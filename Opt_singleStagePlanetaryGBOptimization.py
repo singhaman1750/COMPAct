@@ -32,9 +32,11 @@ material_properties = config_data["Material_properties"]
 
 Gear_standard_parameters = config_data["Gear_standard_parameters"]
 Lewis_params             = config_data["Lewis_params"]
+MIT_params               = config_data["MIT_params"]
 
 Steel               = material_properties["Steel"]
 Aluminum            = material_properties["Aluminum"]
+PLA                 = material_properties["PLA"]
 
 sspg_design_params       = sspg_params["sspg_design_parameters"]
 sspg_optimization_params = sspg_params["sspg_optimization_parameters"]
@@ -149,8 +151,8 @@ MotorMaxonIR = motor(maxMotorAngVelRPM = MotorMaxonIR_maxMotorAngVelRPM,
 #--------------------------------------------------------
 PlanetaryGearbox = singleStagePlanetaryGearbox(design_params             = sspg_design_params,
                                                gear_standard_parameters  = Gear_standard_parameters,
-                                               maxGearAllowableStressMPa = Steel["maxAllowableStressMPa"], # MPa
-                                               densityGears              = Steel["density"],    # kg/m^3
+                                               maxGearAllowableStressMPa = PLA["maxAllowableStressMPa"], # MPa
+                                               densityGears              = PLA["density"],    # kg/m^3
                                                densityCarrier            = Aluminum["density"], # kg/m^3
                                                densityStructure          = Aluminum["density"]) # kg/m^3
 
@@ -171,55 +173,55 @@ maxGearboxDiameter_MaxonIR = Max_dia_actuator- 2*sspg_design_params["ringRadialW
 Actuator_U8    = singleStagePlanetaryActuator(design_params            = sspg_design_params,
                                                motor                    = MotorU8,
                                                planetaryGearbox         = PlanetaryGearbox,
-                                               FOS                      = Lewis_params["FOS"],
-                                               serviceFactor            = Lewis_params["serviceFactor"],
+                                               FOS                      = MIT_params["FOS"],
+                                               serviceFactor            = MIT_params["serviceFactor"],
                                                maxGearboxDiameter       = maxGearboxDiameter_U8, # mm 
-                                               stressAnalysisMethodName = "Lewis") # Lewis or AGMA
+                                               stressAnalysisMethodName = "MIT") # Lewis or AGMA
 
 # U10-Actuator
 Actuator_U10    = singleStagePlanetaryActuator(design_params            = sspg_design_params,
                                                motor                    = MotorU10,
                                                planetaryGearbox         = PlanetaryGearbox,
-                                               FOS                      = Lewis_params["FOS"],
-                                               serviceFactor            = Lewis_params["serviceFactor"],
+                                               FOS                      = MIT_params["FOS"],
+                                               serviceFactor            = MIT_params["serviceFactor"],
                                                maxGearboxDiameter       = maxGearboxDiameter_U10, # mm 
-                                               stressAnalysisMethodName = "Lewis") # Lewis or AGMA
+                                               stressAnalysisMethodName = "MIT") # Lewis or AGMA
 
 # MN8014-Actuator
 Actuator_MN8014 = singleStagePlanetaryActuator(design_params            = sspg_design_params,
                                                motor                    = MotorMN8014, 
                                                planetaryGearbox         = PlanetaryGearbox, 
-                                               FOS                      = Lewis_params["FOS"], 
-                                               serviceFactor            = Lewis_params["serviceFactor"], 
+                                               FOS                      = MIT_params["FOS"], 
+                                               serviceFactor            = MIT_params["serviceFactor"], 
                                                maxGearboxDiameter       = maxGearboxDiameter_MN8014, # mm 
-                                               stressAnalysisMethodName = "Lewis") # Lewis or AGMA
+                                               stressAnalysisMethodName = "MIT") # Lewis or AGMA
 
 # VT8020-Actuator
 Actuator_VT8020 = singleStagePlanetaryActuator(design_params            = sspg_design_params,
                                                motor                    = Motor8020, 
                                                planetaryGearbox         = PlanetaryGearbox, 
-                                               FOS                      = Lewis_params["FOS"], 
-                                               serviceFactor            = Lewis_params["serviceFactor"], 
+                                               FOS                      = MIT_params["FOS"], 
+                                               serviceFactor            = MIT_params["serviceFactor"], 
                                                maxGearboxDiameter       = maxGearboxDiameter_VT8020, # mm 
-                                               stressAnalysisMethodName = "Lewis") # Lewis or AGMA
+                                               stressAnalysisMethodName = "MIT") # Lewis or AGMA
 
 # U12-Actuator
 Actuator_U12 = singleStagePlanetaryActuator(design_params            = sspg_design_params,
                                             motor                    = MotorU12, 
                                             planetaryGearbox         = PlanetaryGearbox, 
-                                            FOS                      = Lewis_params["FOS"], 
-                                            serviceFactor            = Lewis_params["serviceFactor"], 
+                                            FOS                      = MIT_params["FOS"], 
+                                            serviceFactor            = MIT_params["serviceFactor"], 
                                             maxGearboxDiameter       = maxGearboxDiameter_U12, # mm 
-                                            stressAnalysisMethodName = "Lewis") # Lewis or AGMA
+                                            stressAnalysisMethodName = "MIT") # Lewis or AGMA
 
 # MaxonIR
 Actuator_MaxonIR = singleStagePlanetaryActuator(design_params            = sspg_design_params,
                                                 motor                    = MotorMaxonIR, 
                                                 planetaryGearbox         = PlanetaryGearbox, 
-                                                FOS                      = Lewis_params["FOS"], 
-                                                serviceFactor            = Lewis_params["serviceFactor"], 
+                                                FOS                      = MIT_params["FOS"], 
+                                                serviceFactor            = MIT_params["serviceFactor"], 
                                                 maxGearboxDiameter       = maxGearboxDiameter_MaxonIR, # mm 
-                                                stressAnalysisMethodName = "Lewis") # Lewis or AGMA
+                                                stressAnalysisMethodName = "MIT") # Lewis or AGMA
 
 
 #--------------------------------------------------------
@@ -330,16 +332,16 @@ Optimizer_MaxonIR = optimizationSingleStageActuator(design_params        = sspg_
 # print("Optimization Completed : U8 SSPG : Time taken:", totalTime_U8, " sec")
 # 
 # U10
-# totalTime_U10 = Optimizer_U10.optimizeActuator(Actuator_U10, UsePSCasVariable = 1, log=0, csv=1)
-# print("Optimization Completed : U10 SSPG : Time taken:", totalTime_U10, " sec")
+totalTime_U10 = Optimizer_U10.optimizeActuator(Actuator_U10, UsePSCasVariable = 0, log=0, csv=1)
+print("Optimization Completed : U10 SSPG : Time taken:", totalTime_U10, " sec")
 # 
 # MN8014
 # totalTime_MN8014 = Optimizer_MN8014.optimizeActuator(Actuator_MN8014, UsePSCasVariable = 1, log=0, csv=1)
 # print("Optimization Completed : MN8014 SSPG : Time taken:", totalTime_MN8014, " sec")
 
 # VT8020
-totalTime_VT8020 = Optimizer_VT8020.optimizeActuator(Actuator_VT8020, UsePSCasVariable = 1, log=0, csv=1)
-print("Optimization Completed : VT8020 SSPG : Time taken:", totalTime_VT8020, " sec")
+# totalTime_VT8020 = Optimizer_VT8020.optimizeActuator(Actuator_VT8020, UsePSCasVariable = 1, log=0, csv=1)
+# print("Optimization Completed : VT8020 SSPG : Time taken:", totalTime_VT8020, " sec")
 
 # U12
 # totalTime_U12 = Optimizer_U12.optimizeActuator(Actuator_U12, UsePSCasVariable = 1, log=0, csv=1)

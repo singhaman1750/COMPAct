@@ -21,7 +21,7 @@ class material:
 #-------------------------------------------------------------------------
 # class bearings
 #-------------------------------------------------------------------------
-class bearings:
+class bearings_discrete:
     def __init__(self,idRequiredMM):
         # Bearing dataset entered according to e1102 in [idMM,odMM,widthMM,massKG] format pg no b10-12
         self.data_bearings = [[25,37,7,0.021],[28,52,12,0.096],[30,42,7,0.024],[32,58,13,0.122],[35,47,7,0.027],[40,52,7,0.031],[45,58,7,0.038],[50,65,7,0.050],[55,72,9,0.081],[60,78,10,0.103],[65,85,10,0.128],[70,90,10,0.134],[75,95,10,0.149],[80,100,10,0.151],[85,110,13,0.263],
@@ -687,8 +687,6 @@ class motor:
             print (' Outer Diameter of Stator = ', self.motorStatorODMM, ' mm')
             print (' Height of Stator = ', self.motorStatorIDMM, ' mm')
 
-
-
 #=========================================================================
 # Actuator classes
 #=========================================================================
@@ -787,6 +785,18 @@ class singleStagePlanetaryActuator:
         self.CarrierExtrusionHeightMM          : float | None = None
         self.SecondaryCarrierExtrusionHeightMM : float | None = None
         self.SecondaryCarrierOuterDiameterMM   : float | None = None
+
+        ##  3D printed actuator mass functions
+        self.Motor_case_mass               : float | None = None
+        self.gearbox_casing_mass           : float | None = None
+        self.carrier_mass                  : float | None = None
+        self.sun_mass                      : float | None = None
+        self.sec_carrier_mass              : float | None = None
+        self.planet_mass                   : float | None = None
+        self.planet_bearing_combined_mass  : float | None = None
+        self.sun_shaft_bearing_mass        : float | None = None
+        self.bearing_mass                  : float | None = None
+        self.bearing_retainer_mass         : float | None = None
 
     #-------------------------------------------------------------------------
     # Mass Calculation
@@ -1191,6 +1201,82 @@ class singleStagePlanetaryActuator:
         x_star_en = self.solveCubicEquation(Pen, Qen, Ren, Sen)
         bMin_en = ((x_star_en)**2 - Ft)/C_sp
 
+    def mitStressAnalysisMinFacewidth(self):
+        # Check if the constraints are satisfied
+        if not self.planetaryGearbox.geometricConstraint():
+            print("Geometric constraint not satisfied")
+            return
+        if not self.planetaryGearbox.meshingConstraint():
+            print("Meshing constraint not satisfied")
+            return
+        if not self.planetaryGearbox.noPlanetInterferenceConstraint():
+            print("No planet interference constraint old not satisfied")
+            return
+        
+        Rs_Mt = self.planetaryGearbox.getPCRadiusSunM()
+        Rp_Mt = self.planetaryGearbox.getPCRadiusPlanetM()
+        Rr_Mt = self.planetaryGearbox.getPCRadiusRingM()
+
+        numPlanet = self.planetaryGearbox.numPlanet
+        Ns = self.planetaryGearbox.Ns
+        Np = self.planetaryGearbox.Np
+        Nr = self.planetaryGearbox.Nr
+        module = self.planetaryGearbox.module
+
+        wSun = self.motor.getMaxMotorAngVelRadPerSec()
+        wCarrier = wSun/self.planetaryGearbox.gearRatio()
+        wPlanet = ( -Ns / (Nr - Ns) ) * wSun
+
+        # Ft = (self.serviceFactor*self.motor.getMaxMotorTorque())/( numPlanet * Rs_Mt)
+        
+        Ft = self.getToothForces(False)
+
+        # ySun    = 0.154 - 0.912 / Ns
+        # yPlanet = 0.154 - 0.912 / Np
+        # yRing   = 0.154 - 0.912 / Nr
+
+        # V_sp = ( wSun * Rs_Mt )
+        # V_rp = ( wCarrier*(Rs_Mt + Rp_Mt) + (wPlanet * Rp_Mt) )
+        
+        # if V_sp <= 7.5:
+        #     Kv_sun = 3/(3+V_sp)
+        # elif V_sp > 7.5 and V_sp <= 12.5:
+        #     Kv_sun = 4.5/(4.5 + V_sp)
+
+        # if V_rp <= 7.5:
+        #     Kv_planet = 3/(3+V_rp)
+        # elif V_rp > 7.5 and V_rp <= 12.5:
+        #     Kv_planet = 4.5/(4.5 + V_rp)
+
+        # Kv_ring = Kv_planet
+
+        # P = np.pi*module*0.001 # m
+        
+        # Lewis static load capacity
+        _,_,CR = self.planetaryGearbox.contactRatio_sunPlanet()
+        qe = 1 / CR
+        # qk = 1.85 + 0.35 * (np.log(Ns) / np.log(100)) 
+        qk = (7.65734266e-08 * Ns**4
+              - 2.19500130e-05 * Ns**3
+              + 2.33893357e-03 * Ns**2
+              - 1.13320908e-01 * Ns
+              + 4.44727778)
+        bMin_sun_mit    = (self.FOS * Ft * qe * qk / (self.planetaryGearbox.maxGearAllowableStressPa * module * 0.001)) # m
+        bMin_planet_mit = (self.FOS * Ft * qe * qk / (self.planetaryGearbox.maxGearAllowableStressPa * module * 0.001))
+        bMin_ring_mit   = (self.FOS * Ft * qe * qk / (self.planetaryGearbox.maxGearAllowableStressPa * module * 0.001))
+
+        bMin_sun_mitMM    = bMin_sun_mit    * 1000
+        bMin_planet_mitMM = bMin_planet_mit * 1000
+        bMin_ring_mitMM   = bMin_ring_mit   * 1000
+
+        self.planetaryGearbox.setfwSunMM    ( bMin_sun_mit    * 1000)
+        self.planetaryGearbox.setfwPlanetMM ( bMin_planet_mit * 1000)
+        self.planetaryGearbox.setfwRingMM   ( bMin_ring_mit   * 1000)
+
+        # bMin_sun_lewisMM, bMin_planet_lewisMM, bMin_ring_lewisMM = self.lewisStressAnalysisMinFacewidth()
+
+        return bMin_sun_mitMM, bMin_planet_mitMM, bMin_ring_mitMM
+
     def dynamicLoadSun(self):
         Ft = (self.serviceFactor*self.motor.getMaxMotorTorque()*1000)/(self.planetaryGearbox.numPlanet*self.planetaryGearbox.module*self.planetaryGearbox.Ns)
         V = self.planetaryGearbox.getPCRadiusSunM()*self.motor.getMaxMotorAngVelRadPerSec()
@@ -1528,7 +1614,261 @@ class singleStagePlanetaryActuator:
             self.lewisStressAnalysisMinFacewidth()
         elif self.stressAnalysisMethodName == "AGMA":
             self.AGMAStressAnalysisMinFacewidth()
+        elif self.stressAnalysisMethodName == "MIT":
+            self.mitStressAnalysisMinFacewidth()
 
+    def getMassKG_3DP(self):
+        module    = self.planetaryGearbox.module
+        Ns        = self.planetaryGearbox.Ns
+        Np        = self.planetaryGearbox.Np
+        Nr        = self.planetaryGearbox.Nr
+        numPlanet = self.planetaryGearbox.numPlanet
+
+        #------------------------------------
+        # density of materials
+        #------------------------------------
+        densityPLA = 1020 # PLA
+
+        #------------------------------------
+        # Face Width
+        #------------------------------------
+        sunFwMM     = self.planetaryGearbox.fwSunMM
+        planetFwMM  = self.planetaryGearbox.fwPlanetMM
+        ringFwMM    = self.planetaryGearbox.fwRingMM
+
+        sunFwM    = sunFwMM    * 0.001
+        planetFwM = planetFwMM * 0.001
+        ringFwM   = ringFwMM   * 0.001
+
+        #------------------------------------
+        # Diameter and Radius
+        #------------------------------------
+        DiaSunMM          = Ns * module
+        DiaPlanetMM       = Np * module
+        DiaRingMM         = Nr * module
+
+        RadiusSunMM       = DiaSunMM    * 0.5
+        RadiusPlanetMM    = DiaPlanetMM * 0.5
+        RadiusRingMM      = DiaRingMM   * 0.5
+        
+        #------------------------------------
+        # Bearing Selection
+        #------------------------------------
+        IdrequiredMM      = module * (Ns + Np) + self.bearingIDClearanceMM
+        Bearings          = bearings_discrete(IdrequiredMM)
+        InnerDiaBearingMM = Bearings.getBearingIDMM()
+        OuterDiaBearingMM = Bearings.getBearingODMM()
+        WidthBearingMM    = Bearings.getBearingWidthMM()
+        BearingMassKG     = Bearings.getBearingMassKG() 
+
+        #======================================
+        # Mass Calculation
+        #======================================
+        case_mounting_surface_height = 4   #mm
+        standard_clearance_1_5mm     = 1.5 #mm
+        base_plate_thickness         = 4   #mm
+        Motor_case_thickness         = 2.5 #mm
+        clearance_planet             = 1.5
+        output_mounting_hole_dia     = 4
+        h_b                          = 1.25 * module
+        sec_carrier_thickness        = 5
+        sun_coupler_hub_thickness    = 4
+        sun_shaft_bearing_OD         = 16
+        carrier_bearing_step_width   = 1.5
+        planet_shaft_dia             = 8
+        motor_output_hole_PCD        = 23 # TODO: Shift it to motor parameters in the JSON file
+        motor_output_hole_dia        = 4  # TODO: Shift it to motor parameters in the JSON file
+        sun_shaft_bearing_ID         = 8
+        sun_shaft_bearing_width      = 5
+        planet_bore = 10
+        bearing_retainer_thickness = 2
+
+        #--------------------------------------
+        # sspg_motor_casing
+        #--------------------------------------
+
+        ring_radial_thickness = self.ringRadialWidthMM
+
+        ring_OD  = Nr * module + ring_radial_thickness*2
+        motor_OD = self.motorDiaMM
+
+        if (ring_OD < motor_OD):
+            clearance_motor_and_case = 5
+        else: 
+            clearance_motor_and_case = (ring_OD - motor_OD)/2 + 5
+
+        Motor_case_ID     = motor_OD + clearance_motor_and_case * 2
+        motor_height      = self.motorLengthMM
+        Motor_case_height = motor_height + case_mounting_surface_height + standard_clearance_1_5mm
+
+        Motor_case_OD = Motor_case_ID + Motor_case_thickness * 2
+
+        Motor_case_volume = (  np.pi * ((Motor_case_OD * 0.5)**2) * base_plate_thickness 
+                             + np.pi * ((Motor_case_OD * 0.5)**2 - (Motor_case_ID * 0.5)**2) * Motor_case_height
+        ) * 1e-9
+
+        Motor_case_mass = Motor_case_volume * densityPLA
+
+        #--------------------------------------
+        # sspg_gearbox_casing
+        # ---
+        # Mass of the gearbox includes the mass of:
+        # 1. Ring gear
+        # 2. Bearing holding structure
+        # 3. Case mounting structure
+        #--------------------------------------
+        ring_ID      = Nr * module
+        ringFwUsedMM = ringFwMM + clearance_planet
+
+        bearing_ID     = InnerDiaBearingMM 
+        bearing_OD     = OuterDiaBearingMM 
+        bearing_height = WidthBearingMM    
+        bearing_mass   = BearingMassKG      
+
+        if ((bearing_OD + output_mounting_hole_dia * 4) > (Nr * module + 2 * h_b)):
+            bearing_mount_thickness  = output_mounting_hole_dia * 2
+        else:
+            bearing_mount_thickness = ((((Nr * module + 2 * h_b) - (bearing_OD + output_mounting_hole_dia * 4))/2) 
+                                       + output_mounting_hole_dia * 2 + standard_clearance_1_5mm)        
+
+        bearing_holding_structure_OD     = bearing_OD + bearing_mount_thickness * 2
+        bearing_holding_structure_ID     = bearing_OD
+        bearing_holding_structure_height = bearing_height + standard_clearance_1_5mm
+
+        case_dist                      = sec_carrier_thickness + clearance_planet + sun_coupler_hub_thickness - case_mounting_surface_height
+        case_mounting_structure_ID     = ring_OD
+        case_mounting_structure_OD     = Motor_case_OD
+        case_mounting_structure_height = case_dist
+
+        ring_volume                      = np.pi * (((ring_OD*0.5)**2) - ((ring_ID)*0.5)**2) * ringFwUsedMM * 1e-9
+        bearing_holding_structure_volume = np.pi * (((bearing_holding_structure_OD*0.5)**2) - 
+                                                    ((bearing_holding_structure_ID*0.5)**2)) * bearing_holding_structure_height * 1e-9
+        case_mounting_structure_volume   = np.pi * (((case_mounting_structure_OD*0.5)**2) - 
+                                                    ((case_mounting_structure_ID*0.5)**2)) * case_mounting_structure_height * 1e-9
+        
+        large_fillet_ID     = ring_OD
+        large_fillet_OD     = Motor_case_OD
+        large_fillet_height = ringFwMM
+        large_fillet_volume = 0.5 * (np.pi * (((large_fillet_OD*0.5)**2) - ((large_fillet_ID)*0.5)**2) * large_fillet_height) * 1e-9
+
+        gearbox_casing_mass = (ring_volume + bearing_holding_structure_volume + case_mounting_structure_volume + large_fillet_volume) * densityPLA
+
+        #----------------------------------
+        # sspg_carrier
+        # ---
+        #----------------------------------
+        carrier_OD     = bearing_ID
+        carrier_ID     = sun_shaft_bearing_OD - standard_clearance_1_5mm * 2
+        carrier_height = bearing_height + carrier_bearing_step_width
+
+        carrier_shaft_OD = planet_shaft_dia
+        carrier_shaft_height = planetFwMM + clearance_planet * 2
+        carrier_shaft_num = numPlanet * 2
+
+        carrier_volume = (np.pi * (((carrier_OD*0.5)**2) - ((carrier_ID)*0.5)**2) * carrier_height
+                          + np.pi * ((carrier_shaft_OD*0.5)**2) * carrier_shaft_height * carrier_shaft_num) * 1e-9
+
+        carrier_mass = carrier_volume * densityPLA
+
+        #----------------------------------
+        # sspg_sun
+        # ---
+        #----------------------------------
+        sun_hub_dia = motor_output_hole_PCD + motor_output_hole_dia + standard_clearance_1_5mm * 4
+
+        sun_shaft_dia    = sun_shaft_bearing_ID
+        sun_shaft_height = sun_shaft_bearing_width + 2 * standard_clearance_1_5mm
+
+        fw_s_used        = planetFwMM + clearance_planet + sec_carrier_thickness + standard_clearance_1_5mm
+
+        sun_hub_volume   = np.pi * ((sun_hub_dia*0.5) ** 2) * sun_coupler_hub_thickness * 1e-9
+        sun_gear_volume  = np.pi * ((DiaSunMM * 0.5) ** 2) * fw_s_used * 1e-9
+        sun_shaft_volume = np.pi * ((sun_shaft_dia*0.5) ** 2) * sun_shaft_height * 1e-9
+
+        sun_volume       = sun_hub_volume + sun_gear_volume + sun_shaft_volume
+        sun_mass         = sun_volume * densityPLA
+
+        #--------------------------------------
+        # sspg_planet
+        #--------------------------------------
+        planet_volume = (np.pi * ((DiaPlanetMM*0.5)**2 - (planet_bore*0.5)) * planetFwMM) * 1e-9
+        planet_mass   = planet_volume * densityPLA
+
+        #--------------------------------------
+        # sspg_sec_carrier
+        #--------------------------------------
+        sec_carrier_OD = bearing_ID
+        sec_carrier_ID = (DiaSunMM + DiaPlanetMM) - planet_shaft_dia - 2 * standard_clearance_1_5mm
+
+        sec_carrier_volume = (np.pi * ((sec_carrier_OD*0.5)**2 - (sec_carrier_ID*0.5)) * sec_carrier_thickness) * 1e-9
+        sec_carrier_mass   = sec_carrier_volume * densityPLA
+
+        #--------------------------------------
+        # sspg_sun_shaft_bearing
+        #--------------------------------------
+        sun_shaft_bearing_mass = 4 * 0.001 # kg
+
+        #--------------------------------------
+        # sspg_planet_bearing
+        #--------------------------------------
+        planet_bearing_mass          = 1 * 0.001 # kg
+        planet_bearing_num           = numPlanet * 2
+        planet_bearing_combined_mass = planet_bearing_mass * planet_bearing_num
+
+        #--------------------------------------
+        # sspg_planet_bearing
+        #--------------------------------------
+        bearing_mass = BearingMassKG # kg
+
+        #--------------------------------------
+        # sspg_bearing_retainer
+        #--------------------------------------
+        bearing_retainer_OD        = bearing_holding_structure_OD
+        bearing_retainer_ID        = bearing_OD - standard_clearance_1_5mm
+
+        bearing_retainer_volume = (np.pi * ((bearing_retainer_OD*0.5)**2 - (bearing_retainer_ID*0.5)**2) * bearing_retainer_thickness) * 1e-9
+
+        bearing_retainer_mass = bearing_retainer_volume * densityPLA
+
+
+        self.Motor_case_mass               = Motor_case_mass
+        self.gearbox_casing_mass           = gearbox_casing_mass
+        self.carrier_mass                  = carrier_mass
+        self.sun_mass                      = sun_mass
+        self.sec_carrier_mass              = sec_carrier_mass
+        self.planet_mass                   = planet_mass
+        self.planet_bearing_combined_mass  = planet_bearing_combined_mass
+        self.sun_shaft_bearing_mass        = sun_shaft_bearing_mass
+        self.bearing_mass                  = bearing_mass
+        self.bearing_retainer_mass         = bearing_retainer_mass
+
+        Actuator_mass = (self.motorMassKG 
+                         + self.Motor_case_mass 
+                         + self.gearbox_casing_mass 
+                         + self.carrier_mass 
+                         + self.sun_mass 
+                         + self.sec_carrier_mass 
+                         + self.planet_mass * numPlanet 
+                         + self.planet_bearing_combined_mass 
+                         + self.sun_shaft_bearing_mass 
+                         + self.bearing_mass 
+                         + self.bearing_retainer_mass)
+        
+        return Actuator_mass
+    
+    def print_mass_of_parts_3DP(self):
+        print("Motor_case_mass: ",              1000 * self.Motor_case_mass)
+        print("gearbox_casing_mass: ",          1000 * self.gearbox_casing_mass)
+        print("carrier_mass: ",                 1000 * self.carrier_mass)
+        print("sun_mass: ",                     1000 * self.sun_mass)
+        print("sec_carrier_mass: ",             1000 * self.sec_carrier_mass)
+        print("planet_mass: ",                  1000 * self.planet_mass)
+        print("planet_bearing_combined_mass: ", 1000 * self.planet_bearing_combined_mass)
+        print("sun_shaft_bearing_mass: ",       1000 * self.sun_shaft_bearing_mass)
+        print("bearing_mass: ",                 1000 * self.bearing_mass)
+        print("bearing_retainer_mass: ",        1000 * self.bearing_retainer_mass)
+        print("Motor mass:",                    1000 * self.motorMassKG)
+        print("---------------------------------------------------")
 
 #========================================================================
 # Class: Actuator Optimization
@@ -1684,7 +2024,8 @@ class optimizationSingleStageActuator:
                 Opt_CD_PR = ((Nr - Np) / 2) * module
 
             # mass     = round(Actuator.getMassStructureKG(), 3)
-            mass       = round(Actuator.getMassKG_new(), 3)
+            # mass       = round(Actuator.getMassKG_new(), 3)
+            mass       = round(Actuator.getMassKG_3DP(), 3)
             eff        = round(Actuator.planetaryGearbox.getEfficiency(), 3)
             
             # Update it is PSC are non-zero
@@ -1773,7 +2114,8 @@ class optimizationSingleStageActuator:
                                             Actuator.updateFacewidth()
 
                                             effActuator = Actuator.planetaryGearbox.getEfficiency()
-                                            massActuator = Actuator.getMassKG_new()
+                                            # massActuator = Actuator.getMassKG_new()
+                                            massActuator = Actuator.getMassKG_3DP()
 
                                             self.Cost = (self.K_Mass * massActuator) + (self.K_Eff * effActuator)
                                             #self.Cost = massActuator/effActuator
@@ -1781,7 +2123,7 @@ class optimizationSingleStageActuator:
                                                 MinCost = self.Cost
                                                 self.iter+=1
                                                 opt_done = 1
-                                                Actuator.genEquationFile()
+                                                # Actuator.genEquationFile()
                                                 opt_parameters = [Actuator.planetaryGearbox.gearRatio(),
                                                                   Actuator.planetaryGearbox.numPlanet,
                                                                   Actuator.planetaryGearbox.Ns,
@@ -1809,7 +2151,10 @@ class optimizationSingleStageActuator:
                                                                                             FOS                      = Actuator.FOS, 
                                                                                             serviceFactor            = Actuator.serviceFactor, 
                                                                                             maxGearboxDiameter       = Actuator.maxGearboxDiameter, # mm 
-                                                                                            stressAnalysisMethodName = "Lewis") # Lewis or AGMA
+                                                                                            stressAnalysisMethodName = "MIT") # Lewis or AGMA
+                                                opt_actuator.updateFacewidth()
+                                                opt_actuator.getMassKG_3DP()
+                                                # opt_actuator.print_mass_of_parts_3DP()
 
                                                 # self.printOptimizationResults(Actuator, log, csv)
                                     Actuator.planetaryGearbox.setNumPlanet(Actuator.planetaryGearbox.numPlanet + 1)
@@ -1903,14 +2248,15 @@ class optimizationSingleStageActuator:
                                                 Actuator.updateFacewidth()
 
                                                 effActuator = Actuator.planetaryGearbox.getEfficiency()
-                                                massActuator = Actuator.getMassKG_new()
+                                                # massActuator = Actuator.getMassKG_new()
+                                                massActuator = Actuator.getMassKG_3DP()
 
                                                 self.Cost = (self.K_Mass * massActuator) + (self.K_Eff * effActuator)
                                                 if self.Cost <= MinCost:
                                                     MinCost    = self.Cost
                                                     self.iter += 1
                                                     opt_done   = 1
-                                                    Actuator.genEquationFile()
+                                                    # Actuator.genEquationFile()
                                                     opt_parameters = [Actuator.planetaryGearbox.gearRatio(),
                                                                       Actuator.planetaryGearbox.numPlanet,
                                                                       Actuator.planetaryGearbox.Ns,
@@ -1973,7 +2319,6 @@ class optimizationSingleStageActuator:
 
             sys.stdout = sys.__stdout__
             return totalTime
-
 
 #------------------------------------------------------------
 # Continuous optimization of the Profile shift coefficients

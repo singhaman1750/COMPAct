@@ -7,6 +7,10 @@
         "FOS": 1.2,
         "serviceFactor": 2.0
     },
+    "MIT_params": {
+        "FOS": 1.5,
+        "serviceFactor": 2.0
+    },
     "Material_properties":{
         "Steel": {
             "density": 7850,
@@ -14,6 +18,10 @@
         },
         "Aluminum": {
             "density": 2710
+        },
+        "PLA": {
+            "density": 1240,
+            "maxAllowableStressMPa": 70
         }
     },
     "Motors": {
@@ -70,9 +78,9 @@
         "MotorU10_framed": {
             "maxTorque": 3.184,
             "power": 1500,
-            "mass": 0.405,
+            "mass": 0.500,
             "dia": 86.8,
-            "length": 38.5
+            "length": 43
         },
         "MotorU10_frameless": {
             "maxTorque": 3.184,

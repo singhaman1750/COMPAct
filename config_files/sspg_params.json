@@ -1,6 +1,6 @@
 {   
     "sspg_design_parameters":{
-        "ringRadialWidthMM"            : 3.0,
+        "ringRadialWidthMM"            : 5.0,
         "planetMinDistanceMM"          : 5.0,
         "sCarrierExtrusionDiaMM"       : 8.0,
         "sCarrierExtrusionClearanceMM" : 1.0,
