@@ -37,5 +37,27 @@
         "NUM_PLANET_MAX"       : 7,
         "NUM_TEETH_SUN_MIN"    : 18,
         "NUM_TEETH_PLANET_MIN" : 18
+    },
+    "sspg_3DP_design_parameters":{
+        "ringRadialWidthMM"            : 5.0,
+        "planetMinDistanceMM"          : 5.0,
+        "sCarrierExtrusionDiaMM"       : 8.0,
+        "sCarrierExtrusionClearanceMM" : 1.0,
+        "bearingIDClearanceMM"         : 10,
+        "case_mounting_surface_height" : 4,
+        "standard_clearance_1_5mm"     : 1.5,
+        "base_plate_thickness"         : 4,
+        "Motor_case_thickness"         : 2.5,
+        "clearance_planet"             : 1.5,
+        "output_mounting_hole_dia"     : 4,
+        "sec_carrier_thickness"        : 5,
+        "sun_coupler_hub_thickness"    : 4,
+        "sun_shaft_bearing_OD"         : 16,
+        "carrier_bearing_step_width"   : 1.5,
+        "planet_shaft_dia"             : 8,
+        "sun_shaft_bearing_ID"         : 8,
+        "sun_shaft_bearing_width"      : 5,
+        "planet_bore"                  : 10,
+        "bearing_retainer_thickness"   : 2
     }
 }
