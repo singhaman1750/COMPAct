@@ -38,7 +38,7 @@ Steel               = material_properties["Steel"]
 Aluminum            = material_properties["Aluminum"]
 PLA                 = material_properties["PLA"]
 
-sspg_design_params       = sspg_params["sspg_design_parameters"]
+sspg_design_params       = sspg_params["sspg_3DP_design_parameters"]
 sspg_optimization_params = sspg_params["sspg_optimization_parameters"]
 
 #--------------------------------------------------------
@@ -94,30 +94,30 @@ MotorMaxonIR_length            = motor_data["MotorMaxonIR_framed"]["length"]    
 
 # Motor-U8
 MotorU8 = motor(maxMotorAngVelRPM = MotorU8_maxMotorAngVelRPM, 
-                 maxMotorTorque    = MotorU8_maxTorque,
-                 maxMotorPower     = MotorU8_power,
-                 motorMass         = MotorU8_mass,
-                 motorDia          = MotorU8_dia,
-                 motorLength       = MotorU8_length,
-                 motorName         = "U8")
+                 maxMotorTorque   = MotorU8_maxTorque,
+                 maxMotorPower    = MotorU8_power,
+                 motorMass        = MotorU8_mass,
+                 motorDia         = MotorU8_dia,
+                 motorLength      = MotorU8_length,
+                 motorName        = "U8")
 
 # Motor-U10
-MotorU10  = motor(maxMotorAngVelRPM   = MotorU10_maxMotorAngVelRPM, # RPM 
-                  maxMotorTorque      = MotorU10_maxTorque,         # Nm 
-                  maxMotorPower       = MotorU10_power,             # W 
-                  motorMass           = MotorU10_mass,              # kg 
-                  motorDia            = MotorU10_dia,               # mm 
-                  motorLength         = MotorU10_length,     
-                  motorName           = "U10") 
+MotorU10  = motor(maxMotorAngVelRPM = MotorU10_maxMotorAngVelRPM, # RPM 
+                  maxMotorTorque    = MotorU10_maxTorque,         # Nm 
+                  maxMotorPower     = MotorU10_power,             # W 
+                  motorMass         = MotorU10_mass,              # kg 
+                  motorDia          = MotorU10_dia,               # mm 
+                  motorLength       = MotorU10_length,     
+                  motorName         = "U10") 
 
 # Motor-MN8014
 MotorMN8014 = motor(maxMotorAngVelRPM = MotorMN8014_maxMotorAngVelRPM, #RPM 
-                    maxMotorTorque      = MotorMN8014_maxTorque      , # Nm 
-                    maxMotorPower       = MotorMN8014_power          , # W 
-                    motorMass           = MotorMN8014_mass           , # kg 
-                    motorDia            = MotorMN8014_dia            , # mm 
-                    motorLength         = MotorMN8014_length         ,     
-                    motorName           = "MN8014") 
+                    maxMotorTorque    = MotorMN8014_maxTorque      , # Nm 
+                    maxMotorPower     = MotorMN8014_power          , # W 
+                    motorMass         = MotorMN8014_mass           , # kg 
+                    motorDia          = MotorMN8014_dia            , # mm 
+                    motorLength       = MotorMN8014_length         ,     
+                    motorName         = "MN8014") 
 
 # Motor-VT8020
 Motor8020 = motor(maxMotorAngVelRPM = Motor8020_maxMotorAngVelRPM, # RPM 
@@ -138,13 +138,12 @@ MotorU12 = motor(maxMotorAngVelRPM = MotorU12_maxMotorAngVelRPM,
                  motorName         = "U12")
 
 MotorMaxonIR = motor(maxMotorAngVelRPM = MotorMaxonIR_maxMotorAngVelRPM,
-                 maxMotorTorque    = MotorMaxonIR_maxTorque        ,
-                 maxMotorPower     = MotorMaxonIR_power            ,
-                 motorMass         = MotorMaxonIR_mass             , 
-                 motorDia          = MotorMaxonIR_dia              ,
-                 motorLength       = MotorMaxonIR_length           ,
-                 motorName         = "MaxonIR")
-
+                 maxMotorTorque        = MotorMaxonIR_maxTorque,
+                 maxMotorPower         = MotorMaxonIR_power,
+                 motorMass             = MotorMaxonIR_mass, 
+                 motorDia              = MotorMaxonIR_dia,
+                 motorLength           = MotorMaxonIR_length,
+                 motorName             = "MaxonIR")
 
 #--------------------------------------------------------
 # Gearboxes 
@@ -328,12 +327,12 @@ Optimizer_MaxonIR = optimizationSingleStageActuator(design_params        = sspg_
 
 
 # U8
-# totalTime_U8 = Optimizer_U8.optimizeActuator(Actuator_U8, UsePSCasVariable = 1, log=0, csv=1)
-# print("Optimization Completed : U8 SSPG : Time taken:", totalTime_U8, " sec")
+totalTime_U8 = Optimizer_U8.optimizeActuator(Actuator_U8, UsePSCasVariable = 0, log=0, csv=1)
+print("Optimization Completed : U8 SSPG : Time taken:", totalTime_U8, " sec")
 # 
 # U10
-totalTime_U10 = Optimizer_U10.optimizeActuator(Actuator_U10, UsePSCasVariable = 0, log=0, csv=1)
-print("Optimization Completed : U10 SSPG : Time taken:", totalTime_U10, " sec")
+# totalTime_U10 = Optimizer_U10.optimizeActuator(Actuator_U10, UsePSCasVariable = 0, log=0, csv=1)
+# print("Optimization Completed : U10 SSPG : Time taken:", totalTime_U10, " sec")
 # 
 # MN8014
 # totalTime_MN8014 = Optimizer_MN8014.optimizeActuator(Actuator_MN8014, UsePSCasVariable = 1, log=0, csv=1)
