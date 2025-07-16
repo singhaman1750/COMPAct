@@ -34,16 +34,6 @@
             "output_hole_PCD" : 23,
             "output_hole_dia" : 4
         },
-        "MotorU12_frameless": {
-            "maxTorque": 8.83,
-            "power": 4000,
-            "mass": 0.578,
-            "dia": 106.8,
-            "length": 47.6,
-            "statorID": 70,
-            "statorOD": 95,
-            "statorHeight": 45.6
-        },
         "Motor8020_framed": {
             "maxTorque": 5.5,
             "power": 1900,
@@ -52,16 +42,6 @@
             "length": 50,
             "output_hole_PCD" : 23,
             "output_hole_dia" : 4
-        },
-        "Motor8020_frameless": {
-            "maxTorque": 5.5,
-            "power": 1900,
-            "mass": 0.560,
-            "dia": 89,
-            "length": 31.5,
-            "statorID": 58,
-            "statorOD": 77,
-            "statorHeight": 29.5
         },
         "MotorU8_framed": {
             "maxTorque": 1.15,
@@ -72,32 +52,21 @@
             "output_hole_PCD" : 23,
             "output_hole_dia" : 4
         },
-        "MotorU8_frameless": {
-            "maxTorque": 1.15,
-            "power": 180,
-            "mass": 0.140,
-            "dia": 86.8,
-            "length": 18.25,
-            "statorID": 60,
-            "statorOD": 80
-        },
         "MotorU10_framed": {
-            "maxTorque"       : 3.184,
-            "power"           : 1500,
-            "mass"            : 0.500,
-            "dia"             : 86.8,
-            "length"          : 43,
-            "output_hole_PCD" : 23,
-            "output_hole_dia" : 4
-        },
-        "MotorU10_frameless": {
-            "maxTorque": 3.184,
-            "power": 1500,
-            "mass": 0.280,
-            "dia": 86.8,
-            "length": 27.5,
-            "statorID": 60,
-            "statorOD": 80
+            "maxTorque"                  : 3.184,
+            "power"                      : 1500,
+            "mass"                       : 0.500,
+            "dia"                        : 86.8,
+            "length"                     : 43,
+            "motor_mount_hole_PCD"       : 32,
+            "motor_mount_hole_dia"       : 4,
+            "motor_mount_hole_num"       : 4,
+            "motor_output_hole_PCD"      : 23,
+            "motor_output_hole_dia"      : 4,
+            "motor_output_hole_num"      : 4,
+            "wire_slot_dist_from_center" : 30,
+            "wire_slot_length"           : 10,
+            "wire_slot_radius"           : 4 
         },
         "MotorMN8014_framed": {
             "maxTorque": 4.19,
@@ -107,13 +76,6 @@
             "length": 29.0,
             "output_hole_PCD" : 23,
             "output_hole_dia" : 4
-        },
-        "MotorMaxonIR_framed": {
-            "maxTorque": 20.0,
-            "power": 2423,
-            "mass": 1.000,
-            "dia": 108.0,
-            "length": 43
         }
     },
     "Design_parameters":{

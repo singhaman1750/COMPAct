@@ -53,12 +53,21 @@ MotorU8_dia               = motor_data["MotorU8_framed"]["dia"]                 
 MotorU8_length            = motor_data["MotorU8_framed"]["length"]                # mm
 
 # U10 Motor
-MotorU10_maxTorque         = motor_data["MotorU10_framed"]["maxTorque"]              # Nm
-MotorU10_power             = motor_data["MotorU10_framed"]["power"]                  # W
-MotorU10_maxMotorAngVelRPM = (MotorU10_power * 60) / (MotorU10_maxTorque * 2*np.pi) # RPM
-MotorU10_mass              = motor_data["MotorU10_framed"]["mass"]                   # Kg 
-MotorU10_dia               = motor_data["MotorU10_framed"]["dia"]                    # mm
-MotorU10_length            = motor_data["MotorU10_framed"]["length"]                 # mm
+MotorU10_maxTorque                  = motor_data["MotorU10_framed"]["maxTorque"]              # Nm
+MotorU10_power                      = motor_data["MotorU10_framed"]["power"]                  # W
+MotorU10_maxMotorAngVelRPM          = (MotorU10_power * 60) / (MotorU10_maxTorque * 2*np.pi)  # RPM
+MotorU10_mass                       = motor_data["MotorU10_framed"]["mass"]                   # Kg 
+MotorU10_dia                        = motor_data["MotorU10_framed"]["dia"]                    # mm
+MotorU10_length                     = motor_data["MotorU10_framed"]["length"]                 # mm
+MotorU10_motor_mount_hole_PCD       = motor_data["MotorU10_framed"]["motor_mount_hole_PCD"]
+MotorU10_motor_mount_hole_dia       = motor_data["MotorU10_framed"]["motor_mount_hole_dia"]
+MotorU10_motor_mount_hole_num       = motor_data["MotorU10_framed"]["motor_mount_hole_num"]
+MotorU10_motor_output_hole_PCD      = motor_data["MotorU10_framed"]["motor_output_hole_PCD"]
+MotorU10_motor_output_hole_dia      = motor_data["MotorU10_framed"]["motor_output_hole_dia"]
+MotorU10_motor_output_hole_num      = motor_data["MotorU10_framed"]["motor_output_hole_num"]
+MotorU10_wire_slot_dist_from_center = motor_data["MotorU10_framed"]["wire_slot_dist_from_center"]
+MotorU10_wire_slot_length           = motor_data["MotorU10_framed"]["wire_slot_length"]
+MotorU10_wire_slot_radius           = motor_data["MotorU10_framed"]["wire_slot_radius"]
 
 # MN8014 Motor
 MotorMN8014_maxTorque         = motor_data["MotorMN8014_framed"]["maxTorque"]              # Nm
@@ -164,10 +173,6 @@ maxGearboxDiameter_MN8014  = MotorMN8014.motorDiaMM - 2*sspg_design_params["ring
 maxGearboxDiameter_VT8020  = Motor8020.motorDiaMM - 2*sspg_design_params["ringRadialWidthMM"]
 maxGearboxDiameter_U12     = MotorU12.motorDiaMM - 2*sspg_design_params["ringRadialWidthMM"] 
 
-Max_dia_actuator = 120
-
-maxGearboxDiameter_MaxonIR = Max_dia_actuator- 2*sspg_design_params["ringRadialWidthMM"] # MotorMaxonIR.motorDiaMM # - 2*sspg_design_params["ringRadialWidthMM"] 
-
 # U8-Actuator
 Actuator_U8    = singleStagePlanetaryActuator(design_params            = sspg_design_params,
                                                motor                    = MotorU8,
@@ -212,16 +217,6 @@ Actuator_U12 = singleStagePlanetaryActuator(design_params            = sspg_desi
                                             serviceFactor            = MIT_params["serviceFactor"], 
                                             maxGearboxDiameter       = maxGearboxDiameter_U12, # mm 
                                             stressAnalysisMethodName = "MIT") # Lewis or AGMA
-
-# MaxonIR
-Actuator_MaxonIR = singleStagePlanetaryActuator(design_params            = sspg_design_params,
-                                                motor                    = MotorMaxonIR, 
-                                                planetaryGearbox         = PlanetaryGearbox, 
-                                                FOS                      = MIT_params["FOS"], 
-                                                serviceFactor            = MIT_params["serviceFactor"], 
-                                                maxGearboxDiameter       = maxGearboxDiameter_MaxonIR, # mm 
-                                                stressAnalysisMethodName = "MIT") # Lewis or AGMA
-
 
 #--------------------------------------------------------
 # Optimization
@@ -310,21 +305,6 @@ Optimizer_U12 = optimizationSingleStageActuator(design_params        = sspg_desi
                                                 GEAR_RATIO_MIN       = GEAR_RATIO_MIN      ,
                                                 GEAR_RATIO_MAX       = GEAR_RATIO_MAX      ,
                                                 GEAR_RATIO_STEP      = GEAR_RATIO_STEP     )
-
-Optimizer_MaxonIR = optimizationSingleStageActuator(design_params        = sspg_design_params  ,
-                                                gear_standard_paramaeters = Gear_standard_parameters,
-                                                K_Mass               = K_Mass              ,
-                                                K_Eff                = K_Eff               ,
-                                                MODULE_MIN           = MODULE_MIN          ,
-                                                MODULE_MAX           = MODULE_MAX          ,
-                                                NUM_PLANET_MIN       = NUM_PLANET_MIN      ,
-                                                NUM_PLANET_MAX       = NUM_PLANET_MAX      ,
-                                                NUM_TEETH_SUN_MIN    = NUM_TEETH_SUN_MIN   ,
-                                                NUM_TEETH_PLANET_MIN = NUM_TEETH_PLANET_MIN,
-                                                GEAR_RATIO_MIN       = GEAR_RATIO_MIN      ,
-                                                GEAR_RATIO_MAX       = GEAR_RATIO_MAX      ,
-                                                GEAR_RATIO_STEP      = GEAR_RATIO_STEP     )
-
 
 # U8
 totalTime_U8 = Optimizer_U8.optimizeActuator(Actuator_U8, UsePSCasVariable = 0, log=0, csv=1)
