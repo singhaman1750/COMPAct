@@ -226,7 +226,7 @@ class singleStagePlanetaryGearbox:
         Rp                        = (self.module) * self.Np / 2 
         numPlanet                 = self.numPlanet
         sCarrierExtrusionRadiusMM = self.sCarrierExtrusionDiaMM * 0.5
-        return 2 * (Rs + Rp) * np.sin(np.pi/(2*numPlanet)) - Rp - sCarrierExtrusionRadiusMM >= self.sCarrierExtrusionClearanceMM
+        return 2 * (Rs + Rp) * np.sin(np.pi/(2*numPlanet)) - Rp - sCarrierExtrusionRadiusMM >= self.sCarrierExtrusionClearanceMM * 2
 
     #------------------------------------
     # Gear ratio
@@ -772,6 +772,9 @@ class singleStagePlanetaryActuator:
         self.bearing_mass                 : float | None = None
         self.bearing_retainer_mass        : float | None = None
 
+
+        #---------------- Setting all design variables ---------------
+        self.setVariables()
     #---------------------------------------------
     # Generate Equation file for 3DP Actuators
     #---------------------------------------------
@@ -1094,7 +1097,6 @@ class singleStagePlanetaryActuator:
                 f'"case_mounting_surface_height"= {self.case_mounting_surface_height}\n',
                 f'"Motor_case_thickness"= {self.Motor_case_thickness}\n',
                 f'"Motor_case_ID"= {self.Motor_case_ID}\n',
-                f'"clearance_motor_and_case"= {self.clearance_motor_and_case}\n',
                 f'"motor_case_OD_base"= {self.motor_case_OD_base}\n',
                 f'"case_mounting_hole_dia"= {self.case_mounting_hole_dia}\n',
                 f'"case_mounting_hole_shift"= {self.case_mounting_hole_shift}\n',
@@ -1398,6 +1400,12 @@ class singleStagePlanetaryActuator:
         bMin_sun_mit    = (self.FOS * Ft * qe * qk / (self.planetaryGearbox.maxGearAllowableStressPa * module * 0.001)) # m
         bMin_planet_mit = (self.FOS * Ft * qe * qk / (self.planetaryGearbox.maxGearAllowableStressPa * module * 0.001))
         bMin_ring_mit   = (self.FOS * Ft * qe * qk / (self.planetaryGearbox.maxGearAllowableStressPa * module * 0.001))
+
+
+        #------------- Contraint in planet to accomodate its bearings------------------------------------------
+        if (bMin_planet_mit * 1000 < (self.planet_bearing_width*2 + self.standard_clearance_1_5mm * 2 / 3)) : 
+            bMin_planet_mit = (self.planet_bearing_width*2 + self.standard_clearance_1_5mm * 2 / 3) / 1000
+            bMin_ring_mit = bMin_planet_mit # FT on both are same
 
         bMin_sun_mitMM    = bMin_sun_mit    * 1000
         bMin_planet_mitMM = bMin_planet_mit * 1000

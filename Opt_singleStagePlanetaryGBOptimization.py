@@ -163,7 +163,7 @@ Actuator_U8    = singleStagePlanetaryActuator(design_params            = sspg_de
                                                planetaryGearbox         = PlanetaryGearbox,
                                                FOS                      = MIT_params["FOS"],
                                                serviceFactor            = MIT_params["serviceFactor"],
-                                               maxGearboxDiameter       = maxGearboxDiameter_U8, # mm 
+                                               maxGearboxDiameter       = maxGearboxDiameter_U8 , # mm 
                                                stressAnalysisMethodName = "MIT") # Lewis or AGMA
 
 # U10-Actuator
