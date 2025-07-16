@@ -611,6 +611,536 @@ class singleStagePlanetaryGearbox:
     def setNumPlanet(self, numPlanet):
         self.numPlanet = numPlanet
 
+#-------------------------------------------------------------------------
+# Compound Planetary Gearbox
+#-------------------------------------------------------------------------
+class compoundPlanetaryGearbox:
+    def __init__(self,
+                 design_parameters,
+                 gear_standard_parameters,
+                 Ns                        = 20,
+                 NpBig                     = 20,
+                 NpSmall                   = 20,
+                 Nr                        = 60,
+                 numPlanet                 =  2,
+                 moduleBig                 = 0.8,
+                 moduleSmall               = 0.8,
+                 fwSunMM                   = 5.0,
+                 fwPlanetBigMM             = 5.0,
+                 fwPlanetSmallMM           = 5.0,
+                 fwRingMM                  = 5.0,
+                 gearMaterialDensity       = 7850.0,
+                 carrierMaterialDensity    = 2710.0,
+                 maxGearAllowableStressMPa = 400.0):
+        
+        self.Ns                        = Ns
+        self.NpBig                     = NpBig
+        self.NpSmall                   = NpSmall
+        self.Nr                        = Nr
+        self.numPlanet                 = numPlanet
+        self.moduleBig                 = moduleBig
+        self.moduleSmall               = moduleSmall
+        self.gearMaterialDensity       = gearMaterialDensity
+        self.carrierMaterialDensity    = carrierMaterialDensity
+        self.fwSunMM                   = fwSunMM
+        self.fwPlanetBigMM             = fwPlanetBigMM
+        self.fwPlanetSmallMM           = fwPlanetSmallMM
+        self.fwRingMM                  = fwRingMM
+        self.maxGearAllowableStressMPa = maxGearAllowableStressMPa # MPa
+        self.maxGearAllowableStressPa  = maxGearAllowableStressMPa * 10**6 # Pa
+
+        # Carrier Parameters for the No planet Interference constraint
+        self.mu               = gear_standard_parameters["coefficientOfFriction"] # 0.3
+        self.pressureAngleDEG = gear_standard_parameters["pressureAngleDEG"]      # 20  # deg
+
+        # self.carrierWidthMM    = design_parameters["carrierWidthMM"]    # carrierWidthMM
+        self.ringRadialWidthMM = design_parameters["ringRadialWidthMM"] # ringRadialWidth
+
+        self.planetMinDistanceMM          = design_parameters["planetMinDistanceMM"]          # 5.0 # mm
+        self.sCarrierExtrusionDiaMM       = design_parameters["sCarrierExtrusionDiaMM"]       # 8.0 # mm
+        self.sCarrierExtrusionClearanceMM = design_parameters["sCarrierExtrusionClearanceMM"] # 1.0 # mm
+
+    def geometricConstraint(self):
+        return ((self.Ns + self.NpBig) * self.moduleBig == (self.Nr - self.NpSmall) * self.moduleSmall)
+        
+    def meshingConstraint(self):
+        # TODO: This is a conservative approach. Later make it more general
+        return ((self.Ns % self.numPlanet == 0) and (self.Nr % self.numPlanet == 0))
+    
+    def noPlanetInterferenceConstraint_old(self):
+        return 2*(self.Ns + self.NpBig)*self.moduleBig*np.sin(np.pi/self.numPlanet) >= 2*self.moduleBig*self.NpBig + self.planetMinDistanceMM
+
+    def noPlanetInterferenceConstraint(self):
+        module1   = self.moduleBig  # Module of the gear
+        module2   = self.moduleSmall  # Module of the gear
+        Ns        = self.Ns
+        Np1       = self.NpBig
+        Np2       = self.NpSmall
+        Nr        = self.Nr
+        numPlanet = self.numPlanet
+        
+        Rs                        = (Ns)  * (module1) / 2
+        Rp1                       = (Np1) * (module1) / 2
+        sCarrierExtrusionRadiusMM = self.sCarrierExtrusionDiaMM * 0.5
+        return 2 * (Rs + Rp1) * np.sin(np.pi/(2 * numPlanet)) - Rp1 - sCarrierExtrusionRadiusMM >= self.sCarrierExtrusionClearanceMM
+
+    def getMassKG(self):
+        # Volume of the Sun gear
+        fwSunM            = (self.fwSunMM / 1000.0)
+        fwPlanetBigM      = (self.fwPlanetBigMM / 1000.0)
+        fwPlanetSmallM    = (self.fwPlanetSmallMM / 1000.0)
+        fwRingM           = (self.fwRingMM / 1000.0)
+        carrierWidthM     = (self.carrierWidthMM / 1000.0)
+        sunVolume         = np.pi * fwSunM * (self.getPCRadiusSunM()**2)
+        planetBigVolume   = np.pi * fwPlanetBigM * (self.getPCRadiusPlanetBigM()**2)
+        planetSmallVolume = np.pi * fwPlanetSmallM * (self.getPCRadiusPlanetSmallM()**2)
+        ringVolume        = np.pi * fwRingM * (self.getOuterRadiusRingM()**2 - self.getPCRadiusRingM()**2)
+        carrierVolume     = 2 * np.pi * carrierWidthM * (self.getCarrierRadiusM()**2)
+        
+        # Total mass of the compound planetary gearbox
+        combinedGearVolume = sunVolume + (self.numPlanet * planetBigVolume) + planetSmallVolume + ringVolume
+        TotalMassKG        = (combinedGearVolume * self.gearMaterialDensity + carrierVolume * self.carrierMaterialDensity)
+        return TotalMassKG
+    
+    def gearRatio(self):
+        # Radii of the sun, planet, and ring gears
+        Rs = self.Ns * self.moduleBig
+        RpBig = self.NpBig * self.moduleBig
+        RpSmall = self.NpSmall * self.moduleSmall
+        Rr = self.Nr * self.moduleSmall
+
+        GR = ((Rs + RpBig) * (RpSmall + RpBig)) / (Rs * RpSmall)
+        return GR
+
+    #------------------------------
+    # Utility Functions
+    #------------------------------
+    def inverse_involute(self,inv_alpha):
+        # This is an approximation of the inverse involute function
+        alpha  = ((3*inv_alpha)**(1/3) - 
+                  (2*inv_alpha)/5 + 
+                  (9/175)*(3)**(2/3)*inv_alpha**(5/3) - 
+                  (2/175)*(3)**(1/3)*(inv_alpha)**(7/3) - 
+                  (144/67375)*(inv_alpha)**(3) + 
+                  (3258/3128125)*(3)**(2/3)*(inv_alpha)**(11/3) - 
+                  (49711/153278125)*(3)**(1/3)*(inv_alpha)**(13/3))
+        return alpha
+
+    def involute(self,alpha):
+        return (np.tan(alpha) - alpha)
+
+    # Define the differentiable quadratic approximation of the min function
+    def quadratic_min(self, a, b, k=0.01):
+        return (a + b - np.sqrt((a - b)**2 + k**2)) / 2
+
+    #-------------------------------------------------------------------------
+    # Gear Tooth profile parameters
+    #-------------------------------------------------------------------------
+    def getPressureAngleRad(self):
+        return self.pressureAngleDEG * np.pi / 180  # Pressure angle in radians
+ 
+    def getWorkingPressureAngle(self):
+        module1 = self.moduleBig  # Module of the gear
+        module2 = self.moduleSmall  # Module of the gear
+        Ns      = self.Ns
+        Np1     = self.NpBig
+        Np2     = self.NpSmall
+        Nr      = self.Nr
+        xs      = 0
+        xp1     = 0
+        xp2     = 0
+        xr      = 0
+        
+        #---------------------------------
+        # Pressure Angle
+        #---------------------------------
+        alpha = self.getPressureAngleRad()
+
+        #---------------------------------
+        # Working pressure angle
+        #---------------------------------
+        # Sun-Planet
+        inv_alpha_w_sunPlanet = 2*np.tan(alpha)*((xs + xp1)/(Ns + Np1)) + self.involute(alpha)
+        alpha_w_sunPlanet = self.inverse_involute(inv_alpha_w_sunPlanet)
+
+        # Planet-Ring
+        inv_alpha_w_planetRing = 2*np.tan(alpha)*((xr-xp2)/(Nr - Np2)) + self.involute(alpha)
+        alpha_w_planetRing = self.inverse_involute(inv_alpha_w_planetRing)
+
+        return alpha_w_sunPlanet, alpha_w_planetRing
+
+    def getCenterDistModificationCoeff(self):
+        module1 = self.moduleBig  # Module of the gear
+        module2 = self.moduleSmall  # Module of the gear
+        Ns      = self.Ns
+        Np1     = self.NpBig
+        Np2     = self.NpSmall
+        Nr      = self.Nr
+
+        #------------------------------
+        # Pressure Angle
+        #------------------------------
+        alpha = self.getPressureAngleRad()  # Pressure angle in radians
+
+        #------------------------------
+        # Working pressure angle
+        #------------------------------
+        alpha_w_sunPlanet, alpha_w_planetRing = self.getWorkingPressureAngle()
+
+        #------------------------------
+        # Centre distance modification coefficient
+        #------------------------------
+        y_sunPlanet  = ((Ns + Np1) / 2) * ((np.cos(alpha) / np.cos(alpha_w_sunPlanet)) - 1)
+        y_planetRing = ((Nr - Np2) / 2) * ((np.cos(alpha) / np.cos(alpha_w_planetRing)) - 1)
+
+        return y_sunPlanet, y_planetRing
+
+    def getCenterDistance(self):
+        module1 = self.moduleBig  # Module of the gear
+        module2 = self.moduleSmall  # Module of the gear
+        Ns      = self.Ns
+        Np1     = self.NpBig
+        Np2     = self.NpSmall
+        Nr      = self.Nr
+    
+        #-------------------------------
+        # Centre distance modification coefficient
+        #-------------------------------
+        y_sunPlanet, y_planetRing = self.getCenterDistModificationCoeff()
+
+        #-------------------------------
+        # Centre distance
+        #-------------------------------
+        centerDist_sunPlanet = ((Ns + Np1)/2  + y_sunPlanet)* module1
+        centerDist_planetRing = ((Nr - Np2)/2  + y_planetRing)* module2
+
+        return centerDist_sunPlanet, centerDist_planetRing
+
+    def getBaseDia(self):
+        module1 = self.moduleBig  # Module of the gear
+        module2 = self.moduleSmall  # Module of the gear
+        Ns      = self.Ns
+        Np1     = self.NpBig
+        Np2     = self.NpSmall
+        Nr      = self.Nr
+
+        # Pressure Angle
+        alpha = self.getPressureAngleRad() # Rad
+
+        # Reference Diameter
+        D_sun     = module1 * Ns # Sun's reference diameter
+        D_planet1 = module1 * Np1 # Planet's reference diameter
+        D_planet2 = module2 * Np2 # Planet's reference diameter
+        D_ring    = module2 * Nr # Ring's reference diameter
+
+        # Base Diameter
+        D_b_sun     = D_sun * np.cos(alpha)
+        D_b_planet1 = D_planet1 * np.cos(alpha)
+        D_b_planet2 = D_planet2 * np.cos(alpha)
+        D_b_ring    = D_ring * np.cos(alpha)
+
+        return D_b_sun, D_b_planet1, D_b_planet2, D_b_ring
+ 
+    def getTipCircleDia(self):
+        module1 = self.moduleBig  # Module of the gear
+        module2 = self.moduleSmall  # Module of the gear
+        Ns      = self.Ns
+        Np1     = self.NpBig
+        Np2     = self.NpSmall
+        Nr      = self.Nr
+        xs      = 0
+        xp1     = 0
+        xp2     = 0
+        xr      = 0
+        
+        #----------------------------
+        # Pressure Angle
+        #----------------------------
+        alpha = self.getPressureAngleRad() # Rad
+
+        #----------------------------
+        # Reference Diameter
+        #----------------------------
+        D_sun     = module1 * Ns # Sun's reference diameter
+        D_planet1 = module1 * Np1 # Planet's reference diameter
+        D_planet2 = module2 * Np2 # Planet's reference diameter
+        D_ring    = module2 * Nr # Ring's reference diameter
+
+        #----------------------------
+        # Center Distance Modification Coefficient
+        #----------------------------
+        y_sunPlanet, y_planetRing = self.getCenterDistModificationCoeff()
+
+        #----------------------------
+        # Tip circle diameter
+        #----------------------------
+        # Sun
+        D_a_sun = D_sun + 2 * module1 * (1 + y_sunPlanet - xp1)
+
+        # Planet
+        D_a_planet1  = D_planet1 + 2 * module1 * (1 + self.quadratic_min((y_sunPlanet - xs), xp1))  
+        D_a_planet2  = D_planet2 + 2 * module2 * (1 + self.quadratic_min((y_planetRing - xs),xp2)) 
+        # D_a_planet = D_planet + 2 * module * (1 + xp) 
+        
+        # Ring
+        D_a_ring = D_ring - 2 * module2 * (1 - xr)
+        
+        return D_a_sun, D_a_planet1, D_a_planet2, D_a_ring
+ 
+    def getTipPressureAngle(self):
+        module1 = self.moduleBig  # Module of the gear
+        module2 = self.moduleSmall  # Module of the gear
+        Ns      = self.Ns
+        Np1     = self.NpBig
+        Np2     = self.NpSmall
+        Nr      = self.Nr
+
+        alpha = self.getPressureAngleRad() # Pressure Angle (Rad)
+        D_b_sun, D_b_planet1, D_b_planet2, D_b_ring = self.getBaseDia() # Base Diameter
+        D_a_sun, D_a_planet1, D_a_planet2, D_a_ring = self.getTipCircleDia() # Tip Circle Diameter
+
+        #----------------------------
+        # Tip Pressure angle
+        #----------------------------
+        alpha_a_sun     = np.arccos(D_b_sun / D_a_sun)
+        alpha_a_planet1 = np.arccos(D_b_planet1/D_a_planet1)
+        alpha_a_planet2 = np.arccos(D_b_planet2/D_a_planet2)
+        alpha_a_ring    = np.arccos(D_b_ring / D_a_ring)
+
+        return alpha_a_sun, alpha_a_planet1, alpha_a_planet2, alpha_a_ring
+
+    def getErrorTipCircleDia_planet(self):
+        module1 = self.moduleBig  # Module of the gear
+        module2 = self.moduleSmall  # Module of the gear
+        Ns      = self.Ns
+        Np1     = self.NpBig
+        Np2     = self.NpSmall
+        Nr      = self.Nr
+        xs      = 0
+        xp1     = 0
+        xp2     = 0
+        xr      = 0
+        
+        # Centre distance modification coefficient
+        y_sunPlanet, y_planetRing = self.getCenterDistModificationCoeff()
+
+        # Tip Circle Diameter
+        _, D_a_planet1_quadMin, D_a_planet2_quadMin, _ = self.getTipCircleDia()
+        D_a_planet1_actMin = module1 * Np1 + 2 * module1 * (1 + np.minimum((y_sunPlanet - xs),xp1)) # TODO: How will we implement min function 
+        D_a_planet2_actMin = module2 * Np2 + 2 * module2 * (1 + np.minimum((y_planetRing - xs),xp2)) # TODO: How will we implement min function 
+
+        return np.abs(D_a_planet1_quadMin - D_a_planet1_actMin), np.abs(D_a_planet2_quadMin - D_a_planet2_actMin)
+
+    #-----------------------------------------
+    # Contact Ratio
+    #-----------------------------------------
+    def contactRatio_sunPlanet(self):
+        module1 = self.moduleBig  # Module of the gear
+        module2 = self.moduleSmall  # Module of the gear
+        Ns      = self.Ns
+        Np1     = self.NpBig
+        Np2     = self.NpSmall
+        Nr      = self.Nr
+
+        # Working pressure angle
+        alpha_w_sunPlanet, _ = self.getWorkingPressureAngle()
+
+        # Tip pressure angle
+        alpha_a_sun, alpha_a_planet1, _, _ = self.getTipPressureAngle()
+
+        # Contact ratio
+        Approach_CR_sunPlanet = (Np1 / (2 * np.pi)) * (np.tan(alpha_a_planet1) - np.tan(alpha_w_sunPlanet)) # Approach contact ratio
+        Recess_CR_sunPlanet   =  (Ns / (2 * np.pi)) * (np.tan(alpha_a_sun) - np.tan(alpha_w_sunPlanet))    # Recess contact ratio
+
+        # write the final formula
+        CR_sunPlanet = Approach_CR_sunPlanet + Recess_CR_sunPlanet
+
+        return Approach_CR_sunPlanet, Recess_CR_sunPlanet, CR_sunPlanet
+
+    def contactRatio_planetRing(self):
+        module1 = self.moduleBig  # Module of the gear
+        module2 = self.moduleSmall  # Module of the gear
+        Ns      = self.Ns
+        Np1     = self.NpBig
+        Np2     = self.NpSmall
+        Nr      = self.Nr
+
+        # Working pressure angle
+        _, alpha_w_planetRing = self.getWorkingPressureAngle()
+
+        # Tip pressure angle
+        _, _, alpha_a_planet2, alpha_a_ring = self.getTipPressureAngle()
+
+        # Contact ratio
+        Approach_CR_planetRing = -(Nr / (2 * np.pi)) * (np.tan(alpha_a_ring) - np.tan(alpha_w_planetRing)) # Approach contact ratio
+        Recess_CR_planetRing   =   Np2 / (2 * np.pi) * (np.tan(alpha_a_planet2) - np.tan(alpha_w_planetRing)) # Recess contact ratio
+        
+        # Contact Ratio
+        CR_planetRing = Approach_CR_planetRing + Recess_CR_planetRing
+
+        return Approach_CR_planetRing, Recess_CR_planetRing, CR_planetRing
+
+    #-------------------------------------------
+    # Efficiency Calculation
+    #-------------------------------------------
+    def getEfficiency(self):
+        # TODO: VERIFY THIS EFFICIENCY FORMULA
+        module1 = self.moduleBig  # Module of the gear
+        module2 = self.moduleSmall  # Module of the gear
+        Ns      = self.Ns
+        Np1     = self.NpBig
+        Np2     = self.NpSmall
+        Nr      = self.Nr
+
+        # Contact ratio
+        eps_sunPlanetA, eps_sunPlanetR, _ = self.contactRatio_sunPlanet()
+        eps_planetRingA, eps_planetRingR, _ = self.contactRatio_planetRing()
+        
+        # Contact-Ratio-Factor
+        epsilon_sunPlanet = eps_sunPlanetA**2 + eps_sunPlanetR**2 - eps_sunPlanetA - eps_sunPlanetR + 1 
+        epsilon_planetRing = eps_planetRingA**2 + eps_planetRingR**2 - eps_planetRingA - eps_planetRingR + 1 
+        
+        # Efficiency
+        eff_SP = 1 - self.mu * np.pi * ((1 / Np1) + (1 / Ns)) * epsilon_sunPlanet
+        eff_PR = 1 - self.mu * np.pi * ((1 / Np2) - (1 / Nr)) * epsilon_planetRing
+
+        Numerator   = (Ns * Np2 + eff_SP * eff_PR * Np1 * Nr)
+        Denominator = (Ns + Np1) * (Np2 + Np1)
+        return Numerator / Denominator
+    
+    #-------------------------------------------------
+    # Get functions below (Not much calculations)
+    #-------------------------------------------------
+    def getPCRadiusSunM(self):
+        return ((self.Ns * self.moduleBig / 2) / 1000.0)
+
+    def getPCRadiusPlanetBigM(self):
+        return ((self.NpBig * self.moduleBig / 2) / 1000.0)
+
+    def getPCRadiusPlanetSmallM(self):
+        return ((self.NpSmall * self.moduleSmall / 2) / 1000.0)
+
+    def getPCRadiusRingM(self):
+        return ((self.Nr * self.moduleSmall / 2) / 1000.0)
+    
+    def getGearboxOuterDiaMaxM(self):
+        Rs       = self.Ns * self.moduleBig * 0.5
+        RpBig   = self.NpBig * self.moduleBig * 0.5
+
+        return ((Rs  + 2*RpBig)*2/1000.0)
+
+    def getPCRadiusSunMM(self):
+        return ((self.Ns * self.moduleBig / 2))
+
+    def getPCRadiusPlanetBigMM(self):
+        return ((self.NpBig * self.moduleBig / 2))
+
+    def getPCRadiusPlanetSmallMM(self):
+        return ((self.NpSmall * self.moduleSmall / 2))
+
+    def getPCRadiusRingMM(self):#?
+        return ((self.Nr * self.moduleSmall) / 2)
+    
+    def getOuterRadiusRingM(self):
+        ringPCDiameterMM = self.Nr * self.moduleSmall 
+        ringPCRadiusMM = ringPCDiameterMM / 2
+        return (ringPCRadiusMM + self.ringRadialWidthMM) / 1000.0
+
+    def getCarrierRadiusM(self):
+        return (((self.Ns + self.NpBig + self.NpBig/2)/2)*self.moduleBig) / 1000.0
+
+    #--------------------------------------------
+    # Set functions
+    #--------------------------------------------
+    def setfwSunMM(self, fwSunMM):
+        self.fwSunMM = fwSunMM
+
+    def setfwPlanetBigMM(self, fwPlanetBigMM):
+        self.fwPlanetBigMM = fwPlanetBigMM
+
+    def setfwPlanetSmallMM(self, fwPlanetSmallMM):
+        self.fwPlanetSmallMM = fwPlanetSmallMM
+
+    def setfwRingMM(self, fwRingMM):
+        self.fwRingMM = fwRingMM
+    
+    def setModuleBig(self, moduleBig):
+        self.moduleBig = moduleBig
+
+    def setModuleSmall(self, moduleSmall):
+        self.moduleSmall = moduleSmall
+
+    def setNs(self, Ns):
+        self.Ns = Ns
+
+    def setNpBig(self, NpBig):
+        self.NpBig = NpBig
+    
+    def setNpSmall(self, NpSmall):
+        self.NpSmall = NpSmall
+    
+    def setNr(self, Nr):
+        self.Nr = Nr
+
+    def setNumPlanet(self, numPlanet):
+        self.numPlanet = numPlanet
+  
+    #--------------------------------------------
+    # Print Functions
+    #--------------------------------------------
+    def printParameters(self):
+        print("Ns = ", self.Ns)
+        print("NpBig = ", self.NpBig)
+        print("NpSmall = ", self.NpSmall)
+        print("Nr = ", self.Nr)
+        print("Module (First Layer) = ", self.moduleBig)
+        print("Module (Second Layer) = ", self.moduleSmall)
+        print("Number of planets = ", self.numPlanet)
+        print("Face width of sun gear = ", round(self.fwSunMM,2), " mm")
+        print("Face width of Bigger planet gear = ", round(self.fwPlanetBigMM,2), " mm")
+        print("Face width of Smaller planet gear = ", round(self.fwPlanetSmallMM,2), " mm")
+        print("Face width of ring gear = ", round(self.fwRingMM,2), " mm")
+        print("Carrier width = ", self.carrierWidthMM, " mm")
+        print("Ring radial width = ", self.ringRadialWidthMM, " mm")
+        print("Pitch circle radius of sun gear = ", self.getPCRadiusSunM() * 1000, " mm")
+        print("Pitch circle radius of Bigger planet gear = ", self.getPCRadiusPlanetBigM() * 1000, " mm")
+        print("Pitch circle radius of Smaller planet gear = ", self.getPCRadiusPlanetSmallM() * 1000, " mm")
+        print("Pitch circle radius of ring gear = ", self.getPCRadiusRingM() * 1000, " mm")
+        print("Outer radius of ring gear = ", self.getOuterRadiusRingM() * 1000, " mm")
+        print("Carrier radius = ", self.getCarrierRadiusM() * 1000, " mm")
+        print("Geometric constraint = ", self.geometricConstraint())
+        print("Meshing constraint = ", self.meshingConstraint())
+        print("No planet interference constraint = ", self.noPlanetInterferenceConstraint())
+        print("Mass of the planetary gearbox = ", self.getMassKG(), " kg")
+        print("Efficiency of the planetary gearbox = ", self.getEfficiency())
+        #print("Maximum allowable stress for the gear material = ", self.getMaxGearAllowableStress(), " MPa")
+        
+    def printParametersLess(self):
+        # print("Ns = ", self.Ns)
+        # print("NpBig = ", self.NpBig)
+        # print("NpSmall = ", self.NpSmall)
+        # print("Nr = ", self.Nr)
+        # print("Module (First Layer) = ", self.moduleBig)
+        # print("Module (Second Layer) = ", self.moduleSmall)
+        # print("Number of planets = ", self.numPlanet)
+        # print("Gear ratio = ", self.gearRatio())
+        # print("Face width of sun gear = ", round(self.fwSunMM,2), " mm")
+        # print("Face width of Bigger planet gear = ", round(self.fwPlanetBigMM,2), " mm")
+        # print("Face width of Smaller planet gear = ", round(self.fwPlanetSmallMM,2), " mm")
+        # print("Face width of ring gear = ", round(self.fwRingMM,2), " mm")
+        # print("Mass of the planetary gearbox = ", round(self.getMassKG(),3), " kg")
+        # print("Efficiency of the planetary gearbox = ", round(self.getEfficiency(),4))
+        vars = [self.moduleBig, self.moduleSmall, self.Ns, self.NpBig, self.NpSmall, self.Nr, self.numPlanet]
+        faceWidths = [round(self.fwSunMM,2), round(self.fwPlanetBigMM,2), round(self.fwPlanetSmallMM,2), round(self.fwRingMM,2)]
+        print("[mB, mS, Ns, NpB, NpS, Nr, numPl]:", vars) 
+        print("Face widths = ", faceWidths)
+        print(" ")
+        print("Gear ratio = ", self.gearRatio())
+        print("Efficiency = ", round(self.getEfficiency(),4))
+        print("Mass (gearbox, kg) = ", round(self.getMassKG(),3), " kg")
+        # print("--------------------------------------------------------------------------")
+
+
 #=========================================================================
 # Motor class
 #=========================================================================
@@ -2020,6 +2550,844 @@ class singleStagePlanetaryActuator:
         print("Motor mass:",                    1000 * self.motorMassKG)
         print("---------------------------------------------------")
 
+#-------------------------------------------------------------------------
+# Compound Planetary Actuator class
+#-------------------------------------------------------------------------
+class compoundPlanetaryActuator:
+    def __init__(self, 
+                 design_parameters,
+                 motor                    = motor, 
+                 compoundPlanetaryGearbox = compoundPlanetaryGearbox, 
+                 FOS                      = 2.0, 
+                 serviceFactor            = 2.0, 
+                 maxGearboxDiameter       = 140.0,
+                 stressAnalysisMethodName = "Lewis"):
+        
+        self.motor                    = motor
+        self.compoundPlanetaryGearbox = compoundPlanetaryGearbox
+        self.FOS                      = FOS
+        self.serviceFactor            = serviceFactor
+        self.maxGearboxDiameter       = maxGearboxDiameter # TODO: convert it to 
+                                                           # outer diameter of 
+                                                           # the motor
+        self.stressAnalysisMethodName = stressAnalysisMethodName
+
+        #============================================
+        # Motor Parameters
+        #============================================
+        self.motorLengthMM           = self.motor.getLengthMM()
+        self.motorDiaMM              = self.motor.getDiaMM()
+        self.motorMassKG             = self.motor.getMassKG()
+        self.MaxMotorTorque          = self.motor.maxMotorTorque          # U12_maxTorque          # Nm
+        self.MaxMotorAngVelRPM       = self.motor.maxMotorAngVelRPM       # U12_maxAngVelRPM       # RPM
+        self.MaxMotorAngVelRadPerSec = self.motor.maxMotorAngVelRadPerSec # U12_maxAngVelRadPerSec # radians/sec
+        self.MotorInnerDiaMM         = self.motor.motorStatorIDMM         # U12_innerDiaMM         # mm 
+        self.motorRotorWidthMM       = self.motor.motorRotorWidthMM
+
+        #============================================
+        # Actuator Design Parameters
+        #============================================
+        #--------------------------------------------
+        # Independent Parameters
+        #--------------------------------------------
+        self.baseThicknessMM      = design_parameters["baseThicknessMM"]      # 3
+        self.sCarrierThicknessMM  = design_parameters["sCarrierThicknessMM"]  # 5
+        self.mainCoverThicknessMM = design_parameters["mainCoverThicknessMM"] # 2
+        self.planetBoreMM         = design_parameters["planetBoreMM"]         # 8
+        self.sunBoreMM            = design_parameters["sunBoreMM"]            # 6
+        self.couplerRadiusMM      = design_parameters["couplerRadiusMM"]      # 16.5
+        self.couplerThicknessMM   = design_parameters["couplerThicknessMM"]   # 3
+        self.couplerShaftHeightMM = design_parameters["couplerShaftHeightMM"] # 12
+
+        self.sCarrierExtrusionDiaMM       = self.compoundPlanetaryGearbox.sCarrierExtrusionDiaMM
+        self.sCarrierExtrusionClearanceMM = self.compoundPlanetaryGearbox.sCarrierExtrusionClearanceMM
+
+        self.clearanceMotorandCaseMM  = design_parameters["clearanceMotorandCaseMM"]  # 2.3
+        self.clearanceCarrierPlanetMM = design_parameters["clearanceCarrierPlanetMM"] # 1.5
+        self.upperHousingHeight       = design_parameters["upperHousingHeight"]       # 5
+        self.clearanceSCarrierMotorMM = design_parameters["clearanceSCarrierMotorMM"] # 2
+
+        self.bearingIDClearanceMM  = design_parameters["bearingIDClearanceMM"]  # 10
+        self.carrierIDClearanceMM  = design_parameters["carrierIDClearanceMM"]  # 2
+        self.sCarrierIDClearanceMM = design_parameters["sCarrierIDClearanceMM"] # 2   
+
+        #-----------------------------------------------------
+        # Dependent parameters
+        #-----------------------------------------------------
+        # Initializing here with None values
+        # Will be updated in Mass calculation function
+        #-----------------------------------------------------
+        self.InnerDiaBearingMM                 : float | None = None # InnerDiaBearingMM                
+        self.OuterDiaBearingMM                 : float | None = None # OuterDiaBearingMM                
+        self.WidthBearingMM                    : float | None = None # WidthBearingMM                   
+        self.RingOuterRadiusMM                 : float | None = None # RingOuterRadiusMM                
+        self.CarrierInnerDiameterMM            : float | None = None # CarrierInnerDiameterMM           
+        self.SCarrierInnerDiameterMM           : float | None = None # SCarrierInnerDiameterMM          
+        self.LengthMainCoverMM                 : float | None = None # LengthMainCoverMM                
+        self.CarrierThicknessMM                : float | None = None # CarrierThicknessMM               
+        self.MainCoverInnerRadiusMM            : float | None = None # MainCoverInnerRadiusMM           
+        self.MainCoverOuterRadiusMM            : float | None = None # MainCoverOuterRadiusMM           
+        self.MainCoverProtrusion1RadiusMM      : float | None = None # MainCoverProtrusion1RadiusMM     
+        self.HeightMainCoverProtrusion1MM      : float | None = None # HeightMainCoverProtrusion1MM     
+        self.MainCoverProtrusion2RadiusMM      : float | None = None # MainCoverProtrusion2RadiusMM     
+        self.HeightMainCoverProtrusion2MM      : float | None = None # HeightMainCoverProtrusion2MM     
+        self.RadiusBaseMM                      : float | None = None # RadiusBaseMM                     
+        self.RadiusCouplerShaftMM              : float | None = None # RadiusCouplerShaftMM             
+        self.SecondaryCarrierOuterDiameterMM   : float | None = None # SecondaryCarrierOuterDiameterMM  
+        self.CarrierExtrusionDiameterMM        : float | None = None # CarrierExtrusionDiameterMM       
+        self.CarrierExtrusionHeightMM          : float | None = None # CarrierExtrusionHeightMM         
+        self.SecondaryCarrierExtrusionHeightMM : float | None = None # SecondaryCarrierExtrusionHeightMM
+        self.SecondaryCarrierOuterDiameterMM   : float | None = None # SecondaryCarrierOuterDiameterMM  
+        self.UpperHousingRadius                : float | None = None # UpperHousingRadius
+
+        # TODO: Shift to the massOfGearbox funtion
+        # self.clearanceSCarrierMotorMM = (self.clearanceSCarrierMotorMM + self.couplerThicknessMM)
+
+    def getIdrequiredMM(self):
+        return self.compoundPlanetaryGearbox.moduleBig * (self.compoundPlanetaryGearbox.Ns + self.compoundPlanetaryGearbox.NpBig) + 10
+
+    def getBearings(self):
+        return bearings(self.getIdrequiredMM())
+
+    def getInnerDiaBearingMM(self):
+        return self.getBearings().getBearingIDMM()
+
+    def getOuterDiaBearingMM(self):
+        return self.getBearings().getBearingODMM()
+
+    def getWidthBearingMM(self):
+        return self.getBearings().getBearingWidthMM()
+
+    def getBearingMassKG(self):
+        return self.getBearings().getBearingMassKG()
+
+    def getCarrierInnerDiameterMM(self):
+        return (self.compoundPlanetaryGearbox.getPCRadiusPlanetBigM() * 1000 + self.compoundPlanetaryGearbox.getPCRadiusSunMM() - self.planetBoreMM / 2 - 1) * 2
+
+    def getSCarrierInnerDiameterMM(self):
+        return (self.compoundPlanetaryGearbox.getPCRadiusPlanetBigM() * 1000 + self.compoundPlanetaryGearbox.getPCRadiusSunMM() - self.sCarrierExtrusionDiaMM / 2 - 1) * 2
+    
+    def getLengthMainCoverMM(self):
+        return self.motor.getLengthMM() + self.compoundPlanetaryGearbox.fwPlanetBigMM + self.compoundPlanetaryGearbox.fwPlanetSmallMM + self.baseThicknessMM + self.getWidthBearingMM() + self.sCarrierThicknessMM + self.clearanceCarrierPlanetMM * 2 + self.clearanceSCarrierMotorMM
+
+    def getMainCoverInnerRadiusMM(self):
+        radius = self.motor.getDiaMM() * 0.5 + self.clearanceMotorandCaseMM
+        # if radius < self.compoundPlanetaryGearbox.getPCRadiusSunMM() + 2 * self.compoundPlanetaryGearbox.getPCRadiusPlanetBigMM():
+        #     return self.compoundPlanetaryGearbox.getPCRadiusSunMM() + 2 * self.compoundPlanetaryGearbox.getPCRadiusPlanetBigMM()
+        return radius
+
+    def getMainCoverOuterRadiusMM(self):
+        return self.getMainCoverInnerRadiusMM() + self.mainCoverThicknessMM
+
+    def getMainCoverProtrusion1RadiusMM(self):
+        return self.getOuterDiaBearingMM() * 0.5
+
+    def getHeightMainCoverProtrusion1MM(self):
+        return self.getWidthBearingMM() + self.clearanceCarrierPlanetMM
+
+    def getRadiusBaseMM(self):
+        return self.getMainCoverInnerRadiusMM()
+
+    def getRadiusCouplerShaftMM(self):
+        return self.sunBoreMM * 0.5
+
+    def getCarrierOuterDiameterMM(self):
+        return self.getInnerDiaBearingMM()
+
+    def getCarrierThicknessMM(self):
+        return self.getWidthBearingMM()
+
+    def getCarrierExtrusionDiameterMM(self):
+        return self.planetBoreMM
+
+    def getCarrierExtrusionHeightMM(self):
+        return self.compoundPlanetaryGearbox.fwPlanetBigMM + self.compoundPlanetaryGearbox.fwPlanetSmallMM + self.clearanceCarrierPlanetMM * 2
+
+    def getSecondaryCarrierExtrusionHeightMM(self):
+        return self.getCarrierExtrusionHeightMM()
+
+    def getSecondaryCarrierOuterDiameterMM(self):
+        return self.getCarrierOuterDiameterMM()
+
+    def getRingOuterRadiusMM(self):
+        return self.compoundPlanetaryGearbox.getPCRadiusRingMM() + 5
+
+    def getMainCoverProtrusion2RadiusMM(self):
+        return self.getRingOuterRadiusMM()
+
+    def getHeightMainCoverProtrusion2MM(self):
+        return self.compoundPlanetaryGearbox.fwRingMM
+
+    def getUpperHousingRadius(self):
+        radius = 0
+        if self.getOuterDiaBearingMM() * 0.5 > self.getRingOuterRadiusMM():
+            radius = self.getOuterDiaBearingMM() * 0.5 + self.mainCoverThicknessMM
+        else:
+            radius = self.getRingOuterRadiusMM() + self.mainCoverThicknessMM
+        # radius = self.getRingOuterRadiusMM() + self.mainCoverThicknessMM
+        # radius += (self.getOuterDiaBearingMM() * 0.5 - self.getRingOuterRadiusMM())* self.smooth_if_factor(self.getOuterDiaBearingMM() * 0.5 - self.getRingOuterRadiusMM())
+        while not self.geometricConstraintSCarrier():
+            self.sCarrierExtrusionDiaMM -= 1
+
+        return radius
+
+    def getSunVolume(self):
+        return np.pi * self.compoundPlanetaryGearbox.fwSunMM * ((self.compoundPlanetaryGearbox.getPCRadiusSunMM()**2) - (self.sunBoreMM * 0.5)**2) * 10**-9
+
+    def getPlanetVolume(self):
+        return (np.pi * self.compoundPlanetaryGearbox.fwPlanetBigMM * ((self.compoundPlanetaryGearbox.getPCRadiusPlanetBigMM()**2) - (self.planetBoreMM * 0.5)**2) +
+                np.pi * self.compoundPlanetaryGearbox.fwPlanetSmallMM * ((self.compoundPlanetaryGearbox.getPCRadiusPlanetSmallMM()**2) - (self.planetBoreMM * 0.5)**2)) * 10**-9
+
+    def getRingVolume(self):
+        return np.pi * self.compoundPlanetaryGearbox.fwRingMM * (self.getRingOuterRadiusMM()**2 - self.compoundPlanetaryGearbox.getPCRadiusRingMM()**2) * 10**-9
+
+    def getCarrierVolume(self):
+        return (np.pi * self.getCarrierThicknessMM() * ((self.getCarrierOuterDiameterMM() * 0.5)**2 - (self.getCarrierInnerDiameterMM() * 0.5)**2) +
+                self.getCarrierExtrusionHeightMM() * (self.getCarrierExtrusionDiameterMM() * 0.5)**2 * np.pi * self.compoundPlanetaryGearbox.numPlanet) * 10**-9
+
+    def getSCarrierVolume(self):
+        return (np.pi * self.sCarrierThicknessMM * ((self.getSecondaryCarrierOuterDiameterMM() * 0.5)**2 - (self.getSCarrierInnerDiameterMM() * 0.5)**2) +
+                self.getSecondaryCarrierExtrusionHeightMM() * (self.sCarrierExtrusionDiaMM * 0.5)**2 * np.pi * self.compoundPlanetaryGearbox.numPlanet) * 10**-9
+
+    def getBaseVolume(self):
+        return np.pi * self.baseThicknessMM * self.getRadiusBaseMM()**2 * 10**-9
+
+    def getMainCaseVolume(self):
+        mainCaseVolumePart1 = np.pi * (self.getMainCoverOuterRadiusMM()**2 - self.getMainCoverInnerRadiusMM()**2) * (self.getLengthMainCoverMM() - self.getHeightMainCoverProtrusion1MM() - self.getHeightMainCoverProtrusion2MM())
+        mainCaseVolumePart2 = np.pi * ((self.getUpperHousingRadius())**2 - self.getMainCoverProtrusion1RadiusMM()**2) * self.getHeightMainCoverProtrusion1MM()
+        mainCaseVolumePart3 = np.pi * ((self.getUpperHousingRadius())**2 - self.getMainCoverProtrusion2RadiusMM()**2) * self.getHeightMainCoverProtrusion2MM() + np.pi * ((self.getMainCoverOuterRadiusMM())**2 - (self.getUpperHousingRadius())**2) * self.upperHousingHeight
+        return (mainCaseVolumePart1 + mainCaseVolumePart2 + mainCaseVolumePart3) * 10**-9
+
+    def getCouplerVolume(self):
+        return np.pi * (self.couplerRadiusMM**2 * self.couplerThicknessMM + self.getRadiusCouplerShaftMM()**2 * self.couplerShaftHeightMM) * 10**-9
+    
+    # Constrain to prevent overlap of supporting structure of secondary carrier and planet
+    def geometricConstraintSCarrier(self):
+        return ( self.sCarrierExtrusionDiaMM*0.5 < ((self.compoundPlanetaryGearbox.getPCRadiusPlanetBigMM()+self.compoundPlanetaryGearbox.getPCRadiusSunMM())*np.sin(np.pi/self.compoundPlanetaryGearbox.numPlanet)*2 - self.compoundPlanetaryGearbox.getPCRadiusPlanetBigMM()))
+
+    # Print the actuator parameters
+    def printParameters(self):
+        print("----------------Motor parameters-----------")
+        self.motor.printParameters()
+        print(" ")
+        print("----------------Gearbox parameters-----------")
+        self.compoundPlanetaryGearbox.printParameters()
+        print(" ")
+
+    # Print the actuator parameters
+    def printParametersLess(self):
+        self.compoundPlanetaryGearbox.printParametersLess()
+        print("Mass (actuator,kg):", round(self.getMassStructureKG(),3))
+        print(" ")
+        print("Peak Torque (Nm):", round(self.motor.getMaxMotorTorque()*self.compoundPlanetaryGearbox.gearRatio(),3))
+        [Ft_sp, Ft_rp] = self.getToothForces(constraintCheck = True)
+        Ft = [round(Ft_sp,3), round(Ft_rp,3)]
+        print("Tooth forces: ", Ft)
+        print(" ")
+
+    def getMassKG(self):
+        return self.compoundPlanetaryGearbox.getMassKG() + self.motor.getMassKG()
+    
+    def getMassStructureKG(self):
+        TotalMassKG = (
+            (self.getSunVolume() + self.getPlanetVolume() * self.compoundPlanetaryGearbox.numPlanet + self.getRingVolume()) * self.compoundPlanetaryGearbox.gearMaterial.density +
+            (self.getCarrierVolume() + self.getSCarrierVolume() + self.getBaseVolume() + self.getMainCaseVolume() + self.getCouplerVolume()) * self.compoundPlanetaryGearbox.carrierMaterial.density +
+            self.getBearingMassKG()
+        )
+        return TotalMassKG + self.motor.getMassKG()
+
+    def getMassKG_new(self):
+        module1   = self.compoundPlanetaryGearbox.moduleBig  # Module of the gear
+        module2   = self.compoundPlanetaryGearbox.moduleSmall  # Module of the gear
+        Ns        = self.compoundPlanetaryGearbox.Ns
+        Np1       = self.compoundPlanetaryGearbox.NpBig
+        Np2       = self.compoundPlanetaryGearbox.NpSmall
+        Nr        = self.compoundPlanetaryGearbox.Nr
+        numPlanet = self.compoundPlanetaryGearbox.numPlanet
+
+        #-----------------------------------------
+        # Density
+        #-----------------------------------------
+        densityGears = 7850
+        densityAl    = 2710
+
+        #-----------------------------------------
+        # Face Width
+        #-----------------------------------------
+        sunFwMM     = self.compoundPlanetaryGearbox.fwSunMM
+        planet1FwMM = self.compoundPlanetaryGearbox.fwPlanetBigMM
+        planet2FwMM = self.compoundPlanetaryGearbox.fwPlanetSmallMM
+        ringFwMM    = self.compoundPlanetaryGearbox.fwRingMM
+
+        sunFwM     = sunFwMM     * 1000 # TODO: check the order of the index order should be always sun, planet1, planet2, ring
+        planet1FwM = planet1FwMM * 1000
+        planet2FwM = planet2FwMM * 1000
+        ringFwM    = ringFwMM    * 1000
+
+        #-----------------------------------------
+        # Diameter and Radius
+        #-----------------------------------------
+        DiaSunMM        = Ns  * module1
+        DiaPlanet1MM    = Np1 * module1
+        DiaPlanet2MM    = Np2 * module2
+        DiaRingMM       = Nr  * module2
+
+        RadiusSunMM     = DiaSunMM     * 0.5
+        RadiusPlanet1MM = DiaPlanet1MM * 0.5
+        RadiusPlanet2MM = DiaPlanet2MM * 0.5
+        RadiusRingMM    = DiaRingMM    * 0.5
+
+        RingOuterRadiusMM = RadiusRingMM + self.compoundPlanetaryGearbox.ringRadialWidthMM
+
+        #-----------------------------------------
+        # Bearing Selection
+        #-----------------------------------------
+        IdrequiredMM      = module1 * (Ns + Np1) + self.bearingIDClearanceMM
+        Bearings          = bearings_continuous(IdrequiredMM)
+        InnerDiaBearingMM = Bearings.getBearingIDMM()
+        OuterDiaBearingMM = Bearings.getBearingODMM()
+        WidthBearingMM    = Bearings.getBearingWidthMM()
+        BearingMassKG     = Bearings.getBearingMassKG()
+
+        #-----------------------------------------
+        # Carrier Inner Diameters
+        #-----------------------------------------
+        CarrierInnerDiameterMM  = (RadiusPlanet1MM + RadiusSunMM - self.planetBoreMM / 2) * 2           - self.carrierIDClearanceMM
+        SCarrierInnerDiameterMM = (RadiusPlanet1MM + RadiusSunMM - self.sCarrierExtrusionDiaMM / 2) * 2 - self.sCarrierIDClearanceMM
+        
+        CarrierOuterDiameterMM     = InnerDiaBearingMM
+        CarrierThicknessMM         = WidthBearingMM
+        CarrierExtrusionDiameterMM = self.planetBoreMM
+        CarrierExtrusionHeightMM   = planet1FwMM + planet2FwMM + self.clearanceCarrierPlanetMM * 2
+
+        SecondaryCarrierExtrusionHeightMM = CarrierExtrusionHeightMM
+        SecondaryCarrierOuterDiameterMM   = CarrierOuterDiameterMM
+
+        clearanceSCarrierMotorMM_plus_couplerThicknessMM = (self.clearanceSCarrierMotorMM + self.couplerThicknessMM)
+
+        #-----------------------------------------
+        # Main Cover & Base Dimensions
+        #-----------------------------------------
+        LengthMainCoverMM = (self.motorLengthMM + 
+                             planet1FwMM + 
+                             planet2FwMM + 
+                             self.baseThicknessMM + 
+                             WidthBearingMM + 
+                             self.sCarrierThicknessMM + 
+                             self.clearanceCarrierPlanetMM * 2 + 
+                             clearanceSCarrierMotorMM_plus_couplerThicknessMM)
+        
+        MainCoverInnerRadiusMM       = self.motorDiaMM * 0.5 + self.clearanceMotorandCaseMM
+        MainCoverOuterRadiusMM       = MainCoverInnerRadiusMM + self.mainCoverThicknessMM
+        MainCoverProtrusion1RadiusMM = OuterDiaBearingMM * 0.5
+        HeightMainCoverProtrusion1MM = WidthBearingMM #
+        
+        MainCoverProtrusion2RadiusMM = RingOuterRadiusMM
+        HeightMainCoverProtrusion2MM = ringFwMM + self.clearanceCarrierPlanetMM
+
+        RadiusBaseMM                 = MainCoverInnerRadiusMM
+        RadiusCouplerShaftMM         = self.sunBoreMM * 0.5
+
+        # TODO: Update the UpperHousing Radii to a fixed value, find that value through CAD : Deepak will try to check this
+        # Till then the following solution should be used in which the bearing is always bigger than the ring gear
+        UpperHousingRadius = OuterDiaBearingMM * 0.5 + self.mainCoverThicknessMM
+        # UpperHousingRadius = RingOuterRadiusMM + self.mainCoverThicknessMM # TODO: Intead of RingOuterRadiusMM put OuterDiaBearingMM
+        # UpperHousingRadius   = self.UpperHousingDiameterMM * 0.5             # calculated based on maximum feasible diameter of gears and corresponding bearing
+        #this value is being violated as planets are protruding out of casing
+        
+        # TODO: Figure out a solution to this problem
+        # radius = 0
+        # if OuterDiaBearingMM * 0.5 > RingOuterRadiusMM:
+        #     radius = OuterDiaBearingMM * 0.5 + self.mainCoverThicknessMM
+        # else:
+        #     radius = RingOuterRadiusMM + self.mainCoverThicknessMM
+
+        #------------------------------------------------
+        # Gear Volume
+        #------------------------------------------------
+        SunVolume    =  np.pi * sunFwMM     * ((RadiusSunMM**2)       - (self.sunBoreMM * 0.5)**2) * 10**-9
+        PlanetVolume = (np.pi * planet1FwMM * ((RadiusPlanet1MM**2)   - (self.planetBoreMM * 0.5)**2) +
+                        np.pi * planet2FwMM * ((RadiusPlanet2MM**2)   - (self.planetBoreMM * 0.5)**2)) * 10**-9
+        RingVolume   =  np.pi * ringFwMM    * ((RingOuterRadiusMM**2) - RadiusRingMM**2) * 10**-9
+        
+        #------------------------------------------------
+        # Carrier Volume
+        #------------------------------------------------
+        CarrierVolume  = (np.pi * CarrierThicknessMM * ((CarrierOuterDiameterMM * 0.5)**2 - (CarrierInnerDiameterMM * 0.5)**2) +
+                          np.pi * CarrierExtrusionHeightMM * (CarrierExtrusionDiameterMM * 0.5)**2 * numPlanet) * 10**-9
+        SCarrierVolume = (np.pi * self.sCarrierThicknessMM * ((SecondaryCarrierOuterDiameterMM * 0.5)**2 - (SCarrierInnerDiameterMM * 0.5)**2) +
+                          np.pi * SecondaryCarrierExtrusionHeightMM * (self.sCarrierExtrusionDiaMM * 0.5)**2 * numPlanet) * 10**-9
+        BaseVolume     =  np.pi * self.baseThicknessMM * RadiusBaseMM**2 * 10**-9
+        
+        #------------------------------------------------
+        # Main Case Volume
+        #------------------------------------------------
+        mainCaseVolumePart1 = np.pi * (MainCoverOuterRadiusMM**2 - MainCoverInnerRadiusMM**2) * (LengthMainCoverMM - HeightMainCoverProtrusion1MM - HeightMainCoverProtrusion2MM)
+        mainCaseVolumePart2 = np.pi * ((UpperHousingRadius)**2   - MainCoverProtrusion1RadiusMM**2) * HeightMainCoverProtrusion1MM
+        mainCaseVolumePart3 = (np.pi * ((UpperHousingRadius)**2    - MainCoverProtrusion2RadiusMM**2) * HeightMainCoverProtrusion2MM + 
+                               np.pi * ((MainCoverOuterRadiusMM)**2 - (UpperHousingRadius)**2) * self.upperHousingHeight)
+
+        MainCaseVolume      = (mainCaseVolumePart1 + mainCaseVolumePart2 + mainCaseVolumePart3) * 10**-9
+        CouplerVolume       = np.pi * (self.couplerRadiusMM**2 * self.couplerThicknessMM + RadiusCouplerShaftMM**2 * self.couplerShaftHeightMM) * 10**-9
+        
+        # Constrain to prevent overlap of supporting structure of secondary carrier and planet
+        # def geometricConstraintSCarrier = ( self.sCarrierExtrusionDiaMM*0.5 < ((RadiusPlanet1MM+RadiusSunMM)*np.sin(np.pi/numPlanet)*2 - RadiusPlanet1MM))
+
+        #------------------------------------------------
+        # Mass Calculation
+        #------------------------------------------------
+        MassOfGears     = (SunVolume + PlanetVolume * numPlanet + RingVolume) * densityGears
+        MassOfAlParts   = (CarrierVolume + SCarrierVolume + BaseVolume + MainCaseVolume + CouplerVolume) * densityAl
+
+        MassStructureKG = (MassOfGears + MassOfAlParts + BearingMassKG +  self.motorMassKG)
+
+        #------------------------------------------------
+        # Updating the design dependent parameters 
+        #------------------------------------------------
+        self.InnerDiaBearingMM                 = InnerDiaBearingMM                
+        self.OuterDiaBearingMM                 = OuterDiaBearingMM                
+        self.WidthBearingMM                    = WidthBearingMM                   
+        self.RingOuterRadiusMM                 = RingOuterRadiusMM                
+        self.CarrierInnerDiameterMM            = CarrierInnerDiameterMM           
+        self.SCarrierInnerDiameterMM           = SCarrierInnerDiameterMM          
+        self.LengthMainCoverMM                 = LengthMainCoverMM                
+        self.CarrierThicknessMM                = CarrierThicknessMM               
+        self.MainCoverInnerRadiusMM            = MainCoverInnerRadiusMM           
+        self.MainCoverOuterRadiusMM            = MainCoverOuterRadiusMM           
+        self.MainCoverProtrusion1RadiusMM      = MainCoverProtrusion1RadiusMM     
+        self.HeightMainCoverProtrusion1MM      = HeightMainCoverProtrusion1MM     
+        self.MainCoverProtrusion2RadiusMM      = MainCoverProtrusion2RadiusMM     
+        self.HeightMainCoverProtrusion2MM      = HeightMainCoverProtrusion2MM     
+        self.RadiusBaseMM                      = RadiusBaseMM                     
+        self.RadiusCouplerShaftMM              = RadiusCouplerShaftMM             
+        self.SecondaryCarrierOuterDiameterMM   = SecondaryCarrierOuterDiameterMM  
+        self.CarrierExtrusionDiameterMM        = CarrierExtrusionDiameterMM       
+        self.CarrierExtrusionHeightMM          = CarrierExtrusionHeightMM         
+        self.SecondaryCarrierExtrusionHeightMM = SecondaryCarrierExtrusionHeightMM
+        self.SecondaryCarrierOuterDiameterMM   = SecondaryCarrierOuterDiameterMM  
+        self.UpperHousingRadius                = UpperHousingRadius               
+
+        return MassStructureKG
+
+    def compoundNetInertia(self):
+        I_net = (self.getSpinMomentofInertiaPlanetBig()/self.gearRatio())
+        - (self.getOrbitalMomentofInertiaPlanetBig()*self.Ns/(self.NpBig + self.NpSmall))
+        + (self.getSpinMomentofInertiaPlanetSmall()/self.gearRatio())
+        - (self.getOrbitalMomentofInertiaPlanetSmall()*self.Ns/(self.NpBig + self.NpSmall))
+        + self.getMomentofInertiaSun()
+        + self.getMomentofInertiaCarrier()*self.gearRatio()
+        return I_net
+    
+    def printVolumeAndMassParameters(self):
+        print('----------------Compound Actuator Volume & Mass parameters-----------')
+        print ('Volume (m^3) & Mass (kg) of each component')
+        print ('CPA: Compound Planetary Actuator','\n')
+        print('Main Case         = ', self.getMainCaseVolume(),  '\t', round(self.getMainCaseVolume() * self.compoundPlanetaryGearbox.carrierMaterial.density, 4))
+        print('Carrier           = ', self.getCarrierVolume(),   '\t', round(self.getCarrierVolume() * self.compoundPlanetaryGearbox.carrierMaterial.density, 4))
+        print('Secondary Carrier = ', self.getSCarrierVolume(),  '\t', round(self.getSCarrierVolume() * self.compoundPlanetaryGearbox.carrierMaterial.density, 4))
+        print('Base              = ', self.getBaseVolume(),      '\t',   round(self.getBaseVolume() * self.compoundPlanetaryGearbox.carrierMaterial.density, 4))
+        #TODO: Change the density of the coupler material to steel rather than aluminum
+        print('Sun Coupler       = ', self.getCouplerVolume(),   '\t', round(self.getCouplerVolume() * self.compoundPlanetaryGearbox.carrierMaterial.density, 4))
+        print('Sun gear          = ', self.getSunVolume(),       '\t', round(self.getSunVolume() * self.compoundPlanetaryGearbox.gearMaterial.density, 4))
+        print('Planet gear       = ', self.getPlanetVolume(),    '\t', round(self.getPlanetVolume() * self.compoundPlanetaryGearbox.gearMaterial.density, 4))
+        print('Ring gear         = ', self.getRingVolume(),      '\t',   round(self.getRingVolume() * self.compoundPlanetaryGearbox.gearMaterial.density, 4))
+        print('Total Mass of CPA = ', round(self.getMassStructureKG(),4))
+        print('---------------------------------------------------------------------')
+        print()
+
+    # Generating Equations file for SolidWorks visualization
+    def genEquationFile_old(self):
+        # writing values into text file imported which is imported into solidworks
+        file_path = os.path.join(os.path.dirname(__file__), 'template_CAD_designs', 'compound_GB', 'equations_compound.txt')
+        with open(file_path, 'w') as eqFile:
+            l = [
+                '"sun_width"= ' + str(self.compoundPlanetaryGearbox.fwSunMM) + 'mm\n',
+                '"planetBig_width"= ' + str(self.compoundPlanetaryGearbox.fwPlanetBigMM) + 'mm\n',
+                '"planetSmall_width"= ' + str(self.compoundPlanetaryGearbox.fwPlanetSmallMM) + 'mm\n',
+                '"ring_width"= ' + str(self.compoundPlanetaryGearbox.fwRingMM) + 'mm\n',
+                '"motor_radius" = ' + str(self.motor.getDiaMM() * 0.5) + 'mm\n',
+                '"motor_height" = ' + str(self.motor.getLengthMM()) + 'mm\n',
+                '"gear_moduleSmall" = ' + str(self.compoundPlanetaryGearbox.moduleSmall) + 'mm\n',
+                '"gear_moduleBig" = ' + str(self.compoundPlanetaryGearbox.moduleBig) + 'mm\n',
+                '"Sun_teeth" = ' + str(self.compoundPlanetaryGearbox.Ns) + 'mm\n',
+                '"PlanetBig_teeth" = ' + str(self.compoundPlanetaryGearbox.NpBig) + 'mm\n',
+                '"PlanetSmall_teeth" = ' + str(self.compoundPlanetaryGearbox.NpSmall) + 'mm\n',
+                '"Ring_teeth" = ' + str(self.compoundPlanetaryGearbox.Nr) + 'mm\n',
+                '"Inner_diameter" = ' + str(self.getInnerDiaBearingMM()) + 'mm\n',
+                '"Outer_diameter" = ' + str(self.getOuterDiaBearingMM()) + 'mm\n',
+                '"Width_bearing" = ' + str(self.getWidthBearingMM()) + 'mm\n',
+                '"Base_thickness" = ' + str(self.baseThicknessMM) + 'mm\n',
+                '"secondary_carrier_thickness" = ' + str(self.sCarrierThicknessMM) + 'mm\n',
+                '"ring_outer_radius" = ' + str(self.getRingOuterRadiusMM()) + 'mm\n',
+                '"main_cover_thickness" = ' + str(self.mainCoverThicknessMM) + 'mm\n',
+                '"planet_bore" = ' + str(self.planetBoreMM) + 'mm\n',
+                '"sun_bore" = ' + str(self.sunBoreMM) + 'mm\n',
+                '"coupler_radius" = ' + str(self.couplerRadiusMM) + 'mm\n',
+                '"coupler_thickness" = ' + str(self.couplerThicknessMM) + 'mm\n',
+                '"coupler_shaft_height" = ' + str(self.couplerShaftHeightMM) + 'mm\n',
+                '"carrier_inner_diameter" = ' + str(self.getCarrierInnerDiameterMM()) + 'mm\n',
+                '"secondary_carrier_inner_diameter" = ' + str(self.getSCarrierInnerDiameterMM()) + 'mm\n',
+                '"secondary_carrier_extrusion_diameter" = ' + str(self.sCarrierExtrusionDiaMM) + 'mm\n',
+                '"length_main_cover" = ' + str(self.getLengthMainCoverMM()) + 'mm\n',
+                '"carrier_thickness" = ' + str(self.getCarrierThicknessMM()) + 'mm\n',
+                '"main_cover_inner_radius" = ' + str(self.getMainCoverInnerRadiusMM()) + 'mm\n',
+                '"main_cover_outer_radius" = ' + str(self.getMainCoverOuterRadiusMM()) + 'mm\n',
+                '"main_cover_protrusion1_radius" = ' + str(self.getMainCoverProtrusion1RadiusMM()) + 'mm\n',
+                '"height_main_cover_protrusion1" = ' + str(self.getHeightMainCoverProtrusion1MM()) + 'mm\n',
+                '"main_cover_protrusion2_radius" = ' + str(self.getMainCoverProtrusion2RadiusMM()) + 'mm\n',
+                '"height_main_cover_protrusion2" = ' + str(self.getHeightMainCoverProtrusion2MM()) + 'mm\n',
+                '"radius_base" = ' + str(self.getRadiusBaseMM()) + 'mm\n',
+                '"radius_coupler_shaft" = ' + str(self.getRadiusCouplerShaftMM()) + 'mm\n',
+                '"carrier_outer_diameter" = ' + str(self.getSecondaryCarrierOuterDiameterMM()) + 'mm\n',
+                '"carrier_extrusion_diameter" = ' + str(self.getCarrierExtrusionDiameterMM()) + 'mm\n',
+                '"carrier_extrusion_height" = ' + str(self.getCarrierExtrusionHeightMM()) + 'mm\n',
+                '"secondary_carrier_extrusion_height" = ' + str(self.getSecondaryCarrierExtrusionHeightMM()) + 'mm\n',
+                '"secondary_carrier_outer_diameter" = ' + str(self.getSecondaryCarrierOuterDiameterMM()) + 'mm\n',
+                '"UpperHousingRadius" = ' + str(self.getUpperHousingRadius()) + 'mm\n',
+                '"UpperHousingHeight" = ' + str(self.upperHousingHeight) + 'mm\n'
+            ]
+            eqFile.writelines(l)
+        eqFile.close()
+
+    # Generating Equations file for SolidWorks visualization
+    def genEquationFile(self):
+        # writing values into text file imported which is imported into solidworks
+        file_path = os.path.join(os.path.dirname(__file__), 'template_CAD_designs', 'compound_GB', 'equations_compound.txt')
+        with open(file_path, 'w') as eqFile:
+            l = [
+                '"sun_width"= ' + str(self.compoundPlanetaryGearbox.fwSunMM) + 'mm\n',
+                '"planetBig_width"= ' + str(self.compoundPlanetaryGearbox.fwPlanetBigMM) + 'mm\n',
+                '"planetSmall_width"= ' + str(self.compoundPlanetaryGearbox.fwPlanetSmallMM) + 'mm\n',
+                '"ring_width"= ' + str(self.compoundPlanetaryGearbox.fwRingMM) + 'mm\n',
+                '"motor_radius" = ' + str(self.motorDiaMM * 0.5) + 'mm\n',
+                '"motor_height" = ' + str(self.motorLengthMM) + 'mm\n',
+                '"gear_moduleSmall" = ' + str(self.compoundPlanetaryGearbox.moduleSmall) + 'mm\n',
+                '"gear_moduleBig" = ' + str(self.compoundPlanetaryGearbox.moduleBig) + 'mm\n',
+                '"Sun_teeth" = ' + str(self.compoundPlanetaryGearbox.Ns) + 'mm\n',
+                '"PlanetBig_teeth" = ' + str(self.compoundPlanetaryGearbox.NpBig) + 'mm\n',
+                '"PlanetSmall_teeth" = ' + str(self.compoundPlanetaryGearbox.NpSmall) + 'mm\n',
+                '"Ring_teeth" = ' + str(self.compoundPlanetaryGearbox.Nr) + 'mm\n',
+                '"Inner_diameter" = ' + str(self.InnerDiaBearingMM) + 'mm\n',
+                '"Outer_diameter" = ' + str(self.OuterDiaBearingMM) + 'mm\n',
+                '"Width_bearing" = ' + str(self.WidthBearingMM) + 'mm\n',
+                '"Base_thickness" = ' + str(self.baseThicknessMM) + 'mm\n',
+                '"secondary_carrier_thickness" = ' + str(self.sCarrierThicknessMM) + 'mm\n',
+                '"ring_outer_radius" = ' + str(self.RingOuterRadiusMM) + 'mm\n',
+                '"main_cover_thickness" = ' + str(self.mainCoverThicknessMM) + 'mm\n',
+                '"planet_bore" = ' + str(self.planetBoreMM) + 'mm\n',
+                '"sun_bore" = ' + str(self.sunBoreMM) + 'mm\n',
+                '"coupler_radius" = ' + str(self.couplerRadiusMM) + 'mm\n',
+                '"coupler_thickness" = ' + str(self.couplerThicknessMM) + 'mm\n',
+                '"coupler_shaft_height" = ' + str(self.couplerShaftHeightMM) + 'mm\n',
+                '"carrier_inner_diameter" = ' + str(self.CarrierInnerDiameterMM) + 'mm\n',
+                '"secondary_carrier_inner_diameter" = ' + str(self.SCarrierInnerDiameterMM) + 'mm\n',
+                '"secondary_carrier_extrusion_diameter" = ' + str(self.sCarrierExtrusionDiaMM) + 'mm\n',
+                '"length_main_cover" = ' + str(self.LengthMainCoverMM) + 'mm\n',
+                '"carrier_thickness" = ' + str(self.CarrierThicknessMM) + 'mm\n',
+                '"main_cover_inner_radius" = ' + str(self.MainCoverInnerRadiusMM) + 'mm\n',
+                '"main_cover_outer_radius" = ' + str(self.MainCoverOuterRadiusMM) + 'mm\n',
+                '"main_cover_protrusion1_radius" = ' + str(self.MainCoverProtrusion1RadiusMM) + 'mm\n',
+                '"height_main_cover_protrusion1" = ' + str(self.HeightMainCoverProtrusion1MM) + 'mm\n',
+                '"main_cover_protrusion2_radius" = ' + str(self.MainCoverProtrusion2RadiusMM) + 'mm\n',
+                '"height_main_cover_protrusion2" = ' + str(self.HeightMainCoverProtrusion2MM) + 'mm\n',
+                '"radius_base" = ' + str(self.RadiusBaseMM) + 'mm\n',
+                '"radius_coupler_shaft" = ' + str(self.RadiusCouplerShaftMM) + 'mm\n',
+                '"carrier_outer_diameter" = ' + str(self.SecondaryCarrierOuterDiameterMM) + 'mm\n',
+                '"carrier_extrusion_diameter" = ' + str(self.CarrierExtrusionDiameterMM) + 'mm\n',
+                '"carrier_extrusion_height" = ' + str(self.CarrierExtrusionHeightMM) + 'mm\n',
+                '"secondary_carrier_extrusion_height" = ' + str(self.SecondaryCarrierExtrusionHeightMM) + 'mm\n',
+                '"secondary_carrier_outer_diameter" = ' + str(self.SecondaryCarrierOuterDiameterMM) + 'mm\n',
+                '"UpperHousingRadius" = ' + str(self.UpperHousingRadius) + 'mm\n',
+                '"UpperHousingHeight" = ' + str(self.upperHousingHeight) + 'mm\n'
+            ]
+            eqFile.writelines(l)
+        eqFile.close()
+
+    def getToothForces(self, constraintCheck=True):
+        if constraintCheck:
+            # Check if the constraints are satisfied
+            if not self.compoundPlanetaryGearbox.geometricConstraint():
+                print("Geometric constraint not satisfied")
+                return
+            if not self.compoundPlanetaryGearbox.meshingConstraint():
+                print("Meshing constraint not satisfied")
+                return
+            if not self.compoundPlanetaryGearbox.noPlanetInterferenceConstraint():
+                print("No planet interference constraint not satisfied")
+                return
+
+        Ns          = self.compoundPlanetaryGearbox.Ns
+        NpBig       = self.compoundPlanetaryGearbox.NpBig
+        NpSmall     = self.compoundPlanetaryGearbox.NpSmall
+        Nr          = self.compoundPlanetaryGearbox.Nr
+        numPlanet   = self.compoundPlanetaryGearbox.numPlanet
+        moduleBig   = self.compoundPlanetaryGearbox.moduleBig
+        moduleSmall = self.compoundPlanetaryGearbox.moduleSmall
+
+        Rs_Mt = self.compoundPlanetaryGearbox.getPCRadiusSunM()
+        RpBig_Mt = self.compoundPlanetaryGearbox.getPCRadiusPlanetBigM()
+        RpSmall_Mt = self.compoundPlanetaryGearbox.getPCRadiusPlanetSmallM()
+        Rr_Mt = self.compoundPlanetaryGearbox.getPCRadiusRingM()
+
+        wSun     = self.motor.getMaxMotorAngVelRadPerSec()
+        wPlanet  = (-Ns / (NpBig + NpSmall) ) * wSun
+        wCarrier = wSun/self.compoundPlanetaryGearbox.gearRatio()
+
+        Ft_sp = (self.serviceFactor*self.motor.getMaxMotorTorque()) / (numPlanet * Rs_Mt)
+        Ft_rp = ((self.serviceFactor*self.motor.getMaxMotorTorque()) * RpBig_Mt) / (numPlanet * Rs_Mt * RpSmall_Mt)
+
+        Ft = [Ft_sp, Ft_rp]
+        return Ft
+
+    def lewisStressAnalysisMinFacewidth(self):
+        # Check if the constraints are satisfied
+        if not self.compoundPlanetaryGearbox.geometricConstraint():
+            print("Geometric constraint not satisfied")
+            return
+        if not self.compoundPlanetaryGearbox.meshingConstraint():
+            print("Meshing constraint not satisfied")
+            return
+        if not self.compoundPlanetaryGearbox.noPlanetInterferenceConstraint():
+            print("No planet interference constraint not satisfied")
+            return
+
+        Ns          = self.compoundPlanetaryGearbox.Ns
+        NpBig       = self.compoundPlanetaryGearbox.NpBig
+        NpSmall     = self.compoundPlanetaryGearbox.NpSmall
+        Nr          = self.compoundPlanetaryGearbox.Nr
+        numPlanet   = self.compoundPlanetaryGearbox.numPlanet
+        moduleBig   = self.compoundPlanetaryGearbox.moduleBig
+        moduleSmall = self.compoundPlanetaryGearbox.moduleSmall
+
+        wSun     = self.motor.getMaxMotorAngVelRadPerSec()
+        wPlanet  = (-Ns / (NpBig + NpSmall) ) * wSun
+        wCarrier = wSun/self.compoundPlanetaryGearbox.gearRatio()
+
+        # Ft_sp = (self.serviceFactor*self.motor.getMaxMotorTorque()*1000) / (numPlanet * Rs)
+        # Ft_rp = ((self.serviceFactor*self.motor.getMaxMotorTorque()*1000) * RpBig) / (numPlanet * Rs * RpSmall)
+
+        [Ft_sp, Ft_rp] = self.getToothForces(constraintCheck=False)
+
+        ySun         = 0.154 - 0.912/Ns
+        yPlanetBig   = 0.154 - 0.912/NpBig
+        yPlanetSmall = 0.154 - 0.912/NpSmall
+        yRing        = 0.154 - 0.912/Nr
+
+        V_sp = (self.compoundPlanetaryGearbox.getPCRadiusSunM() * wSun)
+        V_rp = (wCarrier*(self.compoundPlanetaryGearbox.getPCRadiusSunM() + self.compoundPlanetaryGearbox.getPCRadiusPlanetBigM()) + 
+                wPlanet*(self.compoundPlanetaryGearbox.getPCRadiusPlanetSmallM()))
+        
+        if V_sp <= 7.5:
+            Kv_sun = 3/(3+V_sp)
+            Kv_planetBig = 3/(3+V_sp)
+        # elif V_sp > 7.5 and V_sp <= 12.5:
+        else:
+            Kv_sun = 4.5/(4.5 + V_sp)
+            Kv_planetBig = 4.5/(4.5 + V_sp)
+
+        if V_rp <= 7.5:
+            Kv_planetSmall = 3/(3+V_rp)
+            Kv_ring = 3/(3+V_rp)
+        elif V_rp > 7.5 and V_rp <= 12.5:
+            Kv_planetSmall = 4.5/(4.5 + V_rp)
+            Kv_ring = 4.5/(4.5 + V_rp)
+
+        P_big   = np.pi*moduleBig*0.001 # m
+        P_small = np.pi*moduleSmall*0.001 # m
+
+        # Lewis static load capacity
+        bMin_sun         = (self.FOS * Ft_sp / (self.compoundPlanetaryGearbox.maxGearAllowableStressPa * ySun * Kv_sun * P_big)) # m
+        bMin_planetBig   = (self.FOS * Ft_sp / (self.compoundPlanetaryGearbox.maxGearAllowableStressPa * yPlanetBig * Kv_planetBig * P_big))
+        bMin_planetSmall = (self.FOS * Ft_rp / (self.compoundPlanetaryGearbox.maxGearAllowableStressPa * yPlanetSmall * Kv_planetSmall * P_small))
+        bMin_ring        = (self.FOS * Ft_rp / (self.compoundPlanetaryGearbox.maxGearAllowableStressPa * yRing * Kv_ring * P_small))
+
+        if bMin_ring < bMin_planetSmall:
+            bMin_ring = bMin_planetSmall
+        else:
+            bMin_planetSmall = bMin_ring
+
+        self.compoundPlanetaryGearbox.setfwSunMM(bMin_sun*1000)
+        self.compoundPlanetaryGearbox.setfwPlanetBigMM(bMin_planetBig*1000)
+        self.compoundPlanetaryGearbox.setfwPlanetSmallMM(bMin_planetSmall*1000)
+        self.compoundPlanetaryGearbox.setfwRingMM(bMin_ring*1000)
+
+        # print(f"Lewis:")
+        # print(f"bMin_planetSmall = {bMin_planetSmall}")
+        # print(f"bMin_planetBig = {bMin_planetBig}")
+        # print(f"bMin_sun = {bMin_sun}")
+        # print(f"bMin_ring = {bMin_ring}")
+
+    def AGMAStressAnalysisMinFacewidth(self):
+        # Check if the constraints are satisfied
+        if not self.compoundPlanetaryGearbox.geometricConstraint():
+            print("Geometric constraint not satisfied")
+            return
+        if not self.compoundPlanetaryGearbox.meshingConstraint():
+            print("Meshing constraint not satisfied")
+            return
+        if not self.compoundPlanetaryGearbox.noPlanetInterferenceConstraint():
+            print("No planet interference constraint not satisfied")
+            return
+
+        Ns          = self.compoundPlanetaryGearbox.Ns
+        NpBig       = self.compoundPlanetaryGearbox.NpBig
+        NpSmall     = self.compoundPlanetaryGearbox.NpSmall
+        Nr          = self.compoundPlanetaryGearbox.Nr
+        numPlanet   = self.compoundPlanetaryGearbox.numPlanet
+        moduleBig   = self.compoundPlanetaryGearbox.moduleBig
+        moduleSmall = self.compoundPlanetaryGearbox.moduleSmall
+
+        wSun     = self.motor.getMaxMotorAngVelRadPerSec()
+        wPlanet  = (-Ns / (NpBig + NpSmall) ) * wSun
+        wCarrier = wSun/self.compoundPlanetaryGearbox.gearRatio()
+
+        pressureAngle = self.compoundPlanetaryGearbox.pressureAngleDEG
+
+        [Wt_sp, Wt_rp] = self.getToothForces(constraintCheck=False)
+
+        # T Krishna Rao - Design of Machine Elements - II pg.191
+        # Modified Lewis Form Factor Y = pi*y for pressure angle = 20
+        Y_sun         = (0.154 - 0.912 / Ns) * np.pi
+        Y_planetBig   = (0.154 - 0.912 / NpBig) * np.pi
+        Y_planetSmall = (0.154 - 0.912 / NpSmall) * np.pi
+        Y_ring        = (0.154 - 0.912 / Nr) * np.pi
+
+        V_sp = abs(self.compoundPlanetaryGearbox.getPCRadiusSunM() * wSun)
+        V_rp = abs(wCarrier*(self.compoundPlanetaryGearbox.getPCRadiusSunM() + self.compoundPlanetaryGearbox.getPCRadiusPlanetBigM()) + 
+                wPlanet*(self.compoundPlanetaryGearbox.getPCRadiusPlanetSmallM()))
+        
+        # AGMA 908-B89 pg.16
+        # Kf Fatigue stress concentration factor
+        H = 0.331 - (0.436 * np.pi * pressureAngle / 180)
+        L = 0.324 - (0.492 * np.pi * pressureAngle / 180)
+        M = 0.261 + (0.545 * np.pi * pressureAngle / 180)  
+        # t -> tooth thickness, r -> fillet radius and l -> tooth height
+        t_planetSmall = (13.5 * Y_planetSmall)**(1/2) * moduleSmall
+        r_planetSmall = 0.3 * moduleSmall
+        l_planetSmall = 2.25 * moduleSmall
+        Kf_planetSmall = H + (t_planetSmall / r_planetSmall)**(L) * (t_planetSmall / l_planetSmall)**(M)
+
+        t_planetBig = (13.5 * Y_planetBig)**(1/2) * moduleBig
+        r_planetBig = 0.3 * moduleBig
+        l_planetBig = 2.25 * moduleBig
+        Kf_planetBig = H + (t_planetBig / r_planetBig)**(L) * (t_planetBig / l_planetBig)**(M)
+
+        t_sun = (13.5 * Y_sun)**(1/2) * moduleBig
+        r_sun = 0.3 * moduleBig
+        l_sun = 2.25 * moduleBig
+        Kf_sun = H + (t_sun / r_sun)**(L) * (t_sun / l_sun)**(M)
+
+        t_ring = (13.5 * Y_ring)**(1/2) * moduleSmall
+        r_ring = 0.3 * moduleSmall 
+        l_ring = 2.25 * moduleSmall
+        Kf_ring = H + (t_ring / r_ring)**(L) * (t_ring / l_ring)**(M)
+
+        # Shigley's Mechanical Engineering Design 9th Edition pg.752
+        # Yj Geometry factor
+        Yj_planetSmall = Y_planetSmall/Kf_planetSmall
+        Yj_planetBig = Y_planetBig/Kf_planetBig
+        Yj_sun = Y_sun/Kf_sun
+        Yj_ring = Y_ring/Kf_ring
+        
+        # Kv Dynamic factor
+        # Shigley's Mechanical Engineering Design 9th Edition pg.756
+        Qv = 7      # Quality numbers 3 to 7 will include most commercial-quality gears.
+        B_planetSmall =  0.25*(12-Qv)**(2/3)
+        A_planetSmall = 50 + 56*(1-B_planetSmall)
+        Kv_planetSmall = ((A_planetSmall+np.sqrt(200*V_rp))/A_planetSmall)**B_planetSmall
+
+        B_planetBig =  0.25*(12-Qv)**(2/3)
+        A_planetBig = 50 + 56*(1-B_planetBig)
+        Kv_planetBig = ((A_planetBig+np.sqrt(200*V_sp))/A_planetBig)**B_planetBig
+
+        B_sun =  0.25*(12-Qv)**(2/3)
+        A_sun = 50 + 56*(1-B_sun)
+        Kv_sun = ((A_sun+np.sqrt(200*V_sp))/A_sun)**B_sun
+
+        B_ring =  0.25*(12-Qv)**(2/3)
+        A_ring = 50 + 56*(1-B_ring)
+        Kv_ring = ((A_ring+np.sqrt(200*V_rp))/A_ring)**B_ring
+
+        # Shigley's Mechanical Engineering Design 9th Edition pg.764
+        # Ks Size factor (can be omitted if enough information is not available)
+        Ks = 1
+        
+        # NPTEL Fatigue Consideration in Design lecture-7 pg.10 Table-7.4 (https://archive.nptel.ac.in/courses/112/106/112106137/)
+        # Kh Load-distribution factor (0-50mm, less rigid mountings, less accurate gears)
+        Kh_planet = 1.3
+        Kh_sun = 1.3
+        Kh_ring = 1.3
+
+        # Shigley's Mechanical Engineering Design 9th Edition pg.764
+        # Kb Rim-thickness factor (the gears have a uniform thickness)
+        Kb = 1
+        
+        # AGMA bending stress equation (Shigley's Mechanical Engineering Design 9th Edition pg.746)  
+        bMin_planetSmall = (self.FOS * Wt_rp * Kv_planetSmall * Ks * Kh_planet * Kb)/(moduleSmall * Yj_planetSmall * self.compoundPlanetaryGearbox.maxGearAllowableStressPa * 0.001)
+        bMin_planetBig = (self.FOS * Wt_sp * Kv_planetBig * Ks * Kh_planet * Kb)/(moduleBig * Yj_planetBig * self.compoundPlanetaryGearbox.maxGearAllowableStressPa * 0.001)
+        bMin_sun = (self.FOS * Wt_sp * Kv_sun * Ks * Kh_sun * Kb) / (moduleBig * Yj_sun * self.compoundPlanetaryGearbox.maxGearAllowableStressPa * 0.001)
+        bMin_ring = (self.FOS * Wt_rp * Kv_ring * Ks * Kh_ring * Kb) / (moduleSmall * Yj_ring * self.compoundPlanetaryGearbox.maxGearAllowableStressPa * 0.001)
+
+        # C_pm = 1.1
+        # X_planetSmall = (self.FOS * Wt_rp * Kv_planetSmall * Ks * Kb)/(moduleSmall * Y_planetSmall * self.compoundPlanetaryGearbox.maxGearAllowableStressPa * 0.001)
+        # X_planetBig = (self.FOS * Wt_sp * Kv_planetBig * Ks * Kb)/(moduleBig * Y_planetBig * self.compoundPlanetaryGearbox.maxGearAllowableStressPa * 0.001)
+        # X_sun = (self.FOS * Wt_sp * Kv_sun * Ks * Kb) / (moduleBig * Y_sun * self.compoundPlanetaryGearbox.maxGearAllowableStressPa * 0.001)
+        # X_ring = (self.FOS * Wt_rp * Kv_ring * Ks * Kb) / (moduleSmall * Y_ring * self.compoundPlanetaryGearbox.maxGearAllowableStressPa * 0.001)
+
+        # co_eff_of_fwSqr = 0.93/10000
+        # co_eff_of_fw_planetSmall = -(C_pm/(moduleSmall*NpSmall*10*0.03937)) + 1/(39.37*X_planetSmall) - 0.0158
+        # co_eff_of_fw_planetBig = -(C_pm/(moduleBig*NpBig*10*0.03937)) + 1/(39.37*X_planetBig) - 0.0158
+        # co_eff_of_fw_sun = -(C_pm/(moduleBig*Ns*10*0.03937)) + 1/(39.37*X_sun) - 0.0158
+        # co_eff_of_fw_ring = -(C_pm/(moduleSmall*Nr*10*0.03937)) + 1/(39.37*X_ring) - 0.0158
+        # constant = -1.0995
+
+        # bMin_planetSmall = max(np.roots([co_eff_of_fwSqr, co_eff_of_fw_planetSmall, constant]))/39.37
+        # bMin_planetBig = max(np.roots([co_eff_of_fwSqr, co_eff_of_fw_planetBig, constant]))/39.37
+        # bMin_sun = max(np.roots([co_eff_of_fwSqr, co_eff_of_fw_sun, constant]))/39.37
+        # bMin_ring = max(np.roots([co_eff_of_fwSqr, co_eff_of_fw_ring, constant]))/39.37
+
+        # if bMin_planetBig > 0.026:
+        #     co_eff_of_fw_planetBig = -(C_pm/(moduleBig*NpBig*10*0.03937)) + 1/(39.37*X_planetBig) - 0.1533
+        #     constant = -1.08575
+        #     bMin_planetBig = max(np.roots([co_eff_of_fwSqr, co_eff_of_fw_planetBig, constant]))/39.37
+
+        # if bMin_planetSmall > 0.026:
+        #     co_eff_of_fw_planetSmall = -(C_pm/(moduleSmall*NpSmall*10*0.03937)) + 1/(39.37*X_planetSmall) - 0.1533
+        #     constant = -1.08575
+        #     bMin_planetSmall = max(np.roots([co_eff_of_fwSqr, co_eff_of_fw_planetSmall, constant]))/39.37
+
+        # if bMin_ring > 0.026:
+        #     co_eff_of_fw_ring = -(C_pm/(moduleSmall*Nr*10*0.03937)) + 1/(39.37*X_ring) - 0.1533
+        #     constant = -1.08575
+        #     bMin_ring = max(np.roots([co_eff_of_fwSqr, co_eff_of_fw_ring, constant]))/39.37
+
+        # if bMin_sun > 0.026:
+        #     co_eff_of_fw_sun = -(C_pm/(moduleBig*Ns*10*0.03937)) + 1/(39.37*X_sun) - 0.1533
+        #     constant = -1.08575
+        #     bMin_sun = max(np.roots([co_eff_of_fwSqr, co_eff_of_fw_sun, constant]))/39.37
+
+        if bMin_ring < bMin_planetSmall:
+            bMin_ring = bMin_planetSmall
+        else:
+            bMin_planetSmall = bMin_ring
+
+        self.compoundPlanetaryGearbox.setfwSunMM(bMin_sun*1000)
+        self.compoundPlanetaryGearbox.setfwPlanetBigMM(bMin_planetBig*1000)
+        self.compoundPlanetaryGearbox.setfwPlanetSmallMM(bMin_planetSmall*1000)
+        self.compoundPlanetaryGearbox.setfwRingMM(bMin_ring*1000)
+
+        # print("AGMA:")
+        # print(f"bMin_planetSmall = {bMin_planetSmall}")
+        # print(f"bMin_planetBig = {bMin_planetBig}")
+        # print(f"bMin_sun = {bMin_sun}")
+        # print(f"bMin_ring = {bMin_ring}")
+
+    def updateFacewidth(self):
+        if self.stressAnalysisMethodName == "Lewis":
+            self.lewisStressAnalysisMinFacewidth()
+        elif self.stressAnalysisMethodName == "AGMA":
+            self.AGMAStressAnalysisMinFacewidth()
+
 #========================================================================
 # Class: Actuator Optimization
 #========================================================================
@@ -2487,6 +3855,493 @@ class optimizationSingleStageActuator:
 
             sys.stdout = sys.__stdout__
             return totalTime
+
+#------------------------------------------------------------
+# Class: Optimization of Compound Planetary Actuator
+#------------------------------------------------------------
+class optimizationCompoundPlanetaryActuator:
+    def __init__(self,
+                 design_parameters,
+                 gear_standard_parameters,
+                 K_Mass                     = 2,
+                 K_Eff                      = -1,
+                 MODULE_BIG_MIN             = 0.8,
+                 MODULE_BIG_MAX             = 1.2,
+                 MODULE_SMALL_MIN           = 0.8,
+                 MODULE_SMALL_MAX           = 1.2,
+                 NUM_PLANET_MIN             = 3,
+                 NUM_PLANET_MAX             = 5,
+                 NUM_TEETH_SUN_MIN          = 20,
+                 NUM_TEETH_PLANET_BIG_MIN   = 20,
+                 NUM_TEETH_PLANET_SMALL_MIN = 20,
+                 GEAR_RATIO_MIN             = 5,
+                 GEAR_RATIO_MAX             = 30,
+                 GEAR_RATIO_STEP            = 1):
+        
+        self.K_Mass                     = K_Mass
+        self.K_Eff                      = K_Eff
+        self.MODULE_BIG_MIN             = MODULE_BIG_MIN
+        self.MODULE_BIG_MAX             = MODULE_BIG_MAX
+        self.MODULE_SMALL_MIN           = MODULE_SMALL_MIN
+        self.MODULE_SMALL_MAX           = MODULE_SMALL_MAX
+        self.NUM_PLANET_MIN             = NUM_PLANET_MIN
+        self.NUM_PLANET_MAX             = NUM_PLANET_MAX
+        self.NUM_TEETH_SUN_MIN          = NUM_TEETH_SUN_MIN
+        self.NUM_TEETH_PLANET_BIG_MIN   = NUM_TEETH_PLANET_BIG_MIN
+        self.NUM_TEETH_PLANET_SMALL_MIN = NUM_TEETH_PLANET_SMALL_MIN
+        self.GEAR_RATIO_MIN             = GEAR_RATIO_MIN
+        self.GEAR_RATIO_MAX             = GEAR_RATIO_MAX
+        self.GEAR_RATIO_STEP            = GEAR_RATIO_STEP
+
+        self.Cost                    = 100000
+        self.totalGearboxesWithReqGR = 0
+        self.totalFeasibleGearboxes  = 0
+        self.cntrIterBeforeCons      = 0
+        self.iter                    = 1
+        self.gearRatioIter           = GEAR_RATIO_MIN
+        self.UsePSCasVariable        = 1 # Default Yes
+
+        self.gear_standard_parameters = gear_standard_parameters
+        self.design_parameters        = design_parameters
+    
+    def printOptimizationParameters(self, Actuator=compoundPlanetaryActuator, log=1, csv=0):
+        # Motor Parameters
+        maxMotorAngVelRPM       = Actuator.motor.maxMotorAngVelRPM
+        maxMotorAngVelRadPerSec = Actuator.motor.maxMotorAngVelRadPerSec
+        maxMotorTorque          = Actuator.motor.maxMotorTorque
+        maxMotorPower           = Actuator.motor.maxMotorPower
+        motorMass               = Actuator.motor.massKG
+        motorDia                = Actuator.motor.motorDiaMM
+        motorLength             = Actuator.motor.motorLengthMM
+        
+        # Planetary Gearbox Parameters
+        maxGearAllowableStressMPa = Actuator.compoundPlanetaryGearbox.maxGearAllowableStressMPa
+        
+        # Gear strength parameters
+        FOS                      = Actuator.FOS
+        serviceFactor            = Actuator.serviceFactor
+        maxGearBoxDia            = Actuator.maxGearboxDiameter
+        stressAnalysisMethodName = Actuator.stressAnalysisMethodName
+        
+        if log:
+           # Printing the parameters below
+            print("--------------------Motor Parameters--------------------")
+            print("maxMotorAngVelRPM:       ", maxMotorAngVelRPM)
+            print("maxMotorAngVelRadPerSec: ", maxMotorAngVelRadPerSec)
+            print("maxMotorTorque:          ", maxMotorTorque)
+            print("maxMotorPower:           ", maxMotorPower)
+            print("motorMass:               ", motorMass)
+            print("motorDia:                ", motorDia)
+            print("motorLength:             ", motorLength)
+            print(" ")
+            print("--------------Planetary Gearbox Parameters--------------")
+            print("maxGearAllowableStressMPa: ", maxGearAllowableStressMPa)
+            print(" ")
+            print("-----------Gear strength and size parameters------------")
+            print("FOS:                     ", FOS)
+            print("serviceFactor:           ", serviceFactor)
+            print("stressAnalysisMethodName:", stressAnalysisMethodName)
+            print("maxGearBoxDia:           ", maxGearBoxDia)
+            print(" ")
+            print("-----------------Optimization Parameters-----------------")
+            print("K_Mass:                     ", self.K_Mass)
+            print("K_Eff:                      ", self.K_Eff)
+            print("MODULE_BIG_MIN:             ", self.MODULE_BIG_MIN)
+            print("MODULE_BIG_MAX:             ", self.MODULE_BIG_MAX)
+            print("MODULE_SMALL_MIN:           ", self.MODULE_SMALL_MIN)
+            print("MODULE_SMALL_MAX:           ", self.MODULE_SMALL_MAX)
+            print("NUM_PLANET_MIN:             ", self.NUM_PLANET_MIN)
+            print("NUM_PLANET_MAX:             ", self.NUM_PLANET_MAX)
+            print("NUM_TEETH_SUN_MIN:          ", self.NUM_TEETH_SUN_MIN)
+            print("NUM_TEETH_PLANET_BIG_MIN:   ", self.NUM_TEETH_PLANET_BIG_MIN)
+            print("NUM_TEETH_PLANET_SMALL_MIN: ", self.NUM_TEETH_PLANET_SMALL_MIN)
+            print("GEAR_RATIO_MIN:             ", self.GEAR_RATIO_MIN)
+            print("GEAR_RATIO_MAX:             ", self.GEAR_RATIO_MAX)
+            print("GEAR_RATIO_STEP:            ", self.GEAR_RATIO_STEP)
+        elif csv:
+            print("Motor Parameters:")
+            print("maxMotorAngVelRPM,","maxMotorAngVelRadPerSec,","maxMotorTorque,","maxMotorPower,","motorMass,","motorDia,", "motorLength")
+            print(maxMotorAngVelRPM,",", maxMotorAngVelRadPerSec,",", maxMotorTorque,",",maxMotorPower,",",motorMass,",",motorDia,",", motorLength)
+            print(" ")
+            print("Gear strength and size parameters:")
+            print("FOS,", "serviceFactor,", "stressAnalysisMethodName,", "maxGearBoxDia,","maxGearAllowableStressMPa")
+            print(FOS,",", serviceFactor,",", stressAnalysisMethodName,",", maxGearBoxDia,",",maxGearAllowableStressMPa)
+            print(" ")
+            print("Optimization Parameters:")            
+            print("K_mass, K_Eff, MODULE_BIG_MIN, MODULE_BIG_MAX, MODULE_SMALL_MIN, MODULE_SMALL_MAX, NUM_PLANET_MIN, NUM_PLANET_MAX, NUM_TEETH_SUN_MIN, NUM_TEETH_PLANET_BIG_MIN, NUM_TEETH_PLANET_SMALL_MIN, GEAR_RATIO_MIN, GEAR_RATIO_MAX, GEAR_RATIO_STEP")
+            print(self.K_Mass,",", self.K_Eff,",", self.MODULE_BIG_MIN,",", self.MODULE_BIG_MAX,",", self.MODULE_SMALL_MIN,",", self.MODULE_SMALL_MAX,",",self.NUM_PLANET_MIN,",", self.NUM_PLANET_MAX,",", self.NUM_TEETH_SUN_MIN,",", self.NUM_TEETH_PLANET_BIG_MIN,",",self.NUM_TEETH_PLANET_SMALL_MIN,",", self.GEAR_RATIO_MIN,",", self.GEAR_RATIO_MAX,",", self.GEAR_RATIO_STEP)
+        
+    def printOptimizationResults(self, Actuator=compoundPlanetaryActuator, log=1, csv=0):
+        if log:
+            # Printing the parameters below
+            print("Iteration: ", self.iter)
+            Actuator.printParametersLess()
+            Actuator.printVolumeAndMassParameters()
+            print(" ")
+            print("Cost:", self.Cost)
+            print("*****************************************************************")
+        elif csv:
+            iter       = self.iter
+            gearRatio       = Actuator.compoundPlanetaryGearbox.gearRatio()
+            moduleBig       = Actuator.compoundPlanetaryGearbox.moduleBig
+            moduleSmall     = Actuator.compoundPlanetaryGearbox.moduleSmall
+            Ns              = Actuator.compoundPlanetaryGearbox.Ns 
+            NpBig           = Actuator.compoundPlanetaryGearbox.NpBig
+            NpSmall         = Actuator.compoundPlanetaryGearbox.NpSmall 
+            Nr              = Actuator.compoundPlanetaryGearbox.Nr 
+            numPlanet       = Actuator.compoundPlanetaryGearbox.numPlanet
+            fwSunMM         = round(Actuator.compoundPlanetaryGearbox.fwSunMM    , 3)
+            fwPlanetBigMM   = round(Actuator.compoundPlanetaryGearbox.fwPlanetBigMM , 3)
+            fwPlanetSmallMM = round(Actuator.compoundPlanetaryGearbox.fwPlanetSmallMM , 3)
+            fwRingMM        = round(Actuator.compoundPlanetaryGearbox.fwRingMM   , 3)
+            if self.UsePSCasVariable == 1 :
+                Opt_PSC_ring                 = self.cspgOpt.model.PSCr.value
+                Opt_PSC_planetBig            = self.cspgOpt.model.PSCp1.value
+                Opt_PSC_planetSmall          = self.cspgOpt.model.PSCp2.value
+                Opt_PSC_sun                  = self.cspgOpt.model.PSCs.value
+                CenterDist_SP, CenterDist_PR = self.cspgOpt.getCenterDistance(Var = False)
+            else :
+                Opt_PSC_ring   = 0
+                Opt_PSC_planetBig = 0
+                Opt_PSC_planetSmall = 0
+                Opt_PSC_sun   = 0
+                CenterDist_SP = ((Ns + NpBig)/2)* moduleBig
+                CenterDist_PR = ((Nr - NpSmall)/2)* moduleSmall
+
+            mass            = round(Actuator.getMassKG_new(), 3)
+            eff             = round(Actuator.compoundPlanetaryGearbox.getEfficiency(), 3)
+            peakTorque      = round(Actuator.motor.getMaxMotorTorque()*Actuator.compoundPlanetaryGearbox.gearRatio(), 3)
+            
+            tooth_forces    = Actuator.getToothForces()
+            Torque_Density  = round(peakTorque/mass, 3)
+            
+            if self.UsePSCasVariable == 1 : 
+                eff  = round(self.cspgOpt.getEfficiency(Var=False), 3)
+            
+            Cost = self.K_Mass * mass + self.K_Eff * eff
+            
+            print(iter, ",", gearRatio, ",", moduleBig, ",", moduleSmall, ",", Ns, ",", NpBig, ",", NpSmall, ",", Nr, ",", numPlanet, ",", fwSunMM, ",", fwPlanetBigMM, ",", fwPlanetSmallMM, ",", fwRingMM, ",", Opt_PSC_sun, ",", Opt_PSC_planetBig, ",", Opt_PSC_planetSmall, ",", Opt_PSC_ring, ",", CenterDist_SP, ",", CenterDist_PR, ",", mass, ",", eff, ",", peakTorque, ",", Cost, ",", tooth_forces, ",", Torque_Density)
+
+    def optimizeActuator(self, Actuator=compoundPlanetaryActuator, UsePSCasVariable = 1, log=1, csv=0):   
+        self.UsePSCasVariable = UsePSCasVariable
+        totalTime = 0
+        if UsePSCasVariable == 0:
+            totalTime = self.optimizeActuatorWithoutPSC(Actuator, log, csv)
+        elif UsePSCasVariable == 1:
+            totalTime = self.optimizeActuatorWith_MINLP_PSC(Actuator, log, csv)
+        else:
+            totalTime = 0
+            print("ERROR: \"UsePSCasVariable\" can be either 0 or 1")
+
+        return totalTime
+    
+    def optimizeActuatorWithoutPSC(self, Actuator=compoundPlanetaryActuator, log=1, csv=0):
+        startTime = time.time()
+        opt_parameters = []
+        if csv and log:
+            print("WARNING: Both csv and Log cannot be true")
+            print("WARNING: Please set either csv or log to be 0 in \"Optimizer.optimizeActuator(Actuator)\" function")
+            print(" ")
+            print("Making log to be false and csv to be true")
+            log = 0
+            csv = 1
+        elif not csv and not log:
+            print("WARNING: Both csv and Log cannot be false")
+            print("WARNING: Please set either csv or log to be 1 in \"Optimizer.optimizeActuator(Actuator)\" function")
+            print(" ")
+            print("Making log to be False and csv to be true")
+            log = 0
+            csv = 1
+        
+        if csv:
+            fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/CPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}.csv"
+        elif log:
+            fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/CPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}_LOG.txt"
+        
+        with open(fileName, "w") as file1:
+            sys.stdout = file1
+            self.printOptimizationParameters(Actuator, log, csv)
+            if log:
+                print(" ")
+                print("*****************************************************************")
+                print("FOR MINIMUM GEAR RATIO ", self.gearRatioIter)
+                print("*****************************************************************")
+                print(" ")
+            elif csv:
+                # Printing the optimization iterations below
+                print(" ")
+                print("iter, gearRatio, moduleBig, moduleSmall, Ns, NpBig, NpSmall, Nr, numPlanet, fwSunMM, fwPlanetBigMM, fwPanetSmallMM, fwRingMM, PSCs, PSCp1, PSCp2, PSCr, CD_SP, CD_PR, mass, eff, peakTorque, Cost, tooth_forces_sp, tooth_forces_rp, Torque_Density")
+                # print("iter, gearRatio, moduleBig, moduleSmall, Ns, NpBig, NpSmall, Nr, numPlanet, fwSunMM, fwPlanetBigMM, fwPanetSmallMM, fwRingMM, mass, eff, peakTorque, Cost, tooth_forces_sp, tooth_forces_rp, Torque_Density")
+
+            while self.gearRatioIter <= self.GEAR_RATIO_MAX:
+                opt_done  = 0
+                self.iter = 0
+                self.Cost = 100000
+                MinCost   = self.Cost
+                Actuator.compoundPlanetaryGearbox.setModuleBig(self.MODULE_BIG_MIN)
+                while Actuator.compoundPlanetaryGearbox.moduleBig <= self.MODULE_BIG_MAX:
+                    # Setting Module Small
+                    Actuator.compoundPlanetaryGearbox.setModuleSmall(self.MODULE_SMALL_MIN)
+                    while (Actuator.compoundPlanetaryGearbox.moduleSmall <= self.MODULE_SMALL_MAX):
+                        # Setting Ns
+                        Actuator.compoundPlanetaryGearbox.setNs(self.NUM_TEETH_SUN_MIN)
+                        while (2*Actuator.compoundPlanetaryGearbox.getPCRadiusSunM()*1000) <= Actuator.maxGearboxDiameter:
+                            # Setting Np Big
+                            Actuator.compoundPlanetaryGearbox.setNpBig(self.NUM_TEETH_PLANET_BIG_MIN)
+                            while (2*Actuator.compoundPlanetaryGearbox.getPCRadiusPlanetBigM()*1000) <= Actuator.maxGearboxDiameter/2:
+                                # Setting Np Small
+                                Actuator.compoundPlanetaryGearbox.setNpSmall(self.NUM_TEETH_PLANET_SMALL_MIN)
+                                while (2*Actuator.compoundPlanetaryGearbox.getPCRadiusPlanetSmallM()*1000) <= Actuator.maxGearboxDiameter/2:
+                                    # Setting Nr
+                                    Actuator.compoundPlanetaryGearbox.setNr(Actuator.compoundPlanetaryGearbox.NpSmall + 
+                                                                            Actuator.compoundPlanetaryGearbox.NpBig +
+                                                                            Actuator.compoundPlanetaryGearbox.Ns)
+                                    # if (2*Actuator.compoundPlanetaryGearbox.getPCRadiusRingM()*1000) <= Actuator.maxGearboxDiameter:
+                                    if (Actuator.compoundPlanetaryGearbox.getGearboxOuterDiaMaxM()*1000) <= Actuator.maxGearboxDiameter:
+                                        # Setting number of Planet
+                                        Actuator.compoundPlanetaryGearbox.setNumPlanet(self.NUM_PLANET_MIN)
+                                        while Actuator.compoundPlanetaryGearbox.numPlanet <= self.NUM_PLANET_MAX:
+                                            if (Actuator.compoundPlanetaryGearbox.geometricConstraint() and 
+                                                Actuator.compoundPlanetaryGearbox.meshingConstraint() and 
+                                                Actuator.compoundPlanetaryGearbox.noPlanetInterferenceConstraint()):
+                                                self.totalFeasibleGearboxes += 1
+                                                # Fiter for the Gear Ratio
+                                                if (Actuator.compoundPlanetaryGearbox.gearRatio() >= self.gearRatioIter and 
+                                                    Actuator.compoundPlanetaryGearbox.gearRatio() <= (self.gearRatioIter + self.GEAR_RATIO_STEP)):
+                                                    self.totalGearboxesWithReqGR += 1
+                                                    Actuator.updateFacewidth()
+                                                    
+                                                    massActuator   = Actuator.getMassKG_new()
+                                                    effActuator    = Actuator.compoundPlanetaryGearbox.getEfficiency()
+
+                                                    self.Cost = (self.K_Mass * massActuator) + (self.K_Eff * effActuator)
+                                                    if self.Cost < MinCost:
+                                                        MinCost    = self.Cost
+                                                        opt_done   = 1
+                                                        self.iter += 1
+                                                        Actuator.genEquationFile()
+                                                        opt_parameters = [Actuator.compoundPlanetaryGearbox.gearRatio(),
+                                                                          Actuator.compoundPlanetaryGearbox.numPlanet,
+                                                                          Actuator.compoundPlanetaryGearbox.Ns,
+                                                                          Actuator.compoundPlanetaryGearbox.NpBig,
+                                                                          Actuator.compoundPlanetaryGearbox.NpSmall,
+                                                                          Actuator.compoundPlanetaryGearbox.Nr,
+                                                                          Actuator.compoundPlanetaryGearbox.moduleBig,
+                                                                          Actuator.compoundPlanetaryGearbox.moduleSmall]
+                                                        opt_planetaryGearbox = compoundPlanetaryGearbox(design_parameters         = self.design_parameters,
+                                                                                                        gear_standard_parameters  = self.gear_standard_parameters,
+                                                                                                        Ns                        = Actuator.compoundPlanetaryGearbox.Ns,
+                                                                                                        NpBig                     = Actuator.compoundPlanetaryGearbox.NpBig,
+                                                                                                        NpSmall                   = Actuator.compoundPlanetaryGearbox.NpSmall, 
+                                                                                                        Nr                        = Actuator.compoundPlanetaryGearbox.Nr,
+                                                                                                        numPlanet                 = Actuator.compoundPlanetaryGearbox.numPlanet,
+                                                                                                        moduleBig                 = Actuator.compoundPlanetaryGearbox.moduleBig, # mm
+                                                                                                        moduleSmall               = Actuator.compoundPlanetaryGearbox.moduleSmall, # mm
+                                                                                                        gearMaterialDensity       = Actuator.compoundPlanetaryGearbox.gearMaterialDensity,
+                                                                                                        carrierMaterialDensity    = Actuator.compoundPlanetaryGearbox.carrierMaterialDensity,
+                                                                                                        fwSunMM                   = Actuator.compoundPlanetaryGearbox.fwSunMM, # mm
+                                                                                                        fwPlanetBigMM             = Actuator.compoundPlanetaryGearbox.fwPlanetBigMM, # mm
+                                                                                                        fwPlanetSmallMM           = Actuator.compoundPlanetaryGearbox.fwPlanetSmallMM, # mm
+                                                                                                        fwRingMM                  = Actuator.compoundPlanetaryGearbox.fwRingMM, # mm
+                                                                                                        maxGearAllowableStressMPa = Actuator.compoundPlanetaryGearbox.maxGearAllowableStressMPa) # MPa) # kg/m^3
+                                                        opt_actuator = compoundPlanetaryActuator(design_parameters        = self.design_parameters,
+                                                                                                 motor                    = Actuator.motor,
+                                                                                                 compoundPlanetaryGearbox = opt_planetaryGearbox,
+                                                                                                 FOS                      = Actuator.FOS,
+                                                                                                 serviceFactor            = Actuator.serviceFactor,
+                                                                                                 maxGearboxDiameter       = Actuator.maxGearboxDiameter, # mm 
+                                                                                                 stressAnalysisMethodName = "Lewis") # Lewis or AGMA
+                                                        # self.printOptimizationResults(Actuator, log, csv)
+                                            Actuator.compoundPlanetaryGearbox.setNumPlanet(Actuator.compoundPlanetaryGearbox.numPlanet + 1)
+                                        # Actuator.compoundPlanetaryGearbox.setNr(Actuator.compoundPlanetaryGearbox.Nr + 1)
+                                    Actuator.compoundPlanetaryGearbox.setNpSmall(Actuator.compoundPlanetaryGearbox.NpSmall + 1)
+                                Actuator.compoundPlanetaryGearbox.setNpBig(Actuator.compoundPlanetaryGearbox.NpBig + 1)
+                            Actuator.compoundPlanetaryGearbox.setNs(Actuator.compoundPlanetaryGearbox.Ns + 1)
+                        Actuator.compoundPlanetaryGearbox.setModuleSmall(Actuator.compoundPlanetaryGearbox.moduleSmall + 0.100)
+                        Actuator.compoundPlanetaryGearbox.setModuleSmall(round(Actuator.compoundPlanetaryGearbox.moduleSmall, 1)) # Round Off
+                    Actuator.compoundPlanetaryGearbox.setModuleBig(Actuator.compoundPlanetaryGearbox.moduleBig + 0.100)
+                    Actuator.compoundPlanetaryGearbox.setModuleBig(round(Actuator.compoundPlanetaryGearbox.moduleBig, 1)) # Round Off
+                if (opt_done):
+                    self.printOptimizationResults(opt_actuator, log, csv)
+                self.gearRatioIter += self.GEAR_RATIO_STEP
+            
+                if log:
+                    print("Number of iterations: ", self.iter)
+                    print("Total Feasible Gearboxes:", self.totalFeasibleGearboxes)
+                    print("Total Gearboxes with requires Gear Ratio:", self.totalGearboxesWithReqGR)
+                    print("*****************************************************************")
+                    print("----------------------------END----------------------------------")
+                    print(" ")
+
+            # Print the time in the file 
+            endTime = time.time()
+            totalTime = endTime - startTime
+            print("\n")
+            print("Running Time (sec)")
+            print(totalTime) 
+
+        sys.stdout = sys.__stdout__
+
+        return totalTime
+
+    def optimizeActuatorWith_MINLP_PSC(self, Actuator=compoundPlanetaryActuator, log=1, csv=0):
+        startTime = time.time()
+        opt_parameters = []
+        if csv and log:
+            print("WARNING: Both csv and Log cannot be true")
+            print("WARNING: Please set either csv or log to be 0 in \"Optimizer.optimizeActuator(Actuator)\" function")
+            print(" ")
+            print("Making log to be false and csv to be true")
+            log = 0
+            csv = 1
+        elif not csv and not log:
+            print("WARNING: Both csv and Log cannot be false")
+            print("WARNING: Please set either csv or log to be 1 in \"Optimizer.optimizeActuator(Actuator)\" function")
+            print(" ")
+            print("Making log to be False and csv to be true")
+            log = 0
+            csv = 1
+        
+        if csv:
+            fileName = f"./results/results_bilevel_{Actuator.motor.motorName}/CPG_BILEVEL_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}.csv"
+        elif log:
+            fileName = f"./results/results_bilevel_{Actuator.motor.motorName}/CPG_BILEVEL_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}_LOG.txt"
+        
+        with open(fileName, "w") as file1:
+            sys.stdout = file1
+            self.printOptimizationParameters(Actuator, log, csv)
+            
+            if log:
+                print(" ")
+                print("*****************************************************************")
+                print("FOR MINIMUM GEAR RATIO ", self.gearRatioIter)
+                print("*****************************************************************")
+                print(" ")
+            elif csv:
+                # Printing the optimization iterations below
+                print(" ")
+                print("iter, gearRatio, moduleBig, moduleSmall, Ns, NpBig, NpSmall, Nr, numPlanet, fwSunMM, fwPlanetBigMM, fwPanetSmallMM, fwRingMM, PSCs, PSCp1, PSCp2, PSCr, CD_SP, CD_PR, mass, eff, peakTorque, Cost, tooth_forces_sp, tooth_forces_rp, Torque_Density")
+
+            while self.gearRatioIter <= self.GEAR_RATIO_MAX:
+                opt_done  = 0
+                self.iter = 0
+                self.Cost = 100000
+                MinCost   = self.Cost
+                Actuator.compoundPlanetaryGearbox.setModuleBig(self.MODULE_BIG_MIN)
+                while Actuator.compoundPlanetaryGearbox.moduleBig <= self.MODULE_BIG_MAX:
+                    # Setting Module Small
+                    Actuator.compoundPlanetaryGearbox.setModuleSmall(self.MODULE_SMALL_MIN)
+                    while (Actuator.compoundPlanetaryGearbox.moduleSmall <= self.MODULE_SMALL_MAX):
+                        # Setting Ns
+                        Actuator.compoundPlanetaryGearbox.setNs(self.NUM_TEETH_SUN_MIN)
+                        while (2*Actuator.compoundPlanetaryGearbox.getPCRadiusSunM()*1000) <= Actuator.maxGearboxDiameter:
+                            # Setting Np Big
+                            Actuator.compoundPlanetaryGearbox.setNpBig(self.NUM_TEETH_PLANET_BIG_MIN)
+                            while (2*Actuator.compoundPlanetaryGearbox.getPCRadiusPlanetBigM()*1000) <= Actuator.maxGearboxDiameter/2:
+                                # Setting Np Small
+                                Actuator.compoundPlanetaryGearbox.setNpSmall(self.NUM_TEETH_PLANET_SMALL_MIN)
+                                while (2*Actuator.compoundPlanetaryGearbox.getPCRadiusPlanetSmallM()*1000) <= Actuator.maxGearboxDiameter/2:
+                                    # Setting Nr
+                                    Actuator.compoundPlanetaryGearbox.setNr(Actuator.compoundPlanetaryGearbox.NpSmall + 
+                                                                            Actuator.compoundPlanetaryGearbox.NpBig +
+                                                                            Actuator.compoundPlanetaryGearbox.Ns)
+                                    # if (2*Actuator.compoundPlanetaryGearbox.getPCRadiusRingM()*1000) <= Actuator.maxGearboxDiameter:
+                                    if (Actuator.compoundPlanetaryGearbox.getGearboxOuterDiaMaxM()*1000) <= Actuator.maxGearboxDiameter:
+                                        # Setting number of Planet
+                                        Actuator.compoundPlanetaryGearbox.setNumPlanet(self.NUM_PLANET_MIN)
+                                        while Actuator.compoundPlanetaryGearbox.numPlanet <= self.NUM_PLANET_MAX:
+                                            if (Actuator.compoundPlanetaryGearbox.geometricConstraint() and 
+                                                Actuator.compoundPlanetaryGearbox.meshingConstraint() and 
+                                                Actuator.compoundPlanetaryGearbox.noPlanetInterferenceConstraint()):
+                                                self.totalFeasibleGearboxes += 1
+                                                # Fiter for the Gear Ratio
+                                                if (Actuator.compoundPlanetaryGearbox.gearRatio() >= self.gearRatioIter and 
+                                                    Actuator.compoundPlanetaryGearbox.gearRatio() <= (self.gearRatioIter + self.GEAR_RATIO_STEP)):
+                                                    self.totalGearboxesWithReqGR += 1
+                                                    Actuator.updateFacewidth()
+                                                    
+                                                    effActuator = Actuator.compoundPlanetaryGearbox.getEfficiency()
+                                                    massActuator = Actuator.getMassKG_new()
+
+                                                    self.Cost = (self.K_Mass * massActuator) + (self.K_Eff * effActuator)
+                                                    if self.Cost < MinCost:
+                                                        MinCost = self.Cost
+                                                        opt_done = 1
+                                                        self.iter += 1
+                                                        Actuator.genEquationFile()
+                                                        opt_parameters = [Actuator.compoundPlanetaryGearbox.gearRatio(),
+                                                                          Actuator.compoundPlanetaryGearbox.numPlanet,
+                                                                          Actuator.compoundPlanetaryGearbox.Ns,
+                                                                          Actuator.compoundPlanetaryGearbox.NpBig,
+                                                                          Actuator.compoundPlanetaryGearbox.NpSmall,
+                                                                          Actuator.compoundPlanetaryGearbox.Nr,
+                                                                          Actuator.compoundPlanetaryGearbox.moduleBig,
+                                                                          Actuator.compoundPlanetaryGearbox.moduleSmall]
+                                                        opt_planetaryGearbox = compoundPlanetaryGearbox(design_parameters         = self.design_parameters,
+                                                                                                        gear_standard_parameters  = self.gear_standard_parameters,
+                                                                                                        Ns                        = Actuator.compoundPlanetaryGearbox.Ns,
+                                                                                                        NpBig                     = Actuator.compoundPlanetaryGearbox.NpBig,
+                                                                                                        NpSmall                   = Actuator.compoundPlanetaryGearbox.NpSmall, 
+                                                                                                        Nr                        = Actuator.compoundPlanetaryGearbox.Nr,
+                                                                                                        numPlanet                 = Actuator.compoundPlanetaryGearbox.numPlanet,
+                                                                                                        moduleBig                 = Actuator.compoundPlanetaryGearbox.moduleBig, # mm
+                                                                                                        moduleSmall               = Actuator.compoundPlanetaryGearbox.moduleSmall, # mm
+                                                                                                        gearMaterialDensity       = Actuator.compoundPlanetaryGearbox.gearMaterialDensity,
+                                                                                                        carrierMaterialDensity    = Actuator.compoundPlanetaryGearbox.carrierMaterialDensity,
+                                                                                                        fwSunMM                   = Actuator.compoundPlanetaryGearbox.fwSunMM, # mm
+                                                                                                        fwPlanetBigMM             = Actuator.compoundPlanetaryGearbox.fwPlanetBigMM, # mm
+                                                                                                        fwPlanetSmallMM           = Actuator.compoundPlanetaryGearbox.fwPlanetSmallMM, # mm
+                                                                                                        fwRingMM                  = Actuator.compoundPlanetaryGearbox.fwRingMM, # mm
+                                                                                                        maxGearAllowableStressMPa = Actuator.compoundPlanetaryGearbox.maxGearAllowableStressMPa) # MPa) # kg/m^3
+                                                        opt_actuator = compoundPlanetaryActuator(design_parameters        = self.design_parameters,
+                                                                                                 motor                    = Actuator.motor,
+                                                                                                 compoundPlanetaryGearbox = opt_planetaryGearbox,
+                                                                                                 FOS                      = Actuator.FOS,
+                                                                                                 serviceFactor            = Actuator.serviceFactor,
+                                                                                                 maxGearboxDiameter       = Actuator.maxGearboxDiameter, # mm 
+                                                                                                 stressAnalysisMethodName = "Lewis") # Lewis or AGMA
+                                            Actuator.compoundPlanetaryGearbox.setNumPlanet(Actuator.compoundPlanetaryGearbox.numPlanet + 1)
+                                        # Actuator.compoundPlanetaryGearbox.setNr(Actuator.compoundPlanetaryGearbox.Nr + 1)
+                                    Actuator.compoundPlanetaryGearbox.setNpSmall(Actuator.compoundPlanetaryGearbox.NpSmall + 1)
+                                Actuator.compoundPlanetaryGearbox.setNpBig(Actuator.compoundPlanetaryGearbox.NpBig + 1)
+                            Actuator.compoundPlanetaryGearbox.setNs(Actuator.compoundPlanetaryGearbox.Ns + 1)
+                        Actuator.compoundPlanetaryGearbox.setModuleSmall(Actuator.compoundPlanetaryGearbox.moduleSmall + 0.100)
+                        Actuator.compoundPlanetaryGearbox.setModuleSmall(round(Actuator.compoundPlanetaryGearbox.moduleSmall, 1)) # Round Off
+                    Actuator.compoundPlanetaryGearbox.setModuleBig(Actuator.compoundPlanetaryGearbox.moduleBig + 0.100)
+                    Actuator.compoundPlanetaryGearbox.setModuleBig(round(Actuator.compoundPlanetaryGearbox.moduleBig, 1)) # Round Off
+                if (opt_done):
+                    self.cspgOpt = optimal_continuous_PSC_cpg(GEAR_RATIO_MIN = opt_parameters[0],
+                                                              numPlanet      = opt_parameters[1],
+                                                              Ns_init        = opt_parameters[2],
+                                                              Np1_init       = opt_parameters[3],
+                                                              Np2_init       = opt_parameters[4],
+                                                              Nr_init        = opt_parameters[5],
+                                                              M1_init        = opt_parameters[6] * 10,
+                                                              M2_init        = opt_parameters[7] * 10)
+                    _, calc_centerDistForManufacturing = self.cspgOpt.solve()
+                    self.cspgOpt.solve(optimizeForManufacturing=True,
+                                       centerDistForManufacturing=calc_centerDistForManufacturing)
+                    self.printOptimizationResults(opt_actuator, log, csv)
+                self.gearRatioIter += self.GEAR_RATIO_STEP
+            
+                if log:
+                    print("Number of iterations: ", self.iter)
+                    print("Total Feasible Gearboxes:", self.totalFeasibleGearboxes)
+                    print("Total Gearboxes with requires Gear Ratio:", self.totalGearboxesWithReqGR)
+                    print("*****************************************************************")
+                    print("----------------------------END----------------------------------")
+                    print(" ")
+
+            # Print the time in the file 
+            endTime = time.time()
+            totalTime = endTime - startTime
+            print("\n")
+            print("Running Time (sec)")
+            print(totalTime) 
+
+        sys.stdout = sys.__stdout__
+
+        return totalTime
 
 #------------------------------------------------------------
 # Continuous optimization of the Profile shift coefficients
