@@ -866,6 +866,17 @@ class singleStagePlanetaryActuator:
         #------------------------------------------------------
         # Indepent Constant variables
         #------------------------------------------------------
+        # --- Gear Profile parameters ---
+        self.pressure_angle = self.planetaryGearbox.getPressureAngleRad()
+        self.pressure_angle_deg = self.planetaryGearbox.getPressureAngleRad() * 180 / np.pi
+
+        # --- variable used in gearbox class not used here ---
+        # self.ringRadialWidthMM            = 5.0
+        # self.planetMinDistanceMM          = 5.0
+        # self.sCarrierExtrusionDiaMM       = 8.0
+        # self.sCarrierExtrusionClearanceMM = 1.0
+        self.bearingIDClearanceMM           = 10
+        
         # --- Clearances -----------------
         self.clearance_planet                           = 1.5
         self.clearance_case_mount_holes_shell_thickness = 1
@@ -874,11 +885,6 @@ class singleStagePlanetaryActuator:
         self.ring_to_chamfer_clearance                  = 2
         self.standard_fillet_1_5mm                      = 1.5
         self.standard_bearing_insertion_chamfer         = 0.5
-
-        # --- Gear Profile parameters ---
-        self.pressure_angle = self.planetaryGearbox.getPressureAngleRad()
-        self.pressure_angle_deg = self.planetaryGearbox.getPressureAngleRad() * 180 / np.pi
-        
 
         # --- Secondary Carrier dimensions ---
         self.sec_carrier_thickness = 5
@@ -913,6 +919,25 @@ class singleStagePlanetaryActuator:
         self.carrier_trapezoidal_support_hole_dia                   = 3
         self.carrier_bearing_step_width                             = 1.5
         
+        # --- Driver Dimensions ---
+        self.driver_upper_holes_dist_from_center = 23
+        self.driver_lower_holes_dist_from_center = 15
+        self.driver_side_holes_dist_from_center  = 20
+        self.driver_mount_holes_dia              = 2.5
+        self.driver_mount_inserts_OD             = 3.5
+        self.driver_mount_thickness              = 1.5
+        self.driver_mount_height                 = 4
+
+        # --- Planet Gear dimensions ---
+        self.planet_pin_bolt_dia        = 5 
+        self.planet_shaft_dia           = 8  
+        self.planet_shaft_step_offset   = 1  
+        self.planet_bearing_OD          = 12 
+        self.planet_bearing_width       = 3.5
+        self.planet_bore                = 10
+
+        # --- bearing retainer dimensions ---
+        self.bearing_retainer_thickness = 2
 
         # --- carrier nuts and bolts ---
         carrier_trapezoidal_support_hole_socket_head_dia, _ = self.get_bolt_head_dimensions(diameter=self.carrier_trapezoidal_support_hole_dia, bolt_type="socket_head")
@@ -933,15 +958,6 @@ class singleStagePlanetaryActuator:
         self.wire_slot_dist_from_center = self.motor.wire_slot_dist_from_center 
         self.wire_slot_length           = self.motor.wire_slot_length 
         self.wire_slot_radius           = self.motor.wire_slot_radius
-
-        # --- Driver Dimensions ---
-        self.driver_upper_holes_dist_from_center = 23
-        self.driver_lower_holes_dist_from_center = 15
-        self.driver_side_holes_dist_from_center  = 20
-        self.driver_mount_holes_dia              = 2.5
-        self.driver_mount_inserts_OD             = 3.5
-        self.driver_mount_thickness              = 1.5
-        self.driver_mount_height                 = 4
 
         #------------------------------------------------------
         # Depent variables
@@ -965,17 +981,11 @@ class singleStagePlanetaryActuator:
         self.alpha_p = (np.sqrt(self.dp_p**2 - self.db_p**2) / self.db_p) * 180 / np.pi - self.pressure_angle * 180 / np.pi 
         self.beta_p  = (360 / (4 * self.Np) - self.alpha_p) * 2
 
-        # ---
-        self.planet_pin_bolt_dia        = 5  
+        # --- 
         planet_pin_socket_head_dia, _ = self.get_bolt_head_dimensions(diameter=self.planet_pin_bolt_dia, bolt_type="socket_head")
         planet_pin_bolt_wrench_size, _ = self.get_nut_dimensions(diameter=self.planet_pin_bolt_dia)
         self.planet_pin_socket_head_dia = planet_pin_socket_head_dia
         self.planet_pin_bolt_wrench_size = planet_pin_bolt_wrench_size
-        self.planet_shaft_dia           = 8  
-        self.planet_shaft_step_offset   = 1  
-        self.planet_bearing_OD          = 12 
-        self.planet_bearing_width       = 3.5
-        self.planet_bore                = 10
         # ---
 
         self.dp_r    = self.module * self.Nr
@@ -988,6 +998,14 @@ class singleStagePlanetaryActuator:
         self.ring_OD = self.dp_r + 2 * self.ring_radial_thickness
 
         # --- casing Motor and gearbox casing dimensions ---
+        if self.ring_OD < self.motor_OD :
+            self.clearance_motor_and_case = 5 
+        else :
+            self.clearance_motor_and_case = (self.ring_OD - self.motor_OD) / 2 + 5
+        
+        self.Motor_case_ID = self.motor_OD + self.clearance_motor_and_case * 2
+        self.motor_case_OD_base = self.motor_OD + self.clearance_motor_and_case * 2 + self.Motor_case_thickness * 2
+
         self.case_dist = self.sec_carrier_thickness + self.clearance_planet + self.sun_coupler_hub_thickness - self.case_mounting_surface_height
 
         self.case_mounting_hole_shift = self.case_mounting_hole_dia / 2 - 0.5
@@ -1002,6 +1020,13 @@ class singleStagePlanetaryActuator:
 
         self.case_mounting_wrench_size       = case_mounting_wrench_size      # 5.5
         self.case_mounting_nut_thickness     = case_mounting_nut_thickness    # 2.4
+
+        # --- Bearing Dimensions ---
+        IdrequiredMM        = self.module * (self.Ns + self.Np) + self.bearingIDClearanceMM
+        Bearings            = bearings_discrete(IdrequiredMM)
+        self.bearing_ID     = Bearings.getBearingIDMM()
+        self.bearing_OD     = Bearings.getBearingODMM()
+        self.bearing_height = Bearings.getBearingWidthMM()
 
         outer_check = self.bearing_OD + self.output_mounting_hole_dia * 4
         inner_check = self.Nr * self.module + 2 * self.h_b
@@ -1018,25 +1043,11 @@ class singleStagePlanetaryActuator:
         self.output_mounting_nut_thickness   = output_mounting_nut_thickness   # 3.2
         self.output_mounting_nut_wrench_size = output_mounting_nut_wrench_size # 7
 
-
-        # --- Bearing Dimensions ---
-        IdrequiredMM        = self.module * (self.Ns + self.Np) + self.bearingIDClearanceMM
-        Bearings            = bearings_discrete(IdrequiredMM)
-        self.bearing_ID     = Bearings.getBearingIDMM()
-        self.bearing_OD     = Bearings.getBearingODMM()
-        self.bearing_height = Bearings.getBearingWidthMM()
-
         # ------------ Motors ------------------
         motor_output_hole_CSK_OD, motor_output_hole_CSK_head_height = self.get_bolt_head_dimensions(diameter=self.motor_output_hole_dia, bolt_type="CSK")
 
         self.motor_output_hole_CSK_OD          = motor_output_hole_CSK_OD
         self.motor_output_hole_CSK_head_height = motor_output_hole_CSK_head_height
-        if self.ring_OD < self.motor_OD :
-            self.clearance_motor_and_case = 5 
-        else :
-            self.clearance_motor_and_case = (self.ring_OD - self.motor_OD) / 2 + 5
-           
-        self.motor_case_OD_base = self.motor_OD + self.clearance_motor_and_case * 2 + self.Motor_case_thickness * 2
 
         # --- Sun coupler & sun gear dimensions ---
         self.sun_hub_dia = self.motor_output_hole_PCD + self.motor_output_hole_dia + self.standard_clearance_1_5mm * 4
@@ -1049,6 +1060,7 @@ class singleStagePlanetaryActuator:
         #------------------------------------------
 
     def genEquationFile(self):
+        self.setVariables()
         file_path = os.path.join(os.path.dirname(__file__), 'SSPG', 'sspg_equations.txt')
         with open(file_path, 'w') as eqFile:
             eqFile.writelines([
@@ -1129,6 +1141,7 @@ class singleStagePlanetaryActuator:
                 f'"output_mounting_nut_thickness"= {self.output_mounting_nut_thickness}\n',
                 f'"output_mounting_nut_depth"= {self.output_mounting_nut_depth}\n',
                 f'"output_mounting_nut_wrench_size"= {self.output_mounting_nut_wrench_size}\n',
+                f'"output_mounting_hole_dia"= {self.output_mounting_hole_dia}\n',                
                 f'"case_mounting_bolt_depth"= {self.case_mounting_bolt_depth}\n',
                 f'"case_mounting_wrench_size"= {self.case_mounting_wrench_size}\n',
                 f'"case_mounting_nut_clearance"= {self.case_mounting_nut_clearance}\n',
@@ -1180,6 +1193,7 @@ class singleStagePlanetaryActuator:
                 f'"sun_central_bolt_dia"= {self.sun_central_bolt_dia}\n',
                 f'"sun_central_bolt_socket_head_dia"= {self.sun_central_bolt_socket_head_dia}\n',
                 f'"fw_s_used"= {self.fw_s_used}\n',
+                f'"bearing_retainer_thickness"= {self.bearing_retainer_thickness}\n',
             ])
 
 
@@ -1805,8 +1819,8 @@ class singleStagePlanetaryActuator:
         bearing_retainer_thickness   = self.bearing_retainer_thickness  
 
         # To be written in Motor JSON files
-        motor_output_hole_PCD = self.motor_output_hole_PCD
-        motor_output_hole_dia = self.motor_output_hole_dia
+        motor_output_hole_PCD = self.motor.motor_output_hole_PCD
+        motor_output_hole_dia = self.motor.motor_output_hole_dia
 
         #--------------------------------------
         # Dependent variables
@@ -2252,7 +2266,7 @@ class optimizationSingleStageActuator:
                                                 MinCost = self.Cost
                                                 self.iter+=1
                                                 opt_done = 1
-                                                # Actuator.genEquationFile()
+                                                Actuator.genEquationFile()
                                                 opt_parameters = [Actuator.planetaryGearbox.gearRatio(),
                                                                   Actuator.planetaryGearbox.numPlanet,
                                                                   Actuator.planetaryGearbox.Ns,
@@ -2385,7 +2399,7 @@ class optimizationSingleStageActuator:
                                                     MinCost    = self.Cost
                                                     self.iter += 1
                                                     opt_done   = 1
-                                                    # Actuator.genEquationFile()
+                                                    Actuator.genEquationFile()
                                                     opt_parameters = [Actuator.planetaryGearbox.gearRatio(),
                                                                       Actuator.planetaryGearbox.numPlanet,
                                                                       Actuator.planetaryGearbox.Ns,

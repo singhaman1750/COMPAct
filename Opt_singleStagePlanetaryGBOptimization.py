@@ -93,14 +93,6 @@ MotorU12_mass              = motor_data["MotorU12_framed"]["mass"]              
 MotorU12_dia               = motor_data["MotorU12_framed"]["dia"]                   # mm 
 MotorU12_length            = motor_data["MotorU12_framed"]["length"]                # mm
 
-# MaxonIR
-MotorMaxonIR_maxTorque         = motor_data["MotorMaxonIR_framed"]["maxTorque"]             # Nm
-MotorMaxonIR_power             = motor_data["MotorMaxonIR_framed"]["power"]                 # W 
-MotorMaxonIR_maxMotorAngVelRPM = (MotorMaxonIR_power * 60) / (MotorMaxonIR_maxTorque * 2*np.pi) # RPM 
-MotorMaxonIR_mass              = motor_data["MotorMaxonIR_framed"]["mass"]                  # kg 
-MotorMaxonIR_dia               = motor_data["MotorMaxonIR_framed"]["dia"]                   # mm 
-MotorMaxonIR_length            = motor_data["MotorMaxonIR_framed"]["length"]                # mm
-
 # Motor-U8
 MotorU8 = motor(maxMotorAngVelRPM = MotorU8_maxMotorAngVelRPM, 
                  maxMotorTorque   = MotorU8_maxTorque,
@@ -145,14 +137,6 @@ MotorU12 = motor(maxMotorAngVelRPM = MotorU12_maxMotorAngVelRPM,
                  motorDia          = MotorU12_dia              ,
                  motorLength       = MotorU12_length           ,
                  motorName         = "U12")
-
-MotorMaxonIR = motor(maxMotorAngVelRPM = MotorMaxonIR_maxMotorAngVelRPM,
-                 maxMotorTorque        = MotorMaxonIR_maxTorque,
-                 maxMotorPower         = MotorMaxonIR_power,
-                 motorMass             = MotorMaxonIR_mass, 
-                 motorDia              = MotorMaxonIR_dia,
-                 motorLength           = MotorMaxonIR_length,
-                 motorName             = "MaxonIR")
 
 #--------------------------------------------------------
 # Gearboxes 
