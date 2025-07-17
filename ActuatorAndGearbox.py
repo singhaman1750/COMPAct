@@ -2417,7 +2417,7 @@ class singleStagePlanetaryActuator:
         #--------------------------------------
         # Mass: sspg_planet
         #--------------------------------------
-        planet_volume = (np.pi * ((DiaPlanetMM*0.5)**2 - (planet_bore*0.5)) * planetFwMM) * 1e-9
+        planet_volume = (np.pi * ((DiaPlanetMM*0.5)**2 - (planet_bore*0.5)**2) * planetFwMM) * 1e-9
         planet_mass   = planet_volume * densityPLA
 
         #--------------------------------------
@@ -2426,7 +2426,7 @@ class singleStagePlanetaryActuator:
         sec_carrier_OD = bearing_ID
         sec_carrier_ID = (DiaSunMM + DiaPlanetMM) - planet_shaft_dia - 2 * standard_clearance_1_5mm
 
-        sec_carrier_volume = (np.pi * ((sec_carrier_OD*0.5)**2 - (sec_carrier_ID*0.5)) * sec_carrier_thickness) * 1e-9
+        sec_carrier_volume = (np.pi * ((sec_carrier_OD*0.5)**2 - (sec_carrier_ID*0.5)**2) * sec_carrier_thickness) * 1e-9
         sec_carrier_mass   = sec_carrier_volume * densityPLA
 
         #--------------------------------------
@@ -2538,6 +2538,7 @@ class compoundPlanetaryActuator:
         #--------------------------------------------
         # Independent Parameters
         #--------------------------------------------
+        self.ringRadialWidthMM    = self.compoundPlanetaryGearbox.ringRadialWidthMM
         self.baseThicknessMM      = design_parameters["baseThicknessMM"]      # 3
         self.sCarrierThicknessMM  = design_parameters["sCarrierThicknessMM"]  # 5
         self.mainCoverThicknessMM = design_parameters["mainCoverThicknessMM"] # 2
@@ -3031,7 +3032,7 @@ class compoundPlanetaryActuator:
         #--------------------------------------
         # Independent variables
         #--------------------------------------
-        # To be written in Gearbox(sspg) JSON files
+        # To be written in Gearbox(cpg) JSON files
         case_mounting_surface_height = self.case_mounting_surface_height
         standard_clearance_1_5mm     = self.standard_clearance_1_5mm    
         base_plate_thickness         = self.base_plate_thickness        
@@ -3046,11 +3047,14 @@ class compoundPlanetaryActuator:
         sun_shaft_bearing_ID         = self.sun_shaft_bearing_ID        
         sun_shaft_bearing_width      = self.sun_shaft_bearing_width     
         planet_bore                  = self.planet_bore                 
-        bearing_retainer_thickness   = self.bearing_retainer_thickness  
+        bearing_retainer_thickness   = self.bearing_retainer_thickness
+        Motor_case_OD_base_to_chamfer  = self.Motor_case_OD_base_to_chamfer #5
 
         # To be written in Motor JSON files
         motor_output_hole_PCD = self.motor.motor_output_hole_PCD
         motor_output_hole_dia = self.motor.motor_output_hole_dia
+
+        planet2FwMM += standard_clearance_1_5mm #clearnce to ensure big planet doesnt rub against the ring
 
         #--------------------------------------
         # Dependent variables
@@ -3059,17 +3063,19 @@ class compoundPlanetaryActuator:
         h_b2 = 1.25 * module2
 
         #--------------------------------------
-        # Mass: sspg_motor_casing
+        # Mass: cpg_motor_casing
         #--------------------------------------
         ring_radial_thickness = self.ringRadialWidthMM
-
         ring_OD  = Nr * module2 + ring_radial_thickness*2
+
+
+        gearbox_OD =  (Ns + Np1 * 2) * module1
         motor_OD = self.motorDiaMM
 
-        if (ring_OD < motor_OD):
+        if (gearbox_OD < motor_OD):
             clearance_motor_and_case = 5
         else: 
-            clearance_motor_and_case = (ring_OD - motor_OD)/2 + 5
+            clearance_motor_and_case = (gearbox_OD - motor_OD)/2 + 5
 
         Motor_case_ID     = motor_OD + clearance_motor_and_case * 2
         motor_height      = self.motorLengthMM
@@ -3084,7 +3090,7 @@ class compoundPlanetaryActuator:
         Motor_case_mass = Motor_case_volume * densityPLA
 
         #--------------------------------------
-        # Mass: sspg_gearbox_casing
+        # Mass: cpg_gearbox_casing
         #--------------------------------------
         # Mass of the gearbox includes the mass of:
         # 1. Ring gear
@@ -3099,19 +3105,19 @@ class compoundPlanetaryActuator:
         bearing_height = WidthBearingMM    
         bearing_mass   = BearingMassKG      
 
-        if ((bearing_OD + output_mounting_hole_dia * 4) > (Nr * module + 2 * h_b)):
+        if ((bearing_OD + output_mounting_hole_dia * 4) > (Nr * module2 + 2 * h_b2)):
             bearing_mount_thickness  = output_mounting_hole_dia * 2
         else:
-            bearing_mount_thickness = ((((Nr * module + 2 * h_b) - (bearing_OD + output_mounting_hole_dia * 4))/2) 
+            bearing_mount_thickness = ((((Nr * module2 + 2 * h_b2) - (bearing_OD + output_mounting_hole_dia * 4))/2) 
                                     + output_mounting_hole_dia * 2 + standard_clearance_1_5mm)        
 
         bearing_holding_structure_OD     = bearing_OD + bearing_mount_thickness * 2
         bearing_holding_structure_ID     = bearing_OD
         bearing_holding_structure_height = bearing_height + standard_clearance_1_5mm
 
-        case_dist                      = sec_carrier_thickness + clearance_planet + sun_coupler_hub_thickness - case_mounting_surface_height
-        case_mounting_structure_ID     = ring_OD
+        case_dist                      = sec_carrier_thickness + clearance_planet * 2 + sun_coupler_hub_thickness + planet1FwMM - case_mounting_surface_height
         case_mounting_structure_OD     = Motor_case_OD
+        case_mounting_structure_ID     = case_mounting_structure_OD - Motor_case_OD_base_to_chamfer *  2
         case_mounting_structure_height = case_dist
 
         ring_volume                      = np.pi * (((ring_OD*0.5)**2) - ((ring_ID)*0.5)**2) * ringFwUsedMM * 1e-9
@@ -3122,20 +3128,20 @@ class compoundPlanetaryActuator:
         
         large_fillet_ID     = ring_OD
         large_fillet_OD     = Motor_case_OD
-        large_fillet_height = ringFwMM
+        large_fillet_height = ringFwMM/2
         large_fillet_volume = 0.5 * (np.pi * (((large_fillet_OD*0.5)**2) - ((large_fillet_ID)*0.5)**2) * large_fillet_height) * 1e-9
 
         gearbox_casing_mass = (ring_volume + bearing_holding_structure_volume + case_mounting_structure_volume + large_fillet_volume) * densityPLA
 
         #----------------------------------
-        # Mass: sspg_carrier
+        # Mass: cpg_carrier
         #----------------------------------
         carrier_OD     = bearing_ID
         carrier_ID     = sun_shaft_bearing_OD - standard_clearance_1_5mm * 2
         carrier_height = bearing_height + carrier_bearing_step_width
 
         carrier_shaft_OD = planet_shaft_dia
-        carrier_shaft_height = planetFwMM + clearance_planet * 2
+        carrier_shaft_height = planet1FwMM  + planet2FwMM + clearance_planet * 2
         carrier_shaft_num = numPlanet * 2
 
         carrier_volume = (np.pi * (((carrier_OD*0.5)**2) - ((carrier_ID)*0.5)**2) * carrier_height
@@ -3144,14 +3150,14 @@ class compoundPlanetaryActuator:
         carrier_mass = carrier_volume * densityPLA
 
         #----------------------------------
-        # Mass: sspg_sun
+        # Mass: cpg_sun
         #----------------------------------
         sun_hub_dia = motor_output_hole_PCD + motor_output_hole_dia + standard_clearance_1_5mm * 4
 
         sun_shaft_dia    = sun_shaft_bearing_ID
         sun_shaft_height = sun_shaft_bearing_width + 2 * standard_clearance_1_5mm
 
-        fw_s_used        = planetFwMM + clearance_planet + sec_carrier_thickness + standard_clearance_1_5mm
+        fw_s_used        = planet1FwMM + planet2FwMM + clearance_planet + sec_carrier_thickness + standard_clearance_1_5mm
 
         sun_hub_volume   = np.pi * ((sun_hub_dia*0.5) ** 2) * sun_coupler_hub_thickness * 1e-9
         sun_gear_volume  = np.pi * ((DiaSunMM * 0.5) ** 2) * fw_s_used * 1e-9
@@ -3161,39 +3167,40 @@ class compoundPlanetaryActuator:
         sun_mass         = sun_volume * densityPLA
 
         #--------------------------------------
-        # Mass: sspg_planet
+        # Mass: cpg_planet
         #--------------------------------------
-        planet_volume = (np.pi * ((DiaPlanetMM*0.5)**2 - (planet_bore*0.5)) * planetFwMM) * 1e-9
-        planet_mass   = planet_volume * densityPLA
+        planet1_volume = (np.pi * ((DiaPlanet1MM*0.5)**2 - (planet_bore*0.5)**2) * planet1FwMM) * 1e-9
+        planet2_volume = (np.pi * ((DiaPlanet2MM*0.5)**2 - (planet_bore*0.5)**2) * planet2FwMM) * 1e-9
+        planet_mass   = (planet1_volume + planet2_volume) * densityPLA
 
         #--------------------------------------
-        # Mass: sspg_sec_carrier
+        # Mass: cpg_sec_carrier
         #--------------------------------------
         sec_carrier_OD = bearing_ID
-        sec_carrier_ID = (DiaSunMM + DiaPlanetMM) - planet_shaft_dia - 2 * standard_clearance_1_5mm
+        sec_carrier_ID = (DiaSunMM + DiaPlanet1MM) - planet_shaft_dia - 2 * standard_clearance_1_5mm
 
-        sec_carrier_volume = (np.pi * ((sec_carrier_OD*0.5)**2 - (sec_carrier_ID*0.5)) * sec_carrier_thickness) * 1e-9
+        sec_carrier_volume = (np.pi * ((sec_carrier_OD*0.5)**2 - (sec_carrier_ID*0.5)**2) * sec_carrier_thickness) * 1e-9
         sec_carrier_mass   = sec_carrier_volume * densityPLA
 
         #--------------------------------------
-        # Mass: sspg_sun_shaft_bearing
+        # Mass: cpg_sun_shaft_bearing
         #--------------------------------------
         sun_shaft_bearing_mass       = 4 * 0.001 # kg
 
         #--------------------------------------
-        # Mass: sspg_planet_bearing
+        # Mass: cpg_planet_bearing
         #--------------------------------------
         planet_bearing_mass          = 1 * 0.001 # kg
         planet_bearing_num           = numPlanet * 2
         planet_bearing_combined_mass = planet_bearing_mass * planet_bearing_num
 
         #--------------------------------------
-        # Mass: sspg_planet_bearing
+        # Mass: cpg_planet_bearing
         #--------------------------------------
         bearing_mass = BearingMassKG # kg
 
         #--------------------------------------
-        # Mass: sspg_bearing_retainer
+        # Mass: cpg_bearing_retainer
         #--------------------------------------
         bearing_retainer_OD        = bearing_holding_structure_OD
         bearing_retainer_ID        = bearing_OD - standard_clearance_1_5mm
