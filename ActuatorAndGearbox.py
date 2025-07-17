@@ -2529,8 +2529,6 @@ class compoundPlanetaryActuator:
         self.MaxMotorTorque          = self.motor.maxMotorTorque          # U12_maxTorque          # Nm
         self.MaxMotorAngVelRPM       = self.motor.maxMotorAngVelRPM       # U12_maxAngVelRPM       # RPM
         self.MaxMotorAngVelRadPerSec = self.motor.maxMotorAngVelRadPerSec # U12_maxAngVelRadPerSec # radians/sec
-        self.MotorInnerDiaMM         = self.motor.motorStatorIDMM         # U12_innerDiaMM         # mm 
-        self.motorRotorWidthMM       = self.motor.motorRotorWidthMM
 
         #============================================
         # Actuator Design Parameters
@@ -2588,6 +2586,8 @@ class compoundPlanetaryActuator:
         self.SecondaryCarrierExtrusionHeightMM : float | None = None # SecondaryCarrierExtrusionHeightMM
         self.SecondaryCarrierOuterDiameterMM   : float | None = None # SecondaryCarrierOuterDiameterMM  
         self.UpperHousingRadius                : float | None = None # UpperHousingRadius
+
+        self.setVariables()
 
     def setVariables(self):
 
@@ -3192,21 +3192,21 @@ class compoundPlanetaryActuator:
         # Independent variables
         #--------------------------------------
         # To be written in Gearbox(cpg) JSON files
-        case_mounting_surface_height = self.case_mounting_surface_height
-        standard_clearance_1_5mm     = self.standard_clearance_1_5mm    
-        base_plate_thickness         = self.base_plate_thickness        
-        Motor_case_thickness         = self.Motor_case_thickness        
-        clearance_planet             = self.clearance_planet            
-        output_mounting_hole_dia     = self.output_mounting_hole_dia    
-        sec_carrier_thickness        = self.sec_carrier_thickness       
-        sun_coupler_hub_thickness    = self.sun_coupler_hub_thickness   
-        sun_shaft_bearing_OD         = self.sun_shaft_bearing_OD        
-        carrier_bearing_step_width   = self.carrier_bearing_step_width  
-        planet_shaft_dia             = self.planet_shaft_dia            
-        sun_shaft_bearing_ID         = self.sun_shaft_bearing_ID        
-        sun_shaft_bearing_width      = self.sun_shaft_bearing_width     
-        planet_bore                  = self.planet_bore                 
-        bearing_retainer_thickness   = self.bearing_retainer_thickness
+        case_mounting_surface_height   = self.case_mounting_surface_height
+        standard_clearance_1_5mm       = self.standard_clearance_1_5mm    
+        base_plate_thickness           = self.base_plate_thickness        
+        Motor_case_thickness           = self.Motor_case_thickness        
+        clearance_planet               = self.clearance_planet            
+        output_mounting_hole_dia       = self.output_mounting_hole_dia    
+        sec_carrier_thickness          = self.sec_carrier_thickness       
+        sun_coupler_hub_thickness      = self.sun_coupler_hub_thickness   
+        sun_shaft_bearing_OD           = self.sun_shaft_bearing_OD        
+        carrier_bearing_step_width     = self.carrier_bearing_step_width  
+        planet_shaft_dia               = self.planet_shaft_dia            
+        sun_shaft_bearing_ID           = self.sun_shaft_bearing_ID        
+        sun_shaft_bearing_width        = self.sun_shaft_bearing_width     
+        planet_bore                    = self.planet_bore                 
+        bearing_retainer_thickness     = self.bearing_retainer_thickness
         Motor_case_OD_base_to_chamfer  = self.Motor_case_OD_base_to_chamfer #5
 
         # To be written in Motor JSON files
