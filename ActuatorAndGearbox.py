@@ -1228,6 +1228,781 @@ class compoundPlanetaryGearbox:
         print("Mass (gearbox, kg) = ", round(self.getMassKG(),3), " kg")
         # print("--------------------------------------------------------------------------")
 
+#-------------------------------------------------------------------------
+# 3K - Planetary Gearbox (wolfrom Planetary Gearbox)
+#-------------------------------------------------------------------------
+class wolfromPlanetaryGearbox:
+    def __init__(self,
+                 design_parameters,
+                 gear_standard_parameters,
+                 Ns      = 20, # Teeth: sun gear
+                 NpBig   = 40, # Teeth: bigger planet gear
+                 NpSmall = 20, # Teeth: smaller planet gear
+                 NrBig   = 80, # Teeth: bigger ring gear
+                 NrSmall = 40, # Teeth: smaller ring gear
+                 numPlanet                 = 2,
+                 moduleBig                 = 0.5,
+                 moduleSmall               = 0.5,
+                 gearDensity               = 7850,
+                 carrierDensity            = 2710,
+                 fwSunMM                   = 5.0,
+                 fwPlanetBigMM             = 5.0,
+                 fwPlanetSmallMM           = 5.0,
+                 fwRingBigMM               = 5.0,
+                 fwRingSmallMM             = 5.0,
+                 maxGearAllowableStressMPa = 400):
+        
+        #-----------------------------------
+        # Discrete Optimizaition Variables 
+        #-----------------------------------
+        self.Ns          = Ns
+        self.NpBig       = NpBig
+        self.NpSmall     = NpSmall
+        self.NrBig       = NrBig
+        self.NrSmall     = NrSmall
+        self.numPlanet   = numPlanet
+        self.moduleBig   = moduleBig
+        self.moduleSmall = moduleSmall
+        
+        #-----------------------------------
+        # Material Properties
+        #-----------------------------------
+        self.gearDensity               = gearDensity
+        self.carrierDensity            = carrierDensity
+        self.maxGearAllowableStressMPa = maxGearAllowableStressMPa         # MPa
+        self.maxGearAllowableStressPa  = maxGearAllowableStressMPa * 10**6 # Pa
+        
+        #-------------------------------
+        # Facewidths
+        #-------------------------------
+        self.fwSunMM         = fwSunMM
+        self.fwPlanetBigMM   = fwPlanetBigMM
+        self.fwPlanetSmallMM = fwPlanetSmallMM
+        self.fwRingBigMM     = fwRingBigMM
+        self.fwRingSmallMM   = fwRingSmallMM
+        
+        #------------------------------
+        # Gearbox parameters
+        #------------------------------
+        self.mu               = gear_standard_parameters["coefficientOfFriction"] # 0.3 # Gear standard parameters
+        self.pressureAngleDEG = gear_standard_parameters["pressureAngleDEG"]      # 20  # deg
+        
+        self.planetMinDistanceMM  = design_parameters["planetMinDistanceMM"]    # mm
+        self.ringRadialWidthSmall = design_parameters["ringRadialWidthMMSmall"] # ringRadialWidthSmall
+        self.ringRadialWidthBig   = design_parameters["ringRadialWidthMMBig"]   # ringRadialWidthBig
+        # self.carrierWidthMM     = carrierWidthMM
+        
+        #------------------------------
+        # Profile Shift Coefficients TODO: Remove this
+        #------------------------------
+        self.profileShiftCoefficientRingSmall   = 0.0
+        self.profileShiftCoefficientRingBig     = 0.0
+        self.profileShiftCoefficientPlanetBig   = self.profileShiftCoefficientRingBig
+        self.profileShiftCoefficientPlanetSmall = self.profileShiftCoefficientRingSmall
+        self.profileShiftCoefficientSun         = -self.profileShiftCoefficientPlanetBig
+        
+    def geometricConstraint(self):
+        return (((self.Ns + self.NpBig) * self.moduleBig == (self.NrSmall - self.NpSmall) * self.moduleSmall) and
+                ((self.Ns + 2 * self.NpBig) == (self.NrBig)) and
+                (self.NrBig * self.moduleBig > self.NrSmall * self.moduleSmall))
+        
+    def meshingConstraint(self):
+        # TODO: VERIFY THIS WITH EXAMPLE AND SELF ANALYSIS
+        return ((self.Ns % self.numPlanet == 0) and (self.NrSmall % self.numPlanet == 0) and (self.NrBig % self.numPlanet == 0))
+    
+    def noPlanetInterferenceConstraint(self):
+        return 2*(self.Ns + self.NpBig)*self.moduleBig*np.sin(np.pi/self.numPlanet) >= 2*self.moduleBig*self.NpBig + self.planetMinDistanceMM
+
+    def getMassKG(self):
+        # Volume of the Sun gear
+        fwSunM            = (self.fwSunMM / 1000.0)
+        fwPlanetBigM      = (self.fwPlanetBigMM / 1000.0)
+        fwPlanetSmallM    = (self.fwPlanetSmallMM / 1000.0)
+        fwRingSmallM      = (self.fwRingSmallMM / 1000.0)
+        fwRingBigM        = (self.fwRingBigMM / 1000.0)
+        carrierWidthM     = (self.carrierWidthMM / 1000.0)
+
+        sunVolume         = np.pi * fwSunM * (self.getPCRadiusSunM()**2)
+        planetBigVolume   = np.pi * fwPlanetBigM * (self.getPCRadiusPlanetBigM()**2)
+        planetSmallVolume = np.pi * fwPlanetSmallM * (self.getPCRadiusPlanetSmallM()**2)
+        ringSmallVolume   = np.pi * fwRingSmallM * (self.getOuterRadiusRingSmallM()**2 - self.getPCRadiusRingSmallM()**2)
+        ringBigVolume     = np.pi * fwRingBigM * (self.getOuterRadiusRingBigM()**2 - self.getPCRadiusRingBigM()**2)
+        carrierVolume     =  2 * np.pi * carrierWidthM * (self.getCarrierRadiusM()**2)
+
+        # Total mass of the compound planetary gearbox
+        combinedGearVolume = sunVolume + (self.numPlanet * (planetBigVolume + planetSmallVolume)) + ringBigVolume + ringSmallVolume
+        TotalMassKG        = (combinedGearVolume * self.gearDensity + carrierVolume * self.carrierDensity)
+        return TotalMassKG
+
+    def gearRatio(self):
+        GR1 = 2*self.NrSmall*self.NpBig / (self.Ns * (self.NpBig - self.NpSmall))
+        GR2 = ((self.Ns + self.NrBig) * self.NpBig * self.NrSmall) / (self.Ns * (self.NpBig * self.NrSmall - self.NpSmall * self.NrBig))
+        if GR1 == GR2:
+            pass
+        else:
+            print("ERROR: Gear ratio mismatch")
+        return GR1
+    
+    #======================================
+    # Efficiency Calculations
+    #======================================
+    #--------------------------------------
+    # Utility Functions
+    #--------------------------------------
+    def inverse_involute(self,inv_alpha):
+        # This is an approximation of the inverse involute function
+        alpha  = ((3*inv_alpha)**(1/3) - 
+                  (2*inv_alpha)/5 + 
+                  (9/175)*(3)**(2/3)*inv_alpha**(5/3) - 
+                  (2/175)*(3)**(1/3)*(inv_alpha)**(7/3) - 
+                  (144/67375)*(inv_alpha)**(3) + 
+                  (3258/3128125)*(3)**(2/3)*(inv_alpha)**(11/3) - 
+                  (49711/153278125)*(3)**(1/3)*(inv_alpha)**(13/3))
+        return alpha
+
+    def involute(self,alpha):
+        return (np.tan(alpha) - alpha)
+
+    # Define the differentiable quadratic approximation of the min function
+    def quadratic_min(self, a, b, k=0.01):
+        return (a + b - np.sqrt((a - b)**2 + k**2)) / 2
+
+    #-----------------------------------------
+    # Gear tooth profile parameters
+    #-----------------------------------------
+    def getPressureAngleRad(self):
+        return self.pressureAngleDEG * np.pi / 180  # Pressure angle in radians
+
+    def getWorkingPressureAngle(self):
+        module1 = self.moduleBig
+        module2 = self.moduleSmall
+        Ns      = self.Ns
+        Np1     = self.NpBig
+        Np2     = self.NpSmall
+        Nr1     = self.NrBig
+        Nr2     = self.NrSmall
+        xs      = 0
+        xp1     = 0
+        xp2     = 0
+        xr1     = 0
+        xr2     = 0
+
+        #---------------------------------
+        # Pressure Angle
+        #---------------------------------
+        alpha = self.getPressureAngleRad()
+
+        #---------------------------------
+        # Working pressure angle
+        #---------------------------------
+        # Sun-Planet-Stg1
+        inv_alpha_w_sunPlanet_stg1 = 2*np.tan(alpha)*((xs + xp1)/(Ns + Np1)) + self.involute(alpha)
+        alpha_w_sunPlanet_stg1     = self.inverse_involute(inv_alpha_w_sunPlanet_stg1)
+
+        # Planet-Ring-Stg1
+        inv_alpha_w_planetRing_stg1 = 2*np.tan(alpha)*((xr1 - xp1)/(Nr1 - Np1)) + self.involute(alpha)
+        alpha_w_planetRing_stg1     = self.inverse_involute(inv_alpha_w_planetRing_stg1)
+
+        # Planet-Ring-Stg2
+        inv_alpha_w_planetRing_stg2 = 2*np.tan(alpha)*((xr2 - xp2)/(Nr2 - Np2)) + self.involute(alpha)
+        alpha_w_planetRing_stg2     = self.inverse_involute(inv_alpha_w_planetRing_stg2)
+
+        return alpha_w_sunPlanet_stg1, alpha_w_planetRing_stg1, alpha_w_planetRing_stg2
+
+    def getCenterDistModificationCoeff(self):
+        module1 = self.moduleBig
+        module2 = self.moduleSmall
+        Ns      = self.Ns
+        Np1     = self.NpBig
+        Np2     = self.NpSmall
+        Nr1     = self.NrBig
+        Nr2     = self.NrSmall
+        xs      = 0
+        xp1     = 0
+        xp2     = 0
+        xr1     = 0
+        xr2     = 0
+
+        #------------------------------
+        # Pressure Angle
+        #------------------------------
+        alpha = self.getPressureAngleRad()  # Pressure angle in radians
+
+        #------------------------------
+        # Working pressure angle
+        #------------------------------
+        alpha_w_sunPlanet_stg1, alpha_w_planetRing_stg1, alpha_w_planetRing_stg2 = self.getWorkingPressureAngle()
+
+        #------------------------------------------
+        # Centre distance modification coefficient
+        #------------------------------------------
+        y_sunPlanet_stg1  = (( Ns + Np1) / 2) * ((np.cos(alpha) / np.cos(alpha_w_sunPlanet_stg1)) - 1)
+        y_planetRing_stg1 = ((Nr1 - Np1) / 2) * ((np.cos(alpha) / np.cos(alpha_w_planetRing_stg1)) - 1)
+        y_planetRing_stg2 = ((Nr2 - Np2) / 2) * ((np.cos(alpha) / np.cos(alpha_w_planetRing_stg2)) - 1)
+
+        return y_sunPlanet_stg1, y_planetRing_stg1, y_planetRing_stg2
+
+    def getCenterDistance(self):
+        module1 = self.moduleBig
+        module2 = self.moduleSmall
+        Ns      = self.Ns
+        Np1     = self.NpBig
+        Np2     = self.NpSmall
+        Nr1     = self.NrBig
+        Nr2     = self.NrSmall
+        xs      = 0
+        xp1     = 0
+        xp2     = 0
+        xr1     = 0
+        xr2     = 0
+
+        #-------------------------------
+        # Centre distance modification coefficient
+        #-------------------------------
+        y_sunPlanet_stg1, y_planetRing_stg1, y_planetRing_stg2 = self.getCenterDistModificationCoeff()
+
+        #-------------------------------
+        # Centre distance
+        #-------------------------------
+
+        centerDist_sunPlanet_stg1  = ((Ns + Np1)/2   + y_sunPlanet_stg1)* module1
+        centerDist_planetRing_stg1 = ((Nr1 - Np1)/2  + y_planetRing_stg1)* module1
+        centerDist_planetRing_stg2 = ((Nr2 - Np2)/2  + y_planetRing_stg2)* module2
+
+        return centerDist_sunPlanet_stg1, centerDist_planetRing_stg1, centerDist_planetRing_stg2
+
+    def getBaseDia(self):
+        module1 = self.moduleBig
+        module2 = self.moduleSmall
+        Ns      = self.Ns
+        Np1     = self.NpBig
+        Np2     = self.NpSmall
+        Nr1     = self.NrBig
+        Nr2     = self.NrSmall
+        xs      = 0
+        xp1     = 0
+        xp2     = 0
+        xr1     = 0
+        xr2     = 0
+
+        # Pressure Angle
+        alpha = self.getPressureAngleRad() # Rad
+
+        # Reference Diameter
+        D_sun     = module1 * Ns   # Sun's reference diameter
+        D_planet1 = module1 * Np1  # Planet's reference diameter
+        D_planet2 = module2 * Np2  # Planet's reference diameter
+        D_ring1    = module1 * Nr1 # Ring's reference diameter
+        D_ring2    = module2 * Nr2 # Ring's reference diameter
+
+        # Base Diameter
+        D_b_sun      = D_sun * np.cos(alpha)
+        D_b_planet1  = D_planet1 * np.cos(alpha)
+        D_b_planet2  = D_planet2 * np.cos(alpha)
+        D_b_ring1    = D_ring1 * np.cos(alpha)
+        D_b_ring2    = D_ring2 * np.cos(alpha)
+
+        return D_b_sun, D_b_planet1, D_b_planet2, D_b_ring1, D_b_ring2
+
+    def getTipCircleDia(self):
+        module1 = self.moduleBig
+        module2 = self.moduleSmall
+        Ns      = self.Ns
+        Np1     = self.NpBig
+        Np2     = self.NpSmall
+        Nr1     = self.NrBig
+        Nr2     = self.NrSmall
+        xs      = 0
+        xp1     = 0
+        xp2     = 0
+        xr1     = 0
+        xr2     = 0
+        
+        #----------------------------
+        # Pressure Angle
+        #----------------------------
+        alpha = self.getPressureAngleRad() # Rad
+
+        #----------------------------
+        # Reference Diameter
+        #----------------------------
+        D_sun     = module1 * Ns  # Sun's reference diameter
+        D_planet1 = module1 * Np1 # Planet's reference diameter
+        D_planet2 = module2 * Np2 # Planet's reference diameter
+        D_ring1   = module1 * Nr1 # Ring's reference diameter
+        D_ring2   = module2 * Nr2 # Ring's reference diameter
+
+        #----------------------------
+        # Center Distance Modification Coefficient
+        #----------------------------
+        y_sunPlanet_stg1, y_planetRing_stg1, y_planetRing_stg2 = self.getCenterDistModificationCoeff()
+
+        #----------------------------
+        # Tip circle diameter
+        #----------------------------
+        # Sun
+        D_a_sun = D_sun + 2 * module1 * (1 + y_sunPlanet_stg1 - xp1)
+
+        # Planet
+        D_a_planet1 = D_planet1 + 2 * module1 * (1 + self.quadratic_min((y_sunPlanet_stg1 - xs), xp1))  
+        # D_a_planet2 = D_planet2 + 2 * module2 * (1 + self.quadratic_min((y_planetRing - xs),xp2)) 
+        D_a_planet2 = D_planet2 + 2 * module2 * (1 + xp2) 
+        
+        # Ring
+        D_a_ring1 = D_ring1 - 2 * module1 * (1 - xr1)
+        D_a_ring2 = D_ring2 - 2 * module2 * (1 - xr2)
+        
+        return D_a_sun, D_a_planet1, D_a_planet2, D_a_ring1, D_a_ring2
+
+    def getTipPressureAngle(self):
+        module1 = self.moduleBig
+        module2 = self.moduleSmall
+        Ns      = self.Ns
+        Np1     = self.NpBig
+        Np2     = self.NpSmall
+        Nr1     = self.NrBig
+        Nr2     = self.NrSmall
+        xs      = 0
+        xp1     = 0
+        xp2     = 0
+        xr1     = 0
+        xr2     = 0
+
+        alpha = self.getPressureAngleRad() # Pressure Angle (Rad)
+        D_b_sun, D_b_planet1, D_b_planet2, D_b_ring1, D_b_ring2 = self.getBaseDia() # Base Diameter
+        D_a_sun, D_a_planet1, D_a_planet2, D_a_ring1, D_a_ring2 = self.getTipCircleDia() # Tip Circle Diameter
+
+        #----------------------------
+        # Tip Pressure angle
+        #----------------------------
+        alpha_a_sun    =  np.arccos(D_b_sun / D_a_sun)
+        alpha_a_planet1 = np.arccos(D_b_planet1/D_a_planet1)
+        alpha_a_planet2 = np.arccos(D_b_planet2/D_a_planet2)
+        alpha_a_ring1   = np.arccos(D_b_ring1 / D_a_ring1)
+        alpha_a_ring2   = np.arccos(D_b_ring2 / D_a_ring2)
+
+        return alpha_a_sun, alpha_a_planet1, alpha_a_planet2, alpha_a_ring1, alpha_a_ring2
+
+    def getErrorTipCircleDia_planet(self):
+        module1 = self.moduleBig
+        module2 = self.moduleSmall
+        Ns      = self.Ns
+        Np1     = self.NpBig
+        Np2     = self.NpSmall
+        Nr1     = self.NrBig
+        Nr2     = self.NrSmall
+        xs      = 0
+        xp1     = 0
+        xp2     = 0
+        xr1     = 0
+        xr2     = 0
+        
+        # Centre distance modification coefficient
+        y_sunPlanet_stg1, y_planetRing_stg1, y_planetRing_stg2 = self.getCenterDistModificationCoeff()
+
+        # Tip Circle Diameter
+        _, D_a_planet1_quadMin, D_a_planet2_quadMin, _, _ = self.getTipCircleDia()
+        D_a_planet1_actMin = module1 * Np1 + 2 * module1 * (1 + np.minimum((y_sunPlanet_stg1 - xs),xp1)) # TODO: How will we implement min function 
+        D_a_planet2_actMin = module2 * Np2 + 2 * module2 * (1 + xp2) # TODO: How will we implement min function 
+
+        return np.abs(D_a_planet1_quadMin - D_a_planet1_actMin), np.abs(D_a_planet2_quadMin - D_a_planet2_actMin)
+
+    #-------------------------------------------------------------------------
+    # Contact Ratio
+    #-------------------------------------------------------------------------
+    def contactRatio_sunPlanet_stg1(self):
+        module1 = self.moduleBig
+        module2 = self.moduleSmall
+        Ns      = self.Ns
+        Np1     = self.NpBig
+        Np2     = self.NpSmall
+        Nr1     = self.NrBig
+        Nr2     = self.NrSmall
+        xs      = 0
+        xp1     = 0
+        xp2     = 0
+        xr1     = 0
+        xr2     = 0
+
+        # Working pressure angle
+        alpha_w_sunPlanet_stg1, _, _ = self.getWorkingPressureAngle()
+
+        # Tip pressure angle
+        alpha_a_sun, alpha_a_planet1, _, _, _ = self.getTipPressureAngle()
+
+        # Contact ratio
+        Approach_CR_sunPlanet_stg1 = (Np1 / (2 * np.pi)) * (np.tan(alpha_a_planet1) - np.tan(alpha_w_sunPlanet_stg1)) # Approach contact ratio
+        Recess_CR_sunPlanet_stg1   = (Ns / (2 * np.pi)) * (np.tan(alpha_a_sun) - np.tan(alpha_w_sunPlanet_stg1))      # Recess contact ratio
+
+        # write the final formula
+        CR_sunPlanet_stg1 = Approach_CR_sunPlanet_stg1 + Recess_CR_sunPlanet_stg1
+
+        return Approach_CR_sunPlanet_stg1, Recess_CR_sunPlanet_stg1, CR_sunPlanet_stg1
+
+    def contactRatio_planetRing_stg1(self):
+        module1 = self.moduleBig
+        module2 = self.moduleSmall
+        Ns      = self.Ns
+        Np1     = self.NpBig
+        Np2     = self.NpSmall
+        Nr1     = self.NrBig
+        Nr2     = self.NrSmall
+        xs      = 0
+        xp1     = 0
+        xp2     = 0
+        xr1     = 0
+        xr2     = 0
+
+        # Working pressure angle
+        _, alpha_w_planetRing_stg1, _ = self.getWorkingPressureAngle()
+
+        # Tip pressure angle
+        _, alpha_a_planet1, _, alpha_a_ring1, _ = self.getTipPressureAngle()
+
+        # Contact ratio
+        Approach_CR_planetRing_stg1 = -(Nr1 / (2 * np.pi)) * (np.tan(alpha_a_ring1) - np.tan(alpha_w_planetRing_stg1)) # Approach contact ratio
+        Recess_CR_planetRing_stg1   =   Np1 / (2 * np.pi) * (np.tan(alpha_a_planet1) - np.tan(alpha_w_planetRing_stg1)) # Recess contact ratio
+        
+        # Contact Ratio
+        CR_planetRing_stg1 = Approach_CR_planetRing_stg1 + Recess_CR_planetRing_stg1
+
+        return Approach_CR_planetRing_stg1, Recess_CR_planetRing_stg1, CR_planetRing_stg1
+
+    def contactRatio_planetRing_stg2(self):
+        module1 = self.moduleBig
+        module2 = self.moduleSmall
+        Ns      = self.Ns
+        Np1     = self.NpBig
+        Np2     = self.NpSmall
+        Nr1     = self.NrBig
+        Nr2     = self.NrSmall
+        xs      = 0
+        xp1     = 0
+        xp2     = 0
+        xr1     = 0
+        xr2     = 0
+
+        # Working pressure angle
+        _, _, alpha_w_planetRing_stg2 = self.getWorkingPressureAngle()
+
+        # Tip pressure angle
+        _, _, alpha_a_planet2, _, alpha_a_ring2 = self.getTipPressureAngle()
+
+        # Contact ratio
+        Approach_CR_planetRing_stg2 = -(Nr2 / (2 * np.pi)) * (np.tan(alpha_a_ring2) - np.tan(alpha_w_planetRing_stg2)) # Approach contact ratio
+        Recess_CR_planetRing_stg2   =   Np2 / (2 * np.pi) * (np.tan(alpha_a_planet2) - np.tan(alpha_w_planetRing_stg2)) # Recess contact ratio
+        
+        # Contact Ratio
+        CR_planetRing_stg2 = Approach_CR_planetRing_stg2 + Recess_CR_planetRing_stg2
+        
+        return Approach_CR_planetRing_stg2, Recess_CR_planetRing_stg2, CR_planetRing_stg2
+
+    #-----------------------------------------
+    # Gearbox Efficiency
+    #-----------------------------------------
+    def getEfficiency(self):
+        module1 = self.moduleBig
+        module2 = self.moduleSmall
+        Ns      = self.Ns
+        Np1     = self.NpBig
+        Np2     = self.NpSmall
+        Nr1     = self.NrBig
+        Nr2     = self.NrSmall
+        xs      = 0
+        xp1     = 0
+        xp2     = 0
+        xr1     = 0
+        xr2     = 0
+
+        # Contact ratio
+        eps_sunPlanet_stg1A, eps_sunPlanet_stg1R, _ = self.contactRatio_sunPlanet_stg1()
+        eps_planetRing_stg1A, eps_planetRing_stg1R, _ = self.contactRatio_planetRing_stg1()
+        eps_planetRing_stg2A, eps_planetRing_stg2R, _ = self.contactRatio_planetRing_stg2()
+        
+        # Contact-Ratio-Factor
+        epsilon_sunPlanet_stg1  = eps_sunPlanet_stg1A**2 + eps_sunPlanet_stg1R**2 - eps_sunPlanet_stg1A - eps_sunPlanet_stg1R + 1 
+        epsilon_planetRing_stg1 = eps_planetRing_stg1A**2 + eps_planetRing_stg1R**2 - eps_planetRing_stg1A - eps_planetRing_stg1R + 1 
+        epsilon_planetRing_stg2 = eps_planetRing_stg2A**2 + eps_planetRing_stg2R**2 - eps_planetRing_stg2A - eps_planetRing_stg2R + 1 
+        
+        # Efficiency
+        eff_SP_stg1 = 1 - self.mu * np.pi * ((1 / Np1) + (1 / Ns)) * epsilon_sunPlanet_stg1
+        eff_PR_stg1 = 1 - self.mu * np.pi * ((1 / Np1) - (1 / Nr1)) * epsilon_planetRing_stg1
+        eff_PR_stg2 = 1 - self.mu * np.pi * ((1 / Np2) - (1 / Nr2)) * epsilon_planetRing_stg2
+
+        I1  = (Nr1 / Ns)
+        I2  = (Nr1 * Np2) / (Np1 * Nr2)
+        n_a = eff_SP_stg1 # self.getEfficiency_sunPlanet_stg1(Var = Var)
+        n_b = eff_PR_stg1 # self.getEfficiency_planetRing_stg1(Var = Var)
+        n_c = eff_PR_stg2 # self.getEfficiency_planetRing_stg2(Var = Var)
+
+        Numerator   = (1 + n_a * n_b * I1) * (1 - I2)
+        Denominator = (1 + I1) * (1 - n_b * n_c * I2)
+        return Numerator / Denominator
+
+    # ---------------------------------------
+
+    def getEfficiency_old(self):
+        I1 = self.NrBig / self.Ns
+        I2 = (self.NrBig * self.NpSmall) / (self.NpBig * self.NrSmall)
+        n_a = self.getEfficiencySunPlanet()
+        n_b = self.getEfficiencyPlanetRingBig()
+        n_c = self.getEfficiencyPlanetRingSmall()
+
+        # print(" ")
+        # print("I1 = ", I1)
+        # print("I2 = ", I2)
+        # print("n_a = ", n_a)
+        # print("n_b = ", n_b)
+        # print("n_c = ", n_c)
+        # print(" ")
+
+        Numerator = (1 + n_a*n_b*I1)*(1-I2)
+        Denominator = (1+I1)*(1-n_b*n_c*I2)
+        return Numerator / Denominator
+
+    def getPCRadiusSunM(self):
+        return ((self.Ns * self.moduleBig / 2) / 1000.0)
+
+    def getPCRadiusPlanetBigM(self):
+        return ((self.NpBig * self.moduleBig / 2) / 1000.0)
+
+    def getPCRadiusPlanetSmallM(self):
+        return ((self.NpSmall * self.moduleSmall / 2) / 1000.0)
+
+    def getPCRadiusRingBigM(self):
+        return ((self.NrBig * self.moduleBig / 2) / 1000.0)   
+
+    def getPCRadiusRingSmallM(self):
+        return ((self.NrSmall * self.moduleSmall / 2) / 1000.0) 
+
+    def getOuterRadiusRingSmallM(self):
+        ringPCDiameterMM = self.NrSmall * self.moduleSmall 
+        ringPCRadiusMM = ringPCDiameterMM / 2
+        return (ringPCRadiusMM + self.ringRadialWidthSmall) / 1000.0
+
+    def getOuterRadiusRingBigM(self):
+        ringPCDiameterMM = self.NrBig * self.moduleBig
+        ringPCRadiusMM = ringPCDiameterMM / 2
+        return (ringPCRadiusMM + self.ringRadialWidthBig) / 1000.0
+    
+    def getPCRadiusSunMM(self):
+        return ((self.Ns * self.moduleBig / 2))
+
+    def getPCRadiusPlanetBigMM(self):
+        return ((self.NpBig * self.moduleBig / 2))
+
+    def getPCRadiusPlanetSmallMM(self):
+        return ((self.NpSmall * self.moduleSmall / 2))
+
+    def getPCRadiusRingBigMM(self):
+        return ((self.NrBig * self.moduleBig / 2))   
+
+    def getPCRadiusRingSmallMM(self):
+        return ((self.NrSmall * self.moduleSmall / 2)) 
+
+    def getOuterRadiusRingSmallMM(self):
+        ringPCDiameterMM = self.NrSmall * self.moduleSmall 
+        ringPCRadiusMM = ringPCDiameterMM / 2
+        return (ringPCRadiusMM + self.ringRadialWidthSmall)
+
+    def getOuterRadiusRingBigMM(self):
+        ringPCDiameterMM = self.NrBig * self.moduleBig
+        ringPCRadiusMM = ringPCDiameterMM / 2
+        return (ringPCRadiusMM + self.ringRadialWidthBig)
+    
+    def getCarrierRadiusM(self):
+        return (((self.Ns + self.NpBig + self.NpBig/2)/2)*self.moduleBig) / 1000.0
+
+    # Set the face width of the sun gear, planet gear, and ring gear in mm
+    def setfwSunMM(self, fwSunMM):
+        self.fwSunMM = fwSunMM
+
+    def setfwPlanetBigMM(self, fwPlanetBigMM):
+        self.fwPlanetBigMM = fwPlanetBigMM
+
+    def setfwPlanetSmallMM(self, fwPlanetSmallMM):
+        self.fwPlanetSmallMM = fwPlanetSmallMM
+
+    def setfwRingBigMM(self, fwRingBigMM):
+        self.fwRingBigMM = fwRingBigMM
+
+    def setfwRingSmallMM(self, fwRingSmallMM):
+        self.fwRingSmallMM = fwRingSmallMM
+
+    def setModuleBig(self, moduleBig):
+        self.moduleBig = moduleBig
+
+    def setModuleSmall(self, moduleSmall):
+        self.moduleSmall = moduleSmall
+
+    def setNs(self, Ns):
+        self.Ns = Ns
+
+    def setNpBig(self, NpBig):
+        self.NpBig = NpBig
+
+    def setNpSmall(self, NpSmall):
+        self.NpSmall = NpSmall
+
+    def setNrBig(self, NrBig):
+        self.NrBig = NrBig
+
+    def setNrSmall(self, NrSmall):
+        self.NrSmall = NrSmall
+    
+    def setNumPlanet(self, numPlanet):
+        self.numPlanet = numPlanet
+
+    def getEfficiencySunPlanet(self):
+        module = self.moduleBig                                       # Module of the gear
+        alpha = self.pressureAngleDEG * np.pi / 180                   # Pressure angle in radians
+        
+        D_b_sun    = module * self.Ns * np.cos(alpha)                 # Sun's basic circle diameter
+        D_b_planet = module * self.NpBig * np.cos(alpha)              # Planet's basic circle diameter
+
+        centerDist = (self.Ns + self.NpBig) * module / 2              # Center distance between the gears
+        alpha_w = np.arccos((D_b_sun + D_b_planet) / (2*centerDist))  # Working pressure angle
+
+        # TODO: For non-equal profile shift coefficients: Use this later
+        #ya = 0# ??????
+
+        ya = 0 # Addendum of the sun gear 
+        xp = self.profileShiftCoefficientPlanetBig
+        xs = self.profileShiftCoefficientSun
+
+        # TODO: For non-equal profile shift coefficients: Use this later
+        # D_a_sun    = module * sun.numTeeth + 2*module*(1 + ya - xp)             # Sun's tip circle diameter
+        # D_a_planet = module * sun.numTeeth + 2*module*(1 + np.min([ya-xs, xp])) # Planet's tip circle diameter
+        
+        D_a_sun    = module * self.Ns + 2*module*(1 + xs)             # Sun's tip circle diameter
+        D_a_planet = module * self.NpBig + 2*module*(1 + xp) # Planet's tip circle diameter
+
+        alpha_a_sun = np.arccos(D_b_sun / D_a_sun) # Sun's Tip pressure angle
+        alpha_a_planet = np.arccos(D_b_planet / D_a_planet) # Planet's Tip pressure angle
+        
+        eps1 = ((self.NpBig) / (2 * np.pi)) * (np.tan(alpha_a_planet) - np.tan(alpha_w) ) # Approach contact ratio
+        eps2 = (self.Ns / (2 * np.pi)) * (np.tan(alpha_a_sun) - np.tan(alpha_w) ) # Recess contact ratio
+        epsilon = eps1**2 + eps2**2 - eps1 - eps2 + 1 # equivalent contact ratio
+
+        # NOTE: pinion is always an external gear and gear may be an internal or external gear
+        eff = 1 - self.mu * np.pi * (( 1 / self.Ns) + (1 / self.NpBig)) * epsilon
+        return eff
+    
+    def getEfficiencyPlanetRingBig(self):
+        module = self.moduleBig                      # Module of the gear
+        alpha = self.pressureAngleDEG * np.pi / 180  # Pressure angle in radians
+        
+        D_b_ring    = module * self.NrBig * np.cos(alpha)       # Sun's basic circle diameter
+        D_b_planet = module * self.NpBig * np.cos(alpha)        # Planet's basic circle diameter
+
+        centerDist = (self.NrBig - self.NpBig) * module / 2    # Center distance between the gears
+        alpha_w = np.arccos((D_b_ring - D_b_planet) / (2*centerDist))  # Working pressure angle
+
+        # TODO: For non-equal profile shift coefficients: Use this later
+        #ya = 0# ??????
+
+        ya = 0 # Addendum of the sun gear 
+        xr = self.profileShiftCoefficientRingBig
+        xp = self.profileShiftCoefficientPlanetBig
+
+        # TODO: For non-equal profile shift coefficients: Use this later
+        # D_a_sun    = module * sun.numTeeth + 2*module*(1 + ya - xp)             # Sun's tip circle diameter
+        # D_a_planet = module * sun.numTeeth + 2*module*(1 + np.min([ya-xs, xp])) # Planet's tip circle diameter
+        
+        D_a_ring    = module * self.NrBig - 2*module*(1 - xr)             # Ring's tip circle diameter
+        D_a_planet = module * self.NpBig + 2*module*(1 + xp) # Planet's tip circle diameter
+
+        alpha_a_ring = np.arccos(D_b_ring / D_a_ring) # Sun's Tip pressure angle
+        alpha_a_planet = np.arccos(D_b_planet / D_a_planet) # Planet's Tip pressure angle
+        
+        eps1 = ((self.NrBig) / (2 * np.pi)) * (np.tan(alpha_a_ring) - np.tan(alpha_w) ) # Approach contact ratio
+        eps2 = (self.NpBig / (2 * np.pi)) * (np.tan(alpha_a_planet) - np.tan(alpha_w) ) # Recess contact ratio
+        epsilon = eps1**2 + eps2**2 - eps1 - eps2 + 1 # equivalent contact ratio
+
+        # NOTE: pinion is always an external gear and gear may be an internal or external gear
+        eff = 1 - self.mu * np.pi * (( 1 / self.NpBig) - (1 / self.NrBig)) * epsilon
+        return eff
+
+    def getEfficiencyPlanetRingSmall(self):
+        module = self.moduleSmall                      # Module of the gear
+        alpha = self.pressureAngleDEG * np.pi / 180  # Pressure angle in radians
+        
+        D_b_ring    = module * self.NrSmall * np.cos(alpha)       # Sun's basic circle diameter
+        D_b_planet = module * self.NpSmall * np.cos(alpha)    # Planet's basic circle diameter
+
+        centerDist = (self.NrSmall - self.NpSmall) * module / 2    # Center distance between the gears
+        alpha_w = np.arccos((D_b_ring - D_b_planet) / (2*centerDist))  # Working pressure angle
+
+        # TODO: For non-equal profile shift coefficients: Use this later
+        #ya = 0# ??????
+
+        ya = 0 # Addendum of the sun gear 
+        xr = self.profileShiftCoefficientRingSmall
+        xp = self.profileShiftCoefficientPlanetSmall
+
+        # TODO: For non-equal profile shift coefficients: Use this later
+        # D_a_sun    = module * sun.numTeeth + 2*module*(1 + ya - xp)             # Sun's tip circle diameter
+        # D_a_planet = module * sun.numTeeth + 2*module*(1 + np.min([ya-xs, xp])) # Planet's tip circle diameter
+        
+        D_a_ring    = module * self.NrSmall - 2*module*(1 - xr)             # Ring's tip circle diameter
+        D_a_planet = module * self.NpSmall + 2*module*(1 + xp) # Planet's tip circle diameter
+
+        alpha_a_ring = np.arccos(D_b_ring / D_a_ring) # Sun's Tip pressure angle
+        alpha_a_planet = np.arccos(D_b_planet / D_a_planet) # Planet's Tip pressure angle
+        
+        eps1 = ((self.NrSmall) / (2 * np.pi)) * (np.tan(alpha_a_ring) - np.tan(alpha_w) ) # Approach contact ratio
+        eps2 = (self.NpSmall / (2 * np.pi)) * (np.tan(alpha_a_planet) - np.tan(alpha_w) ) # Recess contact ratio
+        epsilon = eps1**2 + eps2**2 - eps1 - eps2 + 1 # equivalent contact ratio
+
+        # NOTE: pinion is always an external gear and gear may be an internal or external gear
+        eff = 1 - self.mu * np.pi * (( 1 / self.NpSmall) - (1 / self.NrSmall)) * epsilon
+        return eff
+
+    # Print the planetary gearbox parameters
+    def printParameters(self):
+        print("Ns = ", self.Ns)
+        print("NpBig = ", self.NpBig)
+        print("NpSmall = ", self.NpSmall)
+        print("NrBig = ", self.NrBig)
+        print("NrSmall = ", self.NrSmall)
+        print("Module (First Layer) = ", self.moduleBig)
+        print("Module (Second Layer) = ", self.moduleSmall)
+        print("Number of planets = ", self.numPlanet)
+        print("Face width of sun gear = ", round(self.fwSunMM,2), " mm")
+        print("Face width of Bigger planet gear = ", round(self.fwPlanetBigMM,2), " mm")
+        print("Face width of Smaller planet gear = ", round(self.fwPlanetSmallMM,2), " mm")
+        print("Face width of Bigger ring gear = ", round(self.fwRingBigMM,2), " mm")
+        print("Face width of Smaller ring gear = ", round(self.fwRingSmallMM,2), " mm")
+        print("Carrier width = ", self.carrierWidthMM, " mm")
+        print("Bigger Ring radial width = ", self.ringRadialWidthBig, " mm")
+        print("Smaller Ring radial width = ", self.ringRadialWidthSmall, " mm")
+        print("Pitch circle radius of sun gear = ", self.getPCRadiusSunM() * 1000, " mm")
+        print("Pitch circle radius of Bigger planet gear = ", self.getPCRadiusPlanetBigM() * 1000, " mm")
+        print("Pitch circle radius of Smaller planet gear = ", self.getPCRadiusPlanetSmallM() * 1000, " mm")
+        print("Pitch circle radius of Big ring gear = ", self.getPCRadiusRingBigM() * 1000, " mm")
+        print("Pitch circle radius of Smaller ring gear = ", self.getPCRadiusRingSmallM() * 1000, " mm")
+        print("Outer radius of Bigger ring gear = ", self.getOuterRadiusRingBigM() * 1000, " mm")
+        print("Outer radius of Smaller ring gear = ", self.getOuterRadiusRingSmallM() * 1000, " mm")
+        print("Carrier radius = ", self.getCarrierRadiusM() * 1000, " mm")
+        print("Geometric constraint = ", self.geometricConstraint())
+        print("Meshing constraint = ", self.meshingConstraint())
+        print("No planet interference constraint = ", self.noPlanetInterferenceConstraint())
+        print("Mass of the planetary gearbox = ", self.getMassKG(), " kg")
+        print("Efficiency of the planetary gearbox = ", self.getEfficiency())
+        #print("Maximum allowable stress for the gear material = ", self.getMaxGearAllowableStress(), " MPa")
+
+    # Print the planetary gearbox parameters
+    def printParametersLess(self):
+        # print("----------------------------3k Planetary Gearbox--------------------------")
+        vars = [self.moduleBig, self.moduleSmall, self.Ns, self.NpBig, self.NpSmall, self.NrBig, self.NrSmall, self.numPlanet]
+        faceWidths = [round(self.fwSunMM,2), round(self.fwPlanetBigMM,2), round(self.fwPlanetSmallMM,2), round(self.fwRingBigMM,2), round(self.fwRingSmallMM,2)]
+        print("[mB, mS, Ns, NpB, NpS, NrB, NrS, numPl]:", vars) 
+        print("Face widths = ", faceWidths)
+        print(" ")
+        print("Gear ratio = ", self.gearRatio())
+        print("Efficiency = ", round(self.getEfficiency(),4))
+        print("Mass (gearbox, kg) = ", round(self.getMassKG(),3), " kg")
+        # print("--------------------------------------------------------------------------")
 
 #=========================================================================
 # Motor class
@@ -3420,7 +4195,7 @@ class compoundPlanetaryActuator:
         planet_bearing_combined_mass = planet_bearing_mass * planet_bearing_num
 
         #--------------------------------------
-        # Mass: cpg_planet_bearing
+        # Mass: cpg_bearing
         #--------------------------------------
         bearing_mass = BearingMassKG # kg
 
@@ -3475,6 +4250,1208 @@ class compoundPlanetaryActuator:
         print("bearing_retainer_mass: ",        1000 * self.bearing_retainer_mass)
         print("Motor mass:",                    1000 * self.motorMassKG)
         print("---------------------------------------------------")
+
+#-------------------------------------------------------------------------
+# 3K Planetary Actuator class (Wolfrom Planetary Actuator Class)
+#-------------------------------------------------------------------------
+class wolfromPlanetaryActuator:
+    def __init__(self, 
+                 design_parameters,
+                 motor                    = motor,
+                 wolfromPlanetaryGearbox  = wolfromPlanetaryGearbox,
+                 FOS                      = 2.0,
+                 serviceFactor            = 2.0,
+                 maxGearboxDiameter       = 140.0,
+                 stressAnalysisMethodName = "Lewis",
+                 densityPLA = 1240):
+        
+        self.motor                    = motor
+        self.wolfromPlanetaryGearbox  = wolfromPlanetaryGearbox
+        self.FOS                      = FOS
+        self.serviceFactor            = serviceFactor
+        self.maxGearboxDiameter       = maxGearboxDiameter # TODO: convert it to 
+                                                          # outer diameter of 
+                                                          # the motor
+        self.stressAnalysisMethodName = stressAnalysisMethodName
+
+        self.densityPLA = densityPLA
+
+        #--------------------------------------------
+        # Motor Specifications
+        #--------------------------------------------
+        self.motorLengthMM           = self.motor.getLengthMM()
+        self.motorDiaMM              = self.motor.getDiaMM()
+        self.motorMassKG             = self.motor.getMassKG()
+        self.MaxMotorTorque          = self.motor.maxMotorTorque
+        self.MaxMotorAngVelRPM       = self.motor.maxMotorAngVelRPM
+        self.MaxMotorAngVelRadPerSec = self.motor.maxMotorAngVelRadPerSec
+        self.MotorInnerDiaMM         = self.motor.motorStatorIDMM
+        self.motorRotorWidthMM       = self.motor.motorRotorWidthMM
+
+        #-----------------------------------------
+        # Actuator Design Free Parameters
+        #-----------------------------------------
+        self.mainCoverThicknessMM         = design_parameters["mainCoverThicknessMM"] # 2
+        self.baseThicknessMM              = design_parameters["baseThicknessMM"]      # 3 
+
+        self.planetBoreMM                 = design_parameters["planetBoreMM"]                 # 8
+        self.sunBoreMM                    = design_parameters["sunBoreMM"]                    # 6
+        self.couplerRadiusMM              = design_parameters["couplerRadiusMM"]              # 16.5
+        self.couplerThicknessMM           = design_parameters["couplerThicknessMM"]           # 3
+        self.couplerShaftHeightMM         = design_parameters["couplerShaftHeightMM"]         # 12
+        self.sCarrierExtrusionDiaMM       = design_parameters["sCarrierExtrusionDiaMM"]       # 12 # TODO: depends on the numPlanet, planet radii and clearance of planets
+        self.sCarrierExtrusionClearanceMM = design_parameters["sCarrierExtrusionClearanceMM"] # 2
+        self.clearanceMotorandCaseMM      = design_parameters["clearanceMotorandCaseMM"]      # 2.3 # TODO: Why such a "odd" number?
+        self.clearanceCarrierPlanetMM     = design_parameters["clearanceCarrierPlanetMM"]     # 1.5
+        self.clearanceSCarrierMotorMM     = design_parameters["clearanceSCarrierMotorMM"]     # 2
+        self.carrierThicknessMM           = design_parameters["carrierThicknessMM"]           # 5
+
+        self.CarrierRadialThicknessClearance1 = design_parameters["CarrierRadialThicknessClearance1"] # 10 
+
+        self.carrierInnerDiaClearanceMM1  = design_parameters["carrierInnerDiaClearanceMM1"]  # 2
+        self.sCarrierInnerDiaClearanceMM1 = design_parameters["sCarrierInnerDiaClearanceMM1"] # 2
+
+        self.MainCover3AndCarrierClearanceMM = design_parameters["MainCover3AndCarrierClearanceMM"] # 2
+
+        self.CarrierAndMainCaseClearanceMM   = design_parameters["CarrierAndMainCaseClearanceMM"] # 3
+
+        self.ring1RadialWidthMM = self.wolfromPlanetaryGearbox.ringRadialWidthBig   # 5
+        self.ring2RadialWidthMM = self.wolfromPlanetaryGearbox.ringRadialWidthSmall # 5
+
+        #--------------------------------------------------------
+        # Dependent design parameters
+        #--------------------------------------------------------
+        self.InnerDiaBearing1MM                : float | None = None 
+        self.OuterDiaBearing1MM                : float | None = None 
+        self.WidthBearing1MM                   : float | None = None 
+        self.InnerDiaBearing2MM                : float | None = None 
+        self.OuterDiaBearing2MM                : float | None = None 
+        self.WidthBearing2MM                   : float | None = None 
+        self.SCarrierThicknessMM               : float | None = None 
+        self.RingBigOuterRadiusMM              : float | None = None 
+        self.RingSmallOuterRadiusMM            : float | None = None
+        self.CarrierInnerDiameterMM            : float | None = None 
+        self.SCarrierInnerDiameterMM           : float | None = None 
+        self.LengthMainCoverMM                 : float | None = None 
+        self.MainCoverInnerRadiusMM            : float | None = None 
+        self.MainCoverOuterRadiusMM            : float | None = None 
+        self.MainCoverProtrusion1RadiusMM      : float | None = None 
+        self.HeightMainCoverProtrusion1MM      : float | None = None 
+        self.MainCover2InnerDiaMM              : float | None = None 
+        self.MainCover2OuterDiaMM              : float | None = None 
+        self.MainCover3InnerDiaMM              : float | None = None 
+        self.MainCover3OuterDiaMM              : float | None = None 
+        self.HeightMainCover2MM                : float | None = None 
+        self.MainCover3HeightMM                : float | None = None 
+        self.MainCover2ProtrusionRadiusMM      : float | None = None 
+        self.MainCover2ProtrusionHeightMM      : float | None = None 
+        self.RadiusBaseMM                      : float | None = None 
+        self.RadiusCouplerShaftMM              : float | None = None 
+        self.SecondaryCarrierOuterDiameterMM   : float | None = None 
+        self.CarrierExtrusionDiameterMM        : float | None = None 
+        self.CarrierExtrusionHeightMM          : float | None = None 
+        self.SecondaryCarrierExtrusionHeightMM : float | None = None 
+
+    def setVariables(self):
+        pass
+
+    def genEquationFile(self):
+        pass
+
+    # ----------------------------------------
+    # Mass of New Design 
+    #-----------------------------------------
+    def wolfromNetInertia(self):
+        I_net = (self.getSpinMomentofInertiaPlanetBig()*self.Ns/self.Ns + self.NpBig)
+        - (self.getOrbitalMomentofInertiaPlanetBig()*self.Ns/(2 * self.NpBig))
+        + (self.getSpinMomentofInertiaPlanetSmall()*self.Ns/self.Ns + self.NpBig)
+        - (self.getOrbitalMomentofInertiaPlanetSmall()*self.Ns/(2 * self.NpBig))
+        + self.getMomentofInertiaSun()
+        + (self.getMomentofInertiaCarrier()*self.Ns/(self.Ns + self.NpBig))
+        + (self.getMomentofInertiaRingSmall*self.Ns*(self.NpBig - self.NpSmall)/(2*self.NrSmall*self.NpBig))
+        return I_net
+
+    def getToothForces(self, constraintCheck=False):
+        if constraintCheck:
+            # Check if the constraints are satisfied
+            if not self.wolfromPlanetaryGearbox.geometricConstraint():
+                print("Geometric constraint not satisfied")
+                return
+            if not self.wolfromPlanetaryGearbox.meshingConstraint():
+                print("Meshing constraint not satisfied")
+                return
+            if not self.wolfromPlanetaryGearbox.noPlanetInterferenceConstraint():
+                print("No planet interference constraint not satisfied")
+                return
+
+        Ns          = self.wolfromPlanetaryGearbox.Ns
+        NpBig       = self.wolfromPlanetaryGearbox.NpBig
+        NpSmall     = self.wolfromPlanetaryGearbox.NpSmall
+        NrBig       = self.wolfromPlanetaryGearbox.NrBig
+        NrSmall     = self.wolfromPlanetaryGearbox.NrSmall
+        numPlanet   = self.wolfromPlanetaryGearbox.numPlanet
+        moduleBig   = self.wolfromPlanetaryGearbox.moduleBig
+        moduleSmall = self.wolfromPlanetaryGearbox.moduleSmall
+
+        RpBig_Mt   = self.wolfromPlanetaryGearbox.getPCRadiusPlanetBigM()
+        RpSmall_Mt = self.wolfromPlanetaryGearbox.getPCRadiusPlanetSmallM()
+        Rs_Mt      = self.wolfromPlanetaryGearbox.getPCRadiusSunM()
+        RrBig_Mt   = self.wolfromPlanetaryGearbox.getPCRadiusRingBigM()
+        RrSmall_Mt = self.wolfromPlanetaryGearbox.getPCRadiusRingSmallM()
+
+        wSun       = self.motor.getMaxMotorAngVelRadPerSec()
+        wPlanet    = (-Ns / (2*NpBig) ) * wSun
+        wCarrier   = (Ns / (Ns + NrBig)) * wSun
+        wRingSmall = (Ns * (NpBig - NpSmall) / (2 * NrSmall * NpBig)) * wSun
+        
+        I1 = NrBig/Ns
+        I2 = ( (NrBig * NpSmall) / (NpBig * NrSmall))
+        I3 = RpSmall_Mt / RpBig_Mt
+
+        Ft_sp_big = (self.serviceFactor*self.motor.getMaxMotorTorque()*1000) / (numPlanet * moduleBig * (Ns / 2))
+        Ft_rp_big = ((self.serviceFactor*self.motor.getMaxMotorTorque()*1000) * (I1 + I2)) / (numPlanet * moduleBig * (NrBig/2) * (1-I2))
+        Ft_rp_small = -((self.serviceFactor*self.motor.getMaxMotorTorque()*1000) * (1+I1)) / (numPlanet * moduleSmall * (NrSmall/2) * (1-I2))
+
+        if (RpBig_Mt > RpSmall_Mt):
+            Ft_sp_big_alt = (self.serviceFactor*self.motor.getMaxMotorTorque()) / (numPlanet * (Rs_Mt))
+            Ft_rp_big_alt = ((self.serviceFactor*self.motor.getMaxMotorTorque()) * (1 + I3)) / (numPlanet * (Rs_Mt) * (1 - I3))
+            Ft_rp_small_alt = -((self.serviceFactor*self.motor.getMaxMotorTorque()) * (2)) / (numPlanet * (Rs_Mt) * (1 - I3))
+
+            # check the error in the force calculation
+            if np.abs(Ft_sp_big - Ft_sp_big_alt) > 1e-6:
+                print("----------------------------------------------")
+                print("                   ERROR                      ")
+                print("----------------------------------------------")
+                print("Ft_sp_big not equal to Ft_sp_big_alt")
+                print("Ft_sp_big:", Ft_sp_big)
+                print("Ft_sp_big_alt:", Ft_sp_big_alt)
+
+            if np.abs(Ft_rp_big - Ft_rp_big_alt) > 1e-6:
+                print("----------------------------------------------")
+                print("                   ERROR                      ")
+                print("----------------------------------------------")
+                print("Ft_rp_big not equal to Ft_rp_big_alt")
+                print("Ft_rp_big:", Ft_rp_big)
+                print("Ft_rp_big_alt:", Ft_rp_big_alt)
+
+            if np.abs(Ft_rp_small - Ft_rp_small_alt) > 1e-6:
+                print("----------------------------------------------")
+                print("                   ERROR                      ")
+                print("----------------------------------------------")
+                print("Ft_rp_small not equal to Ft_rp_small_alt")
+                print("Ft_rp_small:", Ft_rp_small)
+                print("Ft_rp_small_alt:", Ft_rp_small_alt)
+        else:
+            print("Invalid value of RpBig and RpSmall")
+            print("RpBig:", RpBig_Mt)
+            print("NpBig:", NpBig)
+            print(" ")
+            print("RpSmall:", RpSmall_Mt)
+            print("NpSmall:", NpSmall)
+
+        Ft = [Ft_sp_big, Ft_rp_big, Ft_rp_small]
+        return Ft
+
+    def lewisStressAnalysisMinFacewidth(self):
+        # Check if the constraints are satisfied
+        if not self.wolfromPlanetaryGearbox.geometricConstraint():
+            print("Geometric constraint not satisfied")
+            return
+        if not self.wolfromPlanetaryGearbox.meshingConstraint():
+            print("Meshing constraint not satisfied")
+            return
+        if not self.wolfromPlanetaryGearbox.noPlanetInterferenceConstraint():
+            print("No planet interference constraint not satisfied")
+            return
+
+        Ns          = self.wolfromPlanetaryGearbox.Ns
+        NpBig       = self.wolfromPlanetaryGearbox.NpBig
+        NpSmall     = self.wolfromPlanetaryGearbox.NpSmall
+        NrBig       = self.wolfromPlanetaryGearbox.NrBig
+        NrSmall     = self.wolfromPlanetaryGearbox.NrSmall
+        numPlanet   = self.wolfromPlanetaryGearbox.numPlanet
+        moduleBig   = self.wolfromPlanetaryGearbox.moduleBig
+        moduleSmall = self.wolfromPlanetaryGearbox.moduleSmall
+
+        RpBig = NpBig * moduleBig / 2
+        RpSmall = NpSmall * moduleSmall / 2
+        Rs = Ns * moduleBig / 2
+        RrBig = NrBig * moduleBig / 2
+        RrSmall = NrSmall * moduleSmall / 2
+
+        wSun       = self.motor.getMaxMotorAngVelRadPerSec()
+        wPlanet    = (-Ns / (2*NpBig) ) * wSun
+        wCarrier   = (Ns / (Ns + NrBig)) * wSun
+        wRingSmall = (Ns * (NpBig - NpSmall) / (2 * NrSmall * NpBig)) * wSun
+
+        [Ft_sp_big, Ft_rp_big, Ft_rp_small]  = self.getToothForces(False)
+
+        ySun         = 0.154 - 0.912/Ns
+        yPlanetBig   = 0.154 - 0.912/NpBig
+        yPlanetSmall = 0.154 - 0.912/NpSmall
+        yRingSmall   = 0.154 - 0.912/NrSmall
+        yRingBig     = 0.154 - 0.912/NrBig
+
+        V_sp_big = (self.wolfromPlanetaryGearbox.getPCRadiusSunM() * wSun)
+        V_rp_big = (wCarrier*(self.wolfromPlanetaryGearbox.getPCRadiusSunM() + self.wolfromPlanetaryGearbox.getPCRadiusPlanetBigM()) + 
+                    wPlanet*(self.wolfromPlanetaryGearbox.getPCRadiusPlanetBigM()))
+        V_rp_small = (wCarrier*(self.wolfromPlanetaryGearbox.getPCRadiusSunM() + self.wolfromPlanetaryGearbox.getPCRadiusPlanetBigM()) +
+                      wPlanet*(self.wolfromPlanetaryGearbox.getPCRadiusPlanetSmallM()))
+        
+        # Check 
+        V_rp_small_test = wRingSmall*(self.wolfromPlanetaryGearbox.getPCRadiusSunM() + self.wolfromPlanetaryGearbox.getPCRadiusPlanetBigM()
+                                      + self.wolfromPlanetaryGearbox.getPCRadiusPlanetSmallM())
+        
+        if np.abs(V_rp_small - V_rp_small_test) > 1e-6:
+            print("----------------------------------------------")
+            print("                   ERROR                      ")
+            print("----------------------------------------------")
+            print("V_rp_small not equal to V_rp_small_test")
+            print("V_rp_small:", V_rp_small)
+            print("V_rp_small_test:", V_rp_small_test)
+        
+        if V_sp_big <= 7.5:
+            Kv_sun = 3/(3+V_sp_big)
+            Kv_planetBig1 = 3/(3+V_sp_big)
+        elif V_sp_big > 7.5 and V_sp_big <= 12.5:
+            Kv_sun = 4.5/(4.5 + V_sp_big)
+            Kv_planetBig1 = 4.5/(4.5 + V_sp_big)
+        else:
+            Kv_sun = 4.5/(4.5 + V_sp_big)
+            Kv_planetBig1 = 4.5/(4.5 + V_sp_big)
+
+        if V_rp_big <= 7.5:
+            Kv_planetBig2 = 3/(3+V_rp_big)
+            Kv_ringBig = 3/(3+V_rp_big)
+        elif V_rp_big > 7.5 and V_rp_big <= 12.5:
+            Kv_planetBig2 = 4.5/(4.5 + V_rp_big)
+            Kv_ringBig = 4.5/(4.5 + V_rp_big)
+
+        if V_rp_small <= 7.5:
+            Kv_planetSmall = 3/(3+V_rp_small)
+            Kv_ringSmall = 3/(3+V_rp_small)
+        elif V_rp_small > 7.5 and V_rp_small <= 12.5:
+            Kv_planetSmall = 4.5/(4.5 + V_rp_small)
+            Kv_ringSmall = 4.5/(4.5 + V_rp_small)
+        
+        P_big   = np.pi*moduleBig*0.001 # m
+        P_small = np.pi*moduleSmall*0.001 # m
+
+        # # Print
+        # print("V_sp_big:", V_sp_big)
+        # print("V_rp_big:", V_rp_big)
+        # print("V_rp_small:", V_rp_small)
+
+        # Lewis static load capacity
+        bMin_sun         = (self.FOS * np.abs(Ft_sp_big   )/ (self.wolfromPlanetaryGearbox.maxGearAllowableStressPa * ySun * Kv_sun * P_big)) # m
+        bMin_planetBig1  = (self.FOS * np.abs(Ft_sp_big   )/ (self.wolfromPlanetaryGearbox.maxGearAllowableStressPa * yPlanetBig * Kv_planetBig1 * P_big))
+        bMin_planetBig2  = (self.FOS * np.abs(Ft_sp_big   )/ (self.wolfromPlanetaryGearbox.maxGearAllowableStressPa * yPlanetBig * Kv_planetBig2 * P_big))
+        bMin_planetSmall = (self.FOS * np.abs(Ft_rp_small )/ (self.wolfromPlanetaryGearbox.maxGearAllowableStressPa * yPlanetSmall * Kv_planetSmall * P_small))
+        bMin_ringBig     = (self.FOS * np.abs(Ft_rp_big   )/ (self.wolfromPlanetaryGearbox.maxGearAllowableStressPa * yRingBig * Kv_ringBig * P_big))
+        bMin_ringSmall   = (self.FOS * np.abs(Ft_rp_small )/ (self.wolfromPlanetaryGearbox.maxGearAllowableStressPa * yRingSmall * Kv_ringSmall * P_small))
+
+        # Making the width of the bigger planet to be the maximum of the two
+        if bMin_planetBig1 > bMin_planetBig2:
+            bMin_planetBig = bMin_planetBig1
+        else:
+            bMin_planetBig = bMin_planetBig2
+
+        # Making the width of ring and planet in the second layer to be same
+        if bMin_ringSmall < bMin_planetSmall:
+            bMin_ringSmall = bMin_planetSmall
+        else:
+            bMin_planetSmall = bMin_ringSmall
+
+        # Making the width of ring and planet in the first layer to be same
+        if bMin_ringBig < bMin_planetBig:
+            bMin_ringBig = bMin_planetBig
+        else:
+            bMin_planetBig = bMin_ringBig
+
+        self.wolfromPlanetaryGearbox.setfwSunMM         ( bMin_sun*1000 )
+        self.wolfromPlanetaryGearbox.setfwPlanetBigMM   ( bMin_planetBig*1000 )
+        self.wolfromPlanetaryGearbox.setfwPlanetSmallMM ( bMin_planetSmall*1000 )
+        self.wolfromPlanetaryGearbox.setfwRingSmallMM   ( bMin_ringSmall*1000 )
+        self.wolfromPlanetaryGearbox.setfwRingBigMM     ( bMin_ringBig*1000 )
+        # print("Lewis:")
+        # print(f"bMin_planetSmall = {bMin_planetSmall}")
+        # print(f"bMin_planetBig = {bMin_planetBig}")
+        # print(f"bMin_sun = {bMin_sun}")
+        # print(f"bMin_ringSmall = {bMin_ringSmall}")
+        # print(f"bMin_ringBig = {bMin_ringBig}")
+
+    def AGMAStressAnalysisMinFacewidth(self):
+        # Check if the constraints are satisfied
+        if not self.wolfromPlanetaryGearbox.geometricConstraint():
+            print("Geometric constraint not satisfied")
+            return
+        if not self.wolfromPlanetaryGearbox.meshingConstraint():
+            print("Meshing constraint not satisfied")
+            return
+        if not self.wolfromPlanetaryGearbox.noPlanetInterferenceConstraint():
+            print("No planet interference constraint not satisfied")
+            return
+
+        Ns          = self.wolfromPlanetaryGearbox.Ns
+        NpBig       = self.wolfromPlanetaryGearbox.NpBig
+        NpSmall     = self.wolfromPlanetaryGearbox.NpSmall
+        NrBig       = self.wolfromPlanetaryGearbox.NrBig
+        NrSmall     = self.wolfromPlanetaryGearbox.NrSmall
+        numPlanet   = self.wolfromPlanetaryGearbox.numPlanet
+        moduleBig   = self.wolfromPlanetaryGearbox.moduleBig
+        moduleSmall = self.wolfromPlanetaryGearbox.moduleSmall
+
+        RpBig = NpBig * moduleBig / 2
+        RpSmall = NpSmall * moduleSmall / 2
+        Rs = Ns * moduleBig / 2
+        RrBig = NrBig * moduleBig / 2
+        RrSmall = NrSmall * moduleSmall / 2
+
+        wSun       = self.motor.getMaxMotorAngVelRadPerSec()
+        wPlanet    = (-Ns / (2*NpBig) ) * wSun
+        wCarrier   = (Ns / (Ns + NrBig)) * wSun
+        wRingSmall = (Ns * (NpBig - NpSmall) / (2 * NrSmall * NpBig)) * wSun
+
+        [Wt_sp_big, Wt_rp_big, Wt_rp_small]  = self.getToothForces(False)
+
+        pressureAngle = self.wolfromPlanetaryGearbox.pressureAngleDEG
+
+        # T Krishna Rao - Design of Machine Elements - II pg.191
+        # Modified Lewis Form Factor Y = pi*y for pressure angle = 20
+        Y_sun         = (0.154 - 0.912/Ns) * np.pi
+        Y_planetBig   = (0.154 - 0.912/NpBig) * np.pi
+        Y_planetSmall = (0.154 - 0.912/NpSmall) * np.pi
+        Y_ringSmall   = (0.154 - 0.912/NrSmall) * np.pi
+        Y_ringBig     = (0.154 - 0.912/NrBig) * np.pi
+
+        V_sp_big = np.abs(self.wolfromPlanetaryGearbox.getPCRadiusSunM() * wSun)
+        V_rp_big = np.abs(wCarrier*(self.wolfromPlanetaryGearbox.getPCRadiusSunM() + self.wolfromPlanetaryGearbox.getPCRadiusPlanetBigM()) + 
+                    wPlanet*(self.wolfromPlanetaryGearbox.getPCRadiusPlanetBigM()))
+        V_rp_small = np.abs(wCarrier*(self.wolfromPlanetaryGearbox.getPCRadiusSunM() + self.wolfromPlanetaryGearbox.getPCRadiusPlanetBigM()) +
+                      wPlanet*(self.wolfromPlanetaryGearbox.getPCRadiusPlanetSmallM()))
+        
+        # Check 
+        V_rp_small_test = wRingSmall*(self.wolfromPlanetaryGearbox.getPCRadiusSunM() + self.wolfromPlanetaryGearbox.getPCRadiusPlanetBigM()
+                                      + self.wolfromPlanetaryGearbox.getPCRadiusPlanetSmallM())
+        
+        if np.abs(V_rp_small - V_rp_small_test) > 1e-6:
+            print("----------------------------------------------")
+            print("                   ERROR                      ")
+            print("----------------------------------------------")
+            print("V_rp_small not equal to V_rp_small_test")
+            print("V_rp_small:", V_rp_small)
+            print("V_rp_small_test:", V_rp_small_test)
+
+        # AGMA 908-B89 pg.16
+        # Kf Fatigue stress concentration factor
+        H = 0.331 - (0.436 * np.pi * pressureAngle / 180)
+        L = 0.324 - (0.492 * np.pi * pressureAngle / 180)
+        M = 0.261 + (0.545 * np.pi * pressureAngle / 180) 
+        # t -> tooth thickness, r -> fillet radius and l -> tooth height
+        t_planetSmall = (13.5 * Y_planetSmall)**(1/2) * moduleSmall
+        r_planetSmall = 0.3 * moduleSmall 
+        l_planetSmall = 2.25 * moduleSmall
+        Kf_planetSmall = H + (t_planetSmall / r_planetSmall)**(L) * (t_planetSmall / l_planetSmall)**(M)
+
+        t_planetBig = (13.5 * Y_planetBig)**(1/2) * moduleBig
+        r_planetBig = 0.3 * moduleBig 
+        l_planetBig = 2.25 * moduleBig
+        Kf_planetBig = H + (t_planetBig / r_planetBig)**(L) * (t_planetBig / l_planetBig)**(M)
+
+        t_sun = (13.5 * Y_sun)**(1/2) * moduleBig
+        r_sun = 0.3 * moduleBig 
+        l_sun = 2.25 * moduleBig
+        Kf_sun = H + (t_sun / r_sun)**(L) * (t_sun / l_sun)**(M)
+
+        t_ringSmall = (13.5 * Y_ringSmall)**(1/2) * moduleSmall
+        r_ringSmall = 0.3 * moduleSmall 
+        l_ringSmall = 2.25 * moduleSmall
+        Kf_ringSmall = H + (t_ringSmall / r_ringSmall)**(L) * (t_ringSmall / l_ringSmall)**(M)
+
+        t_ringBig = (13.5 * Y_ringBig)**(1/2) * moduleBig
+        r_ringBig = 0.3 * moduleBig
+        l_ringBig = 2.25 * moduleBig
+        Kf_ringBig = H + (t_ringBig / r_ringBig)**(L) * (t_ringBig / l_ringBig)**(M)
+
+        # Shigley's Mechanical Engineering Design 9th Edition pg.752
+        # Yj Geometry factor
+        Yj_planetSmall = Y_planetSmall/Kf_planetSmall
+        Yj_planetBig = Y_planetBig/Kf_planetBig
+        Yj_sun = Y_sun/Kf_sun
+        Yj_ringSmall = Y_ringSmall/Kf_ringSmall
+        Yj_ringBig = Y_ringBig/Kf_ringBig 
+        
+        # Kv Dynamic factor
+        # Shigley's Mechanical Engineering Design 9th Edition pg.756
+        Qv = 7      # Quality numbers 3 to 7 will include most commercial-quality gears.
+        B_planetSmall =  0.25*(12-Qv)**(2/3)
+        A_planetSmall = 50 + 56*(1-B_planetSmall)
+        Kv_planetSmall = ((A_planetSmall+np.sqrt(200*V_rp_small))/A_planetSmall)**B_planetSmall
+
+        B_planetBig =  0.25*(12-Qv)**(2/3)
+        A_planetBig = 50 + 56*(1-B_planetBig)
+        Kv_planetBig = ((A_planetBig+np.sqrt(200*max(V_sp_big, V_rp_big)))/A_planetBig)**B_planetBig
+
+        B_sun =  0.25*(12-Qv)**(2/3)
+        A_sun = 50 + 56*(1-B_sun)
+        Kv_sun = ((A_sun+np.sqrt(200*V_sp_big))/A_sun)**B_sun
+
+        B_ringSmall =  0.25*(12-Qv)**(2/3)
+        A_ringSmall = 50 + 56*(1-B_ringSmall)
+        Kv_ringSmall = ((A_ringSmall+np.sqrt(200*V_rp_small))/A_ringSmall)**B_planetSmall
+
+        B_ringBig =  0.25*(12-Qv)**(2/3)
+        A_ringBig = 50 + 56*(1-B_ringBig)
+        Kv_ringBig = ((A_ringBig+np.sqrt(200*V_rp_big))/A_ringBig)**B_planetBig
+
+        # Shigley's Mechanical Engineering Design 9th Edition pg.764
+        # Ks Size factor (can be omitted if enough information is not available)
+        Ks = 1
+
+        # NPTEL Fatigue Consideration in Design lecture-7 pg.10 Table-7.4 (https://archive.nptel.ac.in/courses/112/106/112106137/)
+        # Kh Load-distribution factor (0-50mm, less rigid mountings, less accurate gears)
+        Kh = 1.3
+
+        # Shigley's Mechanical Engineering Design 9th Edition pg.764
+        # Kb Rim-thickness factor (the gears have a uniform thickness)
+        Kb = 1
+        
+        # AGMA bending stress equation (Shigley's Mechanical Engineering Design 9th Edition pg.746)  
+        bMin_planetSmall = (self.FOS * np.abs(Wt_rp_small) * Kv_planetSmall * Ks * Kh * Kb)/(moduleSmall * Yj_planetSmall * self.wolfromPlanetaryGearbox.maxGearAllowableStressPa * 0.001)
+        bMin_planetBig = (self.FOS * np.abs(Wt_rp_big) * Kv_planetBig * Ks * Kh * Kb)/(moduleBig * Yj_planetBig * self.wolfromPlanetaryGearbox.maxGearAllowableStressPa * 0.001)
+        bMin_sun = (self.FOS * np.abs(Wt_sp_big) * Kv_sun * Ks * Kh * Kb) / (moduleBig * Yj_sun * self.wolfromPlanetaryGearbox.maxGearAllowableStressPa * 0.001)
+        bMin_ringSmall = (self.FOS * np.abs(Wt_rp_small) * Kv_ringSmall * Ks * Kh * Kb) / (moduleSmall * Yj_ringSmall * self.wolfromPlanetaryGearbox.maxGearAllowableStressPa * 0.001)
+        bMin_ringBig = (self.FOS * np.abs(Wt_rp_big) * Kv_ringBig * Ks * Kh * Kb) / (moduleBig * Yj_ringBig * self.wolfromPlanetaryGearbox.maxGearAllowableStressPa * 0.001)
+
+        # C_pm = 1.1
+        # X_planetSmall = (self.FOS * np.abs(Wt_rp_small) * Kv_planetSmall * Ks * Kb)/(moduleSmall * Y_planetSmall * self.wolfromPlanetaryGearbox.maxGearAllowableStressPa * 0.001)
+        # X_planetBig = (self.FOS * np.abs(Wt_rp_big) * Kv_planetBig * Ks * Kb)/(moduleBig * Y_planetBig * self.wolfromPlanetaryGearbox.maxGearAllowableStressPa * 0.001)
+        # X_sun = (self.FOS * np.abs(Wt_sp_big) * Kv_sun * Ks * Kb) / (moduleBig * Y_sun * self.wolfromPlanetaryGearbox.maxGearAllowableStressPa * 0.001)
+        # X_ringSmall = (self.FOS * np.abs(Wt_rp_small) * Kv_ringSmall * Ks * Kb) / (moduleSmall * Y_ringSmall * self.wolfromPlanetaryGearbox.maxGearAllowableStressPa * 0.001)
+        # X_ringBig = (self.FOS * np.abs(Wt_rp_big) * Kv_ringBig * Ks * Kb) / (moduleBig * Y_ringBig * self.wolfromPlanetaryGearbox.maxGearAllowableStressPa * 0.001)
+
+        # co_eff_of_fwSqr = 0.93/10000
+        # co_eff_of_fw_planetSmall = -(C_pm/(moduleSmall*NpSmall*10*0.03937)) + 1/(39.37*X_planetSmall) - 0.0158
+        # co_eff_of_fw_planetBig = -(C_pm/(moduleBig*NpBig*10*0.03937)) + 1/(39.37*X_planetBig) - 0.0158
+        # co_eff_of_fw_sun = -(C_pm/(moduleBig*Ns*10*0.03937)) + 1/(39.37*X_sun) - 0.0158
+        # co_eff_of_fw_ringSmall = -(C_pm/(moduleSmall*NrSmall*10*0.03937)) + 1/(39.37*X_ringSmall) - 0.0158
+        # co_eff_of_fw_ringBig = -(C_pm/(moduleBig*NrBig*10*0.03937)) + 1/(39.37*X_ringBig) - 0.0158
+        # constant = -1.0995
+
+        # bMin_planetSmall = max(np.roots([co_eff_of_fwSqr, co_eff_of_fw_planetSmall, constant]))/39.37
+        # bMin_planetBig = max(np.roots([co_eff_of_fwSqr, co_eff_of_fw_planetBig, constant]))/39.37
+        # bMin_sun = max(np.roots([co_eff_of_fwSqr, co_eff_of_fw_sun, constant]))/39.37
+        # bMin_ringSmall = max(np.roots([co_eff_of_fwSqr, co_eff_of_fw_ringSmall, constant]))/39.37
+        # bMin_ringBig = max(np.roots([co_eff_of_fwSqr, co_eff_of_fw_ringBig, constant]))/39.37
+
+        # if bMin_planetSmall > 0.026:
+        #     co_eff_of_fw_planetSmall = -(C_pm/(moduleSmall*NpSmall*10*0.03937)) + 1/(39.37*X_planetSmall) - 0.1533
+        #     constant = -1.08575
+        #     bMin_planetSmall = max(np.roots([co_eff_of_fwSqr, co_eff_of_fw_planetSmall, constant]))/39.37
+
+        # if bMin_planetBig > 0.026:
+        #     co_eff_of_fw_planetBig = -(C_pm/(moduleBig*NpBig*10*0.03937)) + 1/(39.37*X_planetBig) - 0.1533
+        #     constant = -1.08575
+        #     bMin_planetBig = max(np.roots([co_eff_of_fwSqr, co_eff_of_fw_planetBig, constant]))/39.37
+
+        # if bMin_ringSmall > 0.026:
+        #     co_eff_of_fw_ringSmall = -(C_pm/(moduleSmall*NrSmall*10*0.03937)) + 1/(39.37*X_ringSmall) - 0.1533
+        #     constant = -1.08575
+        #     bMin_ringSmall = max(np.roots([co_eff_of_fwSqr, co_eff_of_fw_ringSmall, constant]))/39.37
+
+        # if bMin_ringBig > 0.026:
+        #     co_eff_of_fw_ringBig = -(C_pm/(moduleBig*NrBig*10*0.03937)) + 1/(39.37*X_ringBig) - 0.1533
+        #     constant = -1.08575
+        #     bMin_ringBig = max(np.roots([co_eff_of_fwSqr, co_eff_of_fw_ringBig, constant]))/39.37
+
+        # if bMin_sun > 0.026:
+        #     co_eff_of_fw_sun = -(C_pm/(moduleBig*Ns*10*0.03937)) + 1/(39.37*X_sun) - 0.1533
+        #     constant = -1.08575
+        #     bMin_sun = max(np.roots([co_eff_of_fwSqr, co_eff_of_fw_sun, constant]))/39.37
+
+        # Making the width of ring and planet in the second layer to be same
+        if bMin_ringSmall < bMin_planetSmall:
+            bMin_ringSmall = bMin_planetSmall
+        else:
+            bMin_planetSmall = bMin_ringSmall
+
+        # Making the width of ring and planet in the first layer to be same
+        if bMin_ringBig < bMin_planetBig:
+            bMin_ringBig = bMin_planetBig
+        else:
+            bMin_planetBig = bMin_ringBig
+
+        self.wolfromPlanetaryGearbox.setfwSunMM         ( bMin_sun*1000 )
+        self.wolfromPlanetaryGearbox.setfwPlanetBigMM   ( bMin_planetBig*1000 )
+        self.wolfromPlanetaryGearbox.setfwPlanetSmallMM ( bMin_planetSmall*1000 )
+        self.wolfromPlanetaryGearbox.setfwRingSmallMM   ( bMin_ringSmall*1000 )
+        self.wolfromPlanetaryGearbox.setfwRingBigMM     ( bMin_ringBig*1000 )
+
+        # print("AGMA:")
+        # print(f"bMin_planetSmall = {bMin_planetSmall}")
+        # print(f"bMin_planetBig = {bMin_planetBig}")
+        # print(f"bMin_sun = {bMin_sun}")
+        # print(f"bMin_ringSmall = {bMin_ringSmall}")
+        # print(f"bMin_ringBig = {bMin_ringBig}")
+
+    def updateFacewidth(self):
+        if self.stressAnalysisMethodName == "Lewis":
+            self.lewisStressAnalysisMinFacewidth()
+        elif self.stressAnalysisMethodName == "AGMA":
+            self.AGMAStressAnalysisMinFacewidth()
+
+    def getMassKG_new(self, Var = True):
+        module1   = self.wolfromPlanetaryGearbox.moduleBig
+        module2   = self.wolfromPlanetaryGearbox.moduleSmall
+        Ns        = self.wolfromPlanetaryGearbox.Ns
+        Np1       = self.wolfromPlanetaryGearbox.NpBig
+        Nr1       = self.wolfromPlanetaryGearbox.NrBig
+        Np2       = self.wolfromPlanetaryGearbox.NpSmall
+        Nr2       = self.wolfromPlanetaryGearbox.NrSmall
+        numPlanet = self.wolfromPlanetaryGearbox.numPlanet 
+
+        #----------------------------------
+        # Density of Materials
+        #----------------------------------
+        densityGears = 7850
+        densityAl    = 2710
+
+        #----------------------------------
+        # Diameter and Radius
+        #----------------------------------
+        Ds_MM  =  Ns * module1
+        Dp1_MM = Np1 * module1
+        Dr1_MM = Nr1 * module1
+        Dp2_MM = Np2 * module2
+        Dr2_MM = Nr2 * module2
+
+        Rs_MM  =  Ds_MM / 2
+        Rp1_MM = Dp1_MM / 2
+        Rp2_MM = Dp2_MM / 2
+        Rr1_MM = Dr1_MM / 2
+        Rr2_MM = Dr2_MM / 2
+        
+        Ring1OuterRadiusMM = Rr1_MM + self.ring1RadialWidthMM
+        Ring2OuterRadiusMM = Rr2_MM + self.ring2RadialWidthMM
+
+        #----------------------------------
+        # Facewidths
+        #----------------------------------         
+        sunFwMM      = self.wolfromPlanetaryGearbox.fwSunMM
+        planet1FwMM  = self.wolfromPlanetaryGearbox.fwPlanetBigMM
+        planet2FwMM  = self.wolfromPlanetaryGearbox.fwPlanetSmallMM
+        ring1FwMM    = self.wolfromPlanetaryGearbox.fwRingBigMM
+        ring2FwMM    = self.wolfromPlanetaryGearbox.fwRingSmallMM
+
+        sunFwM     = sunFwMM     * 0.001 
+        planet1FwM = planet1FwMM * 0.001
+        planet2FwM = planet2FwMM * 0.001
+        ring1FwM   = ring1FwMM   * 0.001
+        ring2FwM   = ring2FwMM   * 0.001
+
+        #-----------------------------------------
+        # Motor Dimensions & Mass
+        #-----------------------------------------
+        MotorLengthMM = self.motorLengthMM
+        MotorDiaMM    = self.motorDiaMM
+        MotorMassKG   = self.motorMassKG
+
+        #-------------------------------
+        # Bearings: Bearing1 & Bearing2
+        #-------------------------------
+        IdRequired1MM      = module1 * (Ns + Np1) + self.CarrierRadialThicknessClearance1 
+        IdRequired2MM      = Ring2OuterRadiusMM * 2 + self.mainCoverThicknessMM * 2 # CHANGE THIS ID to RING + MAINCASE
+                                                                               
+        Bearing1           = bearings_continuous(IdRequired1MM)
+        Bearing2           = bearings_continuous(IdRequired2MM)
+
+        InnerDiaBearing1MM = Bearing1.getBearingIDMM()
+        OuterDiaBearing1MM = Bearing1.getBearingODMM()
+        WidthBearing1MM    = Bearing1.getBearingWidthMM()
+        BearingMass1KG     = Bearing1.getBearingMassKG()
+        
+        InnerDiaBearing2MM = Bearing2.getBearingIDMM()
+        OuterDiaBearing2MM = Bearing2.getBearingODMM()
+        WidthBearing2MM    = Bearing2.getBearingWidthMM()
+        BearingMass2KG     = Bearing2.getBearingMassKG()
+
+        #-----------------------------------------
+        # Dimensions
+        #-----------------------------------------
+        CarrierInnerDiameterMM  = (Rp1_MM + Rs_MM - self.planetBoreMM/2) * 2 - self.carrierInnerDiaClearanceMM1
+        SCarrierInnerDiameterMM = (Rp1_MM + Rs_MM - self.sCarrierExtrusionDiaMM/2) * 2 - self.sCarrierInnerDiaClearanceMM1
+
+        ClearanceSCarrierMotorMM_withCouplerThickness = self.clearanceSCarrierMotorMM + self.couplerThicknessMM ##### NOTE: HAD AN IF CONDITION
+                                                                                                                ##### TODO: READ BELOW
+                                                                                                                ##### NOTE: This is also not being used?????
+                                                                                                                #####       WHY ?????
+        
+        #-----------------------------------------
+        # NOTE: The following code removal may cause an error
+        # TODO: Use a constraint to satisfy one of the conditions
+        # THis is not a problem : 10-08-2024
+        #-----------------------------------------
+        # ClearanceSCarrierMotorMM = 
+        #     if SCarrierInnerDiameterMM < self.couplerRadiusMM * 2:
+        #         return self.clearanceSCarrierMotorMM + self.couplerThicknessMM
+        #     else:
+        #         return self.clearanceSCarrierMotorMM
+        #     #self.clearanceSCarrierMotorMM += self.couplerThicknessMM * self.smooth_if_factor(self.couplerRadiusMM * 2 - SCarrierInnerDiameterMM)
+        
+        #-----------------------------------------
+        # Main cover Dimensions
+        #-----------------------------------------
+        # LengthMainCoverMM          = MotorLengthMM + 
+        #                              self.baseThicknessMM + 
+        #                              self.clearanceSCarrierMotorMM + 
+        #                              WidthBearing1MM # TODO: Use ClearanceSCarrierMotorMM here in place of self.clearanceSCarrierMotorMM
+        LengthMainCoverMM            = MotorLengthMM + self.baseThicknessMM + ClearanceSCarrierMotorMM_withCouplerThickness + WidthBearing1MM
+        MainCoverInnerRadiusMM       = MotorDiaMM * 0.5 + self.clearanceMotorandCaseMM
+        MainCoverOuterRadiusMM       = MainCoverInnerRadiusMM + self.mainCoverThicknessMM
+        MainCoverProtrusion1RadiusMM = OuterDiaBearing1MM * 0.5
+        HeightMainCoverProtrusion1MM = WidthBearing1MM
+        
+        #-----------------------------------------
+        # Base, 
+        # Coupler shaft & 
+        # Carrier (& secondary carrier) Dimensions
+        #-----------------------------------------
+        RadiusBaseMM                      = MainCoverInnerRadiusMM
+        RadiusCouplerShaftMM              = self.sunBoreMM * 0.5
+        CarrierOuterDiameterMM            = InnerDiaBearing1MM
+        SCarrierThicknessMM               = WidthBearing1MM
+        CarrierExtrusionDiameterMM        = self.planetBoreMM
+        CarrierExtrusionHeightMM          = planet1FwMM + planet2FwMM + self.clearanceCarrierPlanetMM * 2
+        SecondaryCarrierExtrusionHeightMM = CarrierExtrusionHeightMM
+        SecondaryCarrierOuterDiameterMM   = InnerDiaBearing1MM
+
+        #-----------------------------------------
+        # Main cover-2 Dimensions
+        #-----------------------------------------
+        MainCover3HeightMM          = (ring2FwMM + 
+                                       self.clearanceCarrierPlanetMM + 
+                                       WidthBearing2MM + 
+                                       self.mainCoverThicknessMM + 
+                                       self.MainCover3AndCarrierClearanceMM)
+        # CHANGED FROM PREVIOUS
+        MainCover2InnerDiaMM         = Ring1OuterRadiusMM * 2
+        MainCover2ProtrusionRadiusMM = OuterDiaBearing2MM / 2
+        MainCover2ProtrusionHeightMM = WidthBearing2MM
+        MainCover2OuterDiaMM         = MainCover2ProtrusionRadiusMM*2 + self.mainCoverThicknessMM * 2 ##### NOTE: HAD AN IF CONDITION, 
+                                                                                            ##### TODO: READ BELOW
+        HeightMainCover2MM           = ring1FwMM + self.clearanceCarrierPlanetMM + MainCover2ProtrusionHeightMM
+        #-----------------------------------------
+        # MainCover2OuterDiaMM
+        # NOTE: The following code removal may cause an error
+        # TODO: Use a constraint to satisfy one of the conditions
+        # Change the design of 3k Actuator making the 2nd bearing smaller in CAD and re-write the mass fucntions: Deepak 
+        #-----------------------------------------
+        # MainCover2OuterDiaMM = 
+        #     if MainCover2InnerDiaMM < OuterDiaBearing2MM:
+        #         return OuterDiaBearing2MM + self.mainCoverThicknessMM * 2
+        #     else:
+        #         return MainCover2InnerDiaMM + self.mainCoverThicknessMM * 2
+        #     #mainCover2OuterDia = MainCover2InnerDiaMM + 
+        #                           self.mainCoverThicknessMM * 2 + 
+        #                           (OuterDiaBearing2MM - MainCover2InnerDiaMM) * self.smooth_if_factor(OuterDiaBearing2MM - MainCover2InnerDiaMM)
+        #     #return mainCover2OuterDia
+
+        #-----------------------------------------
+        # Main cover-3 Dimensions
+        #-----------------------------------------
+        # CHANGED FROM PREVIOUS
+        MainCover3InnerDiaMM        = Ring2OuterRadiusMM * 2 
+        MainCover3OuterDiaMM        = InnerDiaBearing2MM
+        MainCover3HeightMM        = (ring2FwMM + 
+                                      self.clearanceCarrierPlanetMM +
+                                      self.carrierThicknessMM +
+                                      self.mainCoverThicknessMM + 
+                                      self.MainCover3AndCarrierClearanceMM)
+        #MainCover3ProtInnerRadiusMM = CarrierOuterDiameterMM * 0.5 + self.CarrierAndMainCaseClearanceMM
+        #MainCover3ProtOuterRadiusMM = MainCover3ProtInnerRadiusMM + self.mainCoverThicknessMM
+        #MainCover3ProtHeightMM      = WidthBearing2MM + self.mainCoverThicknessMM + self.clearanceCarrierPlanetMM
+
+        #-----------------------------------------
+        # NOTE: Instead of this constraint we will have to add a deterministic dimension of sCarrierExtrusionDiaMM
+        # TODO: Sit with Deepak and add this code
+        #-----------------------------------------
+        # def geometricConstraintSCarrier(self):
+        #     return self.sCarrierExtrusionDiaMM * 0.5 < ((Rp1_MM + Rs_MM) * np.sin(np.pi / numPlanet) * 2 - Rp1_MM)
+
+        #####################################################################################################
+        # Volumes
+        #####################################################################################################
+        #----------------------------------
+        # Gears, Carrier and Base Volumes
+        #----------------------------------
+        SunVolume      = (np.pi * sunFwMM * ((Rs_MM ** 2) - (self.sunBoreMM * 0.5) ** 2) * 10 ** -9)
+        PlanetVolume   = (np.pi * planet1FwMM * ((Rp1_MM ** 2) - (self.planetBoreMM * 0.5) ** 2) + 
+                          np.pi * planet2FwMM * ((Rp2_MM ** 2) - (self.planetBoreMM * 0.5) ** 2)) * 10 ** -9
+          
+        Ring1Volume    = (np.pi * ring1FwMM * (Ring1OuterRadiusMM ** 2 - Rr1_MM ** 2) * 10 ** -9)
+        Ring2Volume    =  np.pi * ring2FwMM * ((Rr2_MM + 5) ** 2 - Rr2_MM ** 2) * 10 ** -9
+ 
+        CarrierVolume  = (np.pi * self.carrierThicknessMM  * ((CarrierOuterDiameterMM * 0.5) ** 2 - (CarrierInnerDiameterMM * 0.5) ** 2) + 
+                          np.pi * CarrierExtrusionHeightMM * (CarrierExtrusionDiameterMM * 0.5) ** 2 * numPlanet) * 10 ** -9
+        
+        SCarrierVolume = (np.pi * SCarrierThicknessMM * ((SecondaryCarrierOuterDiameterMM * 0.5) ** 2 - (SCarrierInnerDiameterMM * 0.5) ** 2) + 
+                          np.pi * SecondaryCarrierExtrusionHeightMM * (self.sCarrierExtrusionDiaMM * 0.5) ** 2 * numPlanet) * 10 ** -9
+
+        BaseVolume     = (np.pi * self.baseThicknessMM * RadiusBaseMM ** 2) * 10 ** -9
+
+        #----------------------------------
+        # Main Case Volumes
+        #----------------------------------
+        #CHANGED FROM PREVIOUS
+        MainCase1Volume = (np.pi * (MainCoverOuterRadiusMM ** 2 - MainCoverInnerRadiusMM ** 2) * (LengthMainCoverMM - HeightMainCoverProtrusion1MM) + 
+                           np.pi * (MainCoverOuterRadiusMM ** 2 - MainCoverProtrusion1RadiusMM ** 2) * HeightMainCoverProtrusion1MM) * 10 ** -9
+
+        MainCase2Volume = (np.pi * ((MainCover2OuterDiaMM * 0.5) ** 2 - (MainCover2InnerDiaMM * 0.5) ** 2) * (HeightMainCover2MM - MainCover2ProtrusionHeightMM) + 
+                           np.pi * ((MainCover2OuterDiaMM * 0.5) ** 2 - MainCover2ProtrusionRadiusMM ** 2) * MainCover2ProtrusionHeightMM) * 10 ** -9
+
+        MainCase3Volume = (np.pi * ((MainCover3OuterDiaMM * 0.5) ** 2 - (MainCover3InnerDiaMM * 0.5) ** 2) * (MainCover3HeightMM - self.mainCoverThicknessMM) + 
+                          (np.pi * ((MainCover3OuterDiaMM * 0.5) ** 2) * self.mainCoverThicknessMM))* 10 ** -9
+
+        MainCaseVolume = MainCase1Volume + MainCase2Volume + MainCase3Volume
+
+        #----------------------------------
+        # Coupler Volume
+        #----------------------------------
+        CouplerVolume = np.pi * (self.couplerRadiusMM ** 2 * self.couplerThicknessMM + RadiusCouplerShaftMM ** 2 * self.couplerShaftHeightMM) * 10 ** -9
+
+        #==================================
+        # Total Mass
+        #==================================
+        MassOfGearsKG   = ((SunVolume + (PlanetVolume * numPlanet) + Ring1Volume + Ring2Volume) * densityGears)
+        MassOfAlPartsKG = ((CarrierVolume + SCarrierVolume + BaseVolume + MainCaseVolume + CouplerVolume) * densityAl)
+        
+        TotalMassKG     = (MassOfGearsKG + MassOfAlPartsKG + BearingMass1KG + BearingMass2KG)
+        MassStructureKG = TotalMassKG + MotorMassKG
+
+        #-----------------------------------------------------------
+        # Dependent parameters
+        #-----------------------------------------------------------
+        self.InnerDiaBearing1MM                = InnerDiaBearing1MM                
+        self.OuterDiaBearing1MM                = OuterDiaBearing1MM                
+        self.WidthBearing1MM                   = WidthBearing1MM                   
+        self.InnerDiaBearing2MM                = InnerDiaBearing2MM                
+        self.OuterDiaBearing2MM                = OuterDiaBearing2MM                
+        self.WidthBearing2MM                   = WidthBearing2MM                   
+        self.SCarrierThicknessMM               = SCarrierThicknessMM               
+        self.RingBigOuterRadiusMM              = Ring1OuterRadiusMM
+        self.RingSmallOuterRadiusMM            = Ring2OuterRadiusMM
+        self.CarrierInnerDiameterMM            = CarrierInnerDiameterMM            
+        self.SCarrierInnerDiameterMM           = SCarrierInnerDiameterMM           
+        self.LengthMainCoverMM                 = LengthMainCoverMM                 
+        self.MainCoverInnerRadiusMM            = MainCoverInnerRadiusMM            
+        self.MainCoverOuterRadiusMM            = MainCoverOuterRadiusMM            
+        self.MainCoverProtrusion1RadiusMM      = MainCoverProtrusion1RadiusMM      
+        self.HeightMainCoverProtrusion1MM      = HeightMainCoverProtrusion1MM      
+        self.MainCover2InnerDiaMM              = MainCover2InnerDiaMM              
+        self.MainCover2OuterDiaMM              = MainCover2OuterDiaMM              
+        self.MainCover3InnerDiaMM              = MainCover3InnerDiaMM              
+        self.MainCover3OuterDiaMM              = MainCover3OuterDiaMM              
+        self.HeightMainCover2MM                = HeightMainCover2MM                
+        self.MainCover3HeightMM                = MainCover3HeightMM                
+        self.MainCover2ProtrusionRadiusMM      = MainCover2ProtrusionRadiusMM      
+        self.MainCover2ProtrusionHeightMM      = MainCover2ProtrusionHeightMM      
+        self.RadiusBaseMM                      = RadiusBaseMM                      
+        self.RadiusCouplerShaftMM              = RadiusCouplerShaftMM              
+        self.SecondaryCarrierOuterDiameterMM   = SecondaryCarrierOuterDiameterMM   
+        self.CarrierExtrusionDiameterMM        = CarrierExtrusionDiameterMM        
+        self.CarrierExtrusionHeightMM          = CarrierExtrusionHeightMM          
+        self.SecondaryCarrierExtrusionHeightMM = SecondaryCarrierExtrusionHeightMM 
+
+        #-----------------------------------------
+        # Returning the mass of the gearbox
+        #-----------------------------------------
+        return MassStructureKG
+
+    def getMassKG_3DP(self):
+        module1   = self.wolfromPlanetaryGearbox.moduleBig
+        module2   = self.wolfromPlanetaryGearbox.moduleSmall
+        Ns        = self.wolfromPlanetaryGearbox.Ns
+        Np1       = self.wolfromPlanetaryGearbox.NpBig
+        Nr1       = self.wolfromPlanetaryGearbox.NrBig
+        Np2       = self.wolfromPlanetaryGearbox.NpSmall
+        Nr2       = self.wolfromPlanetaryGearbox.NrSmall
+        numPlanet = self.wolfromPlanetaryGearbox.numPlanet 
+
+        #----------------------------------
+        # Density of Materials
+        #----------------------------------
+        densityPLA = self.densityPLA
+
+        #----------------------------------
+        # Diameter and Radius
+        #----------------------------------
+        DiaSunMM  =  Ns * module1
+        DiaPlanet1MM = Np1 * module1
+        DiaRing1MM = Nr1 * module1
+        DiaPlanet2MM = Np2 * module2
+        DiaRing2MM = Nr2 * module2
+
+        Rs_MM  = DiaSunMM / 2
+        Rp1_MM = DiaPlanet1MM / 2
+        Rp2_MM = DiaPlanet2MM / 2
+        Rr1_MM = DiaRing1MM / 2
+        Rr2_MM = DiaRing2MM / 2
+        
+        Ring1OuterRadiusMM = Rr1_MM + self.ring1RadialWidthMM
+        Ring2OuterRadiusMM = Rr2_MM + self.ring2RadialWidthMM
+
+        #----------------------------------
+        # Facewidths
+        #----------------------------------         
+        sunFwMM      = self.wolfromPlanetaryGearbox.fwSunMM
+        planet1FwMM  = self.wolfromPlanetaryGearbox.fwPlanetBigMM
+        planet2FwMM  = self.wolfromPlanetaryGearbox.fwPlanetSmallMM
+        ring1FwMM    = self.wolfromPlanetaryGearbox.fwRingBigMM
+        ring2FwMM    = self.wolfromPlanetaryGearbox.fwRingSmallMM
+
+        sunFwM     = sunFwMM     * 0.001 
+        planet1FwM = planet1FwMM * 0.001
+        planet2FwM = planet2FwMM * 0.001
+        ring1FwM   = ring1FwMM   * 0.001
+        ring2FwM   = ring2FwMM   * 0.001
+
+        #-----------------------------------------
+        # Motor Dimensions & Mass
+        #-----------------------------------------
+        MotorLengthMM = self.motorLengthMM
+        MotorDiaMM    = self.motorDiaMM
+        MotorMassKG   = self.motorMassKG
+
+        #-------------------------------
+        # Bearings: Bearing1 & Bearing2
+        #-------------------------------
+        IdRequiredMM      = module1 * (Ns + Np1) + self.bearingIDClearanceMM 
+                                                                               
+        Bearing           = bearings_discrete(IdRequiredMM)
+
+        InnerDiaBearingMM = Bearing.getBearingIDMM()
+        OuterDiaBearingMM = Bearing.getBearingODMM()
+        WidthBearingMM    = Bearing.getBearingWidthMM()
+        BearingMassKG     = Bearing.getBearingMassKG()
+
+        #--------------------------------------
+        # Independent variables
+        #--------------------------------------
+        # To be written in Gearbox(sspg) JSON files
+        case_mounting_surface_height = self.case_mounting_surface_height
+        standard_clearance_1_5mm     = self.standard_clearance_1_5mm    
+        base_plate_thickness         = self.base_plate_thickness        
+        Motor_case_thickness         = self.Motor_case_thickness        
+        clearance_planet             = self.clearance_planet            
+        output_mounting_hole_dia     = self.output_mounting_hole_dia    
+        sec_carrier_thickness        = self.sec_carrier_thickness       
+        sun_coupler_hub_thickness    = self.sun_coupler_hub_thickness   
+        # sun_shaft_bearing_OD       = self.sun_shaft_bearing_OD        
+        # carrier_bearing_step_width = self.carrier_bearing_step_width  
+        planet_shaft_dia             = self.planet_shaft_dia            
+        sun_shaft_bearing_ID         = self.sun_shaft_bearing_ID        
+        sun_shaft_bearing_width      = self.sun_shaft_bearing_width     
+        planet_bore                  = self.planet_bore                 
+        # bearing_retainer_thickness = self.bearing_retainer_thickness 
+        carrier_small_ring_inner_bearing_flap = self.carrier_small_ring_inner_bearing_flap # 2
+        carrier_small_ring_inner_bearing_ID   = self.carrier_small_ring_inner_bearing_ID # 20
+        gearbox_casing_thickness              = self.gearbox_casing_thickness # 4
+        gear_casing_big_ring_to_bearing_dist  = self.gear_casing_big_ring_to_bearing_dist
+        Motor_case_OD_base_to_chamfer = self.Motor_case_OD_base_to_chamfer # 5
+        planet_pin_socket_head_dia    = self.planet_pin_socket_head_dia
+        carrier_thickness             = self.carrier_thickness # 4
+        small_ring_gear_casing_thickness = self.small_ring_gear_casing_thickness # 4
+        small_ring_output_wall_thickness = self.small_ring_output_wall_thickness # 5
+
+        # To be written in Motor JSON files
+        motor_output_hole_PCD = self.motor.motor_output_hole_PCD
+        motor_output_hole_dia = self.motor.motor_output_hole_dia
+
+        # --- Bearing dimensions --- 
+        bearing_ID     = InnerDiaBearingMM 
+        bearing_OD     = OuterDiaBearingMM 
+        bearing_height = WidthBearingMM 
+
+        #-------------------------------------------------------
+        # wpg_bearing
+        #-------------------------------------------------------   
+        bearing_mass   = BearingMassKG 
+
+        #-------------------------------------------------------
+        # wpg_carrier_ring_small_bearing
+        #-------------------------------------------------------
+        carrier_small_ring_inner_bearing = bearings_discrete(carrier_small_ring_inner_bearing_ID)
+        carrier_small_ring_inner_bearing_OD = carrier_small_ring_inner_bearing.getBearingODMM()
+        carrier_small_ring_inner_bearing_height = carrier_small_ring_inner_bearing.getBearingWidthMM()
+
+        carrier_small_ring_inner_bearing_mass = carrier_small_ring_inner_bearing.getBearingMassKG()
+
+        #-------------------------------------------------------
+        # wpg_carrier
+        #-------------------------------------------------------
+        carrier_OD     = ((Ns + Np1) * module1 + planet_pin_socket_head_dia + standard_clearance_1_5mm * 2)
+        carrier_ID     = carrier_small_ring_inner_bearing_OD
+        carrier_height = carrier_thickness
+
+        carrier_bearing_mount_ID     = carrier_small_ring_inner_bearing_OD
+        carrier_bearing_mount_OD     = standard_clearance_1_5mm * (8/3)
+        carrier_bearing_mount_height = carrier_small_ring_inner_bearing_height - carrier_thickness + standard_clearance_1_5mm
+
+        carrier_shaft_OD     = planet_shaft_dia
+        carrier_shaft_height = planet1FwMM  + planet2FwMM + clearance_planet * 2
+        carrier_shaft_num    = numPlanet * 2
+
+        carrier_volume = (np.pi * (((carrier_OD*0.5)**2) - ((carrier_ID)*0.5)**2) * carrier_height
+                        + np.pi * (((carrier_bearing_mount_OD*0.5)**2) - ((carrier_bearing_mount_ID)*0.5)**2) * carrier_bearing_mount_height  
+                        + np.pi * ((carrier_shaft_OD*0.5)**2) * carrier_shaft_height * carrier_shaft_num) * 1e-9
+
+        carrier_mass = carrier_volume * densityPLA
+
+        #-------------------------------------------------------
+        # wpg_gearbox_casing
+        # ---
+        # Mass of the gearbox casign includes the mass of:
+        # 1. Bearing holding structure
+        # 2. Spacer wall for ring-2
+        # 3. Ring gear-1
+        # 4. Case mounting structure
+        #-------------------------------------------------------
+        ring1_ID      = Nr1 * module2
+        ringFwUsedMM = ring1FwMM
+
+        ring1_radial_thickness = self.ring1RadialWidthMM
+        ring2_radial_thickness = self.ring2RadialWidthMM
+
+        # --- Bearing holding structure --- 
+        if ((bearing_OD + output_mounting_hole_dia * 4) > ((Nr2 * module2 + 2 * ring2_radial_thickness) + standard_clearance_1_5mm * 2)):
+            bearing_mount_thickness  = output_mounting_hole_dia * 2
+        else:
+            bearing_mount_thickness = (((
+                                        ((Nr2 * module2 + 2 * ring2_radial_thickness) + standard_clearance_1_5mm * 2) 
+                                        - (bearing_OD + output_mounting_hole_dia * 4))/2) 
+                                        + output_mounting_hole_dia * 2 + standard_clearance_1_5mm)        
+
+        bearing_holding_structure_ID     = bearing_OD
+        bearing_holding_structure_OD     = bearing_OD + bearing_mount_thickness * 2
+        bearing_holding_structure_height = bearing_height + standard_clearance_1_5mm
+
+        bearing_holding_structure_volume = np.pi * (((bearing_holding_structure_OD*0.5)**2) - 
+                                                    ((bearing_holding_structure_ID*0.5)**2)) * bearing_holding_structure_height * 1e-9
+        # --- Spacer wall for ring-2 --- 
+        spacer_wall_for_ring2_ID     = ((Nr2 * module2 + 2 * ring2_radial_thickness) + standard_clearance_1_5mm * 2)
+        spacer_wall_for_ring2_OD     = spacer_wall_for_ring2_ID + gearbox_casing_thickness * 2
+        spacer_wall_for_ring2_height = gear_casing_big_ring_to_bearing_dist
+
+        spacer_wall_for_ring2_volume = np.pi * (((spacer_wall_for_ring2_OD*0.5)**2) - 
+                                                ((spacer_wall_for_ring2_ID*0.5)**2)) * spacer_wall_for_ring2_height * 1e-9
+
+        # --- Ring gear-1 --- 
+        ring_gear1_ID     = (Nr1 * module1)
+        ring_gear1_OD     = ring_gear1_ID + ring1_radial_thickness * 2
+        ring_gear1_height = ring1FwMM
+
+        ring_gear1_volume = np.pi * (((ring_gear1_OD*0.5)**2) - 
+                                     ((ring_gear1_ID*0.5)**2)) * ring_gear1_height * 1e-9
+
+        # --- Case mounting structure --- 
+        case_dist = (sec_carrier_thickness 
+                     + clearance_planet * 2 
+                     + sun_coupler_hub_thickness 
+                     + planet1FwMM 
+                     - case_mounting_surface_height)
+
+        case_mounting_structure_ID     = Motor_case_OD - Motor_case_OD_base_to_chamfer * 2
+        case_mounting_structure_OD     = Motor_case_OD
+        case_mounting_structure_height = case_dist
+
+        case_mounting_structure_volume  = np.pi * (((case_mounting_structure_OD*0.5)**2) - 
+                                                    ((case_mounting_structure_ID*0.5)**2)) * case_mounting_structure_height * 1e-9
+
+
+        gearbox_casing_mass = (bearing_holding_structure_volume
+                               + spacer_wall_for_ring2_volume
+                               + case_mounting_structure_volume 
+                               + ring_gear1_volume) * densityPLA
+
+        #-------------------------------------------------------
+        # wpg_motor_casing
+        #-------------------------------------------------------
+        ring1_OD  = Nr1 * module1 + ring1_radial_thickness*2
+        motor_OD = self.motorDiaMM
+
+        if (ring1_OD < motor_OD):
+            clearance_motor_and_case = 5
+        else: 
+            clearance_motor_and_case = (ring1_OD - motor_OD)/2 + 5
+
+        Motor_case_ID     = motor_OD + clearance_motor_and_case * 2
+        motor_height      = self.motorLengthMM
+        Motor_case_height = motor_height + case_mounting_surface_height + standard_clearance_1_5mm
+
+        Motor_case_OD = Motor_case_ID + Motor_case_thickness * 2
+
+        Motor_case_volume = ( np.pi * ((Motor_case_OD * 0.5)**2) * base_plate_thickness 
+                            + np.pi * ((Motor_case_OD * 0.5)**2 - (Motor_case_ID * 0.5)**2) * Motor_case_height
+        ) * 1e-9
+
+        Motor_case_mass = Motor_case_volume * densityPLA
+
+        #-------------------------------------------------------
+        # wpg_motor
+        #-------------------------------------------------------
+        motor_mass = self.motorMassKG
+        
+        #-------------------------------------------------------
+        # wpg_planet_bearing
+        #-------------------------------------------------------
+        planet_bearing_mass          = 1 * 0.001 # kg
+        planet_bearing_num           = numPlanet * 2
+        planet_bearing_combined_mass = planet_bearing_mass * planet_bearing_num
+
+        #-------------------------------------------------------
+        # wpg_planet
+        #-------------------------------------------------------
+        planet1_volume = (np.pi * ((DiaPlanet1MM*0.5)**2 - (planet_bore*0.5)**2) * planet1FwMM) * 1e-9
+        planet2_volume = (np.pi * ((DiaPlanet2MM*0.5)**2 - (planet_bore*0.5)**2) * planet2FwMM) * 1e-9
+        planet_mass   = (planet1_volume + planet2_volume) * densityPLA
+
+        #-------------------------------------------------------
+        # wpg_sec_carrier
+        #-------------------------------------------------------
+        sec_carrier_OD = bearing_ID
+        sec_carrier_ID = (DiaSunMM + DiaPlanet1MM) - planet_shaft_dia - 2 * standard_clearance_1_5mm
+
+        sec_carrier_volume = (np.pi * ((sec_carrier_OD*0.5)**2 - (sec_carrier_ID*0.5)**2) * sec_carrier_thickness) * 1e-9
+        sec_carrier_mass   = sec_carrier_volume * densityPLA
+
+        #-------------------------------------------------------
+        # wpg_small_ring_bearing_shaft
+        #-------------------------------------------------------
+        small_ring_bearing_shaft_dia = carrier_small_ring_inner_bearing_ID
+        small_ring_bearing_shaft_height = (bearing_height 
+                                         + carrier_thickness
+                                         + carrier_small_ring_inner_bearing_flap)
+        
+        small_ring_bearing_shaft_volume = (np.pi 
+                                        * (small_ring_bearing_shaft_dia * 0.5)**2 
+                                        *  small_ring_bearing_shaft_height)
+        
+        small_ring_bearing_shaft_mass = small_ring_bearing_shaft_volume * densityPLA
+
+        #-------------------------------------------------------
+        # wpg_small_ring
+        # ---
+        # 1. Ring gear2
+        # 2. ring2bearing_spacer_cone_shell
+        # 3. ring2bearing_spacer_disc
+        # 4. bearing_holding_structure
+        # 5. output_wall
+        # 6. sun_shaft_bearing_holding_structure
+        #-------------------------------------------------------
+
+        # --- Ring gear2 ---
+        ring_gear2_ID     = (Nr2 * module2)
+        ring_gear2_OD     = ring_gear2_ID + ring2_radial_thickness * 2
+        ring_gear2_height = ring2FwMM
+
+        ring_gear2_volume = np.pi * (((ring_gear2_OD*0.5)**2) - 
+                                     ((ring_gear2_ID*0.5)**2)) * ring_gear2_height * 1e-9
+
+        # --- ring2bearing_spacer_cone_shell ---
+        ring2bearing_spacer_cone_shell_base   = small_ring_gear_casing_thickness
+        ring2bearing_spacer_cone_shell_height = carrier_thickness + standard_clearance_1_5mm + clearance_planet
+        ring2bearing_spacer_cone_shell_radius = ((ring_gear2_OD + carrier_OD) / 2) /2
+        
+        ring2bearing_spacer_cone_shell_volume = (2 * np.pi * ring2bearing_spacer_cone_shell_radius
+                                                 * ring2bearing_spacer_cone_shell_height
+                                                 * ring2bearing_spacer_cone_shell_base) * 1e-9
+
+        # --- ring2bearing_spacer_disc ---
+        ring2bearing_spacer_disc_ID     = bearing_ID - 2 * small_ring_gear_casing_thickness
+        ring2bearing_spacer_disc_OD     = carrier_OD + small_ring_gear_casing_thickness * 2
+        ring2bearing_spacer_disc_height = small_ring_gear_casing_thickness
+        
+        ring2bearing_spacer_disc_volume = np.pi * (((ring2bearing_spacer_disc_OD*0.5)**2) - 
+                                                   ((ring2bearing_spacer_disc_ID*0.5)**2)) * ring2bearing_spacer_disc_height * 1e-9
+
+        # --- bearing_holding_structure ---
+        bearing_holding_structure_OD     = bearing_ID
+        bearing_holding_structure_ID     = bearing_ID - 2 * small_ring_gear_casing_thickness
+        bearing_holding_structure_height = bearing_height + standard_clearance_1_5mm * (2/3)
+
+        bearing_holding_structure_volume = np.pi * (((bearing_holding_structure_OD*0.5)**2) - 
+                                                   ((bearing_holding_structure_ID*0.5)**2)) * bearing_holding_structure_height * 1e-9
+
+        # --- output_wall ---
+        output_wall_dia    = bearing_ID - 2 * small_ring_gear_casing_thickness
+        output_wall_height = small_ring_output_wall_thickness
+        output_wall_volume = np.pi * (output_wall_dia / 2)**2 * output_wall_height
+
+        # --- sun_shaft_bearing_holding_structure ---
+        # truncated hollow cone Volume = 0.5 * Hollow cylinder volume. 
+        # 45deg chamfer (height = width)
+        sun_shaft_bearing_holding_structure_ID     = carrier_small_ring_inner_bearing_ID
+        sun_shaft_bearing_holding_structure_height = (bearing_height + carrier_thickness - carrier_small_ring_inner_bearing_height)
+        sun_shaft_bearing_holding_structure_OD     = (sun_shaft_bearing_holding_structure_ID 
+                                                      + sun_shaft_bearing_holding_structure_height * 2)
+        
+        sun_shaft_bearing_holding_structure_volume = (0.5 
+                                                      * np.pi 
+                                                      * (((sun_shaft_bearing_holding_structure_OD*0.5)**2) - 
+                                                         ((sun_shaft_bearing_holding_structure_ID*0.5)**2)) 
+                                                      * sun_shaft_bearing_holding_structure_height * 1e-9)
+
+        small_ring_mass = (ring_gear2_volume 
+                         + ring2bearing_spacer_cone_shell_volume 
+                         + ring2bearing_spacer_disc_volume
+                         + bearing_holding_structure_volume
+                         + output_wall_volume
+                         + sun_shaft_bearing_holding_structure_volume) * densityPLA
+
+        #-------------------------------------------------------
+        # wpg_sun_shaft_bearing
+        #-------------------------------------------------------
+        sun_shaft_bearing_mass       = 1 * 0.001 # kg
+
+        #-------------------------------------------------------
+        # wpg_sun
+        #-------------------------------------------------------
+        sun_hub_dia = motor_output_hole_PCD + motor_output_hole_dia + standard_clearance_1_5mm * 4
+
+        sun_shaft_dia    = sun_shaft_bearing_ID
+        sun_shaft_height = sun_shaft_bearing_width + 2 * standard_clearance_1_5mm
+
+        fw_s_used        = (planet1FwMM 
+                            + planet2FwMM 
+                            + clearance_planet 
+                            + sec_carrier_thickness 
+                            + 2 * standard_clearance_1_5mm 
+                            - carrier_small_ring_inner_bearing_flap)
+
+        sun_hub_volume   = np.pi * ((sun_hub_dia*0.5) ** 2) * sun_coupler_hub_thickness * 1e-9
+        sun_gear_volume  = np.pi * ((DiaSunMM * 0.5) ** 2) * fw_s_used * 1e-9
+        sun_shaft_volume = np.pi * ((sun_shaft_dia*0.5) ** 2) * sun_shaft_height * 1e-9
+
+        sun_volume       = sun_hub_volume + sun_gear_volume + sun_shaft_volume
+        sun_mass         = sun_volume * densityPLA
+
+        Actuator_mass = (carrier_small_ring_inner_bearing_mass + 
+                         carrier_mass + 
+                         gearbox_casing_mass +
+                         Motor_case_mass + 
+                         motor_mass +
+                         planet_bearing_combined_mass +
+                         planet_mass * numPlanet +
+                         sec_carrier_mass +
+                         small_ring_bearing_shaft_mass +
+                         small_ring_mass +
+                         sun_shaft_bearing_mass +
+                         sun_mass)
+
+        return Actuator_mass
+
+    def print_mass_of_parts_3DP(self):
+        pass
 
 #========================================================================
 # Class: Actuator Optimization
