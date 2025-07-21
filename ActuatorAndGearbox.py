@@ -4506,7 +4506,7 @@ class wolfromPlanetaryActuator:
         # --- Ring ---
         # Big
         self.dp_r_b = self.module * self.Nr_b
-        self.db_r_b = self.dp_r_b * np.cos ( self.pressure_angle_deg )
+        self.db_r_b = self.dp_r_b * np.cos ( self.pressure_angle )
         self.fw_r_b = self.fw_p_b
         self.alpha_r_b = ( self.dp_r_b ** 2 - self.db_r_b ** 2 )**0.5 / self.db_r_b * 180 / np.pi - self.pressure_angle_deg
         self.beta_r_b = ( 360 / ( 4 * self.Nr_b ) + self.alpha_r_b ) * 2
@@ -4515,20 +4515,20 @@ class wolfromPlanetaryActuator:
 
         # Small
         self.dp_r_s = self.module * self.Nr_s
-        self.db_r_s = self.dp_r_s * np.cos ( self.pressure_angle_deg )
+        self.db_r_s = self.dp_r_s * np.cos ( self.pressure_angle )
         self.alpha_r_s = ( self.dp_r_s ** 2 - self.db_r_s ** 2 )**0.5 / self.db_r_s * 180 / np.pi - self.pressure_angle_deg
         self.beta_r_s = ( 360 / ( 4 * self.Nr_s ) + self.alpha_r_s ) * 2
 
         # --- Planet ---
         # Big
         self.dp_p_b = self.module * self.Np_b
-        self.db_p_b = self.dp_p_b * np.cos ( self.pressure_angle_deg )
+        self.db_p_b = self.dp_p_b * np.cos ( self.pressure_angle )
         self.alpha_p_b = ( self.dp_p_b ** 2 - self.db_p_b ** 2 )**0.5 / self.db_p_b * 180 / np.pi - self.pressure_angle_deg
         self.beta_p_b = ( 360 / ( 4 * self.Np_b ) - self.alpha_p_b ) * 2
 
         # Small
         self.dp_p_s = self.module * self.Np_s
-        self.db_p_s = self.dp_p_s * np.cos ( self.pressure_angle_deg )
+        self.db_p_s = self.dp_p_s * np.cos ( self.pressure_angle )
         self.alpha_p_s = ( self.dp_p_s ** 2 - self.db_p_s ** 2 )**0.5 / self.db_p_s * 180 / np.pi - self.pressure_angle_deg
         self.beta_p_s = ( 360 / ( 4 * self.Np_s ) - self.alpha_p_s ) * 2
 
@@ -4536,7 +4536,7 @@ class wolfromPlanetaryActuator:
 
         # --- Sun gear ---
         self.dp_s = self.module * self.Ns
-        self.db_s = self.dp_s * np.cos ( self.pressure_angle_deg )
+        self.db_s = self.dp_s * np.cos ( self.pressure_angle )
         self.alpha_s = ( self.dp_s ** 2 - self.db_s ** 2 )**0.5 / self.db_s * 180 / np.pi - self.pressure_angle_deg
         self.beta_s = ( 360 / ( 4 * self.Ns ) - self.alpha_s ) * 2
 
