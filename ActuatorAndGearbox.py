@@ -5181,6 +5181,101 @@ class wolfromPlanetaryActuator:
         # print(f"bMin_ringSmall = {bMin_ringSmall}")
         # print(f"bMin_ringBig = {bMin_ringBig}")
 
+    def mitStressAnalysisMinFacewidth(self):
+        # Check if the constraints are satisfied
+        if not self.wolfromPlanetaryGearbox.geometricConstraint():
+            print("Geometric constraint not satisfied")
+            return
+        if not self.wolfromPlanetaryGearbox.meshingConstraint():
+            print("Meshing constraint not satisfied")
+            return
+        if not self.wolfromPlanetaryGearbox.noPlanetInterferenceConstraint():
+            print("No planet interference constraint not satisfied")
+            return
+
+        Ns          = self.wolfromPlanetaryGearbox.Ns
+        NpBig       = self.wolfromPlanetaryGearbox.NpBig
+        NpSmall     = self.wolfromPlanetaryGearbox.NpSmall
+        NrBig       = self.wolfromPlanetaryGearbox.NrBig
+        NrSmall     = self.wolfromPlanetaryGearbox.NrSmall
+        numPlanet   = self.wolfromPlanetaryGearbox.numPlanet
+        moduleBig   = self.wolfromPlanetaryGearbox.moduleBig
+        moduleSmall = self.wolfromPlanetaryGearbox.moduleSmall
+
+        RpBig = NpBig * moduleBig / 2
+        RpSmall = NpSmall * moduleSmall / 2
+        Rs = Ns * moduleBig / 2
+        RrBig = NrBig * moduleBig / 2
+        RrSmall = NrSmall * moduleSmall / 2
+
+        wSun       = self.motor.getMaxMotorAngVelRadPerSec()
+        wPlanet    = (-Ns / (2*NpBig) ) * wSun
+        wCarrier   = (Ns / (Ns + NrBig)) * wSun
+        wRingSmall = (Ns * (NpBig - NpSmall) / (2 * NrSmall * NpBig)) * wSun
+
+        [Ft_sp_big, Ft_rp_big, Ft_rp_small]  = self.getToothForces(False)
+
+        # Lewis static load capacity
+        _,_,CR_SP1 = self.wolfromPlanetaryGearbox.contactRatio_sunPlanet_stg1()
+        _,_,CR_PR1 = self.wolfromPlanetaryGearbox.contactRatio_planetRing_stg1()
+        _,_,CR_PR2 = self.wolfromPlanetaryGearbox.contactRatio_planetRing_stg2()
+
+        qe_sp1 = 1 / CR_SP1
+        qe_pr1 = 1 / CR_PR1
+        qe_pr2 = 1 / CR_PR2
+
+        qk_sp1 = (7.65734266e-08 * Ns**4
+                - 2.19500130e-05 * Ns**3
+                + 2.33893357e-03 * Ns**2
+                - 1.13320908e-01 * Ns
+                + 4.44727778)
+        qk_pr1 = (7.65734266e-08 * NpBig**4
+                - 2.19500130e-05 * NpBig**3
+                + 2.33893357e-03 * NpBig**2
+                - 1.13320908e-01 * NpBig
+                + 4.44727778)
+        qk_pr2 = (7.65734266e-08 * NpSmall**4
+                - 2.19500130e-05 * NpSmall**3
+                + 2.33893357e-03 * NpSmall**2
+                - 1.13320908e-01 * NpSmall
+                + 4.44727778)
+
+        # Lewis static load capacity
+        bMin_sun_mit           = (self.FOS * np.abs(Ft_sp_big  ) * qe_sp1 * qk_sp1 / (self.wolfromPlanetaryGearbox.maxGearAllowableStressPa * moduleBig   * 0.001))
+        bMin_planetBig_mit_1   = (self.FOS * np.abs(Ft_sp_big  ) * qe_sp1 * qk_sp1 / (self.wolfromPlanetaryGearbox.maxGearAllowableStressPa * moduleBig   * 0.001))
+        bMin_planetBig_mit_2   = (self.FOS * np.abs(Ft_rp_big  ) * qe_pr1 * qk_pr1 / (self.wolfromPlanetaryGearbox.maxGearAllowableStressPa * moduleBig   * 0.001))
+        bMin_planetSmall_mit   = (self.FOS * np.abs(Ft_rp_small) * qe_pr2 * qk_pr2 / (self.wolfromPlanetaryGearbox.maxGearAllowableStressPa * moduleSmall * 0.001))
+        bMin_ringBig_mit       = (self.FOS * np.abs(Ft_rp_big  ) * qe_pr1 * qk_pr1 / (self.wolfromPlanetaryGearbox.maxGearAllowableStressPa * moduleBig   * 0.001))
+        bMin_ringSmall_mit     = (self.FOS * np.abs(Ft_rp_small) * qe_pr2 * qk_pr2 / (self.wolfromPlanetaryGearbox.maxGearAllowableStressPa * moduleSmall * 0.001))
+
+        if (bMin_planetBig_mit_1 > bMin_planetBig_mit_2):
+            bMin_planetBig_mit = bMin_planetBig_mit_1
+        else:
+            bMin_planetBig_mit = bMin_planetBig_mit_2
+
+        #------------- Contraint in planet to accomodate its bearings------------------------------------------
+        if ((bMin_planetBig_mit + bMin_planetSmall_mit) * 1000 < (self.planet_bearing_width*2 + self.standard_clearance_1_5mm * 2 / 3)) : 
+            if ((bMin_planetBig_mit) * 1000 < (self.planet_bearing_width + self.standard_clearance_1_5mm * 1 / 3)): 
+                bMin_planetBig_mit = (self.planet_bearing_width + self.standard_clearance_1_5mm * 1 / 3) / 1000
+            if ((bMin_planetSmall_mit) * 1000 < (self.planet_bearing_width + self.standard_clearance_1_5mm * 1 / 3)): 
+                bMin_planetSmall_mit = (self.planet_bearing_width + self.standard_clearance_1_5mm * 1 / 3) / 1000
+            bMin_ringBig_mit   = bMin_planetBig_mit
+            bMin_ringSmall_mit = bMin_planetSmall_mit
+
+        bMin_sun_mitMM         = bMin_sun_mit * 1000
+        bMin_planetBig_mitMM   = bMin_planetBig_mit * 1000
+        bMin_planetSmall_mitMM = bMin_planetSmall_mit * 1000
+        bMin_ringBig_mitMM     = bMin_ringBig_mit * 1000
+        bMin_ringSmall_mitMM   = bMin_ringSmall_mit * 1000
+
+        self.wolfromPlanetaryGearbox.setfwSunMM         ( bMin_sun_mit         * 1000 )
+        self.wolfromPlanetaryGearbox.setfwPlanetBigMM   ( bMin_planetBig_mit   * 1000 )
+        self.wolfromPlanetaryGearbox.setfwPlanetSmallMM ( bMin_planetSmall_mit * 1000 )
+        self.wolfromPlanetaryGearbox.setfwRingSmallMM   ( bMin_ringSmall_mit   * 1000 )
+        self.wolfromPlanetaryGearbox.setfwRingBigMM     ( bMin_ringBig_mit     * 1000 )
+
+        return bMin_sun_mitMM, bMin_planetBig_mitMM, bMin_planetSmall_mitMM, bMin_ringBig_mitMM, bMin_ringSmall_mitMM
+
     def updateFacewidth(self):
         if self.stressAnalysisMethodName == "Lewis":
             self.lewisStressAnalysisMinFacewidth()
