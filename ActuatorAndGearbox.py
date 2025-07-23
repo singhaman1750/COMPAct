@@ -3821,7 +3821,6 @@ class compoundPlanetaryActuator:
         bMin_planetSmall_mit = (self.FOS * Ft_rp * qe2 * qk2 / (self.compoundPlanetaryGearbox.maxGearAllowableStressPa * moduleSmall * 0.001))
         bMin_ring_mit        = (self.FOS * Ft_rp * qe2 * qk2 / (self.compoundPlanetaryGearbox.maxGearAllowableStressPa * moduleSmall * 0.001))
 
-
         #------------- Contraint in planet to accomodate its bearings------------------------------------------
         if ((bMin_planetBig_mit + bMin_planetSmall_mit) * 1000 < (self.planet_bearing_width*2 + self.standard_clearance_1_5mm * 2 / 3)) : 
             if ((bMin_planetBig_mit) * 1000 < (self.planet_bearing_width + self.standard_clearance_1_5mm * 1 / 3)): 
@@ -4597,7 +4596,7 @@ class wolfromPlanetaryActuator:
         # writing values into text file imported which is imported into solidworks
         self.setVariables()
         file_path = os.path.join(os.path.dirname(__file__), 'WPG', 'wpg_equations.txt')
-        print("File Path: ",file_path)
+        # print("File Path: ",file_path)
         with open(file_path, 'w') as eqFile:
             l = [
                 f'"Np_b" = {self.Np_b}\n',
@@ -5925,20 +5924,20 @@ class wolfromPlanetaryActuator:
         sun_volume       = sun_hub_volume + sun_gear_volume + sun_shaft_volume
         sun_mass         = sun_volume * densityPLA
 
-        print(f"carrier_small_ring_inner_bearing_mass: {carrier_small_ring_inner_bearing_mass} kg")
-        print(f"carrier_mass: {carrier_mass} kg")
-        print(f"gearbox_casing_mass: {gearbox_casing_mass} kg")
-        print(f"Motor_case_mass: {Motor_case_mass} kg")
-        print(f"motor_mass: {motor_mass} kg")
-        print(f"planet_bearing_combined_mass: {planet_bearing_combined_mass} kg")
-        print(f"planet_mass (per planet): {planet_mass} kg")
-        print(f"numPlanet: {numPlanet}")
-        print(f"planet_mass * numPlanet: {planet_mass * numPlanet} kg")
-        print(f"sec_carrier_mass: {sec_carrier_mass} kg")
-        print(f"small_ring_bearing_shaft_mass: {small_ring_bearing_shaft_mass} kg")
-        print(f"small_ring_mass: {small_ring_mass} kg")
-        print(f"sun_shaft_bearing_mass: {sun_shaft_bearing_mass} kg")
-        print(f"sun_mass: {sun_mass} kg")
+        # print(f"carrier_small_ring_inner_bearing_mass: {carrier_small_ring_inner_bearing_mass} kg")
+        # print(f"carrier_mass: {carrier_mass} kg")
+        # print(f"gearbox_casing_mass: {gearbox_casing_mass} kg")
+        # print(f"Motor_case_mass: {Motor_case_mass} kg")
+        # print(f"motor_mass: {motor_mass} kg")
+        # print(f"planet_bearing_combined_mass: {planet_bearing_combined_mass} kg")
+        # print(f"planet_mass (per planet): {planet_mass} kg")
+        # print(f"numPlanet: {numPlanet}")
+        # print(f"planet_mass * numPlanet: {planet_mass * numPlanet} kg")
+        # print(f"sec_carrier_mass: {sec_carrier_mass} kg")
+        # print(f"small_ring_bearing_shaft_mass: {small_ring_bearing_shaft_mass} kg")
+        # print(f"small_ring_mass: {small_ring_mass} kg")
+        # print(f"sun_shaft_bearing_mass: {sun_shaft_bearing_mass} kg")
+        # print(f"sun_mass: {sun_mass} kg")
 
         Actuator_mass = (carrier_small_ring_inner_bearing_mass + 
                         carrier_mass + 
@@ -5953,7 +5952,7 @@ class wolfromPlanetaryActuator:
                         sun_shaft_bearing_mass +
                         sun_mass)
 
-        print(f"Total Actuator_mass: {Actuator_mass} kg")
+        # print(f"Total Actuator_mass: {Actuator_mass} kg")
 
         return Actuator_mass
 
@@ -7121,7 +7120,7 @@ class optimizationWolfromPlanetaryActuator:
                                                                                                 FOS                      = Actuator.FOS, 
                                                                                                 serviceFactor            = Actuator.serviceFactor, 
                                                                                                 maxGearboxDiameter       = Actuator.maxGearboxDiameter, # mm 
-                                                                                                stressAnalysisMethodName = "Lewis") # Lewis or AGMA
+                                                                                                stressAnalysisMethodName = "MIT") # Lewis or AGMA
                                                         
                                                         opt_actuator.updateFacewidth()
                                                         opt_actuator.getMassKG_3DP()

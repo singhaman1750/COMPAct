@@ -34,12 +34,13 @@ material_properties = config_data["Material_properties"]
 
 Gear_standard_parameters = config_data["Gear_standard_parameters"]
 Lewis_params             = config_data["Lewis_params"]
+MIT_params               = config_data["MIT_params"]
 
 Steel    = material_properties["Steel"]
 Aluminum = material_properties["Aluminum"]
 PLA      = material_properties["PLA"]
 
-wpg_design_params       = wpg_params["wpg_design_parameters"]
+wpg_design_params       = wpg_params["wpg_3DP_design_parameters"]
 wpg_optimization_params = wpg_params["wpg_optimization_parameters"]
 
 #---------------------------------------------------
@@ -151,42 +152,42 @@ maxGearboxDiameter_U12    = MotorU12.motorDiaMM    - 2*wpg_design_params["ringRa
 Actuator_U8     = wolfromPlanetaryActuator(design_parameters        = wpg_design_params,
                                            motor                    = MotorU8,
                                            wolfromPlanetaryGearbox  = wolfromPlanetaryGearboxInstance,
-                                           FOS                      = Lewis_params["FOS"], 
-                                           serviceFactor            = Lewis_params["serviceFactor"], 
+                                           FOS                      = MIT_params["FOS"], 
+                                           serviceFactor            = MIT_params["serviceFactor"], 
                                            maxGearboxDiameter       = maxGearboxDiameter_U8,
-                                           stressAnalysisMethodName = "Lewis")
+                                           stressAnalysisMethodName = "MIT")
 
 Actuator_U10    = wolfromPlanetaryActuator(design_parameters        = wpg_design_params,
                                            motor                    = MotorU10,
                                            wolfromPlanetaryGearbox  = wolfromPlanetaryGearboxInstance,
-                                           FOS                      = Lewis_params["FOS"], 
-                                           serviceFactor            = Lewis_params["serviceFactor"], 
+                                           FOS                      = MIT_params["FOS"], 
+                                           serviceFactor            = MIT_params["serviceFactor"], 
                                            maxGearboxDiameter       = maxGearboxDiameter_U10,
-                                           stressAnalysisMethodName = "Lewis")
+                                           stressAnalysisMethodName = "MIT")
 
 Actuator_MN8014 = wolfromPlanetaryActuator(design_parameters       = wpg_design_params,
                                            motor                    = MotorMN8014,
                                            wolfromPlanetaryGearbox  = wolfromPlanetaryGearboxInstance,
-                                           FOS                      = Lewis_params["FOS"], 
-                                           serviceFactor            = Lewis_params["serviceFactor"], 
+                                           FOS                      = MIT_params["FOS"], 
+                                           serviceFactor            = MIT_params["serviceFactor"], 
                                            maxGearboxDiameter       = maxGearboxDiameter_MN8014,
-                                           stressAnalysisMethodName = "Lewis")
+                                           stressAnalysisMethodName = "MIT")
 
 Actuator_VT8020 = wolfromPlanetaryActuator(design_parameters        = wpg_design_params,
                                            motor                    = Motor8020,
                                            wolfromPlanetaryGearbox  = wolfromPlanetaryGearboxInstance,
-                                           FOS                      = Lewis_params["FOS"], 
-                                           serviceFactor            = Lewis_params["serviceFactor"], 
+                                           FOS                      = MIT_params["FOS"], 
+                                           serviceFactor            = MIT_params["serviceFactor"], 
                                            maxGearboxDiameter       = maxGearboxDiameter_VT8020,
-                                           stressAnalysisMethodName = "Lewis")
+                                           stressAnalysisMethodName = "MIT")
 
 Actuator_U12 = wolfromPlanetaryActuator(design_parameters        = wpg_design_params,
                                         motor                    = MotorU12,
                                         wolfromPlanetaryGearbox  = wolfromPlanetaryGearboxInstance,
-                                        FOS                      = Lewis_params["FOS"], 
-                                        serviceFactor            = Lewis_params["serviceFactor"], 
+                                        FOS                      = MIT_params["FOS"], 
+                                        serviceFactor            = MIT_params["serviceFactor"], 
                                         maxGearboxDiameter       = maxGearboxDiameter_U12,
-                                        stressAnalysisMethodName = "Lewis")
+                                        stressAnalysisMethodName = "MIT")
 
 #-----------------------------------------------------
 # Optimization
