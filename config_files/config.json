@@ -8,8 +8,8 @@
         "serviceFactor": 2.0
     },
     "MIT_params": {
-        "FOS": 1.5,
-        "serviceFactor": 2.0
+        "FOS": 1.2,
+        "serviceFactor": 1.5
     },
     "Material_properties":{
         "Steel": {

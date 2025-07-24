@@ -24,7 +24,7 @@ class material:
 class bearings_discrete:
     def __init__(self,idRequiredMM):
         # Bearing dataset entered according to e1102 in [idMM,odMM,widthMM,massKG] format pg no b10-12
-        self.data_bearings = [[25,37,7,0.021],[28,52,12,0.096],[30,42,7,0.024],[32,58,13,0.122],[35,47,7,0.027],[40,52,7,0.031],[45,58,7,0.038],[50,65,7,0.050],[55,72,9,0.081],[60,78,10,0.103],[65,85,10,0.128],[70,90,10,0.134],[75,95,10,0.149],[80,100,10,0.151],[85,110,13,0.263],
+        self.data_bearings = [[10,19,5,0.005],[12,21,5,0.006],[15,24,5,0.007],[17,26,5,0.007],[20,32,7,0.017],[25,37,7,0.021],[28,52,12,0.096],[30,42,7,0.024],[32,58,13,0.122],[35,47,7,0.027],[40,52,7,0.031],[45,58,7,0.038],[50,65,7,0.050],[55,72,9,0.081],[60,78,10,0.103],[65,85,10,0.128],[70,90,10,0.134],[75,95,10,0.149],[80,100,10,0.151],[85,110,13,0.263],
                               [90,115,13,0.276],[95,120,13,0.297],[100,125,13,0.31],[105,130,13,0.324],[110,140,16,0.497],[120,150,16,0.537],[130,165,18,0.758],[140,170,18,0.832],[150,190,20,1.15],[160,200,20,1.23]]
         self.idRequiredMM = idRequiredMM
         self.indexBearing =   0
@@ -4509,8 +4509,8 @@ class wolfromPlanetaryActuator:
 
         small_ring_output_wall_to_bearing_shaft_attachement_bolt = nuts_and_bolts_dimensions(bolt_dia=self.small_ring_output_wall_to_bearing_shaft_attachement_hole_dia, bolt_type="CSK")
 
-        self.small_ring_output_wall_to_bearing_shaft_attachement_nut_wrench             = small_ring_output_wall_to_bearing_shaft_attachement_bolt.nut_thickness
-        self.small_ring_output_wall_to_bearing_shaft_attachement_nut_thickness          = small_ring_output_wall_to_bearing_shaft_attachement_bolt.nut_width_across_flats
+        self.small_ring_output_wall_to_bearing_shaft_attachement_nut_wrench             = small_ring_output_wall_to_bearing_shaft_attachement_bolt.nut_width_across_flats
+        self.small_ring_output_wall_to_bearing_shaft_attachement_nut_thickness          = small_ring_output_wall_to_bearing_shaft_attachement_bolt.nut_thickness
 
         self.small_ring_output_wall_to_bearing_shaft_attachement_hole_CSK_OD            = small_ring_output_wall_to_bearing_shaft_attachement_bolt.bolt_head_dia
         self.small_ring_output_wall_to_bearing_shaft_attachement_hole_CSK_head_height   = small_ring_output_wall_to_bearing_shaft_attachement_bolt.bolt_head_height

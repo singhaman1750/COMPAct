@@ -27,7 +27,7 @@
     },
     "wpg_optimization_parameters":{
         "GEAR_RATIO_MIN"             : 10,
-        "GEAR_RATIO_MAX"             : 15,
+        "GEAR_RATIO_MAX"             : 17,
         "GEAR_RATIO_STEP"            : 1,
         "MODULE_BIG_MIN"             : 0.5,
         "MODULE_BIG_MAX"             : 1.2,
@@ -63,7 +63,7 @@
         "CarrierAndMainCaseClearanceMM"                         : 3,
         "gearbox_casing_thickness"                              : 4, 
         "small_ring_gear_casing_thickness"                      : 4,
-        "bearingIDClearanceMM"                                  : 6,
+        "bearingIDClearanceMM"                                  : 5,
         "clearance_planet"                                      : 1.5,
         "clearance_sun_coupler_sec_carrier"                     : 1.5,
         "clearance_case_mount_holes_shell_thickness"            : 1,

@@ -299,14 +299,14 @@ Optimizer_U12 = optimizationWolfromPlanetaryActuator(design_parameters          
 #-----------------------------------------------------
 # Optimize
 #-----------------------------------------------------
-totalTime_U8    = Optimizer_U8.optimizeActuator(Actuator_U8, UsePSCasVariable = 0, log=0, csv=1)
-print("Optimization Completed : WPG  U8 : Time Taken:", totalTime_U8)
+# totalTime_U8    = Optimizer_U8.optimizeActuator(Actuator_U8, UsePSCasVariable = 0, log=0, csv=1)
+# print("Optimization Completed : WPG  U8 : Time Taken:", totalTime_U8)
 
-# totalTime_U10    = Optimizer_U10.optimizeActuator(Actuator_U10, UsePSCasVariable = 1, log=0, csv=1)
+# totalTime_U10    = Optimizer_U10.optimizeActuator(Actuator_U10, UsePSCasVariable = 0, log=0, csv=1)
 # print("Optimization Completed : WPG  U10 : Time Taken:", totalTime_U10)
 
-# totalTime_MN8014 = Optimizer_MN8014.optimizeActuator(Actuator_MN8014, UsePSCasVariable = 0, log=0, csv=1)
-# print("Optimization Completed : WPG  MN8014 : Time Taken:", totalTime_MN8014)
+totalTime_MN8014 = Optimizer_MN8014.optimizeActuator(Actuator_MN8014, UsePSCasVariable = 0, log=0, csv=1)
+print("Optimization Completed : WPG  MN8014 : Time Taken:", totalTime_MN8014)
 
 # totalTime_VT8020 = Optimizer_VT8020.optimizeActuator(Actuator_VT8020, UsePSCasVariable = 1, log=0, csv=1)
 # print("Optimization Completed : WPG  VT8020 : Time Taken:", totalTime_VT8020)
