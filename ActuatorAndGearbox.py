@@ -5761,7 +5761,7 @@ class wolfromPlanetaryActuator:
         #--------------------------------------
         # Independent variables
         #--------------------------------------
-        # To be written in Gearbox(sspg) JSON files
+        # To be written in Gearbox(dspg) JSON files
         case_mounting_surface_height = self.case_mounting_surface_height
         standard_clearance_1_5mm     = self.standard_clearance_1_5mm    
         base_plate_thickness         = self.base_plate_thickness        
@@ -6140,8 +6140,6 @@ class doubleStagePlanetaryActuator:
         self.MaxMotorTorque          = self.motor.maxMotorTorque          # U12_maxTorque          # Nm
         self.MaxMotorAngVelRPM       = self.motor.maxMotorAngVelRPM       # U12_maxAngVelRPM       # RPM
         self.MaxMotorAngVelRadPerSec = self.motor.maxMotorAngVelRadPerSec # U12_maxAngVelRadPerSec # radians/sec
-        self.MotorInnerDiaMM         = self.motor.motorStatorIDMM         # U12_innerDiaMM         # mm 
-        self.motorRotorWidthMM       = self.motor.motorRotorWidthMM
 
         #------------------------------------------------------------------------
         # Variables required from stage-1 to calculate some dimensions in stage-2
@@ -6156,44 +6154,7 @@ class doubleStagePlanetaryActuator:
         #-----------------------------------------
         # Actuator Design Parameters
         #-----------------------------------------
-        self.carrier1ShaftHeightMM       = design_parameters["carrier1ShaftHeightMM"]
-        self.mainCase2AttachmentHeightMM = design_parameters["mainCase2AttachmentHeightMM"]
 
-        # parameter for stage 1
-        self.baseThicknessMM      = design_parameters["baseThicknessMM"]      # 3
-        self.sCarrierThicknessMM  = design_parameters["sCarrierThicknessMM"]  # 5
-        self.mainCoverThicknessMM = design_parameters["mainCoverThicknessMM"] # 2
-        self.planetBoreMM         = design_parameters["planetBoreMM"]         # 8
-        self.sunBoreMM            = design_parameters["sunBoreMM"]            # 6
-        self.couplerRadiusMM      = design_parameters["couplerRadiusMM"]      # 16.5
-        self.couplerThicknessMM   = design_parameters["couplerThicknessMM"]   # 3
-        self.couplerShaftHeightMM = design_parameters["couplerShaftHeightMM"] # 12
-        self.Ring1RadialWidthMM   = design_parameters["Ring1RadialWidthMM"]   # 5
-        self.Ring2RadialWidthMM   = design_parameters["Ring2RadialWidthMM"]   # 5
-
-        # Bearing Parameters
-        self.CarrierRadialThicknessClearance1 = design_parameters["CarrierRadialThicknessClearance1"]# 10
-        self.CarrierRadialThicknessClearance2 = design_parameters["CarrierRadialThicknessClearance2"]# 10
-
-        # Carrier Inner Diameter Clearance
-        self.carrierInnerDiaClearanceMM1  = design_parameters["carrierInnerDiaClearanceMM1"]# 2
-        self.sCarrierInnerDiaClearanceMM1 = design_parameters["sCarrierInnerDiaClearanceMM1"]# 2
-        self.carrierInnerDiaClearanceMM2  = design_parameters["carrierInnerDiaClearanceMM2"]# 2
-        self.sCarrierInnerDiaClearanceMM2 = design_parameters["sCarrierInnerDiaClearanceMM2"]# 2
-
-        # Update the volume accordingly
-        self.clearanceMotorandCaseMM  = design_parameters["clearanceMotorandCaseMM"]  # 2.3
-        self.clearanceRingandCaseMM   = design_parameters["clearanceRingandCaseMM"]   # 1.5
-        self.clearance1RingandCaseMM  = design_parameters["clearance1RingandCaseMM"]  # 1.5
-        self.clearanceCarrierPlanetMM = design_parameters["clearanceCarrierPlanetMM"] # 1.5
-        self.upperHousingHeight       = design_parameters["upperHousingHeight"]       # 5
-        self.clearanceSCarrierMotorMM = design_parameters["clearanceSCarrierMotorMM"] # 2
-
-        # secondary carrier parameters
-        self.sCarrierExtrusionDiaMM_Stg1       = self.doubleStagePlanetaryGearbox.sCarrierExtrusionDiaMM_Stg1       
-        self.sCarrierExtrusionClearanceMM_Stg1 = self.doubleStagePlanetaryGearbox.sCarrierExtrusionClearanceMM_Stg1 
-        self.sCarrierExtrusionDiaMM_Stg2       = self.doubleStagePlanetaryGearbox.sCarrierExtrusionDiaMM_Stg2       
-        self.sCarrierExtrusionClearanceMM_Stg2 = self.doubleStagePlanetaryGearbox.sCarrierExtrusionClearanceMM_Stg2
 
         #-----------------------------------------------------
         # Dependent parameters
@@ -6201,81 +6162,25 @@ class doubleStagePlanetaryActuator:
         # Initializing here with None values
         # Will be updated in Mass calculation function
         #-----------------------------------------------------
-        # Stage 1 parameters
-        self.InnerDiaBearingMM1                 : float | None = None
-        self.OuterDiaBearingMM1                 : float | None = None
-        self.WidthBearingMM1                    : float | None = None   
-        self.carrierInnerDiameterMM1            : float | None = None           
-        self.sCarrierInnerDiameterMM1           : float | None = None          
-        self.sCarrierExtrusionDiaMM1            : float | None = None           
-        self.CarrierThicknessMM1                : float | None = None               
-        self.CarrierOuterDiameterMM1            : float | None = None           
-        self.CarrierExtrusionDiameterMM1        : float | None = None       
-        self.CarrierExtrusionHeightMM1          : float | None = None         
-        self.SecondaryCarrierExtrusionHeightMM1 : float | None = None
-        self.SecondaryCarrierOuterDiameterMM1   : float | None = None  
 
-        # Stage 2 parameters
-        self.InnerDiaBearingMM2       : float | None = None
-        self.OuterDiaBearingMM2       : float | None = None
-        self.WidthBearingMM2          : float | None = None
-        self.carrierInnerDiameterMM2  : float | None = None
-        self.sCarrierInnerDiameterMM2 : float | None = None
-        self.sCarrierExtrusionDiaMM2  : float | None = None
-
-        self.CarrierThicknessMM2                : float | None = None
-        self.CarrierOuterDiameterMM2            : float | None = None
-        self.CarrierExtrusionDiameterMM2        : float | None = None
-        self.CarrierExtrusionHeightMM2          : float | None = None
-        self.SecondaryCarrierExtrusionHeightMM2 : float | None = None
-        self.SecondaryCarrierOuterDiameterMM2   : float | None = None
-        
-        # Others
-        self.MainCoverInnerRadiusMM       : float | None = None 
-        self.MainCoverOuterRadiusMM       : float | None = None 
-        self.MainCoverProtrusion1RadiusMM : float | None = None 
-        self.HeightMainCoverProtrusion1MM : float | None = None 
-        self.RadiusBaseMM                 : float | None = None 
-        self.RadiusCouplerShaftMM         : float | None = None 
-        self.LengthMainCoverMM            : float | None = None 
-        self.Carrier1ShaftDiaMM           : float | None = None 
-
-        self.MainCase2Part1InnerDiamMM : float | None = None   
-        self.MainCase2Part1OuterDiamMM : float | None = None   
-        self.MainCase2Part1HeightMM    : float | None = None   
-        self.MainCase2Part2InnerDiamMM : float | None = None   
-        self.MainCase2Part2OuterDiamMM : float | None = None   
-        self.MainCase2Part2HeightMM    : float | None = None   
-
-        #----------------------------------------
-        # NOTE: Old Code
-        #----------------------------------------
-        # self.Stage2Actuator = singleStagePlanetaryActuator(motor,self.doubleStagePlanetaryGearbox.Stage2)
-        # self.Stage1Actuator = singleStagePlanetaryActuator(motor,self.doubleStagePlanetaryGearbox.Stage1)
-
-        # self.carrier1ShaftDiaMM = self.getCarrier1ShaftDiaMM()
-        # self.mainCase2Thickness = self.getMainCase2Thickness()
-
-        # # TODO: Deepak Why is this here?
-        # # Shouldn't the functions be used after the facewidth is updated?
-
-        # # Calculations
-        # self.mainCase2Part1InnerDiamMM = self.calculateMainCase2Part1InnerDiamMM()
-        # self.mainCase2Part1OuterDiamMM = self.getMainCase2Part1OuterDiamMM()
-        # self.mainCase2part1HeightMM    = self.getMainCase2Part1HeightMM()
-        # self.mainCase2Part2InnerDiamMM = self.getMainCase2Part2InnerDiamMM()
-        # self.mainCase2Part2OuterDiamMM = self.getMainCase2Part2OuterDiamMM()
-        # self.mainCase2part2HeightMM    = self.getMainCase2Part2HeightMM()
-
-        # # Volume calculations
-        # self.additionalMassCarrier1   = self.calculateAdditionalMassCarrier1()
-        # self.stage1MassKG             = self.calculateStage1MassKG()
-        # self.mainCase2Part1Volume     = self.calculateMainCase2Part1Volume()
-        # self.mainCase2Part2Volume     = self.calculateMainCase2Part2Volume()
-        # self.mainCase2remainingVolume = self.calculateMainCase2RemainingVolume()
-        # self.mainCase2volumeMM        = self.calculateMainCase2VolumeMM()
-        # self.mainCaseStage2Mass       = self.calculateMainCaseStage2Mass()
-        # self.stage2MassKG             = self.calculateStage2MassKG()
+        self.case_mounting_surface_height       = design_parameters["case_mounting_surface_height"]
+        self.standard_clearance_1_5mm           = design_parameters["standard_clearance_1_5mm"]    
+        self.base_plate_thickness               = design_parameters["base_plate_thickness"]        
+        self.Motor_case_thickness               = design_parameters["Motor_case_thickness"]        
+        self.clearance_planet                   = design_parameters["clearance_planet"]            
+        self.output_mounting_hole_dia           = design_parameters["output_mounting_hole_dia"]    
+        self.sec_carrier_thickness              = design_parameters["sec_carrier_thickness"]       
+        self.sun_coupler_hub_thickness          = design_parameters["sun_coupler_hub_thickness"]   
+        self.sun_shaft_bearing_OD               = design_parameters["sun_shaft_bearing_OD"]        
+        self.carrier_bearing_step_width         = design_parameters["carrier_bearing_step_width"]  
+        self.planet_shaft_dia                   = design_parameters["planet_shaft_dia"]            
+        self.sun_shaft_bearing_ID               = design_parameters["sun_shaft_bearing_ID"]        
+        self.sun_shaft_bearing_width            = design_parameters["sun_shaft_bearing_width"]     
+        self.planet_bore                        = design_parameters["planet_bore"]                 
+        self.bearing_retainer_thickness         = design_parameters["bearing_retainer_thickness"]  
+        self.stg1_stg2_allen_socket_head_dia    = design_parameters["stg1_stg2_allen_socket_head_dia"]
+        self.bearingIDClearanceMM               = design_parameters["bearingIDClearanceMM"]
+        self.ringRadialWidthMM                  = design_parameters["ringRadialWidthMM"]
 
     def genEquationFile_old(self):
        file_path = os.path.join(os.path.dirname(__file__), 'template_CAD_designs', 'double_stage_GB', 'equations_double_stage.txt')
@@ -6356,7 +6261,8 @@ class doubleStagePlanetaryActuator:
        file1.close()
     
     def genEquationFile(self):
-       file_path = os.path.join(os.path.dirname(__file__), 'template_CAD_designs', 'double_stage_GB', 'equations_double_stage.txt')
+       return
+       file_path = os.path.join(os.path.dirname(__file__),'DSPG', 'equations_dspg_stg12.txt')
        with open(file_path, 'w') as file1:
         l = [
             # Stage 1 parameters
@@ -6506,8 +6412,8 @@ class doubleStagePlanetaryActuator:
         if not self.doubleStagePlanetaryGearbox.Stage1.meshingConstraint():
             print("Meshing constraint not satisfied in Layer 1")
             return
-        if not self.doubleStagePlanetaryGearbox.Stage1.noPlanetInterferenceConstraint():
-            print("No planet interference constraint not satisfied in Layer 1")
+        if not self.doubleStagePlanetaryGearbox.noPlanetInterferenceConstraint():
+            print("No planet interference constraint not satisfied")
             return
         if not self.doubleStagePlanetaryGearbox.Stage2.geometricConstraint():
             print("Geometric constraint not satisfied in Layer 2")
@@ -6515,9 +6421,9 @@ class doubleStagePlanetaryActuator:
         if not self.doubleStagePlanetaryGearbox.Stage2.meshingConstraint():
             print("Meshing constraint not satisfied in Layer 2")
             return
-        if not self.doubleStagePlanetaryGearbox.Stage2.noPlanetInterferenceConstraint():
-            print("No planet interference constraint not satisfied in Layer 2")
-            return
+        # if not self.doubleStagePlanetaryGearbox.Stage2.noPlanetInterferenceConstraint():
+        #     print("No planet interference constraint not satisfied in Layer 2")
+        #     return
         
         Ns1 = self.doubleStagePlanetaryGearbox.Stage1.Ns
         Np1 = self.doubleStagePlanetaryGearbox.Stage1.Np
@@ -6913,7 +6819,7 @@ class doubleStagePlanetaryActuator:
         #--------------------------------------
         # Independent variables
         #--------------------------------------
-        # To be written in Gearbox(sspg) JSON files
+        # To be written in Gearbox(dspg) JSON files
         case_mounting_surface_height    = self.case_mounting_surface_height
         standard_clearance_1_5mm        = self.standard_clearance_1_5mm    
         base_plate_thickness            = self.base_plate_thickness        
@@ -6941,7 +6847,7 @@ class doubleStagePlanetaryActuator:
         h_b = 1.25 * module
 
         #--------------------------------------
-        # Mass: sspg_motor_casing
+        # Mass: dspg_motor_casing
         #--------------------------------------
         ring_radial_thickness = self.ringRadialWidthMM
 
@@ -6966,7 +6872,7 @@ class doubleStagePlanetaryActuator:
         Motor_case_mass = Motor_case_volume * densityPLA
 
         #--------------------------------------
-        # Mass: sspg_gearbox_casing
+        # Mass: dspg_gearbox_casing
         #--------------------------------------
         # Mass of the gearbox includes the mass of:
         # 1. Ring gear
@@ -7053,7 +6959,7 @@ class doubleStagePlanetaryActuator:
 
 
         #----------------------------------
-        # Mass: sspg_sun
+        # Mass: dspg_sun
         #----------------------------------
         sun_hub_dia = motor_output_hole_PCD + motor_output_hole_dia + standard_clearance_1_5mm * 4
 
@@ -7070,13 +6976,13 @@ class doubleStagePlanetaryActuator:
         sun_mass         = sun_volume * densityPLA
 
         #--------------------------------------
-        # Mass: sspg_planet
+        # Mass: dspg_planet
         #--------------------------------------
         planet_volume = (np.pi * ((DiaPlanetMM*0.5)**2 - (planet_bore*0.5)**2) * planetFwMM) * 1e-9
         planet_mass   = planet_volume * densityPLA
 
         #--------------------------------------
-        # Mass: sspg_sec_carrier
+        # Mass: dspg_sec_carrier
         #--------------------------------------
         sec_carrier_OD = bearing_ID
         sec_carrier_ID = (DiaSunMM + DiaPlanetMM) - planet_shaft_dia - 2 * standard_clearance_1_5mm
@@ -7085,24 +6991,24 @@ class doubleStagePlanetaryActuator:
         sec_carrier_mass   = sec_carrier_volume * densityPLA
 
         #--------------------------------------
-        # Mass: sspg_sun_shaft_bearing
+        # Mass: dspg_sun_shaft_bearing
         #--------------------------------------
         sun_shaft_bearing_mass       = 4 * 0.001 # kg
 
         #--------------------------------------
-        # Mass: sspg_planet_bearing
+        # Mass: dspg_planet_bearing
         #--------------------------------------
         planet_bearing_mass          = 1 * 0.001 # kg
         planet_bearing_num           = numPlanet * 2
         planet_bearing_combined_mass = planet_bearing_mass * planet_bearing_num
 
         #--------------------------------------
-        # Mass: sspg_planet_bearing
+        # Mass: dspg_planet_bearing
         #--------------------------------------
         bearing_mass = BearingMassKG # kg
 
         #--------------------------------------
-        # Mass: sspg_bearing_retainer
+        # Mass: dspg_bearing_retainer
         #--------------------------------------
         bearing_retainer_OD        = bearing_holding_structure_OD
         bearing_retainer_ID        = bearing_OD - standard_clearance_1_5mm
@@ -7202,7 +7108,7 @@ class doubleStagePlanetaryActuator:
         #--------------------------------------
         # Independent variables
         #--------------------------------------
-        # To be written in Gearbox(sspg) JSON files
+        # To be written in Gearbox(dspg) JSON files
         case_mounting_surface_height    = self.case_mounting_surface_height
         standard_clearance_1_5mm        = self.standard_clearance_1_5mm    
         base_plate_thickness            = self.base_plate_thickness        
@@ -7231,14 +7137,14 @@ class doubleStagePlanetaryActuator:
         h_b = 1.25 * module
 
         #--------------------------------------
-        # Mass: sspg_gearbox_casing
+        # Mass: dspg_gearbox_casing
         #--------------------------------------
         # Mass of the gearbox includes the mass of:
         # 1. Ring gear
         # 2. Bearing holding structure
         # 3. Case mounting structure
         #--------------------------------------
-        ring_radial_thickness = self.Ring2RadialWidthMM
+        ring_radial_thickness = self.ringRadialWidthMM
         ring_ID               = Nr * module
         ring_OD               = Nr * module + ring_radial_thickness*2
         ringFwUsedMM          = ringFwMM + clearance_planet
@@ -7292,7 +7198,7 @@ class doubleStagePlanetaryActuator:
         gearbox_casing_mass = (ring_volume + bearing_holding_structure_volume + case_mounting_structure_volume + large_fillet_volume) * densityPLA
 
         #----------------------------------
-        # Mass: sspg_carrier
+        # Mass: dspg_carrier
         #----------------------------------
         carrier_OD     = bearing_ID
         carrier_ID     = sun_shaft_bearing_OD - standard_clearance_1_5mm * 2
@@ -7308,13 +7214,13 @@ class doubleStagePlanetaryActuator:
         carrier_mass = carrier_volume * densityPLA
 
         #--------------------------------------
-        # Mass: sspg_planet
+        # Mass: dspg_planet
         #--------------------------------------
         planet_volume = (np.pi * ((DiaPlanetMM*0.5)**2 - (planet_bore*0.5)**2) * planetFwMM) * 1e-9
         planet_mass   = planet_volume * densityPLA
 
         #--------------------------------------
-        # Mass: sspg_sec_carrier
+        # Mass: dspg_sec_carrier
         #--------------------------------------
         sec_carrier_OD = bearing_ID
         sec_carrier_ID = (DiaSunMM + DiaPlanetMM) - planet_shaft_dia - 2 * standard_clearance_1_5mm
@@ -7323,24 +7229,24 @@ class doubleStagePlanetaryActuator:
         sec_carrier_mass = sec_carrier_volume * densityPLA
 
         #--------------------------------------
-        # Mass: sspg_sun_shaft_bearing
+        # Mass: dspg_sun_shaft_bearing
         #--------------------------------------
         sun_shaft_bearing_mass = 4 * 0.001 # kg
 
         #--------------------------------------
-        # Mass: sspg_planet_bearing
+        # Mass: dspg_planet_bearing
         #--------------------------------------
         planet_bearing_mass          = 1 * 0.001 # kg
         planet_bearing_num           = numPlanet * 2
         planet_bearing_combined_mass = planet_bearing_mass * planet_bearing_num
 
         #--------------------------------------
-        # Mass: sspg_bearing
+        # Mass: dspg_bearing
         #--------------------------------------
         bearing_mass = BearingMassKG # kg
 
         #--------------------------------------
-        # Mass: sspg_bearing_retainer
+        # Mass: dspg_bearing_retainer
         #--------------------------------------
         bearing_retainer_OD = bearing_holding_structure_OD
         bearing_retainer_ID = bearing_OD - standard_clearance_1_5mm
@@ -7372,6 +7278,10 @@ class doubleStagePlanetaryActuator:
         
         return Actuator_mass
         
+    def getMassKG_3DP(self):
+        totalMass = self.getMassKG_3DP_stg1() + self.getMassKG_3DP_stg2()
+        return totalMass
+    
 
 #========================================================================
 # Class: Actuator Optimization
@@ -9017,7 +8927,7 @@ class optimizationDoubleStagePlanetaryActuator:
                                                                 Actuator.updateFacewidth()
                                                                 effActuator = Actuator.doubleStagePlanetaryGearbox.getEfficiency()
                                                                 # massActuator = Actuator.getMassStructureKG()
-                                                                massActuator = Actuator.getMassKG_new()
+                                                                massActuator = Actuator.getMassKG_3DP()
                                                                 self.Cost = (self.K_Mass * massActuator) + (self.K_Eff * effActuator)
 
                                                                 if self.Cost < MinCost:
@@ -9064,6 +8974,8 @@ class optimizationDoubleStagePlanetaryActuator:
                                                                                                                 serviceFactor               = Actuator.serviceFactor, 
                                                                                                                 maxGearboxDiameter          = Actuator.maxGearboxDiameter, # mm 
                                                                                                                 stressAnalysisMethodName    = "Lewis") # Lewis or AGMA
+                                                                    opt_actuator.updateFacewidth()
+                                                                    opt_actuator.getMassKG_3DP()
                                                                     # self.printOptimizationResults(Actuator, log, csv)
                                                         Actuator.doubleStagePlanetaryGearbox.Stage2.setNumPlanet(Actuator.doubleStagePlanetaryGearbox.Stage2.numPlanet + 1)
                                                     # Actuator.doubleStagePlanetaryGearbox.Stage2.setNr(Actuator.doubleStagePlanetaryGearbox.Stage2.Ns + 1)
@@ -9189,7 +9101,7 @@ class optimizationDoubleStagePlanetaryActuator:
                                                                 Actuator.updateFacewidth()
                                                                 effActuator = Actuator.doubleStagePlanetaryGearbox.getEfficiency()
                                                                 # massActuator = Actuator.getMassStructureKG()
-                                                                massActuator = Actuator.getMassKG_new()
+                                                                massActuator = Actuator.getMassKG_3DP()
                                                                 self.Cost = (self.K_Mass * massActuator) + (self.K_Eff * effActuator)
 
                                                                 if self.Cost < MinCost:
@@ -9405,12 +9317,12 @@ class optimizationDoubleStagePlanetaryActuator:
                 Opt_CD_PR2 = ((Nr2 - Np2)/2)* module2
 
             # mass        = round(Actuator.getMassStructureKG(), 3)
-            mass        = round(Actuator.getMassKG_new(), 3)
+            mass        = round(Actuator.getMassKG_3DP(), 3)
             eff         = round(Actuator.doubleStagePlanetaryGearbox.getEfficiency(), 3)
             if (self.UsePSCasVariable == 1):
                 eff = self.dspgOpt.getEfficiency(Var = False)
             
             peakTorque  = round(Actuator.motor.getMaxMotorTorque()*Actuator.doubleStagePlanetaryGearbox.gearRatio(), 3)
             Cost        = self.Cost
-            Torque_Density =  peakTorque/mass #round((Actuator.motor.getMaxMotorTorque()*Actuator.doubleStagePlanetaryGearbox.gearRatio()) / Actuator.getMassKG_new(), 3)
+            Torque_Density =  peakTorque/mass #round((Actuator.motor.getMaxMotorTorque()*Actuator.doubleStagePlanetaryGearbox.gearRatio()) / Actuator.getMassKG_3DP(), 3)
             print(iter,",", gearRatio,",", module1,",", module2,",", Ns1,",", Np1,",", Nr1,",", numPlanet1,",", Ns2,",", Np2,",", Nr2,",", numPlanet2,",", fwSun1MM,",", fwPlanet1MM,",", fwRing1MM,",", fwSun2MM,",", fwPlanet2MM,",", fwRing2MM,"," ,Opt_PSC_sun1,",",  Opt_PSC_planet1,",", Opt_PSC_ring1,",", Opt_PSC_sun2,",",  Opt_PSC_planet2,",", Opt_PSC_ring2, ",", Opt_CD_SP1, ",", Opt_CD_PR1, ",", Opt_CD_SP2, ",", Opt_CD_PR2, ",", mass, ",", eff, ",", peakTorque, ",", Cost,",", Torque_Density)

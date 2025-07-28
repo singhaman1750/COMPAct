@@ -31,13 +31,13 @@
         "clearanceSCarrierMotorMM"          : 2
     },
     "dspg_optimization_parameters":{
-        "GEAR_RATIO_MIN"        : 4,
-        "GEAR_RATIO_MAX"        : 45, 
+        "GEAR_RATIO_MIN"        : 10,
+        "GEAR_RATIO_MAX"        : 12, 
         "GEAR_RATIO_STEP"       : 1,
-        "MODULE_STAGE1_MIN"     : 0.5, 
-        "MODULE_STAGE1_MAX"     : 0.8, 
+        "MODULE_STAGE1_MIN"     : 0.6, 
+        "MODULE_STAGE1_MAX"     : 0.7, 
         "MODULE_STAGE2_MIN"     : 0.9, 
-        "MODULE_STAGE2_MAX"     : 1.2, 
+        "MODULE_STAGE2_MAX"     : 1.0, 
         "NUM_PLANET_STAGE1_MIN" : 3, 
         "NUM_PLANET_STAGE1_MAX" : 5, 
         "NUM_PLANET_STAGE2_MIN" : 3, 
@@ -46,6 +46,31 @@
         "NUM_TEETH_PLANET_MIN"  : 20 
     },
     "dspg_design_parameters_3DP":{
+        "sCarrierExtrusionDiaMM_Stg1"       : 12,
+        "sCarrierExtrusionClearanceMM_Stg1" : 2,
+        "sCarrierExtrusionDiaMM_Stg2"       : 12,
+        "sCarrierExtrusionClearanceMM_Stg2" : 2,
+        "Ring1RadialWidthMM"                : 5,
+        "Ring2RadialWidthMM"                : 5,
+        "planetMinDistanceMM"               : 5,
+        "case_mounting_surface_height"      : 4 ,
+        "standard_clearance_1_5mm"          : 1.5,
+        "base_plate_thickness"              : 4,
+        "Motor_case_thickness"              : 2.5,
+        "clearance_planet"                  : 1.5,
+        "output_mounting_hole_dia"          : 4,
+        "sec_carrier_thickness"             : 5,
+        "sun_coupler_hub_thickness"         : 4,
+        "sun_shaft_bearing_OD"              : 16,
+        "carrier_bearing_step_width"        : 1.5,
+        "planet_shaft_dia"                  : 8,
+        "sun_shaft_bearing_ID"              : 8,
+        "sun_shaft_bearing_width"           : 4,
+        "planet_bore"                       : 10,
+        "bearing_retainer_thickness"        : 2,
+        "stg1_stg2_allen_socket_head_dia"   : 4,
+        "bearingIDClearanceMM"              : 10,
+        "ringRadialWidthMM"                 : 5
 
     }
 }
