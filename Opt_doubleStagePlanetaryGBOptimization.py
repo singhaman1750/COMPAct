@@ -34,6 +34,7 @@ material_properties = config_data["Material_properties"]
 
 Gear_standard_parameters = config_data["Gear_standard_parameters"]
 Lewis_params             = config_data["Lewis_params"]
+MIT_params               = config_data["MIT_params"]
 
 Steel    = material_properties["Steel"]
 Aluminum = material_properties["Aluminum"]
@@ -141,8 +142,8 @@ doubleStagePlanetaryGearboxInstance = doubleStagePlanetaryGearbox(design_paramet
 #----------------------------------------
 # Actuator
 #----------------------------------------
-maxGearboxDiameter_U8     = MotorU8.motorDiaMM     - 2*dspg_design_params["Ring2RadialWidthMM"]
-maxGearboxDiameter_U10    = MotorU10.motorDiaMM    - 2*dspg_design_params["Ring2RadialWidthMM"]
+maxGearboxDiameter_U8     = MotorU8.motorDiaMM * 1.5    - 2*dspg_design_params["Ring2RadialWidthMM"]
+maxGearboxDiameter_U10    = MotorU10.motorDiaMM * 1.5   - 2*dspg_design_params["Ring2RadialWidthMM"]
 maxGearboxDiameter_MN8014 = MotorMN8014.motorDiaMM - 2*dspg_design_params["Ring2RadialWidthMM"]
 maxGearboxDiameter_VT8020 = Motor8020.motorDiaMM   - 2*dspg_design_params["Ring2RadialWidthMM"]
 maxGearboxDiameter_U12    = MotorU12.motorDiaMM    - 2*dspg_design_params["Ring2RadialWidthMM"] 
@@ -151,44 +152,44 @@ maxGearboxDiameter_U12    = MotorU12.motorDiaMM    - 2*dspg_design_params["Ring2
 Actuator_U8 = doubleStagePlanetaryActuator(design_parameters           = dspg_design_params,
                                            motor                       = MotorU8,  
                                            doubleStagePlanetaryGearbox = doubleStagePlanetaryGearboxInstance, 
-                                           FOS                         = Lewis_params["FOS"], 
-                                           serviceFactor               = Lewis_params["serviceFactor"], 
+                                           FOS                         = MIT_params["FOS"], 
+                                           serviceFactor               = MIT_params["serviceFactor"], 
                                            maxGearboxDiameter          = maxGearboxDiameter_U8,
-                                           stressAnalysisMethodName    = "Lewis")
+                                           stressAnalysisMethodName    = "MIT")
 
 # U10-Actuator
 Actuator_U10 = doubleStagePlanetaryActuator(design_parameters           = dspg_design_params,
                                             motor                       = MotorU10,  
                                             doubleStagePlanetaryGearbox = doubleStagePlanetaryGearboxInstance, 
-                                            FOS                         = Lewis_params["FOS"], 
-                                            serviceFactor               = Lewis_params["serviceFactor"], 
+                                            FOS                         = MIT_params["FOS"], 
+                                            serviceFactor               = MIT_params["serviceFactor"], 
                                             maxGearboxDiameter          = maxGearboxDiameter_U10,
-                                            stressAnalysisMethodName    = "Lewis")
+                                            stressAnalysisMethodName    = "MIT")
 
 # MN8014-Actuator
 Actuator_MN8014 = doubleStagePlanetaryActuator(design_parameters           = dspg_design_params,
                                                motor                       = MotorMN8014,  
                                                doubleStagePlanetaryGearbox = doubleStagePlanetaryGearboxInstance, 
-                                               FOS                         = Lewis_params["FOS"], 
-                                               serviceFactor               = Lewis_params["serviceFactor"], 
+                                               FOS                         = MIT_params["FOS"], 
+                                               serviceFactor               = MIT_params["serviceFactor"], 
                                                maxGearboxDiameter          = maxGearboxDiameter_MN8014,
-                                               stressAnalysisMethodName    = "Lewis")
+                                               stressAnalysisMethodName    = "MIT")
 
 Actuator_VT8020 = doubleStagePlanetaryActuator(design_parameters           = dspg_design_params,
                                                motor                       = Motor8020,
                                                doubleStagePlanetaryGearbox = doubleStagePlanetaryGearboxInstance,
-                                               FOS                         = Lewis_params["FOS"],
-                                               serviceFactor               = Lewis_params["serviceFactor"],
+                                               FOS                         = MIT_params["FOS"],
+                                               serviceFactor               = MIT_params["serviceFactor"],
                                                maxGearboxDiameter          = maxGearboxDiameter_VT8020,
-                                               stressAnalysisMethodName    = "Lewis")
+                                               stressAnalysisMethodName    = "MIT")
 
 Actuator_U12 = doubleStagePlanetaryActuator(design_parameters           = dspg_design_params,
                                             motor                       = MotorU12,
                                             doubleStagePlanetaryGearbox = doubleStagePlanetaryGearboxInstance,
-                                            FOS                         = Lewis_params["FOS"],
-                                            serviceFactor               = Lewis_params["serviceFactor"],
+                                            FOS                         = MIT_params["FOS"],
+                                            serviceFactor               = MIT_params["serviceFactor"],
                                             maxGearboxDiameter          = maxGearboxDiameter_U12,
-                                            stressAnalysisMethodName    = "Lewis")
+                                            stressAnalysisMethodName    = "MIT")
 
 # Optimization
 opt_param = config_data["Cost_gain_parameters"]
@@ -304,28 +305,28 @@ Optimizer_U12 = optimizationDoubleStagePlanetaryActuator(design_parameters      
 #-----------------------
 # Optimization: U8
 #-----------------------
-totalTime_U8 = Optimizer_U8.optimizeActuator(Actuator_U8, UsePSCasVariable = 0, log=0, csv=1)
-
-# Convert to hours, minutes, and seconds
-hours_U8, remainder_U8 = divmod(totalTime_U8, 3600)
-minutes_U8, seconds_U8 = divmod(remainder_U8, 60)
-
-# Print
-print("Optimization Completed : DSPG U8")
-print(f"Time taken: {hours_U8} hours, {minutes_U8} minutes, and {seconds_U8} seconds")
-
-# #-----------------------
-# # Optimization: U10
-# #-----------------------
-# totalTime_U10 = Optimizer_U10.optimizeActuator(Actuator_U10, UsePSCasVariable = 1, log=0, csv=1)
+# totalTime_U8 = Optimizer_U8.optimizeActuator(Actuator_U8, UsePSCasVariable = 0, log=0, csv=1)
 
 # # Convert to hours, minutes, and seconds
-# hours_U10, remainder_U10 = divmod(totalTime_U10, 3600)
-# minutes_U10, seconds_U10 = divmod(remainder_U10, 60)
+# hours_U8, remainder_U8 = divmod(totalTime_U8, 3600)
+# minutes_U8, seconds_U8 = divmod(remainder_U8, 60)
 
-# # Print
-# print("Optimization Completed : DSPG U10")
-# print(f"Time taken: {hours_U10} hours, {minutes_U10} minutes, and {seconds_U10} seconds")
+# Print
+# print("Optimization Completed : DSPG U8")
+# print(f"Time taken: {hours_U8} hours, {minutes_U8} minutes, and {seconds_U8} seconds")
+
+#-----------------------
+# Optimization: U10
+#-----------------------
+totalTime_U10 = Optimizer_U10.optimizeActuator(Actuator_U10, UsePSCasVariable = 0, log=0, csv=1)
+
+# Convert to hours, minutes, and seconds
+hours_U10, remainder_U10 = divmod(totalTime_U10, 3600)
+minutes_U10, seconds_U10 = divmod(remainder_U10, 60)
+
+# Print
+print("Optimization Completed : DSPG U10")
+print(f"Time taken: {hours_U10} hours, {minutes_U10} minutes, and {seconds_U10} seconds")
 
 # #-----------------------
 # # Optimization: MN8014
