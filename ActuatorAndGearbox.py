@@ -3247,6 +3247,13 @@ class compoundPlanetaryActuator:
         #-----------------------------------------------------
         self.setVariables()
 
+    def cost(self):
+        massActuator = self.getMassKG_3DP()
+        effActuator  = self.compoundPlanetaryGearbox.getEfficiency()
+        widthActuator = self.compoundPlanetaryGearbox.fwPlanetBigMM + self.compoundPlanetaryGearbox.fwPlanetSmallMM
+        cost = massActuator - effActuator + 0.1 * widthActuator
+        return cost
+
     def setVariables(self):
         #--------- Optimization Variable-----------
         self.Ns         = self.compoundPlanetaryGearbox.Ns
@@ -4050,7 +4057,7 @@ class compoundPlanetaryActuator:
         
         large_fillet_ID     = ring_OD
         large_fillet_OD     = Motor_case_OD
-        large_fillet_height = ringFwMM/2
+        large_fillet_height = ringFwMM
         large_fillet_volume = 0.5 * (np.pi * (((large_fillet_OD*0.5)**2) - ((large_fillet_ID)*0.5)**2) * large_fillet_height) * 1e-9
 
         gearbox_casing_mass = (ring_volume + bearing_holding_structure_volume + case_mounting_structure_volume + large_fillet_volume) * densityPLA
@@ -4064,7 +4071,7 @@ class compoundPlanetaryActuator:
 
         carrier_shaft_OD = planet_shaft_dia
         carrier_shaft_height = planet1FwMM  + planet2FwMM + clearance_planet * 2
-        carrier_shaft_num = numPlanet * 2
+        carrier_shaft_num = numPlanet * 2 + numPlanet # assuming triangular support is twice the mass of shaft
 
         carrier_volume = (np.pi * (((carrier_OD*0.5)**2) - ((carrier_ID)*0.5)**2) * carrier_height
                         + np.pi * ((carrier_shaft_OD*0.5)**2) * carrier_shaft_height * carrier_shaft_num) * 1e-9
@@ -8061,7 +8068,8 @@ class optimizationCompoundPlanetaryActuator:
                                                     massActuator   = Actuator.getMassKG_3DP()
                                                     effActuator    = Actuator.compoundPlanetaryGearbox.getEfficiency()
 
-                                                    self.Cost = (self.K_Mass * massActuator) + (self.K_Eff * effActuator)
+                                                    # self.Cost = (self.K_Mass * massActuator) + (self.K_Eff * effActuator)
+                                                    self.Cost = Actuator.cost()
                                                     if self.Cost < MinCost:
                                                         MinCost    = self.Cost
                                                         opt_done   = 1
