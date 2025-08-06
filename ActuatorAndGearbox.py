@@ -5729,7 +5729,7 @@ class doubleStagePlanetaryActuator:
         mass = self.getMassKG_3DP()
         eff = self.doubleStagePlanetaryGearbox.getEfficiency()
         width = self.doubleStagePlanetaryGearbox.Stage1.fwPlanetMM + self.doubleStagePlanetaryGearbox.Stage2.fwPlanetMM
-        cost = mass - 2 * eff + 0.1 * width
+        cost = mass - 2 * eff + 0.2 * width
         return cost 
 
     def setVariables_stg1(self):
