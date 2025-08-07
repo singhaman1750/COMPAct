@@ -1,0 +1,19 @@
+Motor Parameters:
+maxMotorAngVelRPM, maxMotorAngVelRadPerSec, maxMotorTorque, maxMotorPower, motorMass, motorDia, motorLength
+7200 , 753.9822368615503 , 2.304563575970645 , 1725 , 0.257 , 72 , 27
+ 
+Gear strength and size parameters:
+FOS, serviceFactor, stressAnalysisMethodName, maxGearBoxDia, maxGearAllowableStressMPa
+1.2 , 1.5 , MIT , 98.0 , 400
+ 
+Optimization Parameters:
+K_mass, K_Eff, MODULE_STAGE1_MIN, MODULE_STAGE1_MAX, MODULE_STAGE2_MIN, MODULE_STAGE2_MAX, NUM_PLANET_STAGE1_MIN, NUM_PLANET_STAGE1_MAX, NUM_PLANET_STAGE2_MIN, NUM_PLANET_STAGE2_MAX, NUM_TEETH_SUN_MIN, NUM_TEETH_PLANET_MIN, GEAR_RATIO_MIN, GEAR_RATIO_MAX, GEAR_RATIO_STEP
+1 , -2 , 0.8 , 1.0 , 0.8 , 1.0 , 3 , 5 , 3 , 5 , 20 , 20 , 36 , 38 , 1
+ 
+iter, gearRatio, module1, module2, Ns1, Np1, Nr1, numPlanet1, Ns2, Np2, Nr2, numPlanet2, fwSun1MM, fwPlanet1MM, fwRing1MM, fwSun2MM, fwPlanet2MM, fwRing2MM, Opt_PSC_sun1,  Opt_PSC_planet1, Opt_PSC_ring1, Opt_PSC_sun2, Opt_PSC_planet2, Opt_PSC_ring2, Opt_CD_SP1, Opt_CD_PR1, Opt_CD_SP2, Opt_CD_PR2, mass, eff, peakTorque, Cost, Torque_Density
+2 , 36.0 , 0.9 , 0.8 , 20 , 43 , 106 , 3 , 21 , 39 , 99 , 3 , 0.769 , 8.0 , 8.0 , 5.769 , 8.0 , 8.0 , 0 , 0 , 0 , 0 , 0 , 0 , 28.35 , 28.35 , 24.0 , 24.0 , 0.91 , 0.9 , 82.964 , 1.7120433869231113 , 91.16923076923077
+4 , 37.55102040816327 , 0.8 , 0.8 , 21 , 48 , 117 , 3 , 21 , 39 , 99 , 3 , 0.905 , 8.0 , 8.0 , 6.018 , 8.0 , 8.0 , 0 , 0 , 0 , 0 , 0 , 0 , 27.6 , 27.6 , 24.0 , 24.0 , 0.907 , 0.903 , 86.539 , 1.7209060604600332 , 95.41234840132304
+
+
+Running Time (sec)
+167.0088882446289
