@@ -38,6 +38,7 @@ MIT_params               = config_data["MIT_params"]
 
 Steel    = material_properties["Steel"]
 Aluminum = material_properties["Aluminum"]
+PLA      = material_properties["PLA"]
 
 dspg_design_params       = dspg_params["dspg_design_parameters_3DP"]
 dspg_optimization_params = dspg_params["dspg_optimization_parameters"]
@@ -54,12 +55,11 @@ Motor_Driver_OdrivePro_params = motor_driver_data["OdrivePro"]
 # Motors
 #--------------------------------------------------------
 # T motor U8
-MotorU8_Kv                   = motor_data["MotorU8_framed"]["Kv"]                   # rpm/V
-MotorU8_maxContinuousCurrent = motor_data["MotorU8_framed"]["maxContinuousCurrent"] # A
+MotorU8_Kv                         = motor_data["MotorU8_framed"]["Kv"]                   # rpm/V
+MotorU8_maxContinuousCurrent       = motor_data["MotorU8_framed"]["maxContinuousCurrent"] # A
 
 MotorU8_maxTorque                  = MotorU8_maxContinuousCurrent / (MotorU8_Kv * 2 * np.pi / 60)
 MotorU8_power                      = motor_data["MotorU8_framed"]["power"]                 # W 
-
 MotorU8_ratedVoltage               = motor_data["MotorU8_framed"]["ratedVoltage"]   
 MotorU8_maxMotorAngVelRPM          = MotorU8_Kv * MotorU8_ratedVoltage # RPM 
 MotorU8_mass                       = motor_data["MotorU8_framed"]["mass"]                  # kg 
@@ -76,10 +76,10 @@ MotorU8_wire_slot_length           = motor_data["MotorU8_framed"]["wire_slot_len
 MotorU8_wire_slot_radius           = motor_data["MotorU8_framed"]["wire_slot_radius"]
 
 # U10 Motor
-MotorU10_Kv                   = motor_data["MotorU10_framed"]["Kv"]                   # rpm/V
-MotorU10_maxContinuousCurrent = motor_data["MotorU10_framed"]["maxContinuousCurrent"] # A
+MotorU10_Kv                         = motor_data["MotorU10_framed"]["Kv"]                   # rpm/V
+MotorU10_maxContinuousCurrent       = motor_data["MotorU10_framed"]["maxContinuousCurrent"] # A
 
-MotorU10_maxTorque         = MotorU10_maxContinuousCurrent / (MotorU10_Kv * 2 * np.pi / 60)
+MotorU10_maxTorque                  = MotorU10_maxContinuousCurrent / (MotorU10_Kv * 2 * np.pi / 60)
 MotorU10_power                      = motor_data["MotorU10_framed"]["power"]                  # W
 MotorU10_ratedVoltage               = motor_data["MotorU10_framed"]["ratedVoltage"]   
 MotorU10_maxMotorAngVelRPM          = MotorU10_Kv * MotorU10_ratedVoltage   # RPM
@@ -97,16 +97,16 @@ MotorU10_wire_slot_length           = motor_data["MotorU10_framed"]["wire_slot_l
 MotorU10_wire_slot_radius           = motor_data["MotorU10_framed"]["wire_slot_radius"]
 
 # MN8014 Motor
-MotorMN8014_Kv                   = motor_data["MotorMN8014_framed"]["Kv"]                   # rpm/V
-MotorMN8014_maxContinuousCurrent = motor_data["MotorMN8014_framed"]["maxContinuousCurrent"] # A
+MotorMN8014_Kv                         = motor_data["MotorMN8014_framed"]["Kv"]                   # rpm/V
+MotorMN8014_maxContinuousCurrent       = motor_data["MotorMN8014_framed"]["maxContinuousCurrent"] # A
 
-MotorMN8014_maxTorque         = MotorMN8014_maxContinuousCurrent / (MotorMN8014_Kv * 2 * np.pi / 60)
-MotorMN8014_power             = motor_data["MotorMN8014_framed"]["power"]                  # W
+MotorMN8014_maxTorque                  = MotorMN8014_maxContinuousCurrent / (MotorMN8014_Kv * 2 * np.pi / 60)
+MotorMN8014_power                      = motor_data["MotorMN8014_framed"]["power"]                  # W
 MotorMN8014_ratedVoltage               = motor_data["MotorMN8014_framed"]["ratedVoltage"]   
 MotorMN8014_maxMotorAngVelRPM          = MotorMN8014_Kv * MotorMN8014_ratedVoltage   # RPM
-MotorMN8014_mass              = motor_data["MotorMN8014_framed"]["mass"]                   # Kg 
-MotorMN8014_dia               = motor_data["MotorMN8014_framed"]["dia"]                    # mm
-MotorMN8014_length            = motor_data["MotorMN8014_framed"]["length"]                 # mm
+MotorMN8014_mass                       = motor_data["MotorMN8014_framed"]["mass"]                   # Kg 
+MotorMN8014_dia                        = motor_data["MotorMN8014_framed"]["dia"]                    # mm
+MotorMN8014_length                     = motor_data["MotorMN8014_framed"]["length"]                 # mm
 MotorMN8014_motor_mount_hole_PCD       = motor_data["MotorMN8014_framed"]["motor_mount_hole_PCD"]
 MotorMN8014_motor_mount_hole_dia       = motor_data["MotorMN8014_framed"]["motor_mount_hole_dia"]
 MotorMN8014_motor_mount_hole_num       = motor_data["MotorMN8014_framed"]["motor_mount_hole_num"]
@@ -118,16 +118,16 @@ MotorMN8014_wire_slot_length           = motor_data["MotorMN8014_framed"]["wire_
 MotorMN8014_wire_slot_radius           = motor_data["MotorMN8014_framed"]["wire_slot_radius"]
 
 # 8020 Motor
-Motor8020_Kv                   = motor_data["Motor8020_framed"]["Kv"]                   # rpm/V
-Motor8020_maxContinuousCurrent = motor_data["Motor8020_framed"]["maxContinuousCurrent"] # A
+Motor8020_Kv                         = motor_data["Motor8020_framed"]["Kv"]                   # rpm/V
+Motor8020_maxContinuousCurrent       = motor_data["Motor8020_framed"]["maxContinuousCurrent"] # A
 
-Motor8020_maxTorque         = Motor8020_maxContinuousCurrent / (Motor8020_Kv * 2 * np.pi / 60)
-Motor8020_power             = motor_data["Motor8020_framed"]["power"]                  # W
+Motor8020_maxTorque                  = Motor8020_maxContinuousCurrent / (Motor8020_Kv * 2 * np.pi / 60)
+Motor8020_power                      = motor_data["Motor8020_framed"]["power"]                  # W
 Motor8020_ratedVoltage               = motor_data["Motor8020_framed"]["ratedVoltage"]   
 Motor8020_maxMotorAngVelRPM          = Motor8020_Kv * Motor8020_ratedVoltage   # RPM
-Motor8020_mass              = motor_data["Motor8020_framed"]["mass"]                   # Kg 
-Motor8020_dia               = motor_data["Motor8020_framed"]["dia"]                    # mm
-Motor8020_length            = motor_data["Motor8020_framed"]["length"]                 # mm
+Motor8020_mass                       = motor_data["Motor8020_framed"]["mass"]                   # Kg 
+Motor8020_dia                        = motor_data["Motor8020_framed"]["dia"]                    # mm
+Motor8020_length                     = motor_data["Motor8020_framed"]["length"]                 # mm
 Motor8020_motor_mount_hole_PCD       = motor_data["Motor8020_framed"]["motor_mount_hole_PCD"]
 Motor8020_motor_mount_hole_dia       = motor_data["Motor8020_framed"]["motor_mount_hole_dia"]
 Motor8020_motor_mount_hole_num       = motor_data["Motor8020_framed"]["motor_mount_hole_num"]
@@ -139,16 +139,16 @@ Motor8020_wire_slot_length           = motor_data["Motor8020_framed"]["wire_slot
 Motor8020_wire_slot_radius           = motor_data["Motor8020_framed"]["wire_slot_radius"]
 
 # T motor U12
-MotorU12_Kv                   = motor_data["MotorU12_framed"]["Kv"]                   # rpm/V
-MotorU12_maxContinuousCurrent = motor_data["MotorU12_framed"]["maxContinuousCurrent"] # A
+MotorU12_Kv                         = motor_data["MotorU12_framed"]["Kv"]                   # rpm/V
+MotorU12_maxContinuousCurrent       = motor_data["MotorU12_framed"]["maxContinuousCurrent"] # A
 
-MotorU12_maxTorque         = MotorU12_maxContinuousCurrent / (MotorU12_Kv * 2 * np.pi / 60)
-MotorU12_power             = motor_data["MotorU12_framed"]["power"]                 # W 
+MotorU12_maxTorque                  = MotorU12_maxContinuousCurrent / (MotorU12_Kv * 2 * np.pi / 60)
+MotorU12_power                      = motor_data["MotorU12_framed"]["power"]                 # W 
 MotorU12_ratedVoltage               = motor_data["MotorU12_framed"]["ratedVoltage"]   
 MotorU12_maxMotorAngVelRPM          = MotorU12_Kv * MotorU12_ratedVoltage   # RPM
-MotorU12_mass              = motor_data["MotorU12_framed"]["mass"]                  # kg 
-MotorU12_dia               = motor_data["MotorU12_framed"]["dia"]                   # mm 
-MotorU12_length            = motor_data["MotorU12_framed"]["length"]                # mm
+MotorU12_mass                       = motor_data["MotorU12_framed"]["mass"]                  # kg 
+MotorU12_dia                        = motor_data["MotorU12_framed"]["dia"]                   # mm 
+MotorU12_length                     = motor_data["MotorU12_framed"]["length"]                # mm
 MotorU12_motor_mount_hole_PCD       = motor_data["MotorU12_framed"]["motor_mount_hole_PCD"]
 MotorU12_motor_mount_hole_dia       = motor_data["MotorU12_framed"]["motor_mount_hole_dia"]
 MotorU12_motor_mount_hole_num       = motor_data["MotorU12_framed"]["motor_mount_hole_num"]
@@ -160,16 +160,16 @@ MotorU12_wire_slot_length           = motor_data["MotorU12_framed"]["wire_slot_l
 MotorU12_wire_slot_radius           = motor_data["MotorU12_framed"]["wire_slot_radius"]
 
 # T motor MAD_M6C12
-MotorMAD_M6C12_Kv                   = motor_data["MotorMAD_M6C12_framed"]["Kv"]                   # rpm/V
-MotorMAD_M6C12_maxContinuousCurrent = motor_data["MotorMAD_M6C12_framed"]["maxContinuousCurrent"] # A
+MotorMAD_M6C12_Kv                         = motor_data["MotorMAD_M6C12_framed"]["Kv"]                   # rpm/V
+MotorMAD_M6C12_maxContinuousCurrent       = motor_data["MotorMAD_M6C12_framed"]["maxContinuousCurrent"] # A
 
-MotorMAD_M6C12_maxTorque         = MotorMAD_M6C12_maxContinuousCurrent / (MotorMAD_M6C12_Kv * 2 * np.pi / 60)
-MotorMAD_M6C12_power             = motor_data["MotorMAD_M6C12_framed"]["power"]                 # W 
+MotorMAD_M6C12_maxTorque                  = MotorMAD_M6C12_maxContinuousCurrent / (MotorMAD_M6C12_Kv * 2 * np.pi / 60)
+MotorMAD_M6C12_power                      = motor_data["MotorMAD_M6C12_framed"]["power"]                 # W 
 MotorMAD_M6C12_ratedVoltage               = motor_data["MotorMAD_M6C12_framed"]["ratedVoltage"]   
 MotorMAD_M6C12_maxMotorAngVelRPM          = MotorMAD_M6C12_Kv * MotorMAD_M6C12_ratedVoltage   # RPM
-MotorMAD_M6C12_mass              = motor_data["MotorMAD_M6C12_framed"]["mass"]                  # kg 
-MotorMAD_M6C12_dia               = motor_data["MotorMAD_M6C12_framed"]["dia"]                   # mm 
-MotorMAD_M6C12_length            = motor_data["MotorMAD_M6C12_framed"]["length"]                # mm
+MotorMAD_M6C12_mass                       = motor_data["MotorMAD_M6C12_framed"]["mass"]                  # kg 
+MotorMAD_M6C12_dia                        = motor_data["MotorMAD_M6C12_framed"]["dia"]                   # mm 
+MotorMAD_M6C12_length                     = motor_data["MotorMAD_M6C12_framed"]["length"]                # mm
 MotorMAD_M6C12_motor_mount_hole_PCD       = motor_data["MotorMAD_M6C12_framed"]["motor_mount_hole_PCD"]
 MotorMAD_M6C12_motor_mount_hole_dia       = motor_data["MotorMAD_M6C12_framed"]["motor_mount_hole_dia"]
 MotorMAD_M6C12_motor_mount_hole_num       = motor_data["MotorMAD_M6C12_framed"]["motor_mount_hole_num"]
@@ -293,9 +293,9 @@ MotorMAD_M6C12 = motor(maxMotorAngVelRPM          = MotorMAD_M6C12_maxMotorAngVe
 #--------------------------------------------------------
 doubleStagePlanetaryGearboxInstance = doubleStagePlanetaryGearbox(design_parameters         = dspg_design_params,
                                                                   gear_standard_parameters  = Gear_standard_parameters,
-                                                                  densityGear               = Steel["density"],
-                                                                  densityCarrier            = Aluminum["density"],
-                                                                  maxGearAllowableStressMPa = Steel["maxAllowableStressMPa"])
+                                                                  densityGears              = PLA["density"],
+                                                                  densityStructure          = PLA["density"],
+                                                                  maxGearAllowableStressMPa = PLA["maxAllowableStressMPa"])
                                                                   
 #----------------------------------------
 # Actuator

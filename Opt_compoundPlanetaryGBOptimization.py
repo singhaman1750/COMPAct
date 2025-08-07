@@ -286,15 +286,15 @@ MotorMAD_M6C12 = motor(maxMotorAngVelRPM          = MotorMAD_M6C12_maxMotorAngVe
                        wire_slot_dist_from_center = MotorMAD_M6C12_wire_slot_dist_from_center,
                        wire_slot_length           = MotorMAD_M6C12_wire_slot_length,
                        wire_slot_radius           = MotorMAD_M6C12_wire_slot_radius, 
-                       motorName         = "MAD_M6C12")
+                       motorName                  = "MAD_M6C12")
 
 #-------------------------------------------------------
 # Gearbox
 #-------------------------------------------------------
 compoundPlanetaryGearboxInstance = compoundPlanetaryGearbox(design_parameters         = cpg_design_params,
                                                             gear_standard_parameters  = Gear_standard_parameters,
-                                                            gearMaterialDensity       = PLA["density"],
-                                                            carrierMaterialDensity    = PLA["density"],
+                                                            densityGears              = PLA["density"],
+                                                            densityStructure          = PLA["density"],
                                                             maxGearAllowableStressMPa = PLA["maxAllowableStressMPa"])
 
 #-----------------------------------------------------

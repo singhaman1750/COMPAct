@@ -294,8 +294,8 @@ MotorMAD_M6C12 = motor(maxMotorAngVelRPM          = MotorMAD_M6C12_maxMotorAngVe
 #-------------------------------------------------------
 wolfromPlanetaryGearboxInstance = wolfromPlanetaryGearbox(design_parameters         = wpg_design_params,
                                                           gear_standard_parameters  = Gear_standard_parameters,
-                                                          gearDensity               = PLA["density"],
-                                                          carrierDensity            = PLA["density"],
+                                                          densityGears               = PLA["density"],
+                                                          densityStructure            = PLA["density"],
                                                           maxGearAllowableStressMPa = PLA["maxAllowableStressMPa"])
 
 #-------------------------------------------------------

@@ -247,7 +247,6 @@ class singleStagePlanetaryGearbox:
                  fwRingMM                  = 5.0,
                  maxGearAllowableStressMPa = 400,
                  densityGears              = 7850.0,
-                 densityCarrier            = 2710.0,
                  densityStructure          = 2710.0
                  ):
         
@@ -260,7 +259,6 @@ class singleStagePlanetaryGearbox:
         self.maxGearAllowableStressMPa = maxGearAllowableStressMPa # MPa
         self.maxGearAllowableStressPa  = maxGearAllowableStressMPa * 10**6 # Pa
         self.densityGears              = densityGears
-        self.densityCarrier            = densityCarrier
         self.densityStructure          = densityStructure
         self.bhnSun                    = 270 # Brinell Hardness Number for sun gear
         self.bhnPlanet                 = 270 # Brinell Hardness Number for planet gear
@@ -716,8 +714,8 @@ class compoundPlanetaryGearbox:
                  fwPlanetBigMM             = 5.0,
                  fwPlanetSmallMM           = 5.0,
                  fwRingMM                  = 5.0,
-                 gearMaterialDensity       = 7850.0,
-                 carrierMaterialDensity    = 2710.0,
+                 densityGears              = 7850.0,
+                 densityStructure          = 2710.0,
                  maxGearAllowableStressMPa = 400.0):
         
         self.Ns                        = Ns
@@ -727,8 +725,8 @@ class compoundPlanetaryGearbox:
         self.numPlanet                 = numPlanet
         self.moduleBig                 = moduleBig
         self.moduleSmall               = moduleSmall
-        self.gearMaterialDensity       = gearMaterialDensity
-        self.carrierMaterialDensity    = carrierMaterialDensity
+        self.densityGears              = densityGears
+        self.densityStructure          = densityStructure
         self.fwSunMM                   = fwSunMM
         self.fwPlanetBigMM             = fwPlanetBigMM
         self.fwPlanetSmallMM           = fwPlanetSmallMM
@@ -786,7 +784,7 @@ class compoundPlanetaryGearbox:
         
         # Total mass of the compound planetary gearbox
         combinedGearVolume = sunVolume + (self.numPlanet * planetBigVolume) + planetSmallVolume + ringVolume
-        TotalMassKG        = (combinedGearVolume * self.gearMaterialDensity + carrierVolume * self.carrierMaterialDensity)
+        TotalMassKG        = (combinedGearVolume * self.densityGears + carrierVolume * self.densityStructure)
         return TotalMassKG
     
     def gearRatio(self):
@@ -1227,8 +1225,8 @@ class wolfromPlanetaryGearbox:
                  numPlanet                 = 2,
                  moduleBig                 = 0.5,
                  moduleSmall               = 0.5,
-                 gearDensity               = 7850,
-                 carrierDensity            = 2710,
+                 densityGears              = 7850,
+                 densityStructure          = 2710,
                  fwSunMM                   = 5.0,
                  fwPlanetBigMM             = 5.0,
                  fwPlanetSmallMM           = 5.0,
@@ -1251,8 +1249,8 @@ class wolfromPlanetaryGearbox:
         #-----------------------------------
         # Material Properties
         #-----------------------------------
-        self.gearDensity               = gearDensity
-        self.carrierDensity            = carrierDensity
+        self.densityGears              = densityGears
+        self.densityStructure          = densityStructure
         self.maxGearAllowableStressMPa = maxGearAllowableStressMPa         # MPa
         self.maxGearAllowableStressPa  = maxGearAllowableStressMPa * 10**6 # Pa
         
@@ -1315,7 +1313,7 @@ class wolfromPlanetaryGearbox:
 
         # Total mass of the compound planetary gearbox
         combinedGearVolume = sunVolume + (self.numPlanet * (planetBigVolume + planetSmallVolume)) + ringBigVolume + ringSmallVolume
-        TotalMassKG        = (combinedGearVolume * self.gearDensity + carrierVolume * self.carrierDensity)
+        TotalMassKG        = (combinedGearVolume * self.densityGears + carrierVolume * self.densityStructure)
         return TotalMassKG
 
     def gearRatio(self):
@@ -1999,15 +1997,11 @@ class doubleStagePlanetaryGearbox:
                  Ns2 = 20, Np2 = 40, Nr2 = 100, 
                  numPlanet1 = 2,   numPlanet2 = 2, 
                  module1    = 0.8, module2    = 0.8, 
-                 densityGear = 7850.0,
-                 densityCarrier = 2710.0,
+                 densityGears = 7850.0,
+                 densityStructure = 2710.0,
                  fwSun1MM = 5.0, fwRing1MM = 5.0, fwPlanet1MM = 5.0,
                  fwSun2MM = 5.0, fwRing2MM = 5.0, fwPlanet2MM = 5.0,
-                 maxGearAllowableStressMPa = 400,
-                 gearMaterial    = 7850.0,
-                 carrierMaterial = 2710.0, 
-                 carrierWidth1    = 5.0, carrierWidth2    = 5.0, 
-                 ringRadialWidth1 = 5.0, ringRadialWidth2 = 5.0) :
+                 maxGearAllowableStressMPa = 400) :
         
         #------------------------------------------------------------------
         # Converting the available DSPG data to stg-1 and stg-2 SSPG data 
@@ -2026,6 +2020,9 @@ class doubleStagePlanetaryGearbox:
             "planetMinDistanceMM"          : design_parameters["planetMinDistanceMM"]
         }
 
+        self.densityGears     = densityGears
+        self.densityStructure = densityStructure
+
         # Using single Layer Planetary Gearbox for the first and second layer
         # Stage-1
         self.Stage1 = singleStagePlanetaryGearbox(design_params             = dspg_stg1_parameters,
@@ -2039,9 +2036,8 @@ class doubleStagePlanetaryGearbox:
                                                   fwPlanetMM                = fwPlanet1MM,
                                                   fwRingMM                  = fwRing1MM,  
                                                   maxGearAllowableStressMPa = maxGearAllowableStressMPa, 
-                                                  densityGears              = densityGear,
-                                                  densityCarrier            = densityCarrier, 
-                                                  densityStructure          = densityCarrier)
+                                                  densityGears              = self.densityGears,
+                                                  densityStructure          = self.densityStructure)
                 
         # Stage-2
         self.Stage2 = singleStagePlanetaryGearbox(design_params             = dspg_stg2_parameters,
@@ -2055,9 +2051,8 @@ class doubleStagePlanetaryGearbox:
                                                   fwPlanetMM                = fwPlanet2MM,
                                                   fwRingMM                  = fwRing2MM,  
                                                   maxGearAllowableStressMPa = maxGearAllowableStressMPa, 
-                                                  densityGears              = densityGear,
-                                                  densityCarrier            = densityCarrier, 
-                                                  densityStructure          = densityCarrier)
+                                                  densityGears              = self.densityGears,
+                                                  densityStructure          = self.densityStructure)
         
         self.maxGearAllowableStressMPa = maxGearAllowableStressMPa
 
@@ -2963,7 +2958,8 @@ class singleStagePlanetaryActuator:
         #------------------------------------
         # density of materials
         #------------------------------------
-        densityPLA = 1020 # PLA
+        # density of both gears and the structural materials is the same in 3D printed gearbox
+        density_3DP_material = self.planetaryGearbox.densityGears
 
         #------------------------------------
         # Face Width
@@ -3052,7 +3048,7 @@ class singleStagePlanetaryActuator:
                             + np.pi * ((Motor_case_OD * 0.5)**2 - (Motor_case_ID * 0.5)**2) * Motor_case_height
         ) * 1e-9
 
-        Motor_case_mass = Motor_case_volume * densityPLA
+        Motor_case_mass = Motor_case_volume * density_3DP_material
 
         #--------------------------------------
         # Mass: sspg_gearbox_casing
@@ -3096,7 +3092,7 @@ class singleStagePlanetaryActuator:
         large_fillet_height = ringFwMM
         large_fillet_volume = 0.5 * (np.pi * (((large_fillet_OD*0.5)**2) - ((large_fillet_ID)*0.5)**2) * large_fillet_height) * 1e-9
 
-        gearbox_casing_mass = (ring_volume + bearing_holding_structure_volume + case_mounting_structure_volume + large_fillet_volume) * densityPLA
+        gearbox_casing_mass = (ring_volume + bearing_holding_structure_volume + case_mounting_structure_volume + large_fillet_volume) * density_3DP_material
 
         #----------------------------------
         # Mass: sspg_carrier
@@ -3112,7 +3108,7 @@ class singleStagePlanetaryActuator:
         carrier_volume = (np.pi * (((carrier_OD*0.5)**2) - ((carrier_ID)*0.5)**2) * carrier_height
                         + np.pi * ((carrier_shaft_OD*0.5)**2) * carrier_shaft_height * carrier_shaft_num) * 1e-9
 
-        carrier_mass = carrier_volume * densityPLA
+        carrier_mass = carrier_volume * density_3DP_material
 
         #----------------------------------
         # Mass: sspg_sun
@@ -3129,13 +3125,13 @@ class singleStagePlanetaryActuator:
         sun_shaft_volume = np.pi * ((sun_shaft_dia*0.5) ** 2) * sun_shaft_height * 1e-9
 
         sun_volume       = sun_hub_volume + sun_gear_volume + sun_shaft_volume
-        sun_mass         = sun_volume * densityPLA
+        sun_mass         = sun_volume * density_3DP_material
 
         #--------------------------------------
         # Mass: sspg_planet
         #--------------------------------------
         planet_volume = (np.pi * ((DiaPlanetMM*0.5)**2 - (planet_bore*0.5)**2) * planetFwMM) * 1e-9
-        planet_mass   = planet_volume * densityPLA
+        planet_mass   = planet_volume * density_3DP_material
 
         #--------------------------------------
         # Mass: sspg_sec_carrier
@@ -3144,7 +3140,7 @@ class singleStagePlanetaryActuator:
         sec_carrier_ID = (DiaSunMM + DiaPlanetMM) - planet_shaft_dia - 2 * standard_clearance_1_5mm
 
         sec_carrier_volume = (np.pi * ((sec_carrier_OD*0.5)**2 - (sec_carrier_ID*0.5)**2) * sec_carrier_thickness) * 1e-9
-        sec_carrier_mass   = sec_carrier_volume * densityPLA
+        sec_carrier_mass   = sec_carrier_volume * density_3DP_material
 
         #--------------------------------------
         # Mass: sspg_sun_shaft_bearing
@@ -3171,7 +3167,7 @@ class singleStagePlanetaryActuator:
 
         bearing_retainer_volume = (np.pi * ((bearing_retainer_OD*0.5)**2 - (bearing_retainer_ID*0.5)**2) * bearing_retainer_thickness) * 1e-9
 
-        bearing_retainer_mass   = bearing_retainer_volume * densityPLA
+        bearing_retainer_mass   = bearing_retainer_volume * density_3DP_material
 
         self.Motor_case_mass              = Motor_case_mass
         self.gearbox_casing_mass          = gearbox_casing_mass
@@ -3936,7 +3932,7 @@ class compoundPlanetaryActuator:
         #-----------------------------------------
         # Density
         #-----------------------------------------
-        densityPLA = 1020
+        density_3DP_material = self.compoundPlanetaryGearbox.densityGears
 
         #-----------------------------------------
         # Face Width
@@ -4037,7 +4033,7 @@ class compoundPlanetaryActuator:
                             + np.pi * ((Motor_case_OD * 0.5)**2 - (Motor_case_ID * 0.5)**2) * Motor_case_height
         ) * 1e-9
 
-        Motor_case_mass = Motor_case_volume * densityPLA
+        Motor_case_mass = Motor_case_volume * density_3DP_material
 
         #--------------------------------------
         # Mass: cpg_gearbox_casing
@@ -4081,7 +4077,7 @@ class compoundPlanetaryActuator:
         large_fillet_height = ringFwMM
         large_fillet_volume = 0.5 * (np.pi * (((large_fillet_OD*0.5)**2) - ((large_fillet_ID)*0.5)**2) * large_fillet_height) * 1e-9
 
-        gearbox_casing_mass = (ring_volume + bearing_holding_structure_volume + case_mounting_structure_volume + large_fillet_volume) * densityPLA
+        gearbox_casing_mass = (ring_volume + bearing_holding_structure_volume + case_mounting_structure_volume + large_fillet_volume) * density_3DP_material
 
         #----------------------------------
         # Mass: cpg_carrier
@@ -4097,7 +4093,7 @@ class compoundPlanetaryActuator:
         carrier_volume = (np.pi * (((carrier_OD*0.5)**2) - ((carrier_ID)*0.5)**2) * carrier_height
                         + np.pi * ((carrier_shaft_OD*0.5)**2) * carrier_shaft_height * carrier_shaft_num) * 1e-9
 
-        carrier_mass = carrier_volume * densityPLA
+        carrier_mass = carrier_volume * density_3DP_material
 
         #----------------------------------
         # Mass: cpg_sun
@@ -4114,14 +4110,14 @@ class compoundPlanetaryActuator:
         sun_shaft_volume = np.pi * ((sun_shaft_dia*0.5) ** 2) * sun_shaft_height * 1e-9
 
         sun_volume       = sun_hub_volume + sun_gear_volume + sun_shaft_volume
-        sun_mass         = sun_volume * densityPLA
+        sun_mass         = sun_volume * density_3DP_material
 
         #--------------------------------------
         # Mass: cpg_planet
         #--------------------------------------
         planet1_volume = (np.pi * ((DiaPlanet1MM*0.5)**2 - (planet_bore*0.5)**2) * planet1FwMM) * 1e-9
         planet2_volume = (np.pi * ((DiaPlanet2MM*0.5)**2 - (planet_bore*0.5)**2) * planet2FwMM) * 1e-9
-        planet_mass   = (planet1_volume + planet2_volume) * densityPLA
+        planet_mass   = (planet1_volume + planet2_volume) * density_3DP_material
 
         #--------------------------------------
         # Mass: cpg_sec_carrier
@@ -4130,7 +4126,7 @@ class compoundPlanetaryActuator:
         sec_carrier_ID = (DiaSunMM + DiaPlanet1MM) - planet_shaft_dia - 2 * standard_clearance_1_5mm
 
         sec_carrier_volume = (np.pi * ((sec_carrier_OD*0.5)**2 - (sec_carrier_ID*0.5)**2) * sec_carrier_thickness) * 1e-9
-        sec_carrier_mass   = sec_carrier_volume * densityPLA
+        sec_carrier_mass   = sec_carrier_volume * density_3DP_material
 
         #--------------------------------------
         # Mass: cpg_sun_shaft_bearing
@@ -4157,7 +4153,7 @@ class compoundPlanetaryActuator:
 
         bearing_retainer_volume = (np.pi * ((bearing_retainer_OD*0.5)**2 - (bearing_retainer_ID*0.5)**2) * bearing_retainer_thickness) * 1e-9
 
-        bearing_retainer_mass   = bearing_retainer_volume * densityPLA
+        bearing_retainer_mass   = bearing_retainer_volume * density_3DP_material
 
         self.Motor_case_mass              = Motor_case_mass
         self.gearbox_casing_mass          = gearbox_casing_mass
@@ -4214,8 +4210,7 @@ class wolfromPlanetaryActuator:
                  FOS                      = 2.0,
                  serviceFactor            = 2.0,
                  maxGearboxDiameter       = 140.0,
-                 stressAnalysisMethodName = "Lewis",
-                 densityPLA = 1020):
+                 stressAnalysisMethodName = "Lewis"):
         
         self.motor                    = motor
         self.wolfromPlanetaryGearbox  = wolfromPlanetaryGearbox
@@ -4225,8 +4220,6 @@ class wolfromPlanetaryActuator:
                                                           # outer diameter of 
                                                           # the motor
         self.stressAnalysisMethodName = stressAnalysisMethodName
-
-        self.densityPLA = densityPLA
 
         self.design_params = design_parameters
         self.motor_driver_params = motor_driver_params
@@ -5200,7 +5193,7 @@ class wolfromPlanetaryActuator:
         #----------------------------------
         # Density of Materials
         #----------------------------------
-        densityPLA = self.densityPLA
+        density_3DP_material = self.wolfromPlanetaryGearbox.densityGears
 
         #----------------------------------
         # Diameter and Radius
@@ -5329,7 +5322,7 @@ class wolfromPlanetaryActuator:
                         + np.pi * (((carrier_bearing_mount_OD*0.5)**2) - ((carrier_bearing_mount_ID)*0.5)**2) * carrier_bearing_mount_height  
                         + np.pi * ((carrier_shaft_OD*0.5)**2) * carrier_shaft_height * carrier_shaft_num) * 1e-9
 
-        carrier_mass = carrier_volume * densityPLA
+        carrier_mass = carrier_volume * density_3DP_material
 
         #-------------------------------------------------------
         # wpg_motor_casing
@@ -5351,7 +5344,7 @@ class wolfromPlanetaryActuator:
         Motor_case_volume = ( np.pi * ((Motor_case_OD * 0.5)**2) * base_plate_thickness 
                             + np.pi * ((Motor_case_OD * 0.5)**2 - (Motor_case_ID * 0.5)**2) * Motor_case_height) * 1e-9
 
-        Motor_case_mass = Motor_case_volume * densityPLA
+        Motor_case_mass = Motor_case_volume * density_3DP_material
 
         #-------------------------------------------------------
         # wpg_gearbox_casing
@@ -5420,7 +5413,7 @@ class wolfromPlanetaryActuator:
                                + spacer_wall_for_ring2_volume
                                + case_mounting_structure_volume 
                                + large_fillet_volume
-                               + ring_gear1_volume) * densityPLA
+                               + ring_gear1_volume) * density_3DP_material
 
         #-------------------------------------------------------
         # wpg_motor
@@ -5439,7 +5432,7 @@ class wolfromPlanetaryActuator:
         #-------------------------------------------------------
         planet1_volume = (np.pi * ((DiaPlanet1MM*0.5)**2 - (planet_bore*0.5)**2) * planet1FwMM) * 1e-9
         planet2_volume = (np.pi * ((DiaPlanet2MM*0.5)**2 - (planet_bore*0.5)**2) * planet2FwMM) * 1e-9
-        planet_mass   = (planet1_volume + planet2_volume) * densityPLA
+        planet_mass   = (planet1_volume + planet2_volume) * density_3DP_material
 
         #-------------------------------------------------------
         # wpg_sec_carrier
@@ -5448,7 +5441,7 @@ class wolfromPlanetaryActuator:
         sec_carrier_ID = (DiaSunMM + DiaPlanet1MM) - planet_shaft_dia - 2 * standard_clearance_1_5mm
 
         sec_carrier_volume = (np.pi * ((sec_carrier_OD*0.5)**2 - (sec_carrier_ID*0.5)**2) * sec_carrier_thickness) * 1e-9
-        sec_carrier_mass   = sec_carrier_volume * densityPLA
+        sec_carrier_mass   = sec_carrier_volume * density_3DP_material
 
         #-------------------------------------------------------
         # wpg_small_ring_bearing_shaft
@@ -5462,7 +5455,7 @@ class wolfromPlanetaryActuator:
                                         * (small_ring_bearing_shaft_dia * 0.5)**2 
                                         *  small_ring_bearing_shaft_height) * 1e-9
         
-        small_ring_bearing_shaft_mass = small_ring_bearing_shaft_volume * densityPLA
+        small_ring_bearing_shaft_mass = small_ring_bearing_shaft_volume * density_3DP_material
 
         #-------------------------------------------------------
         # wpg_small_ring
@@ -5532,7 +5525,7 @@ class wolfromPlanetaryActuator:
                          + ring2bearing_spacer_disc_volume
                          + bearing_holding_structure_volume
                          + output_wall_volume
-                         + sun_shaft_bearing_holding_structure_volume) * densityPLA
+                         + sun_shaft_bearing_holding_structure_volume) * density_3DP_material
 
         #-------------------------------------------------------
         # wpg_sun_shaft_bearing
@@ -5559,7 +5552,7 @@ class wolfromPlanetaryActuator:
         sun_shaft_volume = np.pi * ((sun_shaft_dia*0.5) ** 2) * sun_shaft_height * 1e-9
 
         sun_volume       = sun_hub_volume + sun_gear_volume + sun_shaft_volume
-        sun_mass         = sun_volume * densityPLA
+        sun_mass         = sun_volume * density_3DP_material
 
         Actuator_mass = (carrier_small_ring_inner_bearing_mass + 
                         carrier_mass + 
@@ -6776,7 +6769,7 @@ class doubleStagePlanetaryActuator:
         #------------------------------------
         # density of materials
         #------------------------------------
-        densityPLA = 1020 # PLA
+        density_3DP_material = self.doubleStagePlanetaryGearbox.densityGears
 
         #------------------------------------
         # Face Width
@@ -6878,7 +6871,7 @@ class doubleStagePlanetaryActuator:
                             + np.pi * ((Motor_case_OD * 0.5)**2 - (Motor_case_ID * 0.5)**2) * Motor_case_height
         ) * 1e-9
 
-        Motor_case_mass = Motor_case_volume * densityPLA
+        Motor_case_mass = Motor_case_volume * density_3DP_material
 
         #--------------------------------------
         # Mass: dspg_gearbox_casing
@@ -6933,7 +6926,7 @@ class doubleStagePlanetaryActuator:
         large_fillet_height = ringFwMM
         large_fillet_volume = 0.5 * (np.pi * (((large_fillet_OD*0.5)**2) - ((large_fillet_ID)*0.5)**2) * large_fillet_height) * 1e-9
 
-        gearbox_casing_mass = (ring_volume + bearing_holding_structure_volume + case_mounting_structure_volume + large_fillet_volume) * densityPLA
+        gearbox_casing_mass = (ring_volume + bearing_holding_structure_volume + case_mounting_structure_volume + large_fillet_volume) * density_3DP_material
 
         #----------------------------------
         # Mass: dspg_carrier
@@ -6958,9 +6951,9 @@ class doubleStagePlanetaryActuator:
         sun2_shaft_volume = np.pi * ((sun2_shaft_dia*0.5) ** 2) * sun2_shaft_height * 1e-9
 
         sun2_volume       = sun2_gear_volume + sun2_shaft_volume
-        sun2_mass         = sun2_volume * densityPLA
+        sun2_mass         = sun2_volume * density_3DP_material
 
-        carrier_mass = carrier_volume * densityPLA
+        carrier_mass = carrier_volume * density_3DP_material
 
         carrier_stg1_mass = sun2_mass + carrier_mass
 
@@ -6979,13 +6972,13 @@ class doubleStagePlanetaryActuator:
         sun_shaft_volume = np.pi * ((sun_shaft_dia*0.5) ** 2) * sun_shaft_height * 1e-9
 
         sun_volume       = sun_hub_volume + sun_gear_volume + sun_shaft_volume
-        sun_mass         = sun_volume * densityPLA
+        sun_mass         = sun_volume * density_3DP_material
 
         #--------------------------------------
         # Mass: dspg_planet
         #--------------------------------------
         planet_volume = (np.pi * ((DiaPlanetMM*0.5)**2 - (planet_bore*0.5)**2) * planetFwMM) * 1e-9
-        planet_mass   = planet_volume * densityPLA
+        planet_mass   = planet_volume * density_3DP_material
 
         #--------------------------------------
         # Mass: dspg_sec_carrier
@@ -6994,7 +6987,7 @@ class doubleStagePlanetaryActuator:
         sec_carrier_ID = (DiaSunMM + DiaPlanetMM) - planet_shaft_dia - 2 * standard_clearance_1_5mm
 
         sec_carrier_volume = (np.pi * ((sec_carrier_OD*0.5)**2 - (sec_carrier_ID*0.5)**2) * sec_carrier_thickness) * 1e-9
-        sec_carrier_mass   = sec_carrier_volume * densityPLA
+        sec_carrier_mass   = sec_carrier_volume * density_3DP_material
 
         #--------------------------------------
         # Mass: dspg_sun_shaft_bearing
@@ -7022,7 +7015,7 @@ class doubleStagePlanetaryActuator:
 
         bearing_retainer_volume = (np.pi * ((bearing_retainer_OD*0.5)**2 - (bearing_retainer_ID*0.5)**2) * bearing_retainer_thickness) * 1e-9
 
-        bearing_retainer_mass   = bearing_retainer_volume * densityPLA
+        bearing_retainer_mass   = bearing_retainer_volume * density_3DP_material
 
         self.Motor_case_mass_stg1              = Motor_case_mass
         self.gearbox_casing_mass_stg1          = gearbox_casing_mass
@@ -7067,7 +7060,7 @@ class doubleStagePlanetaryActuator:
         #------------------------------------
         # density of materials
         #------------------------------------
-        densityPLA = 1020 # PLA
+        density_3DP_material = self.doubleStagePlanetaryGearbox.densityGears
 
         #------------------------------------
         # Face Width
@@ -7202,7 +7195,7 @@ class doubleStagePlanetaryActuator:
         large_fillet_height = ringFwMM
         large_fillet_volume = 0.5 * (np.pi * (((large_fillet_OD*0.5)**2) - ((large_fillet_ID)*0.5)**2) * large_fillet_height) * 1e-9
 
-        gearbox_casing_mass = (ring_volume + bearing_holding_structure_volume + case_mounting_structure_volume + large_fillet_volume) * densityPLA
+        gearbox_casing_mass = (ring_volume + bearing_holding_structure_volume + case_mounting_structure_volume + large_fillet_volume) * density_3DP_material
 
         #----------------------------------
         # Mass: dspg_carrier
@@ -7218,13 +7211,13 @@ class doubleStagePlanetaryActuator:
         carrier_volume = (np.pi * (((carrier_OD*0.5)**2) - ((carrier_ID)*0.5)**2) * carrier_height
                         + np.pi * ((carrier_shaft_OD*0.5)**2) * carrier_shaft_height * carrier_shaft_num) * 1e-9
 
-        carrier_mass = carrier_volume * densityPLA
+        carrier_mass = carrier_volume * density_3DP_material
 
         #--------------------------------------
         # Mass: dspg_planet
         #--------------------------------------
         planet_volume = (np.pi * ((DiaPlanetMM*0.5)**2 - (planet_bore*0.5)**2) * planetFwMM) * 1e-9
-        planet_mass   = planet_volume * densityPLA
+        planet_mass   = planet_volume * density_3DP_material
 
         #--------------------------------------
         # Mass: dspg_sec_carrier
@@ -7233,7 +7226,7 @@ class doubleStagePlanetaryActuator:
         sec_carrier_ID = (DiaSunMM + DiaPlanetMM) - planet_shaft_dia - 2 * standard_clearance_1_5mm
 
         sec_carrier_volume = (np.pi * ((sec_carrier_OD*0.5)**2 - (sec_carrier_ID*0.5)**2) * sec_carrier_thickness) * 1e-9
-        sec_carrier_mass = sec_carrier_volume * densityPLA
+        sec_carrier_mass = sec_carrier_volume * density_3DP_material
 
         #--------------------------------------
         # Mass: dspg_sun_shaft_bearing
@@ -7260,7 +7253,7 @@ class doubleStagePlanetaryActuator:
 
         bearing_retainer_volume = (np.pi * ((bearing_retainer_OD * 0.5)**2 - (bearing_retainer_ID * 0.5)**2) * bearing_retainer_thickness) * 1e-9
 
-        bearing_retainer_mass   = bearing_retainer_volume * densityPLA
+        bearing_retainer_mass   = bearing_retainer_volume * density_3DP_material
 
         self.gearbox_casing_mass_stg2          = gearbox_casing_mass
         self.carrier_mass_stg2                 = carrier_mass
@@ -7601,7 +7594,6 @@ class optimizationSingleStageActuator:
                                                                                                    fwRingMM                  = Actuator.planetaryGearbox.fwRingMM,   # mm
                                                                                                    maxGearAllowableStressMPa = Actuator.planetaryGearbox.maxGearAllowableStressMPa, # 400 MPa
                                                                                                    densityGears              = Actuator.planetaryGearbox.densityGears,     # 7850 kg/m^3: Steel
-                                                                                                   densityCarrier            = Actuator.planetaryGearbox.densityCarrier,   # 2710 kg/m^3: Aluminum
                                                                                                    densityStructure          = Actuator.planetaryGearbox.densityStructure) # 2710 kg/m^3: Aluminum
 
                                                 opt_actuator = singleStagePlanetaryActuator(design_params            = self.design_params,
@@ -7735,7 +7727,6 @@ class optimizationSingleStageActuator:
                                                                                                        fwRingMM                  = Actuator.planetaryGearbox.fwRingMM,   # mm
                                                                                                        maxGearAllowableStressMPa = Actuator.planetaryGearbox.maxGearAllowableStressMPa, # 400 MPa
                                                                                                        densityGears              = Actuator.planetaryGearbox.densityGears,     # 7850 kg/m^3: Steel
-                                                                                                       densityCarrier            = Actuator.planetaryGearbox.densityCarrier,   # 2710 kg/m^3: Aluminum
                                                                                                        densityStructure          = Actuator.planetaryGearbox.densityStructure) # 2710 kg/m^3: Aluminum
 
                                                     opt_actuator = singleStagePlanetaryActuator(design_params            = self.design_params,
@@ -8080,8 +8071,8 @@ class optimizationCompoundPlanetaryActuator:
                                                                                                         numPlanet                 = Actuator.compoundPlanetaryGearbox.numPlanet,
                                                                                                         moduleBig                 = Actuator.compoundPlanetaryGearbox.moduleBig, # mm
                                                                                                         moduleSmall               = Actuator.compoundPlanetaryGearbox.moduleSmall, # mm
-                                                                                                        gearMaterialDensity       = Actuator.compoundPlanetaryGearbox.gearMaterialDensity,
-                                                                                                        carrierMaterialDensity    = Actuator.compoundPlanetaryGearbox.carrierMaterialDensity,
+                                                                                                        densityGears              = Actuator.compoundPlanetaryGearbox.densityGears,
+                                                                                                        densityStructure          = Actuator.compoundPlanetaryGearbox.densityStructure,
                                                                                                         fwSunMM                   = Actuator.compoundPlanetaryGearbox.fwSunMM, # mm
                                                                                                         fwPlanetBigMM             = Actuator.compoundPlanetaryGearbox.fwPlanetBigMM, # mm
                                                                                                         fwPlanetSmallMM           = Actuator.compoundPlanetaryGearbox.fwPlanetSmallMM, # mm
@@ -8230,8 +8221,8 @@ class optimizationCompoundPlanetaryActuator:
                                                                                                         numPlanet                 = Actuator.compoundPlanetaryGearbox.numPlanet,
                                                                                                         moduleBig                 = Actuator.compoundPlanetaryGearbox.moduleBig, # mm
                                                                                                         moduleSmall               = Actuator.compoundPlanetaryGearbox.moduleSmall, # mm
-                                                                                                        gearMaterialDensity       = Actuator.compoundPlanetaryGearbox.gearMaterialDensity,
-                                                                                                        carrierMaterialDensity    = Actuator.compoundPlanetaryGearbox.carrierMaterialDensity,
+                                                                                                        densityGears              = Actuator.compoundPlanetaryGearbox.densityGears,
+                                                                                                        densityStructure          = Actuator.compoundPlanetaryGearbox.densityStructure,
                                                                                                         fwSunMM                   = Actuator.compoundPlanetaryGearbox.fwSunMM, # mm
                                                                                                         fwPlanetBigMM             = Actuator.compoundPlanetaryGearbox.fwPlanetBigMM, # mm
                                                                                                         fwPlanetSmallMM           = Actuator.compoundPlanetaryGearbox.fwPlanetSmallMM, # mm
@@ -8463,8 +8454,8 @@ class optimizationWolfromPlanetaryActuator:
                                                                                                          numPlanet                 = Actuator.wolfromPlanetaryGearbox.numPlanet,
                                                                                                          moduleBig                 = Actuator.wolfromPlanetaryGearbox.moduleBig,
                                                                                                          moduleSmall               = Actuator.wolfromPlanetaryGearbox.moduleSmall,
-                                                                                                         gearDensity               = Actuator.wolfromPlanetaryGearbox.gearDensity,
-                                                                                                         carrierDensity            = Actuator.wolfromPlanetaryGearbox.carrierDensity,
+                                                                                                         densityGears              = Actuator.wolfromPlanetaryGearbox.densityGears,
+                                                                                                         densityStructure          = Actuator.wolfromPlanetaryGearbox.densityStructure,
                                                                                                          fwSunMM                   = Actuator.wolfromPlanetaryGearbox.fwSunMM,
                                                                                                          fwPlanetBigMM             = Actuator.wolfromPlanetaryGearbox.fwPlanetBigMM,
                                                                                                          fwPlanetSmallMM           = Actuator.wolfromPlanetaryGearbox.fwPlanetSmallMM,
@@ -8617,8 +8608,8 @@ class optimizationWolfromPlanetaryActuator:
                                                                                                          numPlanet                 = Actuator.wolfromPlanetaryGearbox.numPlanet,
                                                                                                          moduleBig                 = Actuator.wolfromPlanetaryGearbox.moduleBig,
                                                                                                          moduleSmall               = Actuator.wolfromPlanetaryGearbox.moduleSmall,
-                                                                                                         gearDensity               = Actuator.wolfromPlanetaryGearbox.gearDensity,
-                                                                                                         carrierDensity            = Actuator.wolfromPlanetaryGearbox.carrierDensity,
+                                                                                                         densityGears              = Actuator.wolfromPlanetaryGearbox.densityGears,
+                                                                                                         densityStructure          = Actuator.wolfromPlanetaryGearbox.densityStructure,
                                                                                                          fwSunMM                   = Actuator.wolfromPlanetaryGearbox.fwSunMM,
                                                                                                          fwPlanetBigMM             = Actuator.wolfromPlanetaryGearbox.fwPlanetBigMM,
                                                                                                          fwPlanetSmallMM           = Actuator.wolfromPlanetaryGearbox.fwPlanetSmallMM,
@@ -8992,8 +8983,8 @@ class optimizationDoubleStagePlanetaryActuator:
                                                                                                                        numPlanet2                = Actuator.doubleStagePlanetaryGearbox.Stage2.numPlanet,
                                                                                                                        module1                   = Actuator.doubleStagePlanetaryGearbox.Stage1.module, # mm
                                                                                                                        module2                   = Actuator.doubleStagePlanetaryGearbox.Stage2.module, # mm
-                                                                                                                       densityGear               = Actuator.doubleStagePlanetaryGearbox.Stage1.densityGears,
-                                                                                                                       densityCarrier            = Actuator.doubleStagePlanetaryGearbox.Stage1.densityCarrier, 
+                                                                                                                       densityGears              = Actuator.doubleStagePlanetaryGearbox.Stage1.densityGears,
+                                                                                                                       densityStructure          = Actuator.doubleStagePlanetaryGearbox.Stage1.densityStructure, 
                                                                                                                        fwSun1MM                  = Actuator.doubleStagePlanetaryGearbox.Stage1.fwSunMM, # mm
                                                                                                                        fwPlanet1MM               = Actuator.doubleStagePlanetaryGearbox.Stage1.fwPlanetMM, # mm
                                                                                                                        fwRing1MM                 = Actuator.doubleStagePlanetaryGearbox.Stage1.fwRingMM, # mm
@@ -9167,8 +9158,8 @@ class optimizationDoubleStagePlanetaryActuator:
                                                                                                                        numPlanet2                = Actuator.doubleStagePlanetaryGearbox.Stage2.numPlanet,
                                                                                                                        module1                   = Actuator.doubleStagePlanetaryGearbox.Stage1.module, # mm
                                                                                                                        module2                   = Actuator.doubleStagePlanetaryGearbox.Stage2.module, # mm
-                                                                                                                       densityGear               = Actuator.doubleStagePlanetaryGearbox.Stage1.densityGears,
-                                                                                                                       densityCarrier            = Actuator.doubleStagePlanetaryGearbox.Stage1.densityCarrier, 
+                                                                                                                       densityGears              = Actuator.doubleStagePlanetaryGearbox.Stage1.densityGears,
+                                                                                                                       densityStructure          = Actuator.doubleStagePlanetaryGearbox.Stage1.densityStructure, 
                                                                                                                        fwSun1MM                  = Actuator.doubleStagePlanetaryGearbox.Stage1.fwSunMM, # mm
                                                                                                                        fwPlanet1MM               = Actuator.doubleStagePlanetaryGearbox.Stage1.fwPlanetMM, # mm
                                                                                                                        fwRing1MM                 = Actuator.doubleStagePlanetaryGearbox.Stage1.fwRingMM, # mm
