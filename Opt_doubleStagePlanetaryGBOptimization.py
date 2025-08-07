@@ -288,8 +288,9 @@ MotorMAD_M6C12 = motor(maxMotorAngVelRPM          = MotorMAD_M6C12_maxMotorAngVe
                        wire_slot_length           = MotorMAD_M6C12_wire_slot_length,
                        wire_slot_radius           = MotorMAD_M6C12_wire_slot_radius, 
                        motorName         = "MAD_M6C12")
+
 #--------------------------------------------------------
-# Gearbox
+# Gearbox 
 #--------------------------------------------------------
 doubleStagePlanetaryGearboxInstance = doubleStagePlanetaryGearbox(design_parameters         = dspg_design_params,
                                                                   gear_standard_parameters  = Gear_standard_parameters,

@@ -7240,6 +7240,7 @@ class doubleStagePlanetaryActuator:
         planet_bearing_num           = numPlanet * 2
         planet_bearing_combined_mass = planet_bearing_mass * planet_bearing_num
 
+
         #--------------------------------------
         # Mass: dspg_bearing
         #--------------------------------------

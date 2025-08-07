@@ -488,7 +488,7 @@ Optimizer_MAD_M6C12 = optimizationWolfromPlanetaryActuator(design_parameters    
 
 
 #-----------------------------------------------------
-# Optimize
+# Optimize 
 #-----------------------------------------------------
 totalTime_U8    = Optimizer_U8.optimizeActuator(Actuator_U8, UsePSCasVariable = 0, log=0, csv=1)
 print("Optimization Completed : WPG  U8 : Time Taken:", totalTime_U8)

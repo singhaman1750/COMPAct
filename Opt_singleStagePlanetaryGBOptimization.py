@@ -289,7 +289,7 @@ MotorMAD_M6C12 = motor(maxMotorAngVelRPM          = MotorMAD_M6C12_maxMotorAngVe
                        motorName                  = "MAD_M6C12")
 
 #--------------------------------------------------------
-# Gearboxes 
+# Gearboxes  
 #--------------------------------------------------------
 PlanetaryGearbox = singleStagePlanetaryGearbox(design_params             = sspg_design_params,
                                                gear_standard_parameters  = Gear_standard_parameters,
