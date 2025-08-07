@@ -1200,23 +1200,8 @@ class compoundPlanetaryGearbox:
         print("No planet interference constraint = ", self.noPlanetInterferenceConstraint())
         print("Mass of the planetary gearbox = ", self.getMassKG(), " kg")
         print("Efficiency of the planetary gearbox = ", self.getEfficiency())
-        #print("Maximum allowable stress for the gear material = ", self.getMaxGearAllowableStress(), " MPa")
         
     def printParametersLess(self):
-        # print("Ns = ", self.Ns)
-        # print("NpBig = ", self.NpBig)
-        # print("NpSmall = ", self.NpSmall)
-        # print("Nr = ", self.Nr)
-        # print("Module (First Layer) = ", self.moduleBig)
-        # print("Module (Second Layer) = ", self.moduleSmall)
-        # print("Number of planets = ", self.numPlanet)
-        # print("Gear ratio = ", self.gearRatio())
-        # print("Face width of sun gear = ", round(self.fwSunMM,2), " mm")
-        # print("Face width of Bigger planet gear = ", round(self.fwPlanetBigMM,2), " mm")
-        # print("Face width of Smaller planet gear = ", round(self.fwPlanetSmallMM,2), " mm")
-        # print("Face width of ring gear = ", round(self.fwRingMM,2), " mm")
-        # print("Mass of the planetary gearbox = ", round(self.getMassKG(),3), " kg")
-        # print("Efficiency of the planetary gearbox = ", round(self.getEfficiency(),4))
         vars = [self.moduleBig, self.moduleSmall, self.Ns, self.NpBig, self.NpSmall, self.Nr, self.numPlanet]
         faceWidths = [round(self.fwSunMM,2), round(self.fwPlanetBigMM,2), round(self.fwPlanetSmallMM,2), round(self.fwRingMM,2)]
         print("[mB, mS, Ns, NpB, NpS, Nr, numPl]:", vars) 
@@ -3236,6 +3221,7 @@ class singleStagePlanetaryActuator:
 class compoundPlanetaryActuator:
     def __init__(self, 
                  design_parameters,
+                 motor_driver_params,
                  motor                    = motor, 
                  compoundPlanetaryGearbox = compoundPlanetaryGearbox, 
                  FOS                      = 2.0, 
@@ -3266,6 +3252,7 @@ class compoundPlanetaryActuator:
         # Actuator Design Parameters
         #============================================
         self.design_params = design_parameters
+        self.motor_driver_params = motor_driver_params
 
         #--------------------------------------------
         # Independent Parameters
@@ -3326,13 +3313,13 @@ class compoundPlanetaryActuator:
         self.wire_slot_length           = self.motor.wire_slot_length         # 10
         self.wire_slot_radius           = self.motor.wire_slot_radius         # 4
 
-        self.driver_upper_holes_dist_from_center = self.design_params["driver_upper_holes_dist_from_center"] # 23
-        self.driver_lower_holes_dist_from_center = self.design_params["driver_lower_holes_dist_from_center"] # 15
-        self.driver_side_holes_dist_from_center  = self.design_params["driver_side_holes_dist_from_center"]  # 20
-        self.driver_mount_holes_dia              = self.design_params["driver_mount_holes_dia"]  # 2.5
-        self.driver_mount_inserts_OD             = self.design_params["driver_mount_inserts_OD"] # 3.5
-        self.driver_mount_thickness              = self.design_params["driver_mount_thickness"]  # 1.5
-        self.driver_mount_height                 = self.design_params["driver_mount_height"]     # 4
+        self.driver_upper_holes_dist_from_center = self.motor_driver_params["driver_upper_holes_dist_from_center"] # 23
+        self.driver_lower_holes_dist_from_center = self.motor_driver_params["driver_lower_holes_dist_from_center"] # 15
+        self.driver_side_holes_dist_from_center  = self.motor_driver_params["driver_side_holes_dist_from_center"]  # 20
+        self.driver_mount_holes_dia              = self.motor_driver_params["driver_mount_holes_dia"]  # 2.5
+        self.driver_mount_inserts_OD             = self.motor_driver_params["driver_mount_inserts_OD"] # 3.5
+        self.driver_mount_thickness              = self.motor_driver_params["driver_mount_thickness"]  # 1.5
+        self.driver_mount_height                 = self.motor_driver_params["driver_mount_height"]     # 4
 
         self.central_hole_offset_from_motor_mount_PCD = self.design_params["central_hole_offset_from_motor_mount_PCD"] # 5
 
@@ -4221,6 +4208,7 @@ class compoundPlanetaryActuator:
 class wolfromPlanetaryActuator:
     def __init__(self, 
                  design_parameters,
+                 motor_driver_params,
                  motor                    = motor,
                  wolfromPlanetaryGearbox  = wolfromPlanetaryGearbox,
                  FOS                      = 2.0,
@@ -4241,6 +4229,7 @@ class wolfromPlanetaryActuator:
         self.densityPLA = densityPLA
 
         self.design_params = design_parameters
+        self.motor_driver_params = motor_driver_params
 
         #--------------------------------------------
         # Motor Specifications
@@ -4265,40 +4254,6 @@ class wolfromPlanetaryActuator:
         self.ring1RadialWidthMM = self.wolfromPlanetaryGearbox.ringRadialWidthBig   # 5
         self.ring2RadialWidthMM = self.wolfromPlanetaryGearbox.ringRadialWidthSmall # 5
 
-        #--------------------------------------------------------
-        # Dependent design parameters
-        #--------------------------------------------------------
-        self.InnerDiaBearing1MM                : float | None = None 
-        self.OuterDiaBearing1MM                : float | None = None 
-        self.WidthBearing1MM                   : float | None = None 
-        self.InnerDiaBearing2MM                : float | None = None 
-        self.OuterDiaBearing2MM                : float | None = None 
-        self.WidthBearing2MM                   : float | None = None 
-        self.SCarrierThicknessMM               : float | None = None 
-        self.RingBigOuterRadiusMM              : float | None = None 
-        self.RingSmallOuterRadiusMM            : float | None = None
-        self.CarrierInnerDiameterMM            : float | None = None 
-        self.SCarrierInnerDiameterMM           : float | None = None 
-        self.LengthMainCoverMM                 : float | None = None 
-        self.MainCoverInnerRadiusMM            : float | None = None 
-        self.MainCoverOuterRadiusMM            : float | None = None 
-        self.MainCoverProtrusion1RadiusMM      : float | None = None 
-        self.HeightMainCoverProtrusion1MM      : float | None = None 
-        self.MainCover2InnerDiaMM              : float | None = None 
-        self.MainCover2OuterDiaMM              : float | None = None 
-        self.MainCover3InnerDiaMM              : float | None = None 
-        self.MainCover3OuterDiaMM              : float | None = None 
-        self.HeightMainCover2MM                : float | None = None 
-        self.MainCover3HeightMM                : float | None = None 
-        self.MainCover2ProtrusionRadiusMM      : float | None = None 
-        self.MainCover2ProtrusionHeightMM      : float | None = None 
-        self.RadiusBaseMM                      : float | None = None 
-        self.RadiusCouplerShaftMM              : float | None = None 
-        self.SecondaryCarrierOuterDiameterMM   : float | None = None 
-        self.CarrierExtrusionDiameterMM        : float | None = None 
-        self.CarrierExtrusionHeightMM          : float | None = None 
-        self.SecondaryCarrierExtrusionHeightMM : float | None = None 
-
         # --- Setting the variables ---
         self.setVariables()
 
@@ -4312,7 +4267,6 @@ class wolfromPlanetaryActuator:
         cost = massActuator - 2 * effActuator + 0.2 * widthActuator
         # print(cost)
         return cost
-
 
     def setVariables(self):
         # --- Optimization Variables --- 
@@ -4355,13 +4309,13 @@ class wolfromPlanetaryActuator:
         self.wire_slot_length                    = self.motor.wire_slot_length         # 10
         self.wire_slot_radius                    = self.motor.wire_slot_radius         # 4
 
-        self.driver_upper_holes_dist_from_center = self.design_params["driver_upper_holes_dist_from_center"] # 23
-        self.driver_lower_holes_dist_from_center = self.design_params["driver_lower_holes_dist_from_center"] # 15
-        self.driver_side_holes_dist_from_center  = self.design_params["driver_side_holes_dist_from_center"]  # 20
-        self.driver_mount_holes_dia              = self.design_params["driver_mount_holes_dia"]  # 2.5
-        self.driver_mount_inserts_OD             = self.design_params["driver_mount_inserts_OD"] # 3.5
-        self.driver_mount_thickness              = self.design_params["driver_mount_thickness"]  # 1.5
-        self.driver_mount_height                 = self.design_params["driver_mount_height"]     # 4
+        self.driver_upper_holes_dist_from_center = self.motor_driver_params["driver_upper_holes_dist_from_center"] # 23
+        self.driver_lower_holes_dist_from_center = self.motor_driver_params["driver_lower_holes_dist_from_center"] # 15
+        self.driver_side_holes_dist_from_center  = self.motor_driver_params["driver_side_holes_dist_from_center"]  # 20
+        self.driver_mount_holes_dia              = self.motor_driver_params["driver_mount_holes_dia"]  # 2.5
+        self.driver_mount_inserts_OD             = self.motor_driver_params["driver_mount_inserts_OD"] # 3.5
+        self.driver_mount_thickness              = self.motor_driver_params["driver_mount_thickness"]  # 1.5
+        self.driver_mount_height                 = self.motor_driver_params["driver_mount_height"]     # 4
 
         self.central_hole_offset_from_motor_mount_PCD = self.design_params["central_hole_offset_from_motor_mount_PCD"] # 5
 
@@ -5655,6 +5609,7 @@ class wolfromPlanetaryActuator:
 class doubleStagePlanetaryActuator:
     def __init__(self, 
                  design_parameters,
+                 motor_driver_params,
                  motor = motor, 
                  doubleStagePlanetaryGearbox = doubleStagePlanetaryGearbox, 
                  FOS=2.0, 
@@ -5691,38 +5646,10 @@ class doubleStagePlanetaryActuator:
 
         self.bearing_mounting_thickness_stg1 : float | None = None
 
-        self.design_params = design_parameters
+        self.design_params       = design_parameters
+        self.motor_driver_params = motor_driver_params
 
-        #-----------------------------------------
-        # Actuator Design Parameters
-        #-----------------------------------------
-
-
-        #-----------------------------------------------------
-        # Dependent parameters
-        #-----------------------------------------------------
-        # Initializing here with None values
-        # Will be updated in Mass calculation function
-        #-----------------------------------------------------
-
-        # self.case_mounting_surface_height        = design_parameters["case_mounting_surface_height"]
-        # self.standard_clearance_1_5mm            = design_parameters["standard_clearance_1_5mm"]    
-        # self.base_plate_thickness                = design_parameters["base_plate_thickness"]        
-        # self.Motor_case_thickness                = design_parameters["Motor_case_thickness"]        
-        # self.clearance_planet                    = design_parameters["clearance_planet"]            
-        # self.output_mounting_hole_dia1           = design_parameters["output_mounting_hole_dia1"]    
-        # self.sec_carrier_thickness1              = design_parameters["sec_carrier_thickness1"]       
-        # self.sun_coupler_hub_thickness1          = design_parameters["sun_coupler_hub_thickness1"]   
-        # self.sun_shaft_bearing_OD1               = design_parameters["sun_shaft_bearing_OD1"]        
-        # self.carrier_bearing_step_width          = design_parameters["carrier_bearing_step_width"]  
-        # self.planet_shaft_dia1                   = design_parameters["planet_shaft_dia1"]            
-        # self.sun_shaft_bearing_ID1               = design_parameters["sun_shaft_bearing_ID1"]        
-        # self.sun_shaft_bearing_width1            = design_parameters["sun_shaft_bearing_width1"]     
-        # self.planet_bore1                        = design_parameters["planet_bore1"]                 
-        # self.bearing_retainer_thickness1         = design_parameters["bearing_retainer_thickness1"]  
-        # self.bearingIDClearanceMM                = design_parameters["bearingIDClearanceMM"]
-        # self.ringRadialWidthMM                   = design_parameters["ringRadialWidthMM"]
-           
+        # ===== Set the Design Variables =====
         self.setVariables()
 
     def cost(self):
@@ -5793,15 +5720,17 @@ class doubleStagePlanetaryActuator:
 
         self.central_hole_offset_from_motor_mount_PCD = self.design_params["central_hole_offset_from_motor_mount_PCD"] # 5
         
-        self.base_plate_thickness                = self.design_params["base_plate_thickness"]                # 4
-        self.driver_upper_holes_dist_from_center = self.design_params["driver_upper_holes_dist_from_center"] # 23
-        self.driver_lower_holes_dist_from_center = self.design_params["driver_lower_holes_dist_from_center"] # 15
-        self.driver_side_holes_dist_from_center  = self.design_params["driver_side_holes_dist_from_center"]  # 20
-        self.driver_mount_holes_dia              = self.design_params["driver_mount_holes_dia"]              # 2.5
-        self.driver_mount_inserts_OD             = self.design_params["driver_mount_inserts_OD"]             # 3.5
-        self.driver_mount_thickness              = self.design_params["driver_mount_thickness"]              # 1.5
-        self.driver_mount_height                 = self.design_params["driver_mount_height"]                 # 4
-        self.air_flow_hole_offset                = self.design_params["air_flow_hole_offset"]                # 3
+        self.base_plate_thickness = self.design_params["base_plate_thickness"] # 4
+        self.air_flow_hole_offset = self.design_params["air_flow_hole_offset"] # 3
+
+        # === Driver ===
+        self.driver_upper_holes_dist_from_center = self.motor_driver_params["driver_upper_holes_dist_from_center"] # 23
+        self.driver_lower_holes_dist_from_center = self.motor_driver_params["driver_lower_holes_dist_from_center"] # 15
+        self.driver_side_holes_dist_from_center  = self.motor_driver_params["driver_side_holes_dist_from_center"]  # 20
+        self.driver_mount_holes_dia              = self.motor_driver_params["driver_mount_holes_dia"]              # 2.5
+        self.driver_mount_inserts_OD             = self.motor_driver_params["driver_mount_inserts_OD"]             # 3.5
+        self.driver_mount_thickness              = self.motor_driver_params["driver_mount_thickness"]              # 1.5
+        self.driver_mount_height                 = self.motor_driver_params["driver_mount_height"]                 # 4
 
         ## --------------------------------------------------------------------
         ## Stage 1 - Core Gear Geometry Calculations
@@ -7391,7 +7320,6 @@ class doubleStagePlanetaryActuator:
 class optimizationSingleStageActuator:
     def __init__(self,
                  design_params,
-                 motor_driver_params,
                  gear_standard_paramaeters,
                  K_Mass               = 1.0,
                  K_Eff                = -2.0,
@@ -7424,7 +7352,6 @@ class optimizationSingleStageActuator:
         self.iter                         = 0
         self.gearRatioIter                = self.GEAR_RATIO_MIN
         self.design_params = design_params
-        self.motor_driver_params = motor_driver_params
         self.gear_standard_parameters = gear_standard_paramaeters
 
     def printOptimizationParameters(self, Actuator=singleStagePlanetaryActuator, log=1, csv=0):
@@ -7679,7 +7606,7 @@ class optimizationSingleStageActuator:
 
                                                 opt_actuator = singleStagePlanetaryActuator(design_params            = self.design_params,
                                                                                             motor                    = Actuator.motor, 
-                                                                                            motor_driver_params      = self.motor_driver_params,
+                                                                                            motor_driver_params      = Actuator.motor_driver_params,
                                                                                             planetaryGearbox         = opt_planetaryGearbox, 
                                                                                             FOS                      = Actuator.FOS, 
                                                                                             serviceFactor            = Actuator.serviceFactor, 
@@ -8162,6 +8089,7 @@ class optimizationCompoundPlanetaryActuator:
                                                                                                         maxGearAllowableStressMPa = Actuator.compoundPlanetaryGearbox.maxGearAllowableStressMPa) # MPa) # kg/m^3
                                                         opt_actuator = compoundPlanetaryActuator(design_parameters        = self.design_parameters,
                                                                                                  motor                    = Actuator.motor,
+                                                                                                 motor_driver_params      = Actuator.motor_driver_params,
                                                                                                  compoundPlanetaryGearbox = opt_planetaryGearbox,
                                                                                                  FOS                      = Actuator.FOS,
                                                                                                  serviceFactor            = Actuator.serviceFactor,
@@ -8545,6 +8473,7 @@ class optimizationWolfromPlanetaryActuator:
                                                                                                          maxGearAllowableStressMPa = Actuator.wolfromPlanetaryGearbox.maxGearAllowableStressMPa)
                                                         opt_actuator = wolfromPlanetaryActuator(design_parameters        = self.design_parameters,
                                                                                                 motor                    = Actuator.motor, 
+                                                                                                motor_driver_params      = Actuator.motor_driver_params,
                                                                                                 wolfromPlanetaryGearbox  = opt_planetaryGearbox, 
                                                                                                 FOS                      = Actuator.FOS, 
                                                                                                 serviceFactor            = Actuator.serviceFactor, 
@@ -9074,6 +9003,7 @@ class optimizationDoubleStagePlanetaryActuator:
                                                                                                                        maxGearAllowableStressMPa = Actuator.doubleStagePlanetaryGearbox.Stage1.maxGearAllowableStressMPa) # MPa
                                                                     opt_actuator = doubleStagePlanetaryActuator(design_parameters           = self.design_parameters,
                                                                                                                 motor                       = Actuator.motor, 
+                                                                                                                motor_driver_params         = Actuator.motor_driver_params,
                                                                                                                 doubleStagePlanetaryGearbox = opt_planetaryGearbox, 
                                                                                                                 FOS                         = Actuator.FOS, 
                                                                                                                 serviceFactor               = Actuator.serviceFactor, 

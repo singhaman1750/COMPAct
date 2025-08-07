@@ -55,14 +55,6 @@
         "standard_clearance_1_5mm"                              : 1.5,
         "standard_fillet_1_5mm"                                 : 1.5,
         "standard_bearing_insertion_chamfer"                    : 0.5,
-
-        "driver_upper_holes_dist_from_center"                   : 23,
-        "driver_lower_holes_dist_from_center"                   : 15,
-        "driver_side_holes_dist_from_center"                    : 20,
-        "driver_mount_holes_dia"                                : 2.5,
-        "driver_mount_inserts_OD"                               : 3.5,
-        "driver_mount_thickness"                                : 1.5,
-        "driver_mount_height"                                   : 4,
         
         "central_hole_offset_from_motor_mount_PCD"              : 5,
 

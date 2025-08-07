@@ -42,6 +42,14 @@ Aluminum = material_properties["Aluminum"]
 dspg_design_params       = dspg_params["dspg_design_parameters_3DP"]
 dspg_optimization_params = dspg_params["dspg_optimization_parameters"]
 
+motor_driver_data = config_data["Motor_drivers"]
+
+#--------------------------------------------------------
+# Motors Drivers
+#--------------------------------------------------------
+Motor_Driver_Moteus_params    = motor_driver_data["Moteus"]
+Motor_Driver_OdrivePro_params = motor_driver_data["OdrivePro"]
+
 #--------------------------------------------------------
 # Motors
 #--------------------------------------------------------
@@ -292,16 +300,17 @@ doubleStagePlanetaryGearboxInstance = doubleStagePlanetaryGearbox(design_paramet
 #----------------------------------------
 # Actuator
 #----------------------------------------
-maxGearboxDiameter_U8     = MotorU8.motorDiaMM * 1   - 2*dspg_design_params["ring_radial_thickness"]
-maxGearboxDiameter_U10    = MotorU10.motorDiaMM * 1  - 2*dspg_design_params["ring_radial_thickness"]
-maxGearboxDiameter_MN8014 = MotorMN8014.motorDiaMM * 1 - 2*dspg_design_params["ring_radial_thickness"]
-maxGearboxDiameter_VT8020 = Motor8020.motorDiaMM * 1  - 2*dspg_design_params["ring_radial_thickness"]
-maxGearboxDiameter_U12    = MotorU12.motorDiaMM * 1   - 2*dspg_design_params["ring_radial_thickness"] 
-maxGearboxDiameter_MAD_M6C12    = MotorMAD_M6C12.motorDiaMM * 1   - 2*dspg_design_params["ring_radial_thickness"] 
+maxGearboxDiameter_U8        = MotorU8.motorDiaMM        * 1 - 2*dspg_design_params["ring_radial_thickness"]
+maxGearboxDiameter_U10       = MotorU10.motorDiaMM       * 1 - 2*dspg_design_params["ring_radial_thickness"]
+maxGearboxDiameter_MN8014    = MotorMN8014.motorDiaMM    * 1 - 2*dspg_design_params["ring_radial_thickness"]
+maxGearboxDiameter_VT8020    = Motor8020.motorDiaMM      * 1 - 2*dspg_design_params["ring_radial_thickness"]
+maxGearboxDiameter_U12       = MotorU12.motorDiaMM       * 1 - 2*dspg_design_params["ring_radial_thickness"] 
+maxGearboxDiameter_MAD_M6C12 = MotorMAD_M6C12.motorDiaMM * 1 - 2*dspg_design_params["ring_radial_thickness"] 
 
 # U8-Actuator
 Actuator_U8 = doubleStagePlanetaryActuator(design_parameters           = dspg_design_params,
                                            motor                       = MotorU8,  
+                                           motor_driver_data           = Motor_Driver_OdrivePro_params,
                                            doubleStagePlanetaryGearbox = doubleStagePlanetaryGearboxInstance, 
                                            FOS                         = MIT_params["FOS"], 
                                            serviceFactor               = MIT_params["serviceFactor"], 
@@ -311,6 +320,7 @@ Actuator_U8 = doubleStagePlanetaryActuator(design_parameters           = dspg_de
 # U10-Actuator
 Actuator_U10 = doubleStagePlanetaryActuator(design_parameters           = dspg_design_params,
                                             motor                       = MotorU10,  
+                                            motor_driver_data           = Motor_Driver_OdrivePro_params,
                                             doubleStagePlanetaryGearbox = doubleStagePlanetaryGearboxInstance, 
                                             FOS                         = MIT_params["FOS"], 
                                             serviceFactor               = MIT_params["serviceFactor"], 
@@ -320,6 +330,7 @@ Actuator_U10 = doubleStagePlanetaryActuator(design_parameters           = dspg_d
 # MN8014-Actuator
 Actuator_MN8014 = doubleStagePlanetaryActuator(design_parameters           = dspg_design_params,
                                                motor                       = MotorMN8014,  
+                                               motor_driver_data           = Motor_Driver_OdrivePro_params,
                                                doubleStagePlanetaryGearbox = doubleStagePlanetaryGearboxInstance, 
                                                FOS                         = MIT_params["FOS"], 
                                                serviceFactor               = MIT_params["serviceFactor"], 
@@ -328,6 +339,7 @@ Actuator_MN8014 = doubleStagePlanetaryActuator(design_parameters           = dsp
 
 Actuator_VT8020 = doubleStagePlanetaryActuator(design_parameters           = dspg_design_params,
                                                motor                       = Motor8020,
+                                               motor_driver_data           = Motor_Driver_OdrivePro_params,
                                                doubleStagePlanetaryGearbox = doubleStagePlanetaryGearboxInstance,
                                                FOS                         = MIT_params["FOS"],
                                                serviceFactor               = MIT_params["serviceFactor"],
@@ -336,6 +348,7 @@ Actuator_VT8020 = doubleStagePlanetaryActuator(design_parameters           = dsp
 
 Actuator_U12 = doubleStagePlanetaryActuator(design_parameters           = dspg_design_params,
                                             motor                       = MotorU12,
+                                            motor_driver_data           = Motor_Driver_OdrivePro_params,
                                             doubleStagePlanetaryGearbox = doubleStagePlanetaryGearboxInstance,
                                             FOS                         = MIT_params["FOS"],
                                             serviceFactor               = MIT_params["serviceFactor"],
@@ -343,12 +356,13 @@ Actuator_U12 = doubleStagePlanetaryActuator(design_parameters           = dspg_d
                                             stressAnalysisMethodName    = "MIT")
 
 Actuator_MAD_M6C12 = doubleStagePlanetaryActuator(design_parameters           = dspg_design_params,
-                                            motor                       = MotorMAD_M6C12,
-                                            doubleStagePlanetaryGearbox = doubleStagePlanetaryGearboxInstance,
-                                            FOS                         = MIT_params["FOS"],
-                                            serviceFactor               = MIT_params["serviceFactor"],
-                                            maxGearboxDiameter          = maxGearboxDiameter_MAD_M6C12,
-                                            stressAnalysisMethodName    = "MIT")
+                                                  motor                       = MotorMAD_M6C12,
+                                                  motor_driver_data           = Motor_Driver_OdrivePro_params,
+                                                  doubleStagePlanetaryGearbox = doubleStagePlanetaryGearboxInstance,
+                                                  FOS                         = MIT_params["FOS"],
+                                                  serviceFactor               = MIT_params["serviceFactor"],
+                                                  maxGearboxDiameter          = maxGearboxDiameter_MAD_M6C12,
+                                                  stressAnalysisMethodName    = "MIT")
 
 
 # Optimization
