@@ -2516,8 +2516,156 @@ class singleStagePlanetaryActuator:
         self.fw_s_used = self.fw_p + self.clearance_planet + self.sec_carrier_thickness + self.standard_clearance_1_5mm
 
         #------------------------------------------
+        self.actuator_width = (  self.motor_height 
+                               + self.case_mounting_surface_height
+                               + self.standard_clearance_1_5mm
+                               + self.base_plate_thickness
+                               + self.case_dist
+                               + self.bearing_height
+                               + self.standard_clearance_1_5mm
+                               + self.fw_r
+                               + self.clearance_planet 
+                               + self.bearing_retainer_thickness)
 
-    def genEquationFile(self):
+    def genEquationFile(self, motor_name="NO_MOTOR", gearRatioLL = 0.0, gearRatioUL = 0.0):
+        self.setVariables()
+        file_path = os.path.join(os.path.dirname(__file__), 'SSPG', 'Equation_Files', motor_name, f'sspg_equations_{gearRatioLL}_{gearRatioUL}.txt')
+        with open(file_path, 'w') as eqFile:
+            eqFile.writelines([
+                # ---------------- Optimization Variables ----------------
+                f'"Ns"= {self.Ns}\n',
+                f'"Np"= {self.Np}\n',
+                f'"Nr"= {self.Nr}\n',
+                f'"module"= {self.module}\n',
+                f'"num_planet"= {self.num_planet}\n',
+
+                # ---------------- Independent Variables ------------------
+                f'"pressure angle"= {self.pressure_angle_deg}deg\n',
+                f'"pressure_angle"= {self.pressure_angle_deg}deg\n',
+                f'"h_a"= {self.h_a}\n',
+                f'"h_b"= {self.h_b}\n',
+                f'"clr_tip_root"= {self.clr_tip_root}\n',
+                f'"h_f"= {self.h_f}\n',
+                f'"planet_bore"= {self.planet_bore}\n',
+                f'"motor_OD"= {self.motor_OD}\n',
+                f'"motor_height"= {self.motor_height}\n',
+                f'"bearing_ID"= {self.bearing_ID}\n',
+                f'"bearing_OD"= {self.bearing_OD}\n',
+                f'"bearing_height"= {self.bearing_height}\n',
+
+                # ---------------- Motor Mounting & Clearances -------------
+                f'"clearance_planet"= {self.clearance_planet}\n',
+                f'"sec_carrier_thickness"= {self.sec_carrier_thickness}\n',
+                f'"sun_coupler_hub_thickness"= {self.sun_coupler_hub_thickness}\n',
+                f'"clearance_sun_coupler_sec_carrier"= {self.clearance_sun_coupler_sec_carrier}\n',
+                f'"clearance_motor_and_case"= {self.clearance_motor_and_case}\n',
+                f'"case_mounting_surface_height"= {self.case_mounting_surface_height}\n',
+                f'"Motor_case_thickness"= {self.Motor_case_thickness}\n',
+                f'"Motor_case_ID"= {self.Motor_case_ID}\n',
+                f'"motor_case_OD_base"= {self.motor_case_OD_base}\n',
+                f'"case_mounting_hole_dia"= {self.case_mounting_hole_dia}\n',
+                f'"case_mounting_hole_shift"= {self.case_mounting_hole_shift}\n',
+                f'"case_mounting_PCD"= {self.case_mounting_PCD}\n',
+                f'"case_mounting_hole_allen_socket_dia"= {self.case_mounting_hole_allen_socket_dia}\n',
+                f'"clearance_case_mount_holes_shell_thickness"= {self.clearance_case_mount_holes_shell_thickness}\n',
+                f'"Motor_case_OD_max"= {self.Motor_case_OD_max}\n',
+                f'"base_plate_thickness"= {self.base_plate_thickness}\n',
+
+                # ---------------- Gear Geometry ---------------------------
+                f'"dp_s"= {self.dp_s}\n',
+                f'"db_s"= {self.db_s}\n',
+                f'"fw_s_calc"= {self.fw_s_calc}\n',
+                f'"alpha_s"= {self.alpha_s}\n',
+                f'"beta_s"= {self.beta_s}\n',
+                f'"dp_p"= {self.dp_p}\n',
+                f'"db_p"= {self.db_p}\n',
+                f'"fw_p"= {self.fw_p}\n',
+                f'"alpha_p"= {self.alpha_p}\n',
+                f'"beta_p"= {self.beta_p}\n',
+                f'"dp_r"= {self.dp_r}\n',
+                f'"db_r"= {self.db_r}\n',
+                f'"fw_r"= {self.fw_r}\n',
+                f'"alpha_r"= {self.alpha_r}\n',
+                f'"beta_r"= {self.beta_r}\n',
+
+                # ---------------- Derived Distances & Constraints ----------
+                f'"case_dist"= {self.case_dist}\n',
+                f'"bearing mount thickness"= {self.bearing_mount_thickness}\n',
+                f'"output_mounting_PCD"= {self.output_mounting_PCD}\n',
+                f'"carrier_PCD"= {self.carrier_PCD}\n',
+
+                # ---------------- Motor Mount -----------------------------
+                f'"motor_mount_hole_PCD"= {self.motor_mount_hole_PCD}\n',
+                f'"motor_mount_hole_dia"= {self.motor_mount_hole_dia}\n',
+                f'"motor_mount_hole_num"= {self.motor_mount_hole_num}\n',
+                f'"motor_output_hole_PCD"= {self.motor_output_hole_PCD}\n',
+                f'"motor_output_hole_dia"= {self.motor_output_hole_dia}\n',
+                f'"motor_output_hole_num"= {self.motor_output_hole_num}\n',
+                f'"motor_output_hole_CSK_OD"= {self.motor_output_hole_CSK_OD}\n',
+                f'"motor_output_hole_CSK_head_height"= {self.motor_output_hole_CSK_head_height}\n',
+
+                # ---------------- Bolt & Fastener Details ------------------
+                f'"output_mounting_nut_thickness"= {self.output_mounting_nut_thickness}\n',
+                f'"output_mounting_nut_depth"= {self.output_mounting_nut_depth}\n',
+                f'"output_mounting_nut_wrench_size"= {self.output_mounting_nut_wrench_size}\n',
+                f'"output_mounting_hole_dia"= {self.output_mounting_hole_dia}\n',                
+                f'"case_mounting_bolt_depth"= {self.case_mounting_bolt_depth}\n',
+                f'"case_mounting_wrench_size"= {self.case_mounting_wrench_size}\n',
+                f'"case_mounting_nut_clearance"= {self.case_mounting_nut_clearance}\n',
+                f'"case_mounting_nut_thickness"= {self.case_mounting_nut_thickness}\n',
+
+                # ---------------- Miscellaneous Constants ------------------
+                f'"central_hole_offset_from_motor_mount_PCD"= {self.central_hole_offset_from_motor_mount_PCD}\n',
+                f'"wire_slot_dist_from_center"= {self.wire_slot_dist_from_center}\n',
+                f'"wire_slot_length"= {self.wire_slot_length}\n',
+                f'"wire_slot_radius"= {self.wire_slot_radius}\n',
+                f'"driver_upper_holes_dist_from_center"= {self.driver_upper_holes_dist_from_center}\n',
+                f'"driver_lower_holes_dist_from_center"= {self.driver_lower_holes_dist_from_center}\n',
+                f'"driver_side_holes_dist_from_center"= {self.driver_side_holes_dist_from_center}\n',
+                f'"driver_mount_holes_dia"= {self.driver_mount_holes_dia}\n',
+                f'"driver_mount_inserts_OD"= {self.driver_mount_inserts_OD}\n',
+                f'"driver_mount_thickness"= {self.driver_mount_thickness}\n',
+                f'"driver_mount_height"= {self.driver_mount_height}\n',
+                f'"air_flow_hole_offset"= {self.air_flow_hole_offset}\n',
+
+                # ---------------- Shaft, Hub & Bearing ---------------------
+                f'"ring_radial_thickness"= {self.ring_radial_thickness}\n',
+                f'"ring_OD"= {self.ring_OD}\n',
+                f'"ring_to_chamfer_clearance"= {self.ring_to_chamfer_clearance}\n',
+                f'"Motor_case_OD_base_to_chamfer"= {self.Motor_case_OD_base_to_chamfer}\n',
+                f'"pattern_offset_from_motor_case_OD_base"= {self.pattern_offset_from_motor_case_OD_base}\n',
+                f'"pattern_bulge_dia"= {self.pattern_bulge_dia}\n',
+                f'"pattern_num_bulge"= {self.pattern_num_bulge}\n',
+                f'"pattern_depth"= {self.pattern_depth}\n',
+                f'"planet_pin_bolt_dia"= {self.planet_pin_bolt_dia}\n',
+                f'"planet_pin_socket_head_dia"= {self.planet_pin_socket_head_dia}\n',
+                f'"planet_shaft_dia"= {self.planet_shaft_dia}\n',
+                f'"planet_pin_bolt_wrench_size"= {self.planet_pin_bolt_wrench_size}\n',
+                f'"planet_shaft_step_offset"= {self.planet_shaft_step_offset}\n',
+                f'"planet_bearing_OD"= {self.planet_bearing_OD}\n',
+                f'"planet_bearing_width"= {self.planet_bearing_width}\n',
+                f'"carrier_trapezoidal_support_sun_offset"= {self.carrier_trapezoidal_support_sun_offset}\n',
+                f'"carrier_trapezoidal_support_hole_PCD_offset_bearing_ID"= {self.carrier_trapezoidal_support_hole_PCD_offset_bearing_ID}\n',
+                f'"carrier_trapezoidal_support_hole_dia"= {self.carrier_trapezoidal_support_hole_dia}\n',
+                f'"carrier_trapezoidal_support_hole_socket_head_dia"= {self.carrier_trapezoidal_support_hole_socket_head_dia}\n',
+                f'"carrier_trapezoidal_support_hole_wrench_size"= {self.carrier_trapezoidal_support_hole_wrench_size}\n',
+                f'"carrier_bearing_step_width"= {self.carrier_bearing_step_width}\n',
+                f'"standard_clearance_1_5mm"= {self.standard_clearance_1_5mm}\n',
+                f'"standard_fillet_1_5mm"= {self.standard_fillet_1_5mm}\n',
+                f'"sun_shaft_bearing_OD"= {self.sun_shaft_bearing_OD}\n',
+                f'"sun_shaft_bearing_width"= {self.sun_shaft_bearing_width}\n',
+                f'"sun_shaft_bearing_ID"= {self.sun_shaft_bearing_ID}\n',
+                f'"standard_bearing_insertion_chamfer"= {self.standard_bearing_insertion_chamfer}\n',
+                f'"sun_hub_dia"= {self.sun_hub_dia}\n',
+                f'"sun_central_bolt_dia"= {self.sun_central_bolt_dia}\n',
+                f'"sun_central_bolt_socket_head_dia"= {self.sun_central_bolt_socket_head_dia}\n',
+                f'"fw_s_used"= {self.fw_s_used}\n',
+                f'"bearing_retainer_thickness"= {self.bearing_retainer_thickness}\n',
+                f'"tight_clearance_3DP" = {self.tight_clearance_3DP}\n',
+                f'"loose_clearance_3DP" = {self.loose_clearance_3DP}\n'                
+            ])
+
+    def genEquationFile_old(self):
         self.setVariables()
         file_path = os.path.join(os.path.dirname(__file__), 'SSPG', 'sspg_equations.txt')
         with open(file_path, 'w') as eqFile:
@@ -7317,6 +7465,7 @@ class optimizationSingleStageActuator:
                  gear_standard_paramaeters,
                  K_Mass               = 1.0,
                  K_Eff                = -2.0,
+                 K_Width              = 0.2,
                  MODULE_MIN           = 0.5,
                  MODULE_MAX           = 1.2,
                  NUM_PLANET_MIN       = 3,
@@ -7329,6 +7478,7 @@ class optimizationSingleStageActuator:
         
         self.K_Mass                        = K_Mass
         self.K_Eff                         = K_Eff
+        self.K_Width                       = K_Width
         self.MODULE_MIN                    = MODULE_MIN
         self.MODULE_MAX                    = MODULE_MAX
         self.NUM_PLANET_MIN                = NUM_PLANET_MIN
@@ -7347,6 +7497,8 @@ class optimizationSingleStageActuator:
         self.gearRatioIter                = self.GEAR_RATIO_MIN
         self.design_params = design_params
         self.gear_standard_parameters = gear_standard_paramaeters
+
+        self.gearRatioReq = 0.0
 
     def printOptimizationParameters(self, Actuator=singleStagePlanetaryActuator, log=1, csv=0):
         # Motor Parameters
@@ -7388,17 +7540,18 @@ class optimizationSingleStageActuator:
             print("maxGearBoxDia:           ", maxGearBoxDia)
             print(" ")
             print("-----------------Optimization Parameters-----------------")
-            print("K_Mass:                       ", self.K_Mass)
-            print("K_Eff:                        ", self.K_Eff)
-            print("MODULE_MIN:                   ", self.MODULE_MIN)
-            print("MODULE_MAX:                   ", self.MODULE_MAX)
-            print("NUM_PLANET_MIN:               ", self.NUM_PLANET_MIN)
-            print("NUM_PLANET_MAX:               ", self.NUM_PLANET_MAX)
-            print("NUM_TEETH_SUN_MIN:            ", self.NUM_TEETH_SUN_MIN)
-            print("NUM_TEETH_PLANET_MIN:         ", self.NUM_TEETH_PLANET_MIN)
-            print("GEAR_RATIO_MIN:               ", self.GEAR_RATIO_MIN)
-            print("GEAR_RATIO_MAX:               ", self.GEAR_RATIO_MAX)
-            print("GEAR_RATIO_STEP:              ", self.GEAR_RATIO_STEP)
+            print("K_Mass:               ", self.K_Mass)
+            print("K_Eff:                ", self.K_Eff)
+            print("K_Width:              ", self.K_Width)
+            print("MODULE_MIN:           ", self.MODULE_MIN)
+            print("MODULE_MAX:           ", self.MODULE_MAX)
+            print("NUM_PLANET_MIN:       ", self.NUM_PLANET_MIN)
+            print("NUM_PLANET_MAX:       ", self.NUM_PLANET_MAX)
+            print("NUM_TEETH_SUN_MIN:    ", self.NUM_TEETH_SUN_MIN)
+            print("NUM_TEETH_PLANET_MIN: ", self.NUM_TEETH_PLANET_MIN)
+            print("GEAR_RATIO_MIN:       ", self.GEAR_RATIO_MIN)
+            print("GEAR_RATIO_MAX:       ", self.GEAR_RATIO_MAX)
+            print("GEAR_RATIO_STEP:      ", self.GEAR_RATIO_STEP)
         elif csv:
             print("Motor Parameters:")
             print("maxMotorAngVelRPM,","maxMotorAngVelRadPerSec,","maxMotorTorque,","maxMotorPower,","motorMass,","motorDia,", "motorLength")
@@ -7409,8 +7562,8 @@ class optimizationSingleStageActuator:
             print(FOS,",", serviceFactor,",", stressAnalysisMethodName,",", maxGearBoxDia,",",maxGearAllowableStressMPa)
             print(" ")
             print("Optimization Parameters:")            
-            print("K_mass, K_Eff, MODULE_MIN, MODULE_MAX, NUM_PLANET_MIN, NUM_PLANET_MAX, NUM_TEETH_SUN_MIN, NUM_TEETH_PLANET_MIN, GEAR_RATIO_MIN, GEAR_RATIO_MAX, GEAR_RATIO_STEP")
-            print(self.K_Mass,",", self.K_Eff,",", self.MODULE_MIN,",", self.MODULE_MAX,",", self.NUM_PLANET_MIN,",", self.NUM_PLANET_MAX,",", self.NUM_TEETH_SUN_MIN,",", self.NUM_TEETH_PLANET_MIN,",", self.GEAR_RATIO_MIN,",", self.GEAR_RATIO_MAX,",", self.GEAR_RATIO_STEP)
+            print("K_mass, K_Eff, K_Width, MODULE_MIN, MODULE_MAX, NUM_PLANET_MIN, NUM_PLANET_MAX, NUM_TEETH_SUN_MIN, NUM_TEETH_PLANET_MIN, GEAR_RATIO_MIN, GEAR_RATIO_MAX, GEAR_RATIO_STEP")
+            print(self.K_Mass,",", self.K_Eff,",", self.K_Width,",", self.MODULE_MIN,",", self.MODULE_MAX,",", self.NUM_PLANET_MIN,",", self.NUM_PLANET_MAX,",", self.NUM_TEETH_SUN_MIN,",", self.NUM_TEETH_PLANET_MIN,",", self.GEAR_RATIO_MIN,",", self.GEAR_RATIO_MAX,",", self.GEAR_RATIO_STEP)
 
     def printOptimizationResults(self, Actuator=singleStagePlanetaryActuator, log=1, csv=0):
         if log:
@@ -7468,42 +7621,29 @@ class optimizationSingleStageActuator:
                 eff  = round(self.sspgOpt.getEfficiency(Var=False), 3)
             
             peakTorque = round(Actuator.motor.getMaxMotorTorque()*Actuator.planetaryGearbox.gearRatio(), 3)
-            Cost       = Actuator.cost() #self.K_Mass * mass + self.K_Eff * eff
+            Cost       = self.cost(Actuator = Actuator) 
             Torque_Density = peakTorque / mass
-            print(iter,",", gearRatio,",",module,",", Ns,",", Np,",", Nr,",", numPlanet,",",  fwSunMM,",", fwPlanetMM,",", fwRingMM,",",Opt_PSC_sun,",", Opt_PSC_planet,",", Opt_PSC_ring,",", Opt_CD_SP, ",", Opt_CD_PR,",", mass,",", eff,",", peakTorque,",", Cost, ",", Torque_Density)
+            Outer_Bearing_mass = Actuator.bearing_mass
+            Actuator_width = Actuator.actuator_width
+            ## Don't delete the comment -- this is to verify if the Center distance and the PSC (should be all zero) are correct or not
+            # print(iter,",", gearRatio,",",module,",", Ns,",", Np,",", Nr,",", numPlanet,",",  fwSunMM,",", fwPlanetMM,",", fwRingMM,",",Opt_PSC_sun,",", Opt_PSC_planet,",", Opt_PSC_ring,",", Opt_CD_SP, ",", Opt_CD_PR,",", mass,",", eff,",", peakTorque,",", Cost, ",", Torque_Density, ",", Outer_Bearing_mass, ",", Actuator_width)
+            print(iter,",", gearRatio,",",module,",", Ns,",", Np,",", Nr,",", numPlanet,",",  fwSunMM,",", fwPlanetMM,",", fwRingMM,",", mass,",", eff,",", peakTorque,",", Cost, ",", Torque_Density, ",", Outer_Bearing_mass, ",", Actuator_width)
 
-    def genOptimalActuator(self, Actuator=singleStagePlanetaryActuator, gear_ratio = 6.0, UsePSCasVariable = 1, log = 0, csv = 1):
-        self.GEAR_RATIO_MIN = gear_ratio
-        self.gearRatioIter = self.GEAR_RATIO_MIN
-        self.GEAR_RATIO_STEP = 1.0
-        self.GEAR_RATIO_MAX = gear_ratio
-        
+    def optimizeActuator(self, Actuator=singleStagePlanetaryActuator, UsePSCasVariable = 1, log = 0, csv = 1, gearRatioReq = 0, printOptParams = 1):
         self.UsePSCasVariable = UsePSCasVariable
         totalTime = 0
+        self.gearRatioReq = gearRatioReq
         if UsePSCasVariable == 0:
-            totalTime = self.optimizeActuatorWithoutPSC(Actuator, log, csv)
+            totalTime = self.optimizeActuatorWithoutPSC(Actuator=Actuator, log=log, csv=csv, printOptParams = printOptParams)
         elif UsePSCasVariable == 1:
-            totalTime = self.optimizeActuatorWith_MINLP_PSC(Actuator, log, csv)
+            totalTime = self.optimizeActuatorWithPSC(Actuator=Actuator, log=log, csv=csv, printOptParams = printOptParams)
         else:
             totalTime = 0
             print("ERROR: \"UsePSCasVariable\" can be either 0 or 1")
         
         return totalTime
 
-    def optimizeActuator(self, Actuator=singleStagePlanetaryActuator, UsePSCasVariable = 1, log = 0, csv = 1):
-        self.UsePSCasVariable = UsePSCasVariable
-        totalTime = 0
-        if UsePSCasVariable == 0:
-            totalTime = self.optimizeActuatorWithoutPSC(Actuator, log, csv)
-        elif UsePSCasVariable == 1:
-            totalTime = self.optimizeActuatorWith_MINLP_PSC(Actuator, log, csv)
-        else:
-            totalTime = 0
-            print("ERROR: \"UsePSCasVariable\" can be either 0 or 1")
-        
-        return totalTime
-
-    def optimizeActuatorWithoutPSC(self, Actuator=singleStagePlanetaryActuator, log=1, csv=0): 
+    def optimizeActuatorWithoutPSC(self, Actuator=singleStagePlanetaryActuator, log=1, csv=0, printOptParams = 1): 
         startTime = time.time()
         if csv and log:
             print("WARNING: Both csv and Log cannot be true")
@@ -7527,18 +7667,23 @@ class optimizationSingleStageActuator:
             
         with open(fileName, "w") as file1:
             sys.stdout = file1
-            self.printOptimizationParameters(Actuator, log, csv)
-            if log:
+            if (printOptParams):
+                self.printOptimizationParameters(Actuator, log, csv)
                 print(" ")
+            if self.gearRatioReq != 0:
+                self.GEAR_RATIO_MIN = self.gearRatioReq - self.GEAR_RATIO_STEP/2
+                self.GEAR_RATIO_MAX = self.gearRatioReq + (self.GEAR_RATIO_STEP/2 - 1e-6)
+
+            self.gearRatioIter = self.GEAR_RATIO_MIN
+            if log:
                 print("*****************************************************************")
                 print("FOR MINIMUM GEAR RATIO ", self.gearRatioIter)
                 print("*****************************************************************")
                 print(" ")
             elif csv:
                 # Printing the optimization iterations below
-                print(" ")
-                print("iter, gearRatio, module, Ns, Np, Nr, numPlanet, fwSunMM, fwPlanetMM, fwRingMM, PSCs, PSCp, PSCr, CD_SP, CD_PR, mass, eff, peakTorque, Cost, Torque_Density")
-                # print("iter, gearRatio, module, Ns, Np, Nr, numPlanet, fwSunMM, fwPlanetMM, fwRingMM, mass, eff, peakTorque, Cost, Torque_Density")
+                # print("iter, gearRatio, module, Ns, Np, Nr, numPlanet, fwSunMM, fwPlanetMM, fwRingMM, PSCs, PSCp, PSCr, CD_SP, CD_PR, mass, eff, peakTorque, Cost, Torque_Density, Outer_Bearing_mass, Actuator_width")
+                print("iter, gearRatio, module, Ns, Np, Nr, numPlanet, fwSunMM, fwPlanetMM, fwRingMM, mass, eff, peakTorque, Cost, Torque_Density, Outer_Bearing_mass, Actuator_width")
 
             while self.gearRatioIter <= self.GEAR_RATIO_MAX:
                 opt_done = 0
@@ -7566,17 +7711,14 @@ class optimizationSingleStageActuator:
                                             self.totalGearboxesWithRequiredGR += 1
                                             Actuator.updateFacewidth()
 
-                                            effActuator = Actuator.planetaryGearbox.getEfficiency()
-                                            # massActuator = Actuator.getMassKG_3DP()
-                                            massActuator = Actuator.getMassKG_3DP()
-                                            # self.Cost = (self.K_Mass * massActuator) + (self.K_Eff * effActuator)
-                                            self.Cost = Actuator.cost()
-                                            #self.Cost = massActuator/effActuator
+                                            self.Cost = self.cost(Actuator=Actuator)
+                                            
                                             if self.Cost <= MinCost:
                                                 MinCost = self.Cost
                                                 self.iter+=1
                                                 opt_done = 1
-                                                Actuator.genEquationFile()
+                                                round(self.gearRatioIter, 1)
+                                                Actuator.genEquationFile(motor_name=Actuator.motor.motorName, gearRatioLL=round(self.gearRatioIter, 1), gearRatioUL = (round(self.gearRatioIter + self.GEAR_RATIO_STEP,1)))
                                                 opt_parameters = [Actuator.planetaryGearbox.gearRatio(),
                                                                   Actuator.planetaryGearbox.numPlanet,
                                                                   Actuator.planetaryGearbox.Ns,
@@ -7629,14 +7771,15 @@ class optimizationSingleStageActuator:
             # Print the time in the file 
             endTime = time.time()
             totalTime = endTime - startTime
-            print("\n")
-            print("Running Time (sec)")
-            print(totalTime) 
+            if(printOptParams):
+                print("\n")
+                print("Running Time (sec)")
+                print(totalTime) 
 
         sys.stdout = sys.__stdout__
         return totalTime
 
-    def optimizeActuatorWith_MINLP_PSC(self, Actuator=singleStagePlanetaryActuator, log=1, csv=0):
+    def optimizeActuatorWithPSC(self, Actuator=singleStagePlanetaryActuator, log=1, csv=0, printOptParams = 1):
             startTime = time.time()
             opt_parameters = []
             if csv and log:
@@ -7771,6 +7914,22 @@ class optimizationSingleStageActuator:
 
             sys.stdout = sys.__stdout__
             return totalTime
+
+    def cost(self, Actuator=singleStagePlanetaryActuator):
+        K_gearRatio = 0
+        if self.gearRatioReq != 0:
+            K_gearRatio = 1
+        
+        gearRatio_err = np.sqrt((Actuator.planetaryGearbox.gearRatio() - self.gearRatioReq)**2)
+
+        mass = Actuator.getMassKG_3DP()
+        eff = Actuator.planetaryGearbox.getEfficiency()
+        width = Actuator.planetaryGearbox.fwPlanetMM
+        cost = (self.K_Mass    * mass 
+                + self.K_Eff   * eff 
+                + self.K_Width * width 
+                + K_gearRatio  * gearRatio_err)
+        return cost
 
 #------------------------------------------------------------
 # Class: Optimization of Compound Planetary Actuator

@@ -35,9 +35,9 @@ Gear_standard_parameters = config_data["Gear_standard_parameters"]
 Lewis_params             = config_data["Lewis_params"]
 MIT_params               = config_data["MIT_params"]
 
-Steel               = material_properties["Steel"]
-Aluminum            = material_properties["Aluminum"]
-PLA                 = material_properties["PLA"]
+Steel    = material_properties["Steel"]
+Aluminum = material_properties["Aluminum"]
+PLA      = material_properties["PLA"]
 
 sspg_design_params       = sspg_params["sspg_3DP_design_parameters"]
 sspg_optimization_params = sspg_params["sspg_optimization_parameters"]
@@ -300,12 +300,15 @@ PlanetaryGearbox = singleStagePlanetaryGearbox(design_params             = sspg_
 #--------------------------------------------------------
 # Actuators
 #--------------------------------------------------------
-maxGearboxDiameter_U8            = 1 * MotorU8.motorDiaMM - 2*sspg_design_params["ringRadialWidthMM"] 
-maxGearboxDiameter_U10           = 1 * MotorU10.motorDiaMM - 2*sspg_design_params["ringRadialWidthMM"] 
-maxGearboxDiameter_MN8014        = 1 * MotorMN8014.motorDiaMM - 2*sspg_design_params["ringRadialWidthMM"] 
-maxGearboxDiameter_VT8020        = 1 * Motor8020.motorDiaMM - 2*sspg_design_params["ringRadialWidthMM"]
-maxGearboxDiameter_U12           = 1 * MotorU12.motorDiaMM - 2*sspg_design_params["ringRadialWidthMM"] 
-maxGearboxDiameter_MAD_M6C12     = 1 * MotorMAD_M6C12.motorDiaMM - 2*sspg_design_params["ringRadialWidthMM"] 
+maxGBDia_multFactor           = sspg_optimization_params["MAX_GB_DIA_MULT_FACTOR"] # 1
+maxGBDia_multFactor_MAD_M6C12 = sspg_optimization_params["MAX_GB_DIA_MULT_FACTOR_MAD_M6C12"] # 1.25
+
+maxGearboxDiameter_U8        = maxGBDia_multFactor * MotorU8.motorDiaMM     - 2*sspg_design_params["ringRadialWidthMM"] 
+maxGearboxDiameter_U10       = maxGBDia_multFactor * MotorU10.motorDiaMM    - 2*sspg_design_params["ringRadialWidthMM"] 
+maxGearboxDiameter_MN8014    = maxGBDia_multFactor * MotorMN8014.motorDiaMM - 2*sspg_design_params["ringRadialWidthMM"] 
+maxGearboxDiameter_VT8020    = maxGBDia_multFactor * Motor8020.motorDiaMM   - 2*sspg_design_params["ringRadialWidthMM"]
+maxGearboxDiameter_U12       = maxGBDia_multFactor * MotorU12.motorDiaMM    - 2*sspg_design_params["ringRadialWidthMM"] 
+maxGearboxDiameter_MAD_M6C12 = maxGBDia_multFactor_MAD_M6C12 * MotorMAD_M6C12.motorDiaMM - 2*sspg_design_params["ringRadialWidthMM"] 
 
 # U8-Actuator
 Actuator_U8    = singleStagePlanetaryActuator(design_params             = sspg_design_params,
@@ -372,8 +375,9 @@ Actuator_MAD_M6C12 = singleStagePlanetaryActuator(design_params            = ssp
 #--------------------------------------------------------
 cost_gains = config_data["Cost_gain_parameters"]
 
-K_Mass = 1 # cost_gains["K_Mass"]
-K_Eff  = 0 # cost_gains["K_Eff"]
+K_Mass = cost_gains["K_Mass"]
+K_Eff  = cost_gains["K_Eff"]
+K_Width = cost_gains["K_Width"]
 
 GEAR_RATIO_MIN       = sspg_optimization_params["GEAR_RATIO_MIN"]       # 4   
 GEAR_RATIO_MAX       = sspg_optimization_params["GEAR_RATIO_MAX"]       # 15 
@@ -389,6 +393,7 @@ Optimizer_U8     = optimizationSingleStageActuator(design_params             = s
                                                    gear_standard_paramaeters = Gear_standard_parameters,
                                                    K_Mass                    = K_Mass              ,
                                                    K_Eff                     = K_Eff               ,
+                                                   K_Width                   = K_Width             ,
                                                    MODULE_MIN                = MODULE_MIN          ,
                                                    MODULE_MAX                = MODULE_MAX          ,
                                                    NUM_PLANET_MIN            = NUM_PLANET_MIN      ,
@@ -403,6 +408,7 @@ Optimizer_U10    = optimizationSingleStageActuator(design_params             = s
                                                    gear_standard_paramaeters = Gear_standard_parameters,
                                                    K_Mass                    = K_Mass              ,
                                                    K_Eff                     = K_Eff               ,
+                                                   K_Width                   = K_Width             ,
                                                    MODULE_MIN                = MODULE_MIN          ,
                                                    MODULE_MAX                = MODULE_MAX          ,
                                                    NUM_PLANET_MIN            = NUM_PLANET_MIN      ,
@@ -417,6 +423,7 @@ Optimizer_MN8014 = optimizationSingleStageActuator(design_params             = s
                                                    gear_standard_paramaeters = Gear_standard_parameters,
                                                    K_Mass                    = K_Mass              ,
                                                    K_Eff                     = K_Eff               ,
+                                                   K_Width                   = K_Width             ,
                                                    MODULE_MIN                = MODULE_MIN          ,
                                                    MODULE_MAX                = MODULE_MAX          ,
                                                    NUM_PLANET_MIN            = NUM_PLANET_MIN      ,
@@ -431,6 +438,7 @@ Optimizer_VT8020 = optimizationSingleStageActuator(design_params             = s
                                                    gear_standard_paramaeters = Gear_standard_parameters,
                                                    K_Mass                    = K_Mass              ,
                                                    K_Eff                     = K_Eff               ,
+                                                   K_Width                   = K_Width             ,
                                                    MODULE_MIN                = MODULE_MIN          ,
                                                    MODULE_MAX                = MODULE_MAX          ,
                                                    NUM_PLANET_MIN            = NUM_PLANET_MIN      ,
@@ -445,6 +453,7 @@ Optimizer_U12 = optimizationSingleStageActuator(design_params             = sspg
                                                 gear_standard_paramaeters = Gear_standard_parameters,
                                                 K_Mass                    = K_Mass              ,
                                                 K_Eff                     = K_Eff               ,
+                                                K_Width                   = K_Width             ,
                                                 MODULE_MIN                = MODULE_MIN          ,
                                                 MODULE_MAX                = MODULE_MAX          ,
                                                 NUM_PLANET_MIN            = NUM_PLANET_MIN      ,
@@ -457,39 +466,40 @@ Optimizer_U12 = optimizationSingleStageActuator(design_params             = sspg
 
 
 Optimizer_MAD_M6C12 = optimizationSingleStageActuator(design_params       = sspg_design_params  ,
-                                                gear_standard_paramaeters = Gear_standard_parameters,
-                                                K_Mass                    = K_Mass              ,
-                                                K_Eff                     = K_Eff               ,
-                                                MODULE_MIN                = MODULE_MIN          ,
-                                                MODULE_MAX                = MODULE_MAX          ,
-                                                NUM_PLANET_MIN            = NUM_PLANET_MIN      ,
-                                                NUM_PLANET_MAX            = NUM_PLANET_MAX      ,
-                                                NUM_TEETH_SUN_MIN         = NUM_TEETH_SUN_MIN   ,
-                                                NUM_TEETH_PLANET_MIN      = NUM_TEETH_PLANET_MIN,
-                                                GEAR_RATIO_MIN            = GEAR_RATIO_MIN      ,
-                                                GEAR_RATIO_MAX            = GEAR_RATIO_MAX      ,
-                                                GEAR_RATIO_STEP           = GEAR_RATIO_STEP     )
+                                                      gear_standard_paramaeters = Gear_standard_parameters,
+                                                      K_Mass                    = K_Mass              ,
+                                                      K_Eff                     = K_Eff               ,
+                                                      K_Width                   = K_Width             ,
+                                                      MODULE_MIN                = MODULE_MIN          ,
+                                                      MODULE_MAX                = MODULE_MAX          ,
+                                                      NUM_PLANET_MIN            = NUM_PLANET_MIN      ,
+                                                      NUM_PLANET_MAX            = NUM_PLANET_MAX      ,
+                                                      NUM_TEETH_SUN_MIN         = NUM_TEETH_SUN_MIN   ,
+                                                      NUM_TEETH_PLANET_MIN      = NUM_TEETH_PLANET_MIN,
+                                                      GEAR_RATIO_MIN            = GEAR_RATIO_MIN      ,
+                                                      GEAR_RATIO_MAX            = GEAR_RATIO_MAX      ,
+                                                      GEAR_RATIO_STEP           = GEAR_RATIO_STEP     )
 
 #U8
-totalTime_U8 = Optimizer_U8.optimizeActuator(Actuator_U8, UsePSCasVariable = 0, log=0, csv=1)
+totalTime_U8 = Optimizer_U8.optimizeActuator(Actuator_U8, UsePSCasVariable = 0, log=0, csv=1, printOptParams=1)
 print("Optimization Completed : U8 SSPG : Time taken:", totalTime_U8, " sec")
 
 #U10
-totalTime_U10 = Optimizer_U10.optimizeActuator(Actuator_U10, UsePSCasVariable = 0, log=0, csv=1)
+totalTime_U10 = Optimizer_U10.optimizeActuator(Actuator_U10, UsePSCasVariable = 0, log=0, csv=1, printOptParams=1)
 print("Optimization Completed : U10 SSPG : Time taken:", totalTime_U10, " sec")
 
 #MN8014
-totalTime_MN8014 = Optimizer_MN8014.optimizeActuator(Actuator_MN8014, UsePSCasVariable = 0, log=0, csv=1)
+totalTime_MN8014 = Optimizer_MN8014.optimizeActuator(Actuator_MN8014, UsePSCasVariable = 0, log=0, csv=1, printOptParams=1)
 print("Optimization Completed : MN8014 SSPG : Time taken:", totalTime_MN8014, " sec")
 
 #VT8020
-totalTime_VT8020 = Optimizer_VT8020.optimizeActuator(Actuator_VT8020, UsePSCasVariable = 0, log=0, csv=1)
+totalTime_VT8020 = Optimizer_VT8020.optimizeActuator(Actuator_VT8020, UsePSCasVariable = 0, log=0, csv=1, printOptParams=1)
 print("Optimization Completed : VT8020 SSPG : Time taken:", totalTime_VT8020, " sec")
 
 #U12
-totalTime_U12 = Optimizer_U12.optimizeActuator(Actuator_U12, UsePSCasVariable = 0, log=0, csv=1)
+totalTime_U12 = Optimizer_U12.optimizeActuator(Actuator_U12, UsePSCasVariable = 0, log=0, csv=1, printOptParams=1)
 print("Optimization Completed : U12 SSPG : Time taken:", totalTime_U12, " sec")
 
 # MAD_M6C12
-totalTime_MAD_M6C12 = Optimizer_MAD_M6C12.optimizeActuator(Actuator_MAD_M6C12, UsePSCasVariable = 0, log=0, csv=1)
+totalTime_MAD_M6C12 = Optimizer_MAD_M6C12.optimizeActuator(Actuator_MAD_M6C12, UsePSCasVariable = 0, log=0, csv=1, printOptParams=1)
 print("Optimization Completed : MAD_M6C12 SSPG : Time taken:", totalTime_MAD_M6C12, " sec")
