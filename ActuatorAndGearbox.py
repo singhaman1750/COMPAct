@@ -8115,20 +8115,21 @@ class optimizationCompoundPlanetaryActuator:
         
         return totalTime
 
-    def optimizeActuator(self, Actuator=compoundPlanetaryActuator, UsePSCasVariable = 1, log=1, csv=0):   
+    def optimizeActuator(self, Actuator=compoundPlanetaryActuator, UsePSCasVariable = 1, log=1, csv=0, printOptParams=1, gearRatioReq = 0):   
         self.UsePSCasVariable = UsePSCasVariable
         totalTime = 0
+        self.gearRatioReq = gearRatioReq
         if UsePSCasVariable == 0:
-            totalTime = self.optimizeActuatorWithoutPSC(Actuator, log, csv)
+            totalTime = self.optimizeActuatorWithoutPSC(Actuator=Actuator, log=log, csv=csv,printOptParams=printOptParams)
         elif UsePSCasVariable == 1:
-            totalTime = self.optimizeActuatorWith_MINLP_PSC(Actuator, log, csv)
+            totalTime = self.optimizeActuatorWithPSC(Actuator=Actuator, log=log, csv=csv,printOptParams=printOptParams)
         else:
             totalTime = 0
             print("ERROR: \"UsePSCasVariable\" can be either 0 or 1")
 
         return totalTime
     
-    def optimizeActuatorWithoutPSC(self, Actuator=compoundPlanetaryActuator, log=1, csv=0):
+    def optimizeActuatorWithoutPSC(self, Actuator=compoundPlanetaryActuator, log=1, csv=0, printOptParams=1, gearRatioReq = 0):
         startTime = time.time()
         opt_parameters = []
         if csv and log:
@@ -8153,18 +8154,19 @@ class optimizationCompoundPlanetaryActuator:
         
         with open(fileName, "w") as file1:
             sys.stdout = file1
-            self.printOptimizationParameters(Actuator, log, csv)
-            if log:
+            if (printOptParams):
+                self.printOptimizationParameters(Actuator, log, csv)
                 print(" ")
+            if log:
                 print("*****************************************************************")
                 print("FOR MINIMUM GEAR RATIO ", self.gearRatioIter)
                 print("*****************************************************************")
                 print(" ")
             elif csv:
                 # Printing the optimization iterations below
-                print(" ")
-                print("iter, gearRatio, moduleBig, moduleSmall, Ns, NpBig, NpSmall, Nr, numPlanet, fwSunMM, fwPlanetBigMM, fwPanetSmallMM, fwRingMM, PSCs, PSCp1, PSCp2, PSCr, CD_SP, CD_PR, mass, eff, peakTorque, Cost, tooth_forces_sp, tooth_forces_rp, Torque_Density")
+                # print("iter, gearRatio, moduleBig, moduleSmall, Ns, NpBig, NpSmall, Nr, numPlanet, fwSunMM, fwPlanetBigMM, fwPanetSmallMM, fwRingMM, PSCs, PSCp1, PSCp2, PSCr, CD_SP, CD_PR, mass, eff, peakTorque, Cost, tooth_forces_sp, tooth_forces_rp, Torque_Density")
                 # print("iter, gearRatio, moduleBig, moduleSmall, Ns, NpBig, NpSmall, Nr, numPlanet, fwSunMM, fwPlanetBigMM, fwPanetSmallMM, fwRingMM, mass, eff, peakTorque, Cost, tooth_forces_sp, tooth_forces_rp, Torque_Density")
+                print("iter, gearRatio, moduleBig, moduleSmall, Ns, NpBig, NpSmall, Nr, numPlanet, fwSunMM, fwPlanetBigMM, fwPanetSmallMM, fwRingMM, mass, eff, peakTorque, Cost, Torque_Density, Outer_Bearing_mass, Actuator_width")
 
             while self.gearRatioIter <= self.GEAR_RATIO_MAX:
                 opt_done  = 0
@@ -8207,8 +8209,10 @@ class optimizationCompoundPlanetaryActuator:
                                                     massActuator   = Actuator.getMassKG_3DP()
                                                     effActuator    = Actuator.compoundPlanetaryGearbox.getEfficiency()
 
+                                                    self.Cost = self.cost(Actuator=Actuator)
+
                                                     # self.Cost = (self.K_Mass * massActuator) + (self.K_Eff * effActuator)
-                                                    self.Cost = Actuator.cost()
+                                                    # self.Cost = Actuator.cost()
                                                     if self.Cost < MinCost:
                                                         MinCost    = self.Cost
                                                         opt_done   = 1
@@ -8246,6 +8250,9 @@ class optimizationCompoundPlanetaryActuator:
                                                                                                  serviceFactor            = Actuator.serviceFactor,
                                                                                                  maxGearboxDiameter       = Actuator.maxGearboxDiameter, # mm 
                                                                                                  stressAnalysisMethodName = "MIT") # Lewis or AGMA
+                                                        opt_actuator.updateFacewidth()
+                                                        opt_actuator.getMassKG_3DP()
+
                                                         # self.printOptimizationResults(Actuator, log, csv)
                                             Actuator.compoundPlanetaryGearbox.setNumPlanet(Actuator.compoundPlanetaryGearbox.numPlanet + 1)
                                         # Actuator.compoundPlanetaryGearbox.setNr(Actuator.compoundPlanetaryGearbox.Nr + 1)
@@ -8271,15 +8278,16 @@ class optimizationCompoundPlanetaryActuator:
             # Print the time in the file 
             endTime = time.time()
             totalTime = endTime - startTime
-            print("\n")
-            print("Running Time (sec)")
-            print(totalTime) 
+            if(printOptParams):
+                print("\n")
+                print("Running Time (sec)")
+                print(totalTime) 
 
         sys.stdout = sys.__stdout__
 
         return totalTime
 
-    def optimizeActuatorWith_MINLP_PSC(self, Actuator=compoundPlanetaryActuator, log=1, csv=0):
+    def optimizeActuatorWithPSC(self, Actuator=compoundPlanetaryActuator, log=1, csv=0):
         startTime = time.time()
         opt_parameters = []
         if csv and log:
@@ -8437,6 +8445,22 @@ class optimizationCompoundPlanetaryActuator:
         sys.stdout = sys.__stdout__
 
         return totalTime
+
+    def cost(self, Actuator=compoundPlanetaryActuator):
+        K_gearRatio = 0
+        if self.gearRatioReq != 0:
+            K_gearRatio = 1
+        
+        gearRatio_err = np.sqrt((Actuator.planetaryGearbox.gearRatio() - self.gearRatioReq)**2)
+
+        mass = Actuator.getMassKG_3DP()
+        eff = Actuator.planetaryGearbox.getEfficiency()
+        width = Actuator.planetaryGearbox.fwPlanetMM
+        cost = (self.K_Mass    * mass 
+                + self.K_Eff   * eff 
+                + self.K_Width * width 
+                + K_gearRatio  * gearRatio_err)
+        return cost
 
 #------------------------------------------------------------
 # Class: Optimization of Wolfrom Planetary Actuator

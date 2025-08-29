@@ -300,12 +300,15 @@ compoundPlanetaryGearboxInstance = compoundPlanetaryGearbox(design_parameters   
 #-----------------------------------------------------
 # Actuator
 #-----------------------------------------------------
-maxGearboxDiameter_U8         = 1 * MotorU8.motorDiaMM       
-maxGearboxDiameter_U10        = 1 * MotorU10.motorDiaMM    
-maxGearboxDiameter_MN8014     = 1 * MotorMN8014.motorDiaMM 
-maxGearboxDiameter_VT8020     = 1 * Motor8020.motorDiaMM   
-maxGearboxDiameter_U12        = 1 * MotorU12.motorDiaMM     
-maxGearboxDiameter_MAD_M6C12  = 1.25 * MotorMAD_M6C12.motorDiaMM
+maxGBDia_multFactor           = cpg_optimization_params["MAX_GB_DIA_MULT_FACTOR"] # 1
+maxGBDia_multFactor_MAD_M6C12 = cpg_optimization_params["MAX_GB_DIA_MULT_FACTOR_MAD_M6C12"] # 1.25
+
+maxGearboxDiameter_U8         = maxGBDia_multFactor * MotorU8.motorDiaMM       
+maxGearboxDiameter_U10        = maxGBDia_multFactor * MotorU10.motorDiaMM    
+maxGearboxDiameter_MN8014     = maxGBDia_multFactor * MotorMN8014.motorDiaMM 
+maxGearboxDiameter_VT8020     = maxGBDia_multFactor * Motor8020.motorDiaMM   
+maxGearboxDiameter_U12        = maxGBDia_multFactor * MotorU12.motorDiaMM     
+maxGearboxDiameter_MAD_M6C12  = maxGBDia_multFactor_MAD_M6C12 * MotorMAD_M6C12.motorDiaMM
 
 # U8-Actuator
 Actuator_U8 = compoundPlanetaryActuator(design_parameters        = cpg_design_params,
@@ -373,6 +376,7 @@ opt_param = config_data["Cost_gain_parameters"]
 
 K_Mass = opt_param["K_Mass"]
 K_Eff  = opt_param["K_Eff"]
+K_Width = opt_param["K_Width"]
 
 GEAR_RATIO_MIN  = cpg_optimization_params["GEAR_RATIO_MIN"]  # 4
 GEAR_RATIO_MAX  = cpg_optimization_params["GEAR_RATIO_MAX"]  # 30
@@ -392,6 +396,7 @@ Optimizer_U8     = optimizationCompoundPlanetaryActuator(design_parameters      
                                                          gear_standard_parameters   = Gear_standard_parameters,
                                                          K_Mass                     = K_Mass                     ,
                                                          K_Eff                      = K_Eff                      ,
+                                                         K_Width                    = K_Width                    ,
                                                          MODULE_BIG_MIN             = MODULE_BIG_MIN             ,
                                                          MODULE_BIG_MAX             = MODULE_BIG_MAX             ,
                                                          MODULE_SMALL_MIN           = MODULE_SMALL_MIN           ,
@@ -409,6 +414,7 @@ Optimizer_U10    = optimizationCompoundPlanetaryActuator(design_parameters      
                                                          gear_standard_parameters   = Gear_standard_parameters,
                                                          K_Mass                     = K_Mass                     ,
                                                          K_Eff                      = K_Eff                      ,
+                                                         K_Width                    = K_Width                    ,
                                                          MODULE_BIG_MIN             = MODULE_BIG_MIN             ,
                                                          MODULE_BIG_MAX             = MODULE_BIG_MAX             ,
                                                          MODULE_SMALL_MIN           = MODULE_SMALL_MIN           ,
@@ -426,6 +432,7 @@ Optimizer_MN8014 = optimizationCompoundPlanetaryActuator(design_parameters      
                                                          gear_standard_parameters   = Gear_standard_parameters,
                                                          K_Mass                     = K_Mass                     ,
                                                          K_Eff                      = K_Eff                      ,
+                                                         K_Width                    = K_Width                    ,
                                                          MODULE_BIG_MIN             = MODULE_BIG_MIN             ,
                                                          MODULE_BIG_MAX             = MODULE_BIG_MAX             ,
                                                          MODULE_SMALL_MIN           = MODULE_SMALL_MIN           ,
@@ -443,6 +450,7 @@ Optimizer_VT8020 = optimizationCompoundPlanetaryActuator(design_parameters      
                                                          gear_standard_parameters   = Gear_standard_parameters,
                                                          K_Mass                     = K_Mass                     ,
                                                          K_Eff                      = K_Eff                      ,
+                                                         K_Width                    = K_Width                    ,
                                                          MODULE_BIG_MIN             = MODULE_BIG_MIN             ,
                                                          MODULE_BIG_MAX             = MODULE_BIG_MAX             ,
                                                          MODULE_SMALL_MIN           = MODULE_SMALL_MIN           ,
@@ -458,25 +466,27 @@ Optimizer_VT8020 = optimizationCompoundPlanetaryActuator(design_parameters      
 
 Optimizer_U12 = optimizationCompoundPlanetaryActuator(design_parameters          = cpg_design_params,
                                                       gear_standard_parameters   = Gear_standard_parameters,
-                                                      K_Mass                     = K_Mass                     ,
-                                                      K_Eff                      = K_Eff                      ,
-                                                      MODULE_BIG_MIN             = MODULE_BIG_MIN             ,
-                                                      MODULE_BIG_MAX             = MODULE_BIG_MAX             ,
-                                                      MODULE_SMALL_MIN           = MODULE_SMALL_MIN           ,
-                                                      MODULE_SMALL_MAX           = MODULE_SMALL_MAX           ,
-                                                      NUM_PLANET_MIN             = NUM_PLANET_MIN             ,
-                                                      NUM_PLANET_MAX             = NUM_PLANET_MAX             ,
-                                                      NUM_TEETH_SUN_MIN          = NUM_TEETH_SUN_MIN          ,
-                                                      NUM_TEETH_PLANET_BIG_MIN   = NUM_TEETH_PLANET_BIG_MIN   ,
-                                                      NUM_TEETH_PLANET_SMALL_MIN = NUM_TEETH_PLANET_SMALL_MIN ,
-                                                      GEAR_RATIO_MIN             = GEAR_RATIO_MIN             ,
-                                                      GEAR_RATIO_MAX             = GEAR_RATIO_MAX             ,
-                                                      GEAR_RATIO_STEP            = GEAR_RATIO_STEP            )
+                                                      K_Mass                     = K_Mass                    ,
+                                                      K_Eff                      = K_Eff                     ,
+                                                      K_Width                    = K_Width                   ,
+                                                      MODULE_BIG_MIN             = MODULE_BIG_MIN            ,
+                                                      MODULE_BIG_MAX             = MODULE_BIG_MAX            ,
+                                                      MODULE_SMALL_MIN           = MODULE_SMALL_MIN          ,
+                                                      MODULE_SMALL_MAX           = MODULE_SMALL_MAX          ,
+                                                      NUM_PLANET_MIN             = NUM_PLANET_MIN            ,
+                                                      NUM_PLANET_MAX             = NUM_PLANET_MAX            ,
+                                                      NUM_TEETH_SUN_MIN          = NUM_TEETH_SUN_MIN         ,
+                                                      NUM_TEETH_PLANET_BIG_MIN   = NUM_TEETH_PLANET_BIG_MIN  ,
+                                                      NUM_TEETH_PLANET_SMALL_MIN = NUM_TEETH_PLANET_SMALL_MIN,
+                                                      GEAR_RATIO_MIN             = GEAR_RATIO_MIN            ,
+                                                      GEAR_RATIO_MAX             = GEAR_RATIO_MAX            ,
+                                                      GEAR_RATIO_STEP            = GEAR_RATIO_STEP           )
 
 Optimizer_MAD_M6C12 = optimizationCompoundPlanetaryActuator(design_parameters    = cpg_design_params,
                                                             gear_standard_parameters   = Gear_standard_parameters,
                                                             K_Mass                     = K_Mass                     ,
                                                             K_Eff                      = K_Eff                      ,
+                                                            K_Width                    = K_Width                   ,
                                                             MODULE_BIG_MIN             = MODULE_BIG_MIN             ,
                                                             MODULE_BIG_MAX             = MODULE_BIG_MAX             ,
                                                             MODULE_SMALL_MIN           = MODULE_SMALL_MIN           ,
@@ -493,20 +503,20 @@ Optimizer_MAD_M6C12 = optimizationCompoundPlanetaryActuator(design_parameters   
 #-------------------------------------------------
 # Optimize
 #-------------------------------------------------
-totalTime_U8 = Optimizer_U8.optimizeActuator(Actuator_U8, UsePSCasVariable = 0, log=0, csv=1)
+totalTime_U8 = Optimizer_U8.optimizeActuator(Actuator_U8, UsePSCasVariable = 0, log=0, csv=1, printOptParams=1, gearRatioReq = 0)
 print("Optimization Completed : CPG U8 : Total Time:", totalTime_U8)
-
-totalTime_U10 = Optimizer_U10.optimizeActuator(Actuator_U10, UsePSCasVariable = 0, log=0, csv=1)
+ 
+totalTime_U10 = Optimizer_U10.optimizeActuator(Actuator_U10, UsePSCasVariable = 0, log=0, csv=1, printOptParams=1, gearRatioReq = 0)
 print("Optimization Completed : CPG U10 : Total Time:", totalTime_U10)
 
-totalTime_MN8014 = Optimizer_MN8014.optimizeActuator(Actuator_MN8014, UsePSCasVariable = 0, log=0, csv=1)
+totalTime_MN8014 = Optimizer_MN8014.optimizeActuator(Actuator_MN8014, UsePSCasVariable = 0, log=0, csv=1, printOptParams=1, gearRatioReq = 0)
 print("Optimization Completed : CPG MN8014 : Total Time:", totalTime_MN8014)
 
-totalTime_VT8020 = Optimizer_VT8020.optimizeActuator(Actuator_VT8020, UsePSCasVariable = 0, log=0, csv=1)
+totalTime_VT8020 = Optimizer_VT8020.optimizeActuator(Actuator_VT8020, UsePSCasVariable = 0, log=0, csv=1, printOptParams=1, gearRatioReq = 0)
 print("Optimization Completed : CPG VT8020 : Total Time:", totalTime_VT8020)
 
-totalTime_U12 = Optimizer_U12.optimizeActuator(Actuator_U12, UsePSCasVariable = 0, log=0, csv=1)
+totalTime_U12 = Optimizer_U12.optimizeActuator(Actuator_U12, UsePSCasVariable = 0, log=0, csv=1, printOptParams=1, gearRatioReq = 0)
 print("Optimization Completed : CPG U12 : Total Time:", totalTime_U12)
 
-totalTime_MAD_M6C12 = Optimizer_MAD_M6C12.optimizeActuator(Actuator_MAD_M6C12, UsePSCasVariable = 0, log=0, csv=1)
+totalTime_MAD_M6C12 = Optimizer_MAD_M6C12.optimizeActuator(Actuator_MAD_M6C12, UsePSCasVariable = 0, log=0, csv=1, printOptParams=1, gearRatioReq = 0)
 print("Optimization Completed : CPG  MAD_M6C12 : Time Taken:", totalTime_MAD_M6C12)
