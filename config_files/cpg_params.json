@@ -21,15 +21,17 @@
         "sCarrierIDClearanceMM"        : 2
     },
     "cpg_optimization_parameters":{
-        "GEAR_RATIO_MIN"       : 4.0,
-        "GEAR_RATIO_MAX"       : 45.0,
-        "GEAR_RATIO_STEP"      : 1.0,
-        "MODULE_MIN"           : 0.5,
-        "MODULE_MAX"           : 1.2,
-        "NUM_PLANET_MIN"       : 3,
-        "NUM_PLANET_MAX"       : 7,
-        "NUM_TEETH_SUN_MIN"    : 18,
-        "NUM_TEETH_PLANET_MIN" : 28
+        "GEAR_RATIO_MIN"                   : 4.0,
+        "GEAR_RATIO_MAX"                   : 20.0,
+        "GEAR_RATIO_STEP"                  : 1.0,
+        "MODULE_MIN"                       : 0.5,
+        "MODULE_MAX"                       : 1.2,
+        "NUM_PLANET_MIN"                   : 3,
+        "NUM_PLANET_MAX"                   : 7,
+        "NUM_TEETH_SUN_MIN"                : 18,
+        "NUM_TEETH_PLANET_MIN"             : 28,
+        "MAX_GB_DIA_MULT_FACTOR"           : 1,
+        "MAX_GB_DIA_MULT_FACTOR_MAD_M6C12" : 1.25
     },
     "cpg_3DP_design_parameters":{
         "ringRadialWidthMM"                                      : 5.0,
