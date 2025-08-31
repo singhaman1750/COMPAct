@@ -301,12 +301,15 @@ doubleStagePlanetaryGearboxInstance = doubleStagePlanetaryGearbox(design_paramet
 #----------------------------------------
 # Actuator
 #----------------------------------------
-maxGearboxDiameter_U8        = MotorU8.motorDiaMM        * 1 - 2*dspg_design_params["ring_radial_thickness"]
-maxGearboxDiameter_U10       = MotorU10.motorDiaMM       * 1 - 2*dspg_design_params["ring_radial_thickness"]
-maxGearboxDiameter_MN8014    = MotorMN8014.motorDiaMM    * 1 - 2*dspg_design_params["ring_radial_thickness"]
-maxGearboxDiameter_VT8020    = Motor8020.motorDiaMM      * 1 - 2*dspg_design_params["ring_radial_thickness"]
-maxGearboxDiameter_U12       = MotorU12.motorDiaMM       * 1 - 2*dspg_design_params["ring_radial_thickness"] 
-maxGearboxDiameter_MAD_M6C12 = MotorMAD_M6C12.motorDiaMM * 1 - 2*dspg_design_params["ring_radial_thickness"] 
+maxGBDia_multFactor           = dspg_optimization_params["MAX_GB_DIA_MULT_FACTOR"] # 1
+maxGBDia_multFactor_MAD_M6C12 = dspg_optimization_params["MAX_GB_DIA_MULT_FACTOR_MAD_M6C12"] # 1.25
+
+maxGearboxDiameter_U8        = MotorU8.motorDiaMM        * maxGBDia_multFactor - 2*dspg_design_params["ring_radial_thickness"]
+maxGearboxDiameter_U10       = MotorU10.motorDiaMM       * maxGBDia_multFactor - 2*dspg_design_params["ring_radial_thickness"]
+maxGearboxDiameter_MN8014    = MotorMN8014.motorDiaMM    * maxGBDia_multFactor - 2*dspg_design_params["ring_radial_thickness"]
+maxGearboxDiameter_VT8020    = Motor8020.motorDiaMM      * maxGBDia_multFactor - 2*dspg_design_params["ring_radial_thickness"]
+maxGearboxDiameter_U12       = MotorU12.motorDiaMM       * maxGBDia_multFactor - 2*dspg_design_params["ring_radial_thickness"] 
+maxGearboxDiameter_MAD_M6C12 = MotorMAD_M6C12.motorDiaMM * maxGBDia_multFactor_MAD_M6C12 - 2*dspg_design_params["ring_radial_thickness"] 
 
 # U8-Actuator
 Actuator_U8 = doubleStagePlanetaryActuator(design_parameters           = dspg_design_params,
@@ -371,6 +374,7 @@ opt_param = config_data["Cost_gain_parameters"]
 
 K_Mass = opt_param["K_Mass"]
 K_Eff  = opt_param["K_Eff"]
+K_Width  = opt_param["K_Width"]
 
 GEAR_RATIO_MIN  = dspg_optimization_params["GEAR_RATIO_MIN"]        # 4   
 GEAR_RATIO_MAX  = dspg_optimization_params["GEAR_RATIO_MAX"]        # 45  
@@ -391,6 +395,7 @@ Optimizer_U8     = optimizationDoubleStagePlanetaryActuator(design_parameters   
                                                             gear_standard_parameters = Gear_standard_parameters,
                                                             K_Mass                   = K_Mass                ,
                                                             K_Eff                    = K_Eff                 ,
+                                                            K_Width                  = K_Width               ,
                                                             MODULE_STAGE1_MIN        = MODULE_STAGE1_MIN     ,
                                                             MODULE_STAGE1_MAX        = MODULE_STAGE1_MAX     ,
                                                             MODULE_STAGE2_MIN        = MODULE_STAGE2_MIN     ,
@@ -409,6 +414,7 @@ Optimizer_U10    = optimizationDoubleStagePlanetaryActuator(design_parameters   
                                                             gear_standard_parameters = Gear_standard_parameters,
                                                             K_Mass                   = K_Mass                ,
                                                             K_Eff                    = K_Eff                 ,
+                                                            K_Width                  = K_Width               ,
                                                             MODULE_STAGE1_MIN        = MODULE_STAGE1_MIN     ,
                                                             MODULE_STAGE1_MAX        = MODULE_STAGE1_MAX     ,
                                                             MODULE_STAGE2_MIN        = MODULE_STAGE2_MIN     ,
@@ -427,6 +433,7 @@ Optimizer_MN8014 = optimizationDoubleStagePlanetaryActuator(design_parameters   
                                                             gear_standard_parameters = Gear_standard_parameters,
                                                             K_Mass                   = K_Mass                ,
                                                             K_Eff                    = K_Eff                 ,
+                                                            K_Width                  = K_Width               ,
                                                             MODULE_STAGE1_MIN        = MODULE_STAGE1_MIN     ,
                                                             MODULE_STAGE1_MAX        = MODULE_STAGE1_MAX     ,
                                                             MODULE_STAGE2_MIN        = MODULE_STAGE2_MIN     ,
@@ -445,6 +452,7 @@ Optimizer_VT8020 = optimizationDoubleStagePlanetaryActuator(design_parameters   
                                                             gear_standard_parameters = Gear_standard_parameters,
                                                             K_Mass                   = K_Mass                ,
                                                             K_Eff                    = K_Eff                 ,
+                                                            K_Width                  = K_Width               ,
                                                             MODULE_STAGE1_MIN        = MODULE_STAGE1_MIN     ,
                                                             MODULE_STAGE1_MAX        = MODULE_STAGE1_MAX     ,
                                                             MODULE_STAGE2_MIN        = MODULE_STAGE2_MIN     ,
@@ -463,6 +471,7 @@ Optimizer_U12 = optimizationDoubleStagePlanetaryActuator(design_parameters      
                                                          gear_standard_parameters = Gear_standard_parameters,
                                                          K_Mass                   = K_Mass                ,
                                                          K_Eff                    = K_Eff                 ,
+                                                         K_Width                  = K_Width               ,
                                                          MODULE_STAGE1_MIN        = MODULE_STAGE1_MIN     ,
                                                          MODULE_STAGE1_MAX        = MODULE_STAGE1_MAX     ,
                                                          MODULE_STAGE2_MIN        = MODULE_STAGE2_MIN     ,
@@ -483,6 +492,7 @@ Optimizer_MAD_M6C12 = optimizationDoubleStagePlanetaryActuator(design_parameters
                                                          gear_standard_parameters = Gear_standard_parameters,
                                                          K_Mass                   = K_Mass                ,
                                                          K_Eff                    = K_Eff                 ,
+                                                         K_Width                  = K_Width               ,
                                                          MODULE_STAGE1_MIN        = MODULE_STAGE1_MIN     ,
                                                          MODULE_STAGE1_MAX        = MODULE_STAGE1_MAX     ,
                                                          MODULE_STAGE2_MIN        = MODULE_STAGE2_MIN     ,
@@ -500,33 +510,33 @@ Optimizer_MAD_M6C12 = optimizationDoubleStagePlanetaryActuator(design_parameters
 # #-----------------------
 # # Optimization: U8
 # #-----------------------
-# totalTime_U8 = Optimizer_U8.optimizeActuator(Actuator_U8, UsePSCasVariable = 0, log=0, csv=1)
+totalTime_U8 = Optimizer_U8.optimizeActuator(Actuator_U8, UsePSCasVariable = 0, log=0, csv=1, printOptParams=1, gearRatioReq=0)
 
-# # Convert to hours, minutes, and seconds
-# hours_U8, remainder_U8 = divmod(totalTime_U8, 3600)
-# minutes_U8, seconds_U8 = divmod(remainder_U8, 60)
+# Convert to hours, minutes, and seconds
+hours_U8, remainder_U8 = divmod(totalTime_U8, 3600)
+minutes_U8, seconds_U8 = divmod(remainder_U8, 60)
 
-# #Print
-# print("Optimization Completed : DSPG U8")
-# print(f"Time taken: {hours_U8} hours, {minutes_U8} minutes, and {seconds_U8} seconds")
+#Print
+print("Optimization Completed : DSPG U8")
+print(f"Time taken: {hours_U8} hours, {minutes_U8} minutes, and {seconds_U8} seconds")
 
-# #-----------------------
-# # Optimization: U10
-# #-----------------------
-# totalTime_U10 = Optimizer_U10.optimizeActuator(Actuator_U10, UsePSCasVariable = 0, log=0, csv=1)
+#-----------------------
+# Optimization: U10
+#-----------------------
+totalTime_U10 = Optimizer_U10.optimizeActuator(Actuator_U10, UsePSCasVariable = 0, log=0, csv=1, printOptParams=1, gearRatioReq=0)
 
-# # Convert to hours, minutes, and seconds
-# hours_U10, remainder_U10 = divmod(totalTime_U10, 3600)
-# minutes_U10, seconds_U10 = divmod(remainder_U10, 60)
+# Convert to hours, minutes, and seconds
+hours_U10, remainder_U10 = divmod(totalTime_U10, 3600)
+minutes_U10, seconds_U10 = divmod(remainder_U10, 60)
 
-# # Print
-# print("Optimization Completed : DSPG U10")
-# print(f"Time taken: {hours_U10} hours, {minutes_U10} minutes, and {seconds_U10} seconds")
+# Print
+print("Optimization Completed : DSPG U10")
+print(f"Time taken: {hours_U10} hours, {minutes_U10} minutes, and {seconds_U10} seconds")
 
 #-----------------------
 # Optimization: MN8014
 #-----------------------
-totalTime_MN8014 = Optimizer_MN8014.optimizeActuator(Actuator_MN8014, UsePSCasVariable = 0, log=0, csv=1)
+totalTime_MN8014 = Optimizer_MN8014.optimizeActuator(Actuator_MN8014, UsePSCasVariable = 0, log=0, csv=1, printOptParams=1, gearRatioReq=0)
 
 # Convert to hours, minutes, and seconds
 hours_MN8014, remainder_MN8014 = divmod(totalTime_MN8014, 3600)
@@ -539,37 +549,38 @@ print(f"Time taken: {hours_MN8014} hours, {minutes_MN8014} minutes, and {seconds
 #-----------------------
 # Optimization: VT8020
 #-----------------------
-# totalTime_VT8020 = Optimizer_VT8020.optimizeActuator(Actuator_VT8020, UsePSCasVariable = 0, log=0, csv=1)
+totalTime_VT8020 = Optimizer_VT8020.optimizeActuator(Actuator_VT8020, UsePSCasVariable = 0, log=0, csv=1, printOptParams=1, gearRatioReq=0)
 
-# # Convert to hours, minutes, and seconds
-# hours_VT8020, remainder_VT8020 = divmod(totalTime_VT8020, 3600)
-# minutes_VT8020, seconds_VT8020 = divmod(remainder_VT8020, 60)
+# Convert to hours, minutes, and seconds
+hours_VT8020, remainder_VT8020 = divmod(totalTime_VT8020, 3600)
+minutes_VT8020, seconds_VT8020 = divmod(remainder_VT8020, 60)
 
-# # Print
-# print("Optimization Completed : DSPG VT8020")
-# print(f"Time taken: {hours_VT8020} hours, {minutes_VT8020} minutes, and {seconds_VT8020} seconds")
+# Print
+print("Optimization Completed : DSPG VT8020")
+print(f"Time taken: {hours_VT8020} hours, {minutes_VT8020} minutes, and {seconds_VT8020} seconds")
 
-# # --------------------
-# # Optimization: U12
-# # --------------------
-# totalTime_U12 = Optimizer_U12.optimizeActuator(Actuator_U12, UsePSCasVariable = 0, log=0, csv=1)
+# --------------------
+# Optimization: U12
+# --------------------
+totalTime_U12 = Optimizer_U12.optimizeActuator(Actuator_U12, UsePSCasVariable = 0, log=0, csv=1, printOptParams=1, gearRatioReq=0)
  
-# # Convert to hours, minutes, and seconds
-# hours_U12, remainder_U12 = divmod(totalTime_U12, 3600)
-# minutes_U12, seconds_U12 = divmod(remainder_U12, 60)
+# Convert to hours, minutes, and seconds
+hours_U12, remainder_U12 = divmod(totalTime_U12, 3600)
+minutes_U12, seconds_U12 = divmod(remainder_U12, 60)
 
+# Print
+print("Optimization Completed : DSPG U12")
+print(f"Time taken: {hours_U12} hours, {minutes_U12} minutes, and {seconds_U12} seconds")
 
-# totalTime_MAD_M6C12 = Optimizer_MAD_M6C12.optimizeActuator(Actuator_MAD_M6C12, UsePSCasVariable = 0, log=0, csv=1)
+# -------------------------
+# Optimization: MAD_M6C12
+# -------------------------
+totalTime_MAD_M6C12 = Optimizer_MAD_M6C12.optimizeActuator(Actuator_MAD_M6C12, UsePSCasVariable = 0, log=0, csv=1, printOptParams=1, gearRatioReq=0)
 
-# # Convert to hours, minutes, and seconds
-# hours_MAD_M6C12, remainder_MAD_M6C12 = divmod(totalTime_MAD_M6C12, 3600)
-# minutes_MAD_M6C12, seconds_MAD_M6C12 = divmod(remainder_MAD_M6C12, 60)
+# Convert to hours, minutes, and seconds
+hours_MAD_M6C12, remainder_MAD_M6C12 = divmod(totalTime_MAD_M6C12, 3600)
+minutes_MAD_M6C12, seconds_MAD_M6C12 = divmod(remainder_MAD_M6C12, 60)
 
-# # Print
-# print("Optimization Completed : DSPG MAD_M6C12")
-# print(f"Time taken: {hours_MAD_M6C12} hours, {minutes_MAD_M6C12} minutes, and {seconds_MAD_M6C12} seconds")
-
-
-# # Print
-# print("Optimization Completed : DSPG U12")
-# print(f"Time taken: {hours_U12} hours, {minutes_U12} minutes, and {seconds_U12} seconds")
+# Print
+print("Optimization Completed : DSPG MAD_M6C12")
+print(f"Time taken: {hours_MAD_M6C12} hours, {minutes_MAD_M6C12} minutes, and {seconds_MAD_M6C12} seconds")

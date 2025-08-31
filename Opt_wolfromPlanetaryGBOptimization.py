@@ -304,12 +304,12 @@ wolfromPlanetaryGearboxInstance = wolfromPlanetaryGearbox(design_parameters     
 maxGBDia_multFactor           = wpg_optimization_params["MAX_GB_DIA_MULT_FACTOR"] # 1
 maxGBDia_multFactor_MAD_M6C12 = wpg_optimization_params["MAX_GB_DIA_MULT_FACTOR_MAD_M6C12"] # 1.25
 
-maxGearboxDiameter_U8           = 1.0 * MotorU8.motorDiaMM     - 2*wpg_design_params["ringRadialWidthMMBig"]
-maxGearboxDiameter_U10          = 1.0 * MotorU10.motorDiaMM    - 2*wpg_design_params["ringRadialWidthMMBig"]
-maxGearboxDiameter_MN8014       = 1.0 * MotorMN8014.motorDiaMM - 2*wpg_design_params["ringRadialWidthMMBig"]
-maxGearboxDiameter_VT8020       = 1.0 * Motor8020.motorDiaMM   - 2*wpg_design_params["ringRadialWidthMMBig"]
-maxGearboxDiameter_U12          = 1.0 * MotorU12.motorDiaMM    - 2*wpg_design_params["ringRadialWidthMMBig"] 
-maxGearboxDiameter_MAD_M6C12    = 1.25 * MotorMAD_M6C12.motorDiaMM    - 2*wpg_design_params["ringRadialWidthMMBig"] 
+maxGearboxDiameter_U8           = maxGBDia_multFactor * MotorU8.motorDiaMM     - 2*wpg_design_params["ringRadialWidthMMBig"]
+maxGearboxDiameter_U10          = maxGBDia_multFactor * MotorU10.motorDiaMM    - 2*wpg_design_params["ringRadialWidthMMBig"]
+maxGearboxDiameter_MN8014       = maxGBDia_multFactor * MotorMN8014.motorDiaMM - 2*wpg_design_params["ringRadialWidthMMBig"]
+maxGearboxDiameter_VT8020       = maxGBDia_multFactor * Motor8020.motorDiaMM   - 2*wpg_design_params["ringRadialWidthMMBig"]
+maxGearboxDiameter_U12          = maxGBDia_multFactor * MotorU12.motorDiaMM    - 2*wpg_design_params["ringRadialWidthMMBig"] 
+maxGearboxDiameter_MAD_M6C12    = maxGBDia_multFactor_MAD_M6C12 * MotorMAD_M6C12.motorDiaMM    - 2*wpg_design_params["ringRadialWidthMMBig"] 
 
 Actuator_U8     = wolfromPlanetaryActuator(design_parameters        = wpg_design_params,
                                            motor                    = MotorU8,
