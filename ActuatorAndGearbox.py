@@ -3625,7 +3625,16 @@ class compoundPlanetaryActuator:
         self.fw_s_used = self.fw_p_s + self.fw_p_b + self.clearance_planet + self.sec_carrier_thickness + self.standard_clearance_1_5mm #TODO: Move to bottom
 
         #-----
-        self.actuator_width =  0  # TODO: calculate the width using the CAD of the CPG
+        self.actuator_width =  (self.fw_r
+                               + self.clearance_planet
+                               + self.bearing_height
+                               + self.clearance_planet
+                               + self.case_dist
+                               + self.bearing_retainer_thickness
+                               + self.motor_height
+                               + self.case_mounting_surface_height
+                               + self.standard_clearance_1_5mm
+                               + self.base_plate_thickness)
                                                                
     def genEquationFile(self, motor_name="NO_MOTOR", gearRatioLL = 0.0, gearRatioUL = 0.0):
         # writing values into text file imported which is imported into solidworks
