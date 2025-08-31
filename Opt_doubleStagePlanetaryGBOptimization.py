@@ -539,37 +539,37 @@ print(f"Time taken: {hours_MN8014} hours, {minutes_MN8014} minutes, and {seconds
 #-----------------------
 # Optimization: VT8020
 #-----------------------
-totalTime_VT8020 = Optimizer_VT8020.optimizeActuator(Actuator_VT8020, UsePSCasVariable = 0, log=0, csv=1)
+# totalTime_VT8020 = Optimizer_VT8020.optimizeActuator(Actuator_VT8020, UsePSCasVariable = 0, log=0, csv=1)
 
-# Convert to hours, minutes, and seconds
-hours_VT8020, remainder_VT8020 = divmod(totalTime_VT8020, 3600)
-minutes_VT8020, seconds_VT8020 = divmod(remainder_VT8020, 60)
+# # Convert to hours, minutes, and seconds
+# hours_VT8020, remainder_VT8020 = divmod(totalTime_VT8020, 3600)
+# minutes_VT8020, seconds_VT8020 = divmod(remainder_VT8020, 60)
 
-# Print
-print("Optimization Completed : DSPG VT8020")
-print(f"Time taken: {hours_VT8020} hours, {minutes_VT8020} minutes, and {seconds_VT8020} seconds")
+# # Print
+# print("Optimization Completed : DSPG VT8020")
+# print(f"Time taken: {hours_VT8020} hours, {minutes_VT8020} minutes, and {seconds_VT8020} seconds")
 
-# --------------------
-# Optimization: U12
-# --------------------
-totalTime_U12 = Optimizer_U12.optimizeActuator(Actuator_U12, UsePSCasVariable = 0, log=0, csv=1)
+# # --------------------
+# # Optimization: U12
+# # --------------------
+# totalTime_U12 = Optimizer_U12.optimizeActuator(Actuator_U12, UsePSCasVariable = 0, log=0, csv=1)
  
-# Convert to hours, minutes, and seconds
-hours_U12, remainder_U12 = divmod(totalTime_U12, 3600)
-minutes_U12, seconds_U12 = divmod(remainder_U12, 60)
+# # Convert to hours, minutes, and seconds
+# hours_U12, remainder_U12 = divmod(totalTime_U12, 3600)
+# minutes_U12, seconds_U12 = divmod(remainder_U12, 60)
 
 
-totalTime_MAD_M6C12 = Optimizer_MAD_M6C12.optimizeActuator(Actuator_MAD_M6C12, UsePSCasVariable = 0, log=0, csv=1)
+# totalTime_MAD_M6C12 = Optimizer_MAD_M6C12.optimizeActuator(Actuator_MAD_M6C12, UsePSCasVariable = 0, log=0, csv=1)
 
-# Convert to hours, minutes, and seconds
-hours_MAD_M6C12, remainder_MAD_M6C12 = divmod(totalTime_MAD_M6C12, 3600)
-minutes_MAD_M6C12, seconds_MAD_M6C12 = divmod(remainder_MAD_M6C12, 60)
+# # Convert to hours, minutes, and seconds
+# hours_MAD_M6C12, remainder_MAD_M6C12 = divmod(totalTime_MAD_M6C12, 3600)
+# minutes_MAD_M6C12, seconds_MAD_M6C12 = divmod(remainder_MAD_M6C12, 60)
 
-# Print
-print("Optimization Completed : DSPG MAD_M6C12")
-print(f"Time taken: {hours_MAD_M6C12} hours, {minutes_MAD_M6C12} minutes, and {seconds_MAD_M6C12} seconds")
+# # Print
+# print("Optimization Completed : DSPG MAD_M6C12")
+# print(f"Time taken: {hours_MAD_M6C12} hours, {minutes_MAD_M6C12} minutes, and {seconds_MAD_M6C12} seconds")
 
 
-# Print
-print("Optimization Completed : DSPG U12")
-print(f"Time taken: {hours_U12} hours, {minutes_U12} minutes, and {seconds_U12} seconds")
+# # Print
+# print("Optimization Completed : DSPG U12")
+# print(f"Time taken: {hours_U12} hours, {minutes_U12} minutes, and {seconds_U12} seconds")

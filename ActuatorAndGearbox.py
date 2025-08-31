@@ -4531,15 +4531,14 @@ class wolfromPlanetaryActuator:
         # --- Setting the variables ---
         self.setVariables()
 
+        self.actuator_width = 0
+
     def cost(self):
         massActuator = self.getMassKG_3DP()
         effActuator  = self.wolfromPlanetaryGearbox.getEfficiency()
         widthActuator = self.wolfromPlanetaryGearbox.fwPlanetBigMM + self.wolfromPlanetaryGearbox.fwPlanetSmallMM
         module = self.wolfromPlanetaryGearbox.moduleBig
-        # print (module)
-        # print (widthActuator)
         cost = massActuator - 2 * effActuator + 0.2 * widthActuator
-        # print(cost)
         return cost
 
     def setVariables(self):
@@ -4556,13 +4555,13 @@ class wolfromPlanetaryActuator:
         # --- Fixed Variables ---
         #------------------------
         # --- Clearances --- 
-        self.clearance_planet                               = self.design_params["clearance_planet"]
-        self.clearance_sun_coupler_sec_carrier              = self.design_params["clearance_sun_coupler_sec_carrier"]
-        self.clearance_case_mount_holes_shell_thickness     = self.design_params["clearance_case_mount_holes_shell_thickness"]
-        self.case_mounting_nut_clearance                    = self.design_params["case_mounting_nut_clearance"]
-        self.standard_clearance_1_5mm                       = self.design_params["standard_clearance_1_5mm"]
-        self.standard_fillet_1_5mm                          = self.design_params["standard_fillet_1_5mm"]
-        self.standard_bearing_insertion_chamfer             = self.design_params["standard_bearing_insertion_chamfer"]
+        self.clearance_planet                           = self.design_params["clearance_planet"]
+        self.clearance_sun_coupler_sec_carrier          = self.design_params["clearance_sun_coupler_sec_carrier"]
+        self.clearance_case_mount_holes_shell_thickness = self.design_params["clearance_case_mount_holes_shell_thickness"]
+        self.case_mounting_nut_clearance                = self.design_params["case_mounting_nut_clearance"]
+        self.standard_clearance_1_5mm                   = self.design_params["standard_clearance_1_5mm"]
+        self.standard_fillet_1_5mm                      = self.design_params["standard_fillet_1_5mm"]
+        self.standard_bearing_insertion_chamfer         = self.design_params["standard_bearing_insertion_chamfer"]
         self.tight_clearance_3DP                        = self.design_params["tight_clearance_3DP"]        
         self.loose_clearance_3DP                        = self.design_params["loose_clearance_3DP"]
 
@@ -5992,6 +5991,7 @@ class wolfromPlanetaryActuator:
         Actuator_mass = (carrier_small_ring_inner_bearing_mass + 
                         carrier_mass + 
                         gearbox_casing_mass +
+                        bearing_mass +
                         Motor_case_mass + 
                         motor_mass +
                         planet_bearing_combined_mass +
@@ -6005,6 +6005,7 @@ class wolfromPlanetaryActuator:
         self.carrier_small_ring_inner_bearing_mass = carrier_small_ring_inner_bearing_mass
         self.carrier_mass                          = carrier_mass
         self.gearbox_casing_mass                   = gearbox_casing_mass
+        self.bearing_mass                          = bearing_mass
         self.Motor_case_mass                       = Motor_case_mass
         self.motor_mass                            = motor_mass
         self.planet_bearing_combined_mass          = planet_bearing_combined_mass
@@ -6020,7 +6021,8 @@ class wolfromPlanetaryActuator:
     def print_mass_of_parts_3DP(self):
         print("carrier_small_ring_inner_bearing_mass :", 1000 * self.carrier_small_ring_inner_bearing_mass)
         print("carrier_mass :", 1000 * self.carrier_mass)                         
-        print("gearbox_casing_mass :", 1000 * self.gearbox_casing_mass)                  
+        print("gearbox_casing_mass :", 1000 * self.gearbox_casing_mass)            
+        print("bearing_mass :", 1000 * self.bearing_mass)      
         print("Motor_case_mass :", 1000 * self.Motor_case_mass)                      
         print("motor_mass :", 1000 * self.motor_mass)                           
         print("planet_bearing_combined_mass :", 1000 * self.planet_bearing_combined_mass)         
@@ -6079,6 +6081,8 @@ class doubleStagePlanetaryActuator:
 
         # ===== Set the Design Variables =====
         self.setVariables()
+
+        self.actuator_width = 0
 
     def cost(self):
         mass = self.getMassKG_3DP()
@@ -9263,7 +9267,9 @@ class optimizationWolfromPlanetaryActuator:
             peakTorque      = round(Actuator.motor.getMaxMotorTorque()*Actuator.wolfromPlanetaryGearbox.gearRatio(), 3)
             Cost       = Actuator.cost() #self.K_Mass * mass + self.K_Eff * eff
             torque_density  = round(peakTorque/mass, 3)
-            print(iter,",", gearRatio,",",moduleBig,",",moduleSmall,",", Ns,",", NpBig,",", NpSmall,",", NrBig,",",NrSmall,",", numPlanet,",", Opt_PSC_sun,",",  Opt_PSC_planet1,",", Opt_PSC_planet2,",", Opt_PSC_ring1,",",Opt_PSC_ring2,",", fwSunMM,",", fwPlanetBigMM,",",fwPlanetSmallMM,",", fwRingBigMM,",",fwRingSmallMM,",", mass, ",", eff,",", peakTorque,",", Cost, ",", torque_density)
+            Outer_bearing_mass = Actuator.bearing_mass
+            Actuator_width = Actuator.actuator_width
+            print(iter,",", gearRatio,",",moduleBig,",",moduleSmall,",", Ns,",", NpBig,",", NpSmall,",", NrBig,",",NrSmall,",", numPlanet,",", Opt_PSC_sun,",",  Opt_PSC_planet1,",", Opt_PSC_planet2,",", Opt_PSC_ring1,",",Opt_PSC_ring2,",", fwSunMM,",", fwPlanetBigMM,",",fwPlanetSmallMM,",", fwRingBigMM,",",fwRingSmallMM,",", mass, ",", eff,",", peakTorque,",", Cost, ",", torque_density, ",", Outer_bearing_mass, ",", Actuator_width)
 
     def cost(self, Actuator=wolfromPlanetaryActuator):
         K_gearRatio = 0
@@ -9290,6 +9296,7 @@ class optimizationDoubleStagePlanetaryActuator:
                  gear_standard_parameters,
                  K_Mass                = 1.0,
                  K_Eff                 = -2.0,
+                 K_Width               = 0.2,
                  MODULE_STAGE1_MIN     = 0.5,
                  MODULE_STAGE1_MAX     = 1.2,
                  MODULE_STAGE2_MIN     = 0.5,
@@ -9305,6 +9312,7 @@ class optimizationDoubleStagePlanetaryActuator:
                  GEAR_RATIO_STEP       = 5):
         self.K_Mass                = K_Mass               
         self.K_Eff                 = K_Eff                
+        self.K_Width               = K_Width                
         self.MODULE_STAGE1_MIN     = MODULE_STAGE1_MIN    
         self.MODULE_STAGE1_MAX     = MODULE_STAGE1_MAX    
         self.MODULE_STAGE2_MIN     = MODULE_STAGE2_MIN    
@@ -9330,20 +9338,23 @@ class optimizationDoubleStagePlanetaryActuator:
         self.gear_standard_parameters = gear_standard_parameters
         self.design_parameters        = design_parameters
 
-    def optimizeActuator(self, Actuator=doubleStagePlanetaryActuator, UsePSCasVariable=1, log=1, csv=0):
+        self.gearRatioReq            = 0
+
+    def optimizeActuator(self, Actuator=doubleStagePlanetaryActuator, UsePSCasVariable=1, log=1, csv=0, gearRatioReq = 0, printOptParams = 1):
         self.UsePSCasVariable = UsePSCasVariable
         totalTime = 0
+        self.gearRatioReq = gearRatioReq
         if UsePSCasVariable == 0:
-            totalTime = self.optimizeActuatorWithoutPSC(Actuator, log, csv)
+            totalTime = self.optimizeActuatorWithoutPSC(Actuator=Actuator, log=log, csv=csv, printOptParams=printOptParams)
         elif UsePSCasVariable == 1:
-            totalTime = self.optimizeActuatorWith_MINLP_PSC(Actuator, log, csv)
+            totalTime = self.optimizeActuatorWithPSC(Actuator=Actuator, log=log, csv=csv, printOptParams=printOptParams)
         else:
             totalTime = 0
             print("ERROR: \"UsePSCasVariable\" can be either 0 or 1")
 
         return totalTime
     
-    def optimizeActuatorWithoutPSC(self, Actuator=doubleStagePlanetaryActuator, log=1, csv=0):
+    def optimizeActuatorWithoutPSC(self, Actuator=doubleStagePlanetaryActuator, log=1, csv=0, printOptParams = 1):
         startTime = time.time()
         if csv and log:
             print("WARNING: Both csv and Log cannot be true")
@@ -9367,18 +9378,19 @@ class optimizationDoubleStagePlanetaryActuator:
         
         with open(fileName, "w") as DSPGLogFile:
             sys.stdout = DSPGLogFile
-            self.printOptimizationParameters(Actuator, log, csv)
+            if(printOptParams):
+                self.printOptimizationParameters(Actuator, log, csv)
+                print(" ")
             
             if log:
-                print(" ")
                 print("*****************************************************************")
                 print("FOR MINIMUM GEAR RATIO ", self.gearRatioIter)
                 print("*****************************************************************")
                 print(" ")
             elif csv:
                 # Printing the optimization iterations below
-                print(" ")
-                print("iter, gearRatio, module1, module2, Ns1, Np1, Nr1, numPlanet1, Ns2, Np2, Nr2, numPlanet2, fwSun1MM, fwPlanet1MM, fwRing1MM, fwSun2MM, fwPlanet2MM, fwRing2MM, Opt_PSC_sun1,  Opt_PSC_planet1, Opt_PSC_ring1, Opt_PSC_sun2, Opt_PSC_planet2, Opt_PSC_ring2, Opt_CD_SP1, Opt_CD_PR1, Opt_CD_SP2, Opt_CD_PR2, mass, eff, peakTorque, Cost, Torque_Density")
+                # print("iter, gearRatio, module1, module2, Ns1, Np1, Nr1, numPlanet1, Ns2, Np2, Nr2, numPlanet2, fwSun1MM, fwPlanet1MM, fwRing1MM, fwSun2MM, fwPlanet2MM, fwRing2MM, Opt_PSC_sun1,  Opt_PSC_planet1, Opt_PSC_ring1, Opt_PSC_sun2, Opt_PSC_planet2, Opt_PSC_ring2, Opt_CD_SP1, Opt_CD_PR1, Opt_CD_SP2, Opt_CD_PR2, mass, eff, peakTorque, Cost, Torque_Density")
+                print("iter, gearRatio, module1, module2, Ns1, Np1, Nr1, numPlanet1, Ns2, Np2, Nr2, numPlanet2, fwSun1MM, fwPlanet1MM, fwRing1MM, fwSun2MM, fwPlanet2MM, fwRing2MM, mass, eff, peakTorque, Cost, Torque_Density, ")
 
             while self.gearRatioIter <= self.GEAR_RATIO_MAX:
                 opt_done  = 0
@@ -9431,10 +9443,10 @@ class optimizationDoubleStagePlanetaryActuator:
                                                                 self.totalGearboxesWithReqGR += 1
 
                                                                 Actuator.updateFacewidth()
-                                                                effActuator = Actuator.doubleStagePlanetaryGearbox.getEfficiency()
-                                                                # massActuator = Actuator.getMassStructureKG()
-                                                                massActuator = Actuator.getMassKG_3DP()
-                                                                self.Cost =  Actuator.cost()#(self.K_Mass * massActuator) + (self.K_Eff * effActuator)
+                                                                # effActuator = Actuator.doubleStagePlanetaryGearbox.getEfficiency()
+                                                                # massActuator = Actuator.getMassKG_3DP()
+                                                                
+                                                                self.Cost = self.cost(Actuator=Actuator)
 
                                                                 if self.Cost < MinCost:
                                                                     MinCost = self.Cost
@@ -9510,15 +9522,16 @@ class optimizationDoubleStagePlanetaryActuator:
             # Print the time in the file 
             endTime = time.time()
             totalTime = endTime - startTime
-            print("\n")
-            print("Running Time (sec)")
-            print(totalTime) 
+            if(printOptParams):
+                print("\n")
+                print("Running Time (sec)")
+                print(totalTime) 
 
         sys.stdout = sys.__stdout__
 
         return totalTime
 
-    def optimizeActuatorWith_MINLP_PSC(self, Actuator=doubleStagePlanetaryActuator, log=1, csv=0):
+    def optimizeActuatorWithPSC(self, Actuator=doubleStagePlanetaryActuator, log=1, csv=0):
         startTime = time.time()
         if csv and log:
             print("WARNING: Both csv and Log cannot be true")
@@ -9682,9 +9695,9 @@ class optimizationDoubleStagePlanetaryActuator:
                                                                    M2_init        = opt_parameters[10] * 10)
                                                 
                         _, calc_centerDistForManufacturing_stg1, calc_centerDistForManufacturing_stg2 = self.dspgOpt.solve()
-                        self.dspgOpt.solve(optimizeForManufacturing=True,
-                                           centerDistForManufacturing_stg1=calc_centerDistForManufacturing_stg1,
-                                           centerDistForManufacturing_stg2=calc_centerDistForManufacturing_stg2)
+                        self.dspgOpt.solve(optimizeForManufacturing        = True,
+                                           centerDistForManufacturing_stg1 = calc_centerDistForManufacturing_stg1,
+                                           centerDistForManufacturing_stg2 = calc_centerDistForManufacturing_stg2)
                         self.printOptimizationResults(opt_actuator, log, csv)
                 self.gearRatioIter += self.GEAR_RATIO_STEP
                 
@@ -9830,6 +9843,25 @@ class optimizationDoubleStagePlanetaryActuator:
                 eff = self.dspgOpt.getEfficiency(Var = False)
             
             peakTorque  = round(Actuator.motor.getMaxMotorTorque()*Actuator.doubleStagePlanetaryGearbox.gearRatio(), 3)
-            Cost        = self.Cost
-            Torque_Density =  peakTorque/mass #round((Actuator.motor.getMaxMotorTorque()*Actuator.doubleStagePlanetaryGearbox.gearRatio()) / Actuator.getMassKG_3DP(), 3)
-            print(iter,",", gearRatio,",", module1,",", module2,",", Ns1,",", Np1,",", Nr1,",", numPlanet1,",", Ns2,",", Np2,",", Nr2,",", numPlanet2,",", fwSun1MM,",", fwPlanet1MM,",", fwRing1MM,",", fwSun2MM,",", fwPlanet2MM,",", fwRing2MM,"," ,Opt_PSC_sun1,",",  Opt_PSC_planet1,",", Opt_PSC_ring1,",", Opt_PSC_sun2,",",  Opt_PSC_planet2,",", Opt_PSC_ring2, ",", Opt_CD_SP1, ",", Opt_CD_PR1, ",", Opt_CD_SP2, ",", Opt_CD_PR2, ",", mass, ",", eff, ",", peakTorque, ",", Cost,",", Torque_Density)
+            Cost        = self.cost(Actuator=Actuator)
+            Torque_Density =  peakTorque/mass
+            Outer_Bearing_mass_stg1 = Actuator.bearing_mass_stg1
+            Outer_Bearing_mass_stg2 = Actuator.bearing_mass_stg2
+            Actuator_width = Actuator.actuator_width
+            print(iter,",", gearRatio,",", module1,",", module2,",", Ns1,",", Np1,",", Nr1,",", numPlanet1,",", Ns2,",", Np2,",", Nr2,",", numPlanet2,",", fwSun1MM,",", fwPlanet1MM,",", fwRing1MM,",", fwSun2MM,",", fwPlanet2MM,",", fwRing2MM,"," , mass, ",", eff, ",", peakTorque, ",", Cost,",", Torque_Density,",", Outer_Bearing_mass_stg1,",", Outer_Bearing_mass_stg2,",",Actuator_width)
+
+    def cost(self, Actuator=doubleStagePlanetaryActuator):
+        K_gearRatio = 0
+        if self.gearRatioReq != 0:
+            K_gearRatio = 1
+        
+        gearRatio_err = np.sqrt((Actuator.doubleStagePlanetaryGearbox.gearRatio() - self.gearRatioReq)**2)
+
+        mass = Actuator.getMassKG_3DP()
+        eff = Actuator.doubleStagePlanetaryGearbox.getEfficiency()
+        width = Actuator.doubleStagePlanetaryGearbox.Stage1.fwPlanetMM + Actuator.doubleStagePlanetaryGearbox.Stage2.fwPlanetMM
+        cost = (self.K_Mass    * mass 
+                + self.K_Eff   * eff 
+                + self.K_Width * width 
+                + K_gearRatio  * gearRatio_err)
+        return cost
