@@ -314,7 +314,7 @@ maxGearboxDiameter_MAD_M6C12 = MotorMAD_M6C12.motorDiaMM * maxGBDia_multFactor_M
 # U8-Actuator
 Actuator_U8 = doubleStagePlanetaryActuator(design_parameters           = dspg_design_params,
                                            motor                       = MotorU8,  
-                                           motor_driver_data           = Motor_Driver_OdrivePro_params,
+                                           motor_driver_params         = Motor_Driver_OdrivePro_params,
                                            doubleStagePlanetaryGearbox = doubleStagePlanetaryGearboxInstance, 
                                            FOS                         = MIT_params["FOS"], 
                                            serviceFactor               = MIT_params["serviceFactor"], 
@@ -324,7 +324,7 @@ Actuator_U8 = doubleStagePlanetaryActuator(design_parameters           = dspg_de
 # U10-Actuator
 Actuator_U10 = doubleStagePlanetaryActuator(design_parameters           = dspg_design_params,
                                             motor                       = MotorU10,  
-                                            motor_driver_data           = Motor_Driver_OdrivePro_params,
+                                            motor_driver_params         = Motor_Driver_OdrivePro_params,
                                             doubleStagePlanetaryGearbox = doubleStagePlanetaryGearboxInstance, 
                                             FOS                         = MIT_params["FOS"], 
                                             serviceFactor               = MIT_params["serviceFactor"], 
@@ -334,7 +334,7 @@ Actuator_U10 = doubleStagePlanetaryActuator(design_parameters           = dspg_d
 # MN8014-Actuator
 Actuator_MN8014 = doubleStagePlanetaryActuator(design_parameters           = dspg_design_params,
                                                motor                       = MotorMN8014,  
-                                               motor_driver_data           = Motor_Driver_OdrivePro_params,
+                                               motor_driver_params         = Motor_Driver_OdrivePro_params,
                                                doubleStagePlanetaryGearbox = doubleStagePlanetaryGearboxInstance, 
                                                FOS                         = MIT_params["FOS"], 
                                                serviceFactor               = MIT_params["serviceFactor"], 
@@ -343,7 +343,7 @@ Actuator_MN8014 = doubleStagePlanetaryActuator(design_parameters           = dsp
 
 Actuator_VT8020 = doubleStagePlanetaryActuator(design_parameters           = dspg_design_params,
                                                motor                       = Motor8020,
-                                               motor_driver_data           = Motor_Driver_OdrivePro_params,
+                                               motor_driver_params         = Motor_Driver_OdrivePro_params,
                                                doubleStagePlanetaryGearbox = doubleStagePlanetaryGearboxInstance,
                                                FOS                         = MIT_params["FOS"],
                                                serviceFactor               = MIT_params["serviceFactor"],
@@ -352,7 +352,7 @@ Actuator_VT8020 = doubleStagePlanetaryActuator(design_parameters           = dsp
 
 Actuator_U12 = doubleStagePlanetaryActuator(design_parameters           = dspg_design_params,
                                             motor                       = MotorU12,
-                                            motor_driver_data           = Motor_Driver_OdrivePro_params,
+                                            motor_driver_params         = Motor_Driver_OdrivePro_params,
                                             doubleStagePlanetaryGearbox = doubleStagePlanetaryGearboxInstance,
                                             FOS                         = MIT_params["FOS"],
                                             serviceFactor               = MIT_params["serviceFactor"],
@@ -361,7 +361,7 @@ Actuator_U12 = doubleStagePlanetaryActuator(design_parameters           = dspg_d
 
 Actuator_MAD_M6C12 = doubleStagePlanetaryActuator(design_parameters           = dspg_design_params,
                                                   motor                       = MotorMAD_M6C12,
-                                                  motor_driver_data           = Motor_Driver_OdrivePro_params,
+                                                  motor_driver_params         = Motor_Driver_OdrivePro_params,
                                                   doubleStagePlanetaryGearbox = doubleStagePlanetaryGearboxInstance,
                                                   FOS                         = MIT_params["FOS"],
                                                   serviceFactor               = MIT_params["serviceFactor"],
