@@ -301,6 +301,9 @@ wolfromPlanetaryGearboxInstance = wolfromPlanetaryGearbox(design_parameters     
 #-------------------------------------------------------
 # Actuator
 #-------------------------------------------------------
+maxGBDia_multFactor           = wpg_optimization_params["MAX_GB_DIA_MULT_FACTOR"] # 1
+maxGBDia_multFactor_MAD_M6C12 = wpg_optimization_params["MAX_GB_DIA_MULT_FACTOR_MAD_M6C12"] # 1.25
+
 maxGearboxDiameter_U8           = 1.0 * MotorU8.motorDiaMM     - 2*wpg_design_params["ringRadialWidthMMBig"]
 maxGearboxDiameter_U10          = 1.0 * MotorU10.motorDiaMM    - 2*wpg_design_params["ringRadialWidthMMBig"]
 maxGearboxDiameter_MN8014       = 1.0 * MotorMN8014.motorDiaMM - 2*wpg_design_params["ringRadialWidthMMBig"]
@@ -369,6 +372,7 @@ opt_param = config_data["Cost_gain_parameters"]
 
 K_Mass = opt_param["K_Mass"]
 K_Eff  = opt_param["K_Eff"]
+K_Width  = opt_param["K_Width"]
 
 GEAR_RATIO_MIN  = wpg_optimization_params["GEAR_RATIO_MIN"]  # 4
 GEAR_RATIO_MAX  = wpg_optimization_params["GEAR_RATIO_MAX"]  # 45
@@ -388,6 +392,7 @@ Optimizer_U8     = optimizationWolfromPlanetaryActuator(design_parameters       
                                                         gear_standard_parameters   = Gear_standard_parameters  ,
                                                         K_Mass                     = K_Mass                    ,
                                                         K_Eff                      = K_Eff                     ,
+                                                        K_Width                    = K_Width                   ,
                                                         MODULE_BIG_MIN             = MODULE_BIG_MIN            ,
                                                         MODULE_BIG_MAX             = MODULE_BIG_MAX            ,
                                                         MODULE_SMALL_MIN           = MODULE_SMALL_MIN          ,
@@ -405,6 +410,7 @@ Optimizer_U10    = optimizationWolfromPlanetaryActuator(design_parameters       
                                                         gear_standard_parameters   = Gear_standard_parameters  ,
                                                         K_Mass                     = K_Mass                    ,
                                                         K_Eff                      = K_Eff                     ,
+                                                        K_Width                    = K_Width                   ,
                                                         MODULE_BIG_MIN             = MODULE_BIG_MIN            ,
                                                         MODULE_BIG_MAX             = MODULE_BIG_MAX            ,
                                                         MODULE_SMALL_MIN           = MODULE_SMALL_MIN          ,
@@ -422,6 +428,7 @@ Optimizer_MN8014 = optimizationWolfromPlanetaryActuator(design_parameters       
                                                         gear_standard_parameters   = Gear_standard_parameters  ,
                                                         K_Mass                     = K_Mass                    ,
                                                         K_Eff                      = K_Eff                     ,
+                                                        K_Width                    = K_Width                   ,
                                                         MODULE_BIG_MIN             = MODULE_BIG_MIN            ,
                                                         MODULE_BIG_MAX             = MODULE_BIG_MAX            ,
                                                         MODULE_SMALL_MIN           = MODULE_SMALL_MIN          ,
@@ -439,6 +446,7 @@ Optimizer_VT8020 = optimizationWolfromPlanetaryActuator(design_parameters       
                                                         gear_standard_parameters   = Gear_standard_parameters  ,
                                                         K_Mass                     = K_Mass                    ,
                                                         K_Eff                      = K_Eff                     ,
+                                                        K_Width                    = K_Width                   ,
                                                         MODULE_BIG_MIN             = MODULE_BIG_MIN            ,
                                                         MODULE_BIG_MAX             = MODULE_BIG_MAX            ,
                                                         MODULE_SMALL_MIN           = MODULE_SMALL_MIN          ,
@@ -456,6 +464,7 @@ Optimizer_U12 = optimizationWolfromPlanetaryActuator(design_parameters          
                                                      gear_standard_parameters   = Gear_standard_parameters  ,
                                                      K_Mass                     = K_Mass                    ,
                                                      K_Eff                      = K_Eff                     ,
+                                                     K_Width                    = K_Width                   ,
                                                      MODULE_BIG_MIN             = MODULE_BIG_MIN            ,
                                                      MODULE_BIG_MAX             = MODULE_BIG_MAX            ,
                                                      MODULE_SMALL_MIN           = MODULE_SMALL_MIN          ,
@@ -473,6 +482,7 @@ Optimizer_MAD_M6C12 = optimizationWolfromPlanetaryActuator(design_parameters    
                                                      gear_standard_parameters   = Gear_standard_parameters  ,
                                                      K_Mass                     = K_Mass                    ,
                                                      K_Eff                      = K_Eff                     ,
+                                                     K_Width                    = K_Width                   ,
                                                      MODULE_BIG_MIN             = MODULE_BIG_MIN            ,
                                                      MODULE_BIG_MAX             = MODULE_BIG_MAX            ,
                                                      MODULE_SMALL_MIN           = MODULE_SMALL_MIN          ,
@@ -490,20 +500,20 @@ Optimizer_MAD_M6C12 = optimizationWolfromPlanetaryActuator(design_parameters    
 #-----------------------------------------------------
 # Optimize 
 #-----------------------------------------------------
-totalTime_U8    = Optimizer_U8.optimizeActuator(Actuator_U8, UsePSCasVariable = 0, log=0, csv=1)
+totalTime_U8    = Optimizer_U8.optimizeActuator(Actuator_U8, UsePSCasVariable = 0, log=0, csv=1, printOptParams=1, gearRatioReq=0)
 print("Optimization Completed : WPG  U8 : Time Taken:", totalTime_U8)
 
-totalTime_U10    = Optimizer_U10.optimizeActuator(Actuator_U10, UsePSCasVariable = 0, log=0, csv=1)
+totalTime_U10    = Optimizer_U10.optimizeActuator(Actuator_U10, UsePSCasVariable = 0, log=0, csv=1, printOptParams=1, gearRatioReq=0)
 print("Optimization Completed : WPG  U10 : Time Taken:", totalTime_U10)
 
-totalTime_MN8014 = Optimizer_MN8014.optimizeActuator(Actuator_MN8014, UsePSCasVariable = 0, log=0, csv=1)
+totalTime_MN8014 = Optimizer_MN8014.optimizeActuator(Actuator_MN8014, UsePSCasVariable = 0, log=0, csv=1, printOptParams=1, gearRatioReq=0)
 print("Optimization Completed : WPG  MN8014 : Time Taken:", totalTime_MN8014)
 
-totalTime_VT8020 = Optimizer_VT8020.optimizeActuator(Actuator_VT8020, UsePSCasVariable = 0, log=0, csv=1)
+totalTime_VT8020 = Optimizer_VT8020.optimizeActuator(Actuator_VT8020, UsePSCasVariable = 0, log=0, csv=1, printOptParams=1, gearRatioReq=0)
 print("Optimization Completed : WPG  VT8020 : Time Taken:", totalTime_VT8020)
 
-totalTime_U12 = Optimizer_U12.optimizeActuator(Actuator_U12, UsePSCasVariable = 0, log=0, csv=1)
+totalTime_U12 = Optimizer_U12.optimizeActuator(Actuator_U12, UsePSCasVariable = 0, log=0, csv=1, printOptParams=1, gearRatioReq=0)
 print("Optimization Completed : WPG  U12 : Time Taken:", totalTime_U12)
 
-totalTime_MAD_M6C12 = Optimizer_MAD_M6C12.optimizeActuator(Actuator_MAD_M6C12, UsePSCasVariable = 0, log=0, csv=1)
+totalTime_MAD_M6C12 = Optimizer_MAD_M6C12.optimizeActuator(Actuator_MAD_M6C12, UsePSCasVariable = 0, log=0, csv=1, printOptParams=1, gearRatioReq=0)
 print("Optimization Completed : WPG  MAD_M6C12 : Time Taken:", totalTime_MAD_M6C12)

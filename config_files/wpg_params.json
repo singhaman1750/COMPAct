@@ -26,18 +26,20 @@
         "bearingIDClearanceMM"             : 6
     },
     "wpg_optimization_parameters":{
-        "GEAR_RATIO_MIN"             : 4,
-        "GEAR_RATIO_MAX"             : 60,
-        "GEAR_RATIO_STEP"            : 1,
-        "MODULE_BIG_MIN"             : 0.5,
-        "MODULE_BIG_MAX"             : 1.2,
-        "MODULE_SMALL_MIN"           : 0.5,
-        "MODULE_SMALL_MAX"           : 1.2,
-        "NUM_PLANET_MIN"             : 3,  
-        "NUM_PLANET_MAX"             : 7,  
-        "NUM_TEETH_SUN_MIN"          : 18, 
-        "NUM_TEETH_PLANET_BIG_MIN"   : 28, 
-        "NUM_TEETH_PLANET_SMALL_MIN" : 28 
+        "GEAR_RATIO_MIN"                   : 4,
+        "GEAR_RATIO_MAX"                   : 60,
+        "GEAR_RATIO_STEP"                  : 1,
+        "MODULE_BIG_MIN"                   : 0.5,
+        "MODULE_BIG_MAX"                   : 1.2,
+        "MODULE_SMALL_MIN"                 : 0.5,
+        "MODULE_SMALL_MAX"                 : 1.2,
+        "NUM_PLANET_MIN"                   : 3,  
+        "NUM_PLANET_MAX"                   : 7,  
+        "NUM_TEETH_SUN_MIN"                : 18, 
+        "NUM_TEETH_PLANET_BIG_MIN"         : 28, 
+        "NUM_TEETH_PLANET_SMALL_MIN"       : 28,
+        "MAX_GB_DIA_MULT_FACTOR"           : 1,
+        "MAX_GB_DIA_MULT_FACTOR_MAD_M6C12" : 1.25
     },
     "wpg_3DP_design_parameters":{        
         "planetMinDistanceMM"                                   : 7.5,
