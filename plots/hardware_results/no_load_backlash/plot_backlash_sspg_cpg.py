@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # File paths
-SSPG_File1 = r"D:\1-Research\Actuator_testbench\actuator-testbench\Actuator_Data\SSPG_MN8014_7.2\SSPG_MN8014_7.2_BACKLASH_DATA\sine_vel_2.500tps_2.00s_processed.csv"
-CPG_File2 = r"D:\1-Research\Actuator_testbench\actuator-testbench\Actuator_Data\CPG_MAD_M6C12_14\CPG_MAD_M6C12_14_BACKLASH_DATA\sine_vel_2.500tps_2.00s_processed.csv"
+SSPG_File1 = r"./sspg_backlash_sine_vel_2.500tps_2.00s.csv"
+CPG_File2  = r"./cpg_backlash_sine_vel_2.500tps_2.00s.csv"
 
 # Column names
 x_col = "time_s"
@@ -51,7 +51,7 @@ plt.scatter(df_cpg[x_col], df_cpg[y_col], label=f"CPG (14:1)",# Max_diff={max_cp
 # Labels and title
 plt.xlabel("Time (s)", fontsize=axis_fontsize)
 plt.ylabel("Backlash (rad)", fontsize=axis_fontsize)
-plt.title("No-load backlash: SSPG and CPG", fontsize=axis_fontsize)
+plt.title("No-load backlash: SSPG(blue) and CPG(red)", fontsize=axis_fontsize)
 
 # legend
 # plt.legend(fontsize=legend_fontsize)
