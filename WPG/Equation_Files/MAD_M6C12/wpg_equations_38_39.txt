@@ -9,7 +9,7 @@
 "Motor_case_thickness" = 2.5
 "air_flow_hole_offset" = 3
 "standard_bearing_insertion_chamfer" = 0.5
-"alpha_p_b" = 0.8539582918412272
+"alpha_p_b" = 0.8539582918412556
 "alpha_p_s" = 0.8539582918412556
 "alpha_r_b" = 0.8539582918412592
 "alpha_r_s" = 0.8539582918412449
@@ -20,7 +20,7 @@
 "bearing_height" = 9
 "bearing mount thickness" = 8
 "bearing_retainer_thickness" = 2
-"beta_p_b" = 2.5777977020318312
+"beta_p_b" = 2.5777977020317744
 "beta_p_s" = 3.586201063376312
 "beta_r_b" = 3.3150594408253755
 "beta_r_s" = 3.4386858144517207
@@ -54,7 +54,7 @@
 "clearance_sun_coupler_sec_carrier" = 1.5
 "clr_tip_root" = 0.17500000000000004
 "clr_tip_root_s" = 0.17500000000000004
-"db_p_b" = 27.626963051105708
+"db_p_b" = 27.626963051105704
 "db_p_s" = 22.364684374704616
 "db_r_b" = 73.67190146961521
 "db_r_s" = 68.40962279321413
@@ -71,13 +71,13 @@
 "driver_mount_thickness" = 1.5
 "driver_side_holes_dist_from_center" = 22.5
 "driver_upper_holes_dist_from_center" = 29
-"fw_p_b" = 25.82101063298305
-"fw_p_s" = 31.511954389756244
-"fw_r_b" = 25.82101063298305
-"fw_r_s" = 30.011954389756244
-"fw_s_calc" = 3.44331542774661
-"fw_s_used" = 64.8329650227393
-"gear_casing_big_ring_to_bearing_dist" = 40.51195438975624
+"fw_p_b" = 25.821010632983114
+"fw_p_s" = 31.511954389756337
+"fw_r_b" = 25.821010632983114
+"fw_r_s" = 30.011954389756337
+"fw_s_calc" = 3.4433154277466116
+"fw_s_used" = 64.83296502273944
+"gear_casing_big_ring_to_bearing_dist" = 40.51195438975634
 "gear_casing_thickness" = 4
 "h_a" = 0.7
 "h_b" = 0.875

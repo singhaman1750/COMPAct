@@ -11,7 +11,7 @@
 "standard_bearing_insertion_chamfer" = 0.5
 "alpha_p_b" = 0.8539582918412556
 "alpha_p_s" = 0.8539582918412592
-"alpha_r_b" = 0.8539582918412343
+"alpha_r_b" = 0.8539582918412663
 "alpha_r_s" = 0.8539582918412449
 "alpha_s" = 0.8539582918412485
 "base_plate_thickness" = 4
@@ -22,7 +22,7 @@
 "bearing_retainer_thickness" = 2
 "beta_p_b" = 3.434940559174632
 "beta_p_s" = 4.292083416317482
-"beta_r_b" = 3.3442802200461053
+"beta_r_b" = 3.344280220046169
 "beta_r_s" = 3.4222022979682043
 "beta_s" = 2.792083416317503
 "carrier_PCD" = 52.5
@@ -56,7 +56,7 @@
 "clr_tip_root_s" = 0.17500000000000004
 "db_p_b" = 23.022469209254755
 "db_p_s" = 19.733545036504076
-"db_r_b" = 72.35633180051495
+"db_r_b" = 72.35633180051494
 "db_r_s" = 69.06740762776427
 "db_s" = 26.311393382005434
 "dp_p_b" = 24.5
@@ -71,13 +71,13 @@
 "driver_mount_thickness" = 1.5
 "driver_side_holes_dist_from_center" = 22.5
 "driver_upper_holes_dist_from_center" = 29
-"fw_p_b" = 20.731629017751118
-"fw_p_s" = 24.82999562341765
-"fw_r_b" = 20.731629017751118
-"fw_r_s" = 23.32999562341765
-"fw_s_calc" = 1.7452106671792726
-"fw_s_used" = 53.06162464116876
-"gear_casing_big_ring_to_bearing_dist" = 33.829995623417645
+"fw_p_b" = 20.731629017751285
+"fw_p_s" = 24.82999562341775
+"fw_r_b" = 20.731629017751285
+"fw_r_s" = 23.32999562341775
+"fw_s_calc" = 1.7452106671792742
+"fw_s_used" = 53.06162464116903
+"gear_casing_big_ring_to_bearing_dist" = 33.82999562341775
 "gear_casing_thickness" = 4
 "h_a" = 0.7
 "h_b" = 0.875
