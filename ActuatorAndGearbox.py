@@ -3,10 +3,6 @@ import numpy as np
 import os
 import sys
 import time
-from pyomo.environ import *
-from pyomo.opt import SolverFactory
-from pyomo.util.infeasible import log_infeasible_constraints
-# from sklearn.linear_model import LinearRegression
 
 #-------------------------------------------------------------------------
 # class material
