@@ -8,8 +8,7 @@ from collections import defaultdict
 # =========================
 # CONFIG — edit here only
 # =========================
-# INPUT_FOLDER = r"C:\Users\singh\OneDrive\Documents\Research\ICRA_2025\Diagrams\plots for 3d printed actuator tests\plots for 3d printed actuator tests\Actuator_testbench\actuator-testbench\Actuator_Data\CPG_MAD_M6C12_14\CPG_MAD_M6C12_14_DATA_sspg"          # folder with files named "<torque>_<rpm>.csv"
-INPUT_FOLDER = r"C:\Users\singh\OneDrive\Documents\Research\ICRA_2025\Diagrams\plots for 3d printed actuator tests\plots for 3d printed actuator tests\Actuator_testbench\actuator-testbench\Actuator_Data\SSPG_MN8014_7.2\SSPG_MN8014_7.2_DATA_till_18"          # folder with files named "<torque>_<rpm>.csv"
+INPUT_FOLDER = r"./SSPG_MN8014_7_2_power_eff_data"
 
 # Column names in your CSVs (RPM in CSV for speed; we convert to rad/s)
 COL = {
