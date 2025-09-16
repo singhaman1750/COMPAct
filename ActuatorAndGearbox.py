@@ -2529,7 +2529,7 @@ class singleStagePlanetaryActuator:
 
     def genEquationFile(self, motor_name="NO_MOTOR", gearRatioLL = 0.0, gearRatioUL = 0.0):
         self.setVariables()
-        file_path = os.path.join(os.path.dirname(__file__), 'SSPG', 'Equation_Files', motor_name, f'sspg_equations_{gearRatioLL}_{gearRatioUL}.txt')
+        file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'SSPG', 'Equation_Files', motor_name, f'sspg_equations_{gearRatioLL}_{gearRatioUL}.txt')
         with open(file_path, 'w') as eqFile:
             eqFile.writelines([
                 # ---------------- Optimization Variables ----------------
@@ -2665,9 +2665,9 @@ class singleStagePlanetaryActuator:
                 f'"loose_clearance_3DP" = {self.loose_clearance_3DP}\n'                
             ])
 
-    def genEquationFile_old(self):
+    def genEquationFile_editCADdirectly(self):
         self.setVariables()
-        file_path = os.path.join(os.path.dirname(__file__), 'SSPG', 'sspg_equations.txt')
+        file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'SSPG', 'sspg_equations.txt')
         with open(file_path, 'w') as eqFile:
             eqFile.writelines([
                 # ---------------- Optimization Variables ----------------
@@ -3639,7 +3639,7 @@ class compoundPlanetaryActuator:
     def genEquationFile(self, motor_name="NO_MOTOR", gearRatioLL = 0.0, gearRatioUL = 0.0):
         # writing values into text file imported which is imported into solidworks
         self.setVariables()
-        file_path = os.path.join(os.path.dirname(__file__), 'CPG', 'Equation_Files', motor_name, f'cpg_equations_{gearRatioLL}_{gearRatioUL}.txt')
+        file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'CPG', 'Equation_Files', motor_name, f'cpg_equations_{gearRatioLL}_{gearRatioUL}.txt')
         with open(file_path, 'w') as eqFile:
             l = [
                     f'"Ns"= {self.Ns}\n',
@@ -3766,10 +3766,10 @@ class compoundPlanetaryActuator:
             eqFile.writelines(l)
         eqFile.close()
 
-    def genEquationFile_old(self):
+    def genEquationFile_editCADdirectly(self):
         # writing values into text file imported which is imported into solidworks
         self.setVariables()
-        file_path = os.path.join(os.path.dirname(__file__), 'CPG', 'cpg_equations.txt')
+        file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'CPG', 'cpg_equations.txt')
         with open(file_path, 'w') as eqFile:
             l = [
                     f'"Ns"= {self.Ns}\n',
@@ -4802,7 +4802,7 @@ class wolfromPlanetaryActuator:
     def genEquationFile(self, motor_name="NO_MOTOR", gearRatioLL = 0.0, gearRatioUL = 0.0):
         # writing values into text file imported which is imported into solidworks
         self.setVariables()
-        file_path = os.path.join(os.path.dirname(__file__), 'WPG', 'Equation_Files', motor_name, f'wpg_equations_{gearRatioLL}_{gearRatioUL}.txt')
+        file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'WPG', 'Equation_Files', motor_name, f'wpg_equations_{gearRatioLL}_{gearRatioUL}.txt')
         # print("File Path: ",file_path)
         with open(file_path, 'w') as eqFile:
             l = [
@@ -4953,10 +4953,10 @@ class wolfromPlanetaryActuator:
             ]
             eqFile.writelines(l)
 
-    def genEquationFile_old(self):
+    def genEquationFile_editCADdirectly(self):
         # writing values into text file imported which is imported into solidworks
         self.setVariables()
-        file_path = os.path.join(os.path.dirname(__file__), 'WPG', 'wpg_equations.txt')
+        file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'WPG', 'wpg_equations.txt')
         # print("File Path: ",file_path)
         with open(file_path, 'w') as eqFile:
             l = [
@@ -6453,7 +6453,7 @@ class doubleStagePlanetaryActuator:
 
     def genEquationFile(self, motor_name="NO_MOTOR", gearRatioLL = 0.0, gearRatioUL = 0.0):
        self.setVariables()
-       file_path = os.path.join(os.path.dirname(__file__),'DSPG', 'Equation_Files', motor_name, f'dspg_equations_{gearRatioLL}_{gearRatioUL}_stg1.txt')
+       file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'DSPG', 'Equation_Files', motor_name, f'dspg_equations_{gearRatioLL}_{gearRatioUL}_stg1.txt')
        with open(file_path, 'w') as file1:
         lines = [
                 f'"Ns" = {self.Ns1}\n',
@@ -6589,7 +6589,7 @@ class doubleStagePlanetaryActuator:
         file1.writelines(lines)
        file1.close()
        # file_path = os.path.join(os.path.dirname(__file__),'DSPG', 'dspg_equations_stg2.txt')
-       file_path = os.path.join(os.path.dirname(__file__),'DSPG', 'Equation_Files', motor_name, f'dspg_equations_{gearRatioLL}_{gearRatioUL}_stg2.txt')
+       file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'DSPG', 'Equation_Files', motor_name, f'dspg_equations_{gearRatioLL}_{gearRatioUL}_stg2.txt')
        with open(file_path, 'w') as file2:
         lines = [
             f'"Ns" = {self.Ns2}\n',
@@ -6724,9 +6724,9 @@ class doubleStagePlanetaryActuator:
         file2.writelines(lines)
        file2.close()
 
-    def genEquationFile_old(self):
+    def genEquationFile_editCADdirectly(self):
        self.setVariables()
-       file_path = os.path.join(os.path.dirname(__file__),'DSPG', 'dspg_equations_stg1.txt')
+       file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'DSPG', 'dspg_equations_stg1.txt')
        with open(file_path, 'w') as file1:
         lines = [
                 f'"Ns" = {self.Ns1}\n',
@@ -6861,7 +6861,7 @@ class doubleStagePlanetaryActuator:
             ]
         file1.writelines(lines)
        file1.close()
-       file_path = os.path.join(os.path.dirname(__file__),'DSPG', 'dspg_equations_stg2.txt')
+       file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'DSPG', 'dspg_equations_stg2.txt')
        with open(file_path, 'w') as file2:
         lines = [
             f'"Ns" = {self.Ns2}\n',
@@ -8334,7 +8334,12 @@ class optimizationSingleStageActuator:
                                                 self.iter+=1
                                                 opt_done = 1
                                                 round(self.gearRatioIter, 1)
-                                                Actuator.genEquationFile(motor_name=Actuator.motor.motorName, gearRatioLL=round(self.gearRatioIter, 1), gearRatioUL = (round(self.gearRatioIter + self.GEAR_RATIO_STEP,1)))
+                                                
+                                                if (self.gearRatioReq == 0):
+                                                    Actuator.genEquationFile(motor_name=Actuator.motor.motorName, gearRatioLL=round(self.gearRatioIter, 1), gearRatioUL = (round(self.gearRatioIter + self.GEAR_RATIO_STEP,1)))
+                                                else:
+                                                    Actuator.genEquationFile_editCADdirectly()
+                                                
                                                 opt_parameters = [Actuator.planetaryGearbox.gearRatio(),
                                                                   Actuator.planetaryGearbox.numPlanet,
                                                                   Actuator.planetaryGearbox.Ns,
@@ -8718,7 +8723,7 @@ class optimizationCompoundPlanetaryActuator:
             Actuator_width = Actuator.actuator_width
             print(iter, ",", gearRatio, ",", moduleBig, ",", moduleSmall, ",", Ns, ",", NpBig, ",", NpSmall, ",", Nr, ",", numPlanet, ",", fwSunMM, ",", fwPlanetBigMM, ",", fwPlanetSmallMM, ",", fwRingMM, ",", mass, ",", eff, ",", peakTorque, ",", Cost, ",", Torque_Density, ",", Outer_Bearing_mass, ",", Actuator_width)
 
-    def optimizeActuator(self, Actuator=compoundPlanetaryActuator, UsePSCasVariable = 1, log=1, csv=0, printOptParams=1, gearRatioReq = 0):   
+    def optimizeActuator(self, Actuator=compoundPlanetaryActuator, UsePSCasVariable = 0, log=1, csv=0, printOptParams=1, gearRatioReq = 0):   
         self.UsePSCasVariable = UsePSCasVariable
         totalTime = 0
         self.gearRatioReq = gearRatioReq
@@ -8765,6 +8770,7 @@ class optimizationCompoundPlanetaryActuator:
                 self.GEAR_RATIO_MIN = self.gearRatioReq - self.GEAR_RATIO_STEP/2
                 self.GEAR_RATIO_MAX = self.gearRatioReq + (self.GEAR_RATIO_STEP/2 - 1e-6)
 
+            self.gearRatioIter = self.GEAR_RATIO_MIN
             if log:
                 print("*****************************************************************")
                 print("FOR MINIMUM GEAR RATIO ", self.gearRatioIter)
@@ -8821,7 +8827,11 @@ class optimizationCompoundPlanetaryActuator:
                                                         opt_done   = 1
                                                         self.iter += 1
                                                         # Actuator.genEquationFile()
-                                                        Actuator.genEquationFile(motor_name=Actuator.motor.motorName, gearRatioLL=round(self.gearRatioIter, 1), gearRatioUL = (round(self.gearRatioIter + self.GEAR_RATIO_STEP,1)))
+                                                        if (self.gearRatioReq == 0):
+                                                            Actuator.genEquationFile(motor_name=Actuator.motor.motorName, gearRatioLL=round(self.gearRatioIter, 1), gearRatioUL = (round(self.gearRatioIter + self.GEAR_RATIO_STEP,1)))
+                                                        else:
+                                                            Actuator.genEquationFile_editCADdirectly()
+                                                    
                                                         opt_parameters = [Actuator.compoundPlanetaryGearbox.gearRatio(),
                                                                           Actuator.compoundPlanetaryGearbox.numPlanet,
                                                                           Actuator.compoundPlanetaryGearbox.Ns,
@@ -9168,6 +9178,7 @@ class optimizationWolfromPlanetaryActuator:
                 self.GEAR_RATIO_MIN = self.gearRatioReq - self.GEAR_RATIO_STEP/2
                 self.GEAR_RATIO_MAX = self.gearRatioReq + (self.GEAR_RATIO_STEP/2 - 1e-6)
 
+            self.gearRatioIter = self.GEAR_RATIO_MIN
             if log:
                 print("*****************************************************************")
                 print("FOR MINIMUM GEAR RATIO ", self.gearRatioIter)
@@ -9228,7 +9239,10 @@ class optimizationWolfromPlanetaryActuator:
                                                         self.iter += 1
                                                         opt_done = 1
                                                         # Actuator.genEquationFile()
-                                                        Actuator.genEquationFile(motor_name=Actuator.motor.motorName, gearRatioLL=round(self.gearRatioIter, 1), gearRatioUL = (round(self.gearRatioIter + self.GEAR_RATIO_STEP,1)))
+                                                        if (self.gearRatioReq == 0):
+                                                            Actuator.genEquationFile(motor_name=Actuator.motor.motorName, gearRatioLL=round(self.gearRatioIter, 1), gearRatioUL = (round(self.gearRatioIter + self.GEAR_RATIO_STEP,1)))
+                                                        else:
+                                                            Actuator.genEquationFile_editCADdirectly()
 
                                                         opt_parameters = [Actuator.wolfromPlanetaryGearbox.gearRatio(),
                                                                           Actuator.wolfromPlanetaryGearbox.numPlanet,
@@ -9709,6 +9723,11 @@ class optimizationDoubleStagePlanetaryActuator:
                 self.printOptimizationParameters(Actuator, log, csv)
                 print(" ")
             
+            if self.gearRatioReq != 0:
+                self.GEAR_RATIO_MIN = self.gearRatioReq - self.GEAR_RATIO_STEP/2
+                self.GEAR_RATIO_MAX = self.gearRatioReq + (self.GEAR_RATIO_STEP/2 - 1e-6)
+
+            self.gearRatioIter = self.GEAR_RATIO_MIN
             if log:
                 print("*****************************************************************")
                 print("FOR MINIMUM GEAR RATIO ", self.gearRatioIter)
@@ -9779,7 +9798,10 @@ class optimizationDoubleStagePlanetaryActuator:
                                                                     MinCost = self.Cost
                                                                     self.iter +=1
                                                                     # Actuator.genEquationFile()
-                                                                    Actuator.genEquationFile(motor_name=Actuator.motor.motorName, gearRatioLL=round(self.gearRatioIter, 1), gearRatioUL = (round(self.gearRatioIter + self.GEAR_RATIO_STEP,1)))
+                                                                    if (self.gearRatioReq == 0):
+                                                                        Actuator.genEquationFile(motor_name=Actuator.motor.motorName, gearRatioLL=round(self.gearRatioIter, 1), gearRatioUL = (round(self.gearRatioIter + self.GEAR_RATIO_STEP,1)))
+                                                                    else:
+                                                                        Actuator.genEquationFile_editCADdirectly()
 
                                                                     opt_done = 1
                                                                     opt_parameters = [Actuator.doubleStagePlanetaryGearbox.gearRatio(),
