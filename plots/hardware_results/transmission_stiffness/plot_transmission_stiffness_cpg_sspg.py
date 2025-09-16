@@ -93,8 +93,8 @@ def plot_csv_data(file1, file2,
 
 # Example usage
 plot_csv_data(
-    r"D:\1-Research\Actuator_testbench\actuator-testbench\Actuator_Data\SSPG_MN8014_7.2\SSPG_MN8014_7.2_STIFFNESS_DATA\stiffness_20250908_161640.csv",
-    r"D:\1-Research\Actuator_testbench\actuator-testbench\Actuator_Data\CPG_MAD_M6C12_14\CPG_MAD_M6C12_14_STIFFNESS_DATA\stiffness_20250908_172116.csv",
+    r"./transmission_stiffness_sspg.csv",
+    r"./transmission_stiffness_cpg.csv",
     axis_fontsize=20,
     tick_fontsize=18,
     legend_fontsize=18,
