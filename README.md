@@ -49,4 +49,4 @@ Results will be saved in the **`results/` folder** under each motor subfolder.
 ---
 
 ### 🔹 Plots
-- Plots generated during optimization are stored in the **`plot/` folder**.  
+- Plots generated during optimization are stored in the **`plots/` folder**.  
