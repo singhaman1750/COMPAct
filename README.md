@@ -1,6 +1,6 @@
 # COMPAct Framework
 
-**Paper:** *COMPAct: Computational Optimization and Automated Modular design of Planetary Actuators*
+**Paper:** [*COMPAct: Computational Optimization and Automated Modular design of Planetary Actuators*](https://www.arxiv.org/abs/2510.07197)
 
 ---
 
@@ -48,4 +48,17 @@ Results will be saved in the **`results/` folder** under each motor subfolder.
 ---
 
 ### 🔹 Plots
-- Plots generated during optimization are stored in the **`plots/` folder**.  
+- Plots generated during optimization are stored in the **`plots/` folder**.
+
+### Citations:
+```
+@misc{singh2025compactcomputationaloptimizationautomated,
+      title={COMPAct: Computational Optimization and Automated Modular design of Planetary Actuators}, 
+      author={Aman Singh and Deepak Kapa and Suryank Joshi and Shishir Kolathaya},
+      year={2025},
+      eprint={2510.07197},
+      archivePrefix={arXiv},
+      primaryClass={cs.RO},
+      url={https://arxiv.org/abs/2510.07197}, 
+}
+```
