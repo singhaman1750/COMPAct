@@ -1,7 +1,6 @@
 # COMPAct Framework
 
-**Paper:** *COMPAct: Computational Optimization and Automated Modular design of Planetary Actuators*  
-**Submission Number:** 3408  
+**Paper:** *COMPAct: Computational Optimization and Automated Modular design of Planetary Actuators*
 
 ---
 
