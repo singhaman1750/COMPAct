@@ -41,7 +41,7 @@ Clone the repository and install the dependencies:
 
 ```bash
 # Clone the repository
-git clone [https://github.com/singhaman1750/COMPAct-Actuator_design_framework.git](https://github.com/singhaman1750/COMPAct-Actuator_design_framework.git)
+git clone https://github.com/singhaman1750/COMPAct-Actuator_design_framework.git
 
 # Enter the directory
 cd COMPAct-Actuator_design_framework 
