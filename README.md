@@ -19,41 +19,36 @@
 3. **SolidWorks 2024 or higher** – for _**CAD automation**_  
 
 ---
+## 🚀 Quick Start (No CAD Automation)
 
-## 🚀 Quick Start Guide (Actuator Optimization Without CAD Automation)
-
-#### 1. Install Prerequisites
-
-Ensure you have **Python 3** installed. Install the required Python packages using:
-
-    pip install numpy matplotlib pandas
-
-**Note:** `sys`, `os`, and `json` are part of Python’s standard library and do not need separate installation.
-
-#### 2. Clone this Repository
-
+1. Install Python 3 and packages  
 ```
-git clone https://github.com/singhaman1750/COMPAct-Actuator_design_framework.git
+   pip install numpy matplotlib pandas
 ```
 
-#### 3. Running the Optimization Script
-
+2. Clone the repository  
 ```
-python actOpt.py <motor_name> <gearbox_type> <gear_ratio>
+   git clone https://github.com/singhaman1750/COMPAct-Actuator_design_framework.git
 ```
 
-Replace `<motor_name>` with name of motors, `<gearbox_type>` with types of gearbox, and `<gear_ratio>` with gear ratio numbers
+3. Run the optimization
+```
+   python actOpt.py <motor> <gearbox> <ratio>
+```
 
-1. `<motor_name>`: U8, U10, U12, MN8014, VT8020, MAD_M6C12
-2. `<gearbox_type>`: sspg, cpg, wpg, dspg
-3. `<gear_ratio>`: $2 <$ `<gear_ratio>`
+- Motors: U8, U10, U12, MN8014, VT8020, MAD_M6C12  
+- Gearboxes: sspg, cpg, wpg, dspg  
+- Ratio: > 2  
 
-##### Example
+Example:  
 ```
 python actOpt.py U8 sspg 6.5
 ```
+Results are saved in `results/`
 
 This command runs the optimization for a **T-motor U8** with a **Single-Stage Planetary Gearbox** and a **gear ratio of 6.5**.
+
+---
 
 #### Available Options
 
