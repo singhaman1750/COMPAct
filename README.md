@@ -79,6 +79,8 @@ Run the Python script from the root directory to generate optimal gear parameter
 ```bash
 python actOpt.py <motor> <gearbox> <ratio>
 ```
+* **`<motor>`**: U8, U10, U12, MN8014, VT8020, MAD_M6C12
+* **`<gearbox>`**: sspg, cpg, dspg, wpg
 * **`<ratio>`**: Must be a value > 2.
 
 **Example:**
