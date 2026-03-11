@@ -1,6 +1,0 @@
-client:
-  env: .env
-  base_url: https://cad.onshape.com
-names:
-  parts: {}
-  mates: {}
