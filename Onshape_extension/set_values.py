@@ -1,9 +1,12 @@
-from onshape_robotics_toolkit.connect import Client, HTTP
-from onshape_robotics_toolkit.models.document import Document
-# from src.connect import Client, HTTP, Document
+# from onshape_robotics_toolkit.connect import Client, HTTP
+# from onshape_robotics_toolkit.models.document import Document
+from src.onshape_client import Client, HTTP, Document
 from parse_variables_txt import parse_variable_file
 
-client = Client(env=".env")
+import os
+
+
+client = Client(env=os.path.join(os.path.dirname(__file__), ".env"))
 
 doc = Document.from_url(
     url="https://cad.onshape.com/documents/c1aac326515ba734f63b9b3f/w/f9cccd7b90ce6d7934076c7c/e/11d494d64974a13f1ae2def2"
