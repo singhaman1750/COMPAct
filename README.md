@@ -68,10 +68,10 @@ Clone the repository and install the dependencies:
 
 ```bash
 # Clone the repository
-git clone https://github.com/singhaman1750/COMPAct-Actuator_design_framework.git
+git clone https://github.com/singhaman1750/COMPAct.git
 
 # Enter the directory
-cd COMPAct-Actuator_design_framework 
+cd COMPAct
 
 # Install required packages
 pip install numpy matplotlib pandas
