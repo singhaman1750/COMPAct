@@ -10,7 +10,7 @@ GEARBOX_TYPE = "SSPG"  # Options: SSPG, DSPG, CPG, WPG
 # Get the path to the equations file relative to project root
 current_dir = os.path.dirname(__file__)
 project_root = os.path.dirname(current_dir)
-equations_file = os.path.join(project_root, "CADs", GEARBOX_TYPE.upper(), f"{GEARBOX_TYPE.lower()}_equations.txt")
+equations_file = os.path.join(project_root, "CADs", GEARBOX_TYPE.upper(), f"{GEARBOX_TYPE.lower()}_equations_onshape.txt")
 
 client = Client(env=os.path.join(os.path.dirname(__file__), ".env"))
 
