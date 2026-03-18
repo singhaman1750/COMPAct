@@ -1,6 +1,53 @@
+# Onshape CAD Automation Toolkit
+
+A Python-based toolkit for programmatic control of Onshape CAD models — enabling parametric variable updates, design automation, and CAD-driven engineering pipelines via the Onshape REST API.
+
+## Features
+
+- Authenticate with the Onshape API (v9)
+- Traverse documents and retrieve elements
+- Access and parse Variable Studios
+- Read variable names, types, and expressions
+- Update variables programmatically with API-compliant payloads
+- Handle type-aware updates (`LENGTH`, `ANGLE`, `NUMBER`)
+- Structured logging for debugging API responses
+
+---
+
+## 🗂️ Onshape CAD Files
+
+The CAD model for this project is hosted publicly on Onshape.
+
+### Step 1: Open the Onshape Document
+
+Click the link below to access the CAD files:
+
+👉 **[Open in Onshape](https://cad.onshape.com/documents/c1aac326515ba734f63b9b3f/w/f9cccd7b90ce6d7934076c7c/e/11d494d64974a13f1ae2def2?renderMode=0&leftPanel=false&uiState=69ba77262aa7d6ac3cb56ff9)**
+
+### Step 2: Make Your Own Copy
+
+To edit the model without affecting the original file:
+
+1. Once the document is open, click the **Onshape logo / menu icon** in the top-left corner
+2. Select **"Make a copy"**
+3. Give it a name and save it to your own Onshape workspace
+
+> ✅ Your copy is fully independent — any changes you make will **not** affect the original shared document.
+
+### Step 3: Get Your Variable Studio URL
+
+1. In your copied document, navigate to the **Variable Studio** tab (usually shown as a tab at the bottom of the screen alongside parts and assemblies)
+2. Once you're on the Variable Studio page, **copy the full URL** from your browser's address bar
+3. Paste this URL into `set_values.py` in the appropriate variable (see Step 6 below)
+
+> 💡 The URL encodes your specific document, workspace, and element IDs — it is unique to your copy of the document and is required for the API to target the correct Variable Studio.
+
+---
+
 ## ⚙️ Setup & Run Instructions
 
 ### Prerequisites
+
 - Python 3.x installed
 - Access to an Onshape account and document
 - A generated equations file from your optimization algorithm
@@ -23,11 +70,11 @@ python3 -m venv venv
 
 - **macOS / Linux:**
 ```bash
-  source venv/bin/activate
+source venv/bin/activate
 ```
 - **Windows:**
 ```bat
-  venv\Scripts\activate
+venv\Scripts\activate
 ```
 
 **4. Install dependencies**
@@ -37,11 +84,11 @@ pip install -r requirements.txt
 
 **5. Get your Onshape URL**
 
-Open your Onshape document in the browser and navigate to the **Variable Studio** page. Copy the full URL from the address bar.
+Open your copied Onshape document in the browser and navigate to the **Variable Studio** page. Copy the full URL from the address bar.
 
 **6. Configure `set_values.py`**
 
-Paste the copied URL into `set_values.py` in the appropriate variable. This URL is unique to each user and document.
+Paste the copied Variable Studio URL into `set_values.py` in the appropriate variable. This URL is unique to each user and document.
 
 **7. Set the equations file name**
 
@@ -56,34 +103,13 @@ python3 set_values.py
 
 > 💡 **Tip:** Make sure your virtual environment is activated every time you work on this project. You'll see `(venv)` in your terminal prompt when it's active.
 
-
-# Onshape CAD Automation Toolkit
-
-A Python-based toolkit for programmatic control of Onshape CAD models — enabling parametric variable updates, design automation, and CAD-driven engineering pipelines via the Onshape REST API.
-
-
-
-## Features
-
-- Authenticate with the Onshape API (v9)
-- Traverse documents and retrieve elements
-- Access and parse Variable Studios
-- Read variable names, types, and expressions
-- Update variables programmatically with API-compliant payloads
-- Handle type-aware updates (`LENGTH`, `ANGLE`, `NUMBER`)
-- Structured logging for debugging API responses
-
----
-
 ---
 
 ## Setup
 
-
 ### Configure Credentials
 
 Create a `.env` file in the project root:
-
 ```env
 ONSHAPE_ACCESS_KEY=your_access_key
 ONSHAPE_SECRET_KEY=your_secret_key
@@ -97,19 +123,15 @@ API keys can be generated at [dev-portal.onshape.com](https://dev-portal.onshape
 ## Usage
 
 ### Reading Variables
-
 ```python
 from variables import get_variables
-
 variables = get_variables(document_id, workspace_id, element_id)
 print(variables)
 ```
 
 ### Updating Variables
-
 ```python
 from variables import set_variables
-
 set_variables(
     document_id,
     workspace_id,
@@ -158,7 +180,6 @@ The Onshape Variables API requires strictly formatted payloads. Key implementati
 ## Security
 
 Never commit your `.env` file. Add it to `.gitignore`:
-
 ```
 .env
 ```
