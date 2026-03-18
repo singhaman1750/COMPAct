@@ -22,7 +22,7 @@ The CAD model for this project is hosted publicly on Onshape.
 
 Click the link below to access the CAD files:
 
-👉 **[Open in Onshape](https://cad.onshape.com/documents/c1aac326515ba734f63b9b3f/w/f9cccd7b90ce6d7934076c7c/e/11d494d64974a13f1ae2def2?renderMode=0&leftPanel=false&uiState=69ba83442aa7d6ac3cb59b32)**
+👉 **[https://cad.onshape.com/documents/c1aac326515ba734f63b9b3f/w/f9cccd7b90ce6d7934076c7c/e/11d494d64974a13f1ae2def2?renderMode=0&leftPanel=false&uiState=69ba83442aa7d6ac3cb59b32]**
 
 ### Step 2: Make Your Own Copy
 
