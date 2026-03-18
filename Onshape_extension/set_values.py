@@ -1,5 +1,3 @@
-# from onshape_robotics_toolkit.connect import Client, HTTP
-# from onshape_robotics_toolkit.models.document import Document
 from src.onshape_client import Client, HTTP, Document
 from parse_variables_txt import parse_variable_file
 
@@ -23,14 +21,11 @@ print("\n=== SETTING VARIABLE ===")
 
 variables_to_set = parse_variable_file("sspg_equations.txt")
 
-
-
 # variables_to_set = [{'name': 'five', 'type': 'LENGTH', 'expression': '120mm'},
 #              {'name': 'six', 'type': 'LENGTH', 'expression': '120mm'},
 #              {'name': 'thee', 'type': 'LENGTH', 'expression': '120mm'},
 #              {'name' : 'four', 'type': 'LENGTH', 'expression': '120mm'}
 #             ]
-
 
 response = client.request(
     method=HTTP.POST,
