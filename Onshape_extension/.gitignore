@@ -1,4 +1,17 @@
 ORT.log
 ORT.yaml
-.DS_Store
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Environment / secrets
 .env
+
+# OS files
+.DS_Store

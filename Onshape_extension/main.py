@@ -5,8 +5,6 @@ print(API_KEY)
 print(API_SECRET_KEY)
 print("Config loaded successfully")
 
-
-
 fall_back = parse_variable_file("sspg_equations.txt")
 print(fall_back)
 

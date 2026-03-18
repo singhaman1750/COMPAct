@@ -3,6 +3,14 @@ from parse_variables_txt import parse_variable_file
 
 import os
 
+# Configuration: Specify the gearbox type or full path
+GEARBOX_TYPE = "SSPG"  # Options: SSPG, DSPG, CPG, WPG
+# Or use full path: EQUATIONS_PATH = "/absolute/path/to/equations.txt"
+
+# Get the path to the equations file relative to project root
+current_dir = os.path.dirname(__file__)
+project_root = os.path.dirname(current_dir)
+equations_file = os.path.join(project_root, "CADs", GEARBOX_TYPE.upper(), f"{GEARBOX_TYPE.lower()}_equations.txt")
 
 client = Client(env=os.path.join(os.path.dirname(__file__), ".env"))
 
@@ -19,13 +27,7 @@ print(response.json())
 
 print("\n=== SETTING VARIABLE ===")
 
-variables_to_set = parse_variable_file("sspg_equations.txt")
-
-# variables_to_set = [{'name': 'five', 'type': 'LENGTH', 'expression': '120mm'},
-#              {'name': 'six', 'type': 'LENGTH', 'expression': '120mm'},
-#              {'name': 'thee', 'type': 'LENGTH', 'expression': '120mm'},
-#              {'name' : 'four', 'type': 'LENGTH', 'expression': '120mm'}
-#             ]
+variables_to_set = parse_variable_file(equations_file)
 
 response = client.request(
     method=HTTP.POST,
