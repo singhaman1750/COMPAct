@@ -17,53 +17,33 @@ This repository provides an implementation of the paper:
 
 <br>
 
-----
+---
 
-This framework provides the following features:
-1. **Optimize planetary gearbox** parameters for a **given motor** across the following gearbox types:
-      - Single Stage Planetary Gearbox (SSPG),
-      - Compound Planetary Gearbox (CPG),
-      - Wolfrom Planetary Gearbox (3K)(WPG), and
-      - Double Stage Planetary Gearbox (DSPG).
+## Quick Start Guide
 
-2. Perform multi-objective optimization to **minimize actuator mass** and **axial width** while **maximizing efficiency**.
-3. **Automatically generate parametric actuator CAD** from optimization results, enabling direct **3D printing without manual redesign**.
-
-----
-
-## ✅ Supported Hardware
-
-### Supported Motors
-| Motor Code | Description |
-| :--- | :--- |
-| **U8** | T-motor U8 |
-| **U10** | T-motor U10+ |
-| **U12** | T-motor U12 |
-| **MN8014** | T-motor MN8014 |
-| **VT8020** | Vector Techniques 8020 |
-| **MAD_M6C12**| MAD Components M6C12 |
-
-### Supported Gearbox Topologies
-| Type | Description |
-| :--- | :--- |
-| **sspg** | Single-Stage Planetary Gearbox |
-| **cpg** | Compound Planetary Gearbox |
-| **wpg** | Wolfrom Planetary Gearbox (3K) |
-| **dspg** | Double-Stage Planetary Gearbox |
+1. [Step 1: Setup & Requirements](https://github.com/singhaman1750/COMPAct/edit/main/README.md#step-1-setup--requirements)
+2. [Step 2: Installation](https://github.com/singhaman1750/COMPAct/edit/main/README.md#step-2-installation)
+3. [Step 3: Extract CAD Files](https://github.com/singhaman1750/COMPAct/edit/main/README.md#step-3-extract-cad-files-optional)
+4. [Step 4: Run Optimization](https://github.com/singhaman1750/COMPAct/edit/main/README.md#step-4-run-optimization)
+5. [Step 5: View Results](https://github.com/singhaman1750/COMPAct/edit/main/README.md#step-5-view-results)
+6. [Step 6: CAD Automation](https://github.com/singhaman1750/COMPAct/edit/main/README.md#step-6-cad-automation)
+7. [Step 7: 3D-print and Assemble](https://github.com/singhaman1750/COMPAct/edit/main/README.md#step-7-3d-print-and-assemble)
 
 ---
 
-## 💻 Setup & Requirements
+### Step 1: Setup & Requirements
 
-### System Requirements
+#### System Requirements
 * **Python 3.x**
 * **SolidWorks 2024** (or higher) – *Required for CAD automation features.*
 
-### Recommended Terminal
+#### Recommended Terminal
 * **Windows:** [Git Bash](https://git-scm.com/downloads) is highly recommended.
 * **Linux/macOS:** Default terminal.
 
-### 1. Installation
+---
+
+### Step 2: Installation
 Clone the repository and install the dependencies:
 
 ```bash
@@ -77,7 +57,9 @@ cd COMPAct
 pip install numpy matplotlib pandas requests
 ```
 
-### 2. Extract CAD Files (Optional)
+---
+
+### Step 3: Extract CAD Files (Optional)
 Due to file size limits, CAD files are zipped. You must extract them before running the framework.
 
 **NOTE:** _If you only need the optimized gear parameters (teeth count, module, etc.), you can skip this step. Extraction is only required if you intend to use the **automated 3D modeling**._
@@ -113,9 +95,7 @@ To get your own editable copy:
 
 ---
 
-## 🚀 Usage
-
-### Step 1: Run Optimization
+### Step 4: Run Optimization
 Run the Python script from the root directory to generate optimal gear parameters.
 
 **Syntax:**
@@ -133,7 +113,9 @@ To optimize a **T-motor U8** with a **Single-Stage Planetary Gearbox** and a **r
 python actOpt.py U8 sspg 6.5
 ```
 
-### Step 2: View Results
+---
+
+### Step 5: View Results
 The script will output the optimal geometric parameters directly in the terminal:
 
 ```text
@@ -158,7 +140,9 @@ Detailed parameter files are automatically generated in the following locations:
 * **DSPG:** `CADs/DSPG/dspg_equations.txt`
 * **WPG:** `CADs/WPG/wpg_equations.txt`
 
-### Step 3: CAD Automation
+---
+
+### Step 6: CAD Automation
 
 There are two ways to apply the optimization results to a CAD model — using **SolidWorks** (local) or **Onshape** (cloud-based). Both use the same equations file generated in Step 2.
 
@@ -264,9 +248,43 @@ The script will print the variable values before and after the update so you can
 
 ---
 
-### Step 4: Manufacturing
+### Step 7: 3D-print and Assemble
 * **3D Printing:** Export the updated plastic parts to `.STL` format.
 * **Bearings:** Check the updated CAD model to identify which standard bearings are required for your specific configuration.
+
+----
+
+This framework provides the following features:
+1. **Optimize planetary gearbox** parameters for a **given motor** across the following gearbox types:
+      - Single Stage Planetary Gearbox (SSPG),
+      - Compound Planetary Gearbox (CPG),
+      - Wolfrom Planetary Gearbox (3K)(WPG), and
+      - Double Stage Planetary Gearbox (DSPG).
+
+2. Perform multi-objective optimization to **minimize actuator mass** and **axial width** while **maximizing efficiency**.
+3. **Automatically generate parametric actuator CAD** from optimization results, enabling direct **3D printing without manual redesign**.
+
+----
+
+## ✅ Supported Hardware
+
+### Supported Motors
+| Motor Code | Description |
+| :--- | :--- |
+| **U8** | T-motor U8 |
+| **U10** | T-motor U10+ |
+| **U12** | T-motor U12 |
+| **MN8014** | T-motor MN8014 |
+| **VT8020** | Vector Techniques 8020 |
+| **MAD_M6C12**| MAD Components M6C12 |
+
+### Supported Gearbox Topologies
+| Type | Description |
+| :--- | :--- |
+| **sspg** | Single-Stage Planetary Gearbox |
+| **cpg** | Compound Planetary Gearbox |
+| **wpg** | Wolfrom Planetary Gearbox (3K) |
+| **dspg** | Double-Stage Planetary Gearbox |
 
 ---
 
