@@ -19,6 +19,15 @@ This repository provides an implementation of the paper:
 
 ---
 
+## COMPAct Flowchart
+
+<p align="center">
+  <img src="images/COMPAct_intro_full.png" alt="Flowchart of COMPAct: Actuator Design Framework">
+</p>
+
+
+---
+
 ## Quick Start Guide
 
 #### **Setup & Installations**
