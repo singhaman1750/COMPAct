@@ -74,7 +74,7 @@ git clone https://github.com/singhaman1750/COMPAct.git
 cd COMPAct
 
 # Install required packages
-pip install numpy matplotlib pandas
+pip install numpy matplotlib pandas requests
 ```
 
 ### 2. Extract CAD Files (Optional)
@@ -94,6 +94,22 @@ COMPAct-Actuator_design_framework/
     ├── DSPG/dspg_actuator/dspg_actuator/...
     └── WPG/wpg_actuator/wpg_actuator/...
 ```
+
+#### Onshape CAD Files (Cloud Alternative)
+
+If you prefer not to use SolidWorks, the CAD models are also available on Onshape. No extraction or local files needed.
+
+##### 1. SSPG
+
+👉 **[Open SSPG in Onshape](https://cad.onshape.com/documents/c1aac326515ba734f63b9b3f/w/f9cccd7b90ce6d7934076c7c/e/11d494d64974a13f1ae2def2?renderMode=0&leftPanel=false&uiState=69ba77262aa7d6ac3cb56ff9)**
+
+To get your own editable copy:
+1. Open the link above — you will see the model in view-only mode
+2. Click the **Onshape logo / menu icon** in the top-left corner
+3. Select **"Make a copy"**
+4. Give it a name and save it to your own Onshape workspace
+
+> ✅ Your copy is fully independent — any changes you make will **not** affect the original shared document. You can now edit the Variable Studio, modify geometry, and run the automation script against your own copy.
 
 ---
 
@@ -135,7 +151,7 @@ Gear Ratio(GR): 6.52 : 1
 -------------------------------
 ```
 
-Detailed parameter files (used by SolidWorks) are automatically generated in the following locations:
+Detailed parameter files are automatically generated in the following locations:
 
 * **SSPG:** `CADs/SSPG/sspg_equations.txt`
 * **CPG:** `CADs/CPG/cpg_equations.txt`
@@ -143,7 +159,14 @@ Detailed parameter files (used by SolidWorks) are automatically generated in the
 * **WPG:** `CADs/WPG/wpg_equations.txt`
 
 ### Step 3: CAD Automation
-**NOTE:** _If you skipped the CAD extraction, you can stop at Step 2._
+
+There are two ways to apply the optimization results to a CAD model — using **SolidWorks** (local) or **Onshape** (cloud-based). Both use the same equations file generated in Step 2.
+
+---
+
+#### Option A: SolidWorks (Local)
+
+**NOTE:** _If you skipped the CAD extraction in Step 2, you cannot use this option._
 
 1.  Open **SolidWorks**.
 2.  Open the assembly file (`.SLDASM`) for your specific gearbox type:
@@ -151,6 +174,95 @@ Detailed parameter files (used by SolidWorks) are automatically generated in the
     * *(Paths for CPG, DSPG, and WPG follow the same folder pattern)*
 3.  Click the **Rebuild** (Traffic Light) icon.
 4.  The 3D model will automatically update to reflect the calculated parameters.
+
+---
+
+#### Option B: Onshape Automation (Cloud-based)
+
+This extension lets you push optimization results directly to a parametric Onshape CAD model via the Onshape REST API — no SolidWorks or local CAD files required.
+
+##### i. Make a Copy of the Onshape Document
+
+If you haven't already done so in the extraction step above, open the shared Onshape document and make your own copy:
+
+👉 **[Open SSPG in Onshape](https://cad.onshape.com/documents/c1aac326515ba734f63b9b3f/w/f9cccd7b90ce6d7934076c7c/e/11d494d64974a13f1ae2def2?renderMode=0&leftPanel=false&uiState=69ba77262aa7d6ac3cb56ff9)**
+
+1. Click the **Onshape logo / menu icon** in the top-left corner
+2. Select **"Make a copy"**
+3. Give it a name and save it to your own Onshape workspace
+
+> ✅ Your copy is fully independent — any changes the script makes will **not** affect the original shared document.
+
+##### ii. Generate Onshape API Keys
+
+The script authenticates with the Onshape REST API using personal API keys.
+
+1. Go to [dev-portal.onshape.com](https://dev-portal.onshape.com) and sign in
+2. Navigate to **API Keys** → **Create New API Key**
+3. Copy the **Access Key** and **Secret Key**
+4. Create a file named `.env` inside the `Onshape_extension/` folder with the following content:
+
+```env
+ONSHAPE_ACCESS_KEY=your_access_key
+ONSHAPE_SECRET_KEY=your_secret_key
+```
+
+> 🔒 **Never commit your `.env` file.** Make sure `.env` is listed in your `.gitignore`.
+
+##### iii. Get Your Variable Studio URL
+
+The script needs to know which Onshape document and Variable Studio to update. This is done via the URL in your browser.
+
+1. Open your **copied** Onshape document
+2. Click on the **Variable Studio** tab at the bottom of the screen (it appears alongside part studios and assemblies)
+3. Once you are on the Variable Studio page, copy the **full URL** from your browser's address bar — it will look something like:
+   ```
+   https://cad.onshape.com/documents/abc123.../w/def456.../e/ghi789...
+   ```
+4. Open `Onshape_extension/set_values.py` and paste the URL into the `url` field:
+   ```python
+   doc = Document.from_url(
+       url="https://cad.onshape.com/documents/<your-url-here>"
+   )
+   ```
+
+> 💡 This URL encodes your document ID, workspace ID, and element ID — it is unique to your copy. Using the original shared link will fail as you do not have write access to it.
+
+<!-- ##### iv. Set the Equations File
+
+In `set_values.py`, make sure the equations file name matches the one generated by the optimizer in Step 2. For SSPG this will be:
+
+```python
+variables_to_set = parse_variable_file("sspg_equations.txt")
+```
+
+Update the filename if you are running a different gearbox type (e.g., `cpg_equations.txt`). -->
+
+##### iv. Run the Script
+
+From the root of the repository:
+
+```bash
+cd Onshape_extension
+python3 set_values.py
+```
+
+The script will print the variable values before and after the update so you can confirm the changes were applied correctly:
+
+```text
+=== BEFORE ===
+{ ... current variable values ... }
+
+=== SETTING VARIABLE ===
+[POST] /api/variables/d/.../w/.../e/.../variables  →  200
+
+=== AFTER ===
+{ ... updated variable values ... }
+```
+
+> ⚠️ A `200` status does not always mean the update succeeded — Onshape returns 200 even for malformed payloads. Always check the `AFTER` output to confirm your variables were updated as expected.
+
+---
 
 ### Step 4: Manufacturing
 * **3D Printing:** Export the updated plastic parts to `.STL` format.
@@ -170,6 +282,6 @@ If you use this framework in your research, please cite:
       eprint={2510.07197},
       archivePrefix={arXiv},
       primaryClass={cs.RO},
-      url={[https://arxiv.org/abs/2510.07197](https://arxiv.org/abs/2510.07197)}, 
+      url={https://arxiv.org/abs/2510.07197}, 
 }
 ```
