@@ -21,13 +21,16 @@ This repository provides an implementation of the paper:
 
 ## Quick Start Guide
 
-1. [Step 1: Setup & Requirements](#step-1-setup--requirements)
-2. [Step 2: Installation](#step-2-installation)
-3. [Step 3: CAD Automation Setup](#step-3-cad-automation-setup-optional)
-4. [Step 4: Run Optimization](#step-4-run-optimization)
-5. [Step 5: View Results](#step-5-view-results)
-6. [Step 6: CAD Automation](#step-6-cad-automation)
-7. [Step 7: 3D-print and Assemble](#step-7-3d-print-and-assemble)
+#### **Setup & Installations**
+* **Step 1:** [Setup & Requirements](#step-1-setup--requirements)
+* **Step 2:** [Installation](#step-2-installation)
+* **Step 3:** [CAD Automation Setup](#step-3-cad-automation-setup-optional)
+
+#### **Optimization & Automated design generation**
+* **Step 4:** [Run Optimization](#step-4-run-optimization)
+* **Step 5:** [View Results](#step-5-view-results)
+* **Step 6:** [Generate Automated CAD designs](#step-6-generate-automated-cad-designs)
+* **Step 7:** [3D-print and Assemble](#step-7-3d-print-and-assemble)
 
 ---
 
@@ -64,6 +67,9 @@ pip install numpy matplotlib pandas requests
 ---
 
 ### Step 3: CAD Automation Setup (Optional)
+
+### Option A: *SolidWorks (Local)*
+
 Due to file size limits, CAD files are zipped. You must extract them before running the framework.
 
 **NOTE:** _If you only need the optimized gear parameters (teeth count, module, etc.), you can skip this step. Extraction is only required if you intend to use the **automated 3D modeling**._
@@ -81,11 +87,11 @@ COMPAct-Actuator_design_framework/
     └── WPG/wpg_actuator/wpg_actuator/...
 ```
 
-#### Onshape CAD Files (Cloud Alternative)
+### Option B: *Onshape (Cloud-based)*
 
 If you prefer not to use SolidWorks, the CAD models are also available on Onshape. No extraction or local files needed.
 
-##### 1. SSPG
+#### 1. SSPG (Single-Stage Planetary Gearbox)
 
 👉 **[Open SSPG in Onshape](https://cad.onshape.com/documents/c1aac326515ba734f63b9b3f/w/f9cccd7b90ce6d7934076c7c/e/11d494d64974a13f1ae2def2?renderMode=0&leftPanel=false&uiState=69ba77262aa7d6ac3cb56ff9)**
 
@@ -146,11 +152,9 @@ Detailed parameter files are automatically generated in the following locations:
 
 ---
 
-### Step 6: CAD Automation
+### Step 6: Generate Automated CAD designs
 
 There are two ways to apply the optimization results to a CAD model — using **SolidWorks** (local) or **Onshape** (cloud-based). Both use the same equations file generated in Step 2.
-
----
 
 #### Option A: SolidWorks (Local)
 
@@ -165,7 +169,7 @@ There are two ways to apply the optimization results to a CAD model — using **
 
 ---
 
-#### Option B: Onshape Automation (Cloud-based)
+#### Option B: Onshape (Cloud-based)
 
 This extension lets you push optimization results directly to a parametric Onshape CAD model via the Onshape REST API — no SolidWorks or local CAD files required.
 
