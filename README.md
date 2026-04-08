@@ -21,13 +21,13 @@ This repository provides an implementation of the paper:
 
 ## Quick Start Guide
 
-1. [Step 1: Setup & Requirements](https://github.com/singhaman1750/COMPAct/edit/main/README.md#step-1-setup--requirements)
-2. [Step 2: Installation](https://github.com/singhaman1750/COMPAct/edit/main/README.md#step-2-installation)
-3. [Step 3: Extract CAD Files](https://github.com/singhaman1750/COMPAct/edit/main/README.md#step-3-extract-cad-files-optional)
-4. [Step 4: Run Optimization](https://github.com/singhaman1750/COMPAct/edit/main/README.md#step-4-run-optimization)
-5. [Step 5: View Results](https://github.com/singhaman1750/COMPAct/edit/main/README.md#step-5-view-results)
-6. [Step 6: CAD Automation](https://github.com/singhaman1750/COMPAct/edit/main/README.md#step-6-cad-automation)
-7. [Step 7: 3D-print and Assemble](https://github.com/singhaman1750/COMPAct/edit/main/README.md#step-7-3d-print-and-assemble)
+1. [Step 1: Setup & Requirements](#step-1-setup--requirements)
+2. [Step 2: Installation](#step-2-installation)
+3. [Step 3: Extract CAD Files](#step-3-extract-cad-files-optional)
+4. [Step 4: Run Optimization](#step-4-run-optimization)
+5. [Step 5: View Results](#step-5-view-results)
+6. [Step 6: CAD Automation](#step-6-cad-automation)
+7. [Step 7: 3D-print and Assemble](#step-7-3d-print-and-assemble)
 
 ---
 
