@@ -17,8 +17,6 @@ This repository provides an implementation of the paper:
 
 <br>
 
----
-
 ## COMPAct Flowchart
 
 <p align="center">
