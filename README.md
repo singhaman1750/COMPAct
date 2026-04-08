@@ -49,10 +49,14 @@ Clone the repository and install the dependencies:
 ```bash
 # Clone the repository
 git clone https://github.com/singhaman1750/COMPAct.git
+```
 
+```bash
 # Enter the directory
 cd COMPAct
+```
 
+```bash
 # Install required packages
 pip install numpy matplotlib pandas requests
 ```
