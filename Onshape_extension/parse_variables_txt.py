@@ -16,7 +16,24 @@ def parse_variable_file(filepath):
         "ring_OD",
         "Nr_b",
         "Nr_s",
-        "small_ring_output_wall_to_bearing_shaft_attachement_hole_num"
+        "small_ring_output_wall_to_bearing_shaft_attachement_hole_num",
+        "a1_pattern_num_bulge",
+        "a2_pattern_num_bulge",
+        "a1_motor_output_hole_num",
+        "a1_motor_mount_hole_num",
+        "a1_num_planet",
+        "a1_Nr",
+        "a2_Nr",
+        "a2_Nr1",
+        "a1_Nr2",
+        "a1_Np",
+        "a2_Np",
+        "a2_Np1",
+        "a1_Np2",
+        "a1_Ns",
+        "a2_Ns",
+        "a2_Ns1",
+        "a1_Ns2",
     }
 
     with open(filepath, "r") as f:
