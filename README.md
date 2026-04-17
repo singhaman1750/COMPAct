@@ -102,6 +102,12 @@ If you prefer not to use SolidWorks, the CAD models are also available on Onshap
 
 👉 **[Open SSPG in Onshape](https://cad.onshape.com/documents/c1aac326515ba734f63b9b3f/w/f9cccd7b90ce6d7934076c7c/e/11d494d64974a13f1ae2def2?renderMode=0&leftPanel=false&uiState=69ba77262aa7d6ac3cb56ff9)**
 
+👉 **[Open CPG in Onshape](https://cad.onshape.com/documents/dabf50453c93c1c427cef77a/w/58e59ba240adf6d2a07794cc/e/2fd7bc338e9316193d1a2f79)**
+
+👉 **[Open WPG in Onshape](https://cad.onshape.com/documents/ad699ddbc25bac5c32e33135/w/758de9a639163030bca8fa73/e/4cb254c85cc1f2d31a39a63a?renderMode=0&uiState=69d8cb5213bdc8529ffa3f3c)**
+
+👉 **[Open DSPG in Onshape](https://cad.onshape.com/documents/b8d43d150fb932ea649dcd0f/w/aaa3fcc8da584cc207374389/e/12e148469fa8eb5b917f5bb1?renderMode=0&uiState=69e2408b879d9edde70b5d36)**
+
 To get your own editable copy:
 1. Open the link above — you will see the model in view-only mode
 2. Click the **Onshape logo / menu icon** in the top-left corner
