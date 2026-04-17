@@ -190,6 +190,8 @@ If you haven't already done so in the extraction step above, open the shared Ons
 
 👉 **[Open WPG in Onshape](https://cad.onshape.com/documents/ad699ddbc25bac5c32e33135/w/758de9a639163030bca8fa73/e/4cb254c85cc1f2d31a39a63a?renderMode=0&uiState=69d8cb5213bdc8529ffa3f3c)**
 
+👉 **[Open DSPG in Onshape](https://cad.onshape.com/documents/b8d43d150fb932ea649dcd0f/w/aaa3fcc8da584cc207374389/e/12e148469fa8eb5b917f5bb1?renderMode=0&uiState=69e2408b879d9edde70b5d36)**
+
 1. Click the **Onshape logo / menu icon** in the top-left corner
 2. Select **"Make a copy"**
 3. Give it a name and save it to your own Onshape workspace

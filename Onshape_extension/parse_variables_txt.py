@@ -34,6 +34,7 @@ def parse_variable_file(filepath):
         "a2_Ns",
         "a2_Ns1",
         "a1_Ns2",
+        "a2_num_planet"
     }
 
     with open(filepath, "r") as f:
