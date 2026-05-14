@@ -13,7 +13,6 @@ def parse_variable_file(filepath):
         "Np_s",
         "num_planet",
         "motor_output_hole_num",
-        "ring_OD",
         "Nr_b",
         "Nr_s",
         "small_ring_output_wall_to_bearing_shaft_attachement_hole_num",

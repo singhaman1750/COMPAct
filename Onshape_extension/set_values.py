@@ -19,7 +19,7 @@ client = Client(env=os.path.join(os.path.dirname(__file__), ".env"))
 
 
 doc = Document.from_url(
-    url="https://cad.onshape.com/documents/c1aac326515ba734f63b9b3f/w/f9cccd7b90ce6d7934076c7c/e/f4f9712b5c14ddf4ef7c2ab6?renderMode=0&leftPanel=false&uiState=69e2419faf198209ac9d78d7"
+    url="https://cad.onshape.com/documents/c1aac326515ba734f63b9b3f/w/f9cccd7b90ce6d7934076c7c/e/f4f9712b5c14ddf4ef7c2ab6"
 )
 
 print("=== BEFORE ===")
