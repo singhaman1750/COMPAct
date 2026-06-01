@@ -11,8 +11,8 @@ K_mass, K_Eff, K_Width, MODULE_MIN, MODULE_MAX, NUM_PLANET_MIN, NUM_PLANET_MAX, 
 1 , -2 , 0.2 , 0.5 , 1.2 , 3 , 7 , 18 , 28 , 4.0 , 15 , 0.1
  
 iter, gearRatio, module, Ns, Np, Nr, numPlanet, fwSunMM, fwPlanetMM, fwRingMM, mass, eff, peakTorque, Cost, Torque_Density, Outer_Bearing_mass, Actuator_width
-2 , 6.6923076923076925 , 0.5 , 26 , 61 , 148 , 3 , 9.711 , 9.711 , 9.711 , 0.598 , 0.96 , 15.338 , 0.6974807978933617 , 25.648829431438127 , 0.081 , 66.21101634109249
+7 , 6.0 , 0.7 , 19 , 38 , 95 , 3 , 7.81 , 8.0 , 8.0 , 0.54 , 0.946 , 13.751 , 0.24937848935129736 , 25.46481481481481 , 0.05 , 62.5
 
 
 Running Time (sec)
-0.023668289184570312
+0.03269314765930176

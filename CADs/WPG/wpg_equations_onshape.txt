@@ -18,7 +18,7 @@
 "bearing_ID" = 65
 "bearing_OD" = 85
 "bearing_height" = 10
-"bearing mount thickness" = 8
+"bearing_mount_thickness" = 8
 "bearing_retainer_thickness" = 2
 "beta_p_b" = 2.2920834163175385
 "beta_p_s" = 3.7466288708629643
@@ -113,7 +113,6 @@
 "planet_shaft_dia" = 8
 "planet_shaft_step_offset" = 1
 "pressure_angle" = 20.0
-"pressure angle" = 20.0
 "ring_OD_b" = 88.0
 "ring_radial_thickness" = 5
 "ring_to_chamfer_clearance" = 1.5
