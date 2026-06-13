@@ -1,0 +1,102 @@
+Motor Parameters:
+maxMotorAngVelRPM, maxMotorAngVelRadPerSec, maxMotorTorque, maxMotorPower, motorMass, motorDia, motorLength
+2550 , 267.0353755551324 , 4 , 1068.1415022205297 , 0.525 , 113.5 , 36.2
+ 
+Gear strength and size parameters:
+FOS, serviceFactor, stressAnalysisMethodName, maxGearBoxDia, maxGearAllowableStressMPa
+1.2 , 1.5 , MIT , 74 , 70
+ 
+Optimization Parameters:
+K_mass, K_Eff, K_Width, MODULE_MIN, MODULE_MAX, NUM_PLANET_MIN, NUM_PLANET_MAX, NUM_TEETH_SUN_MIN, NUM_TEETH_PLANET_MIN, GEAR_RATIO_MIN, GEAR_RATIO_MAX, GEAR_RATIO_STEP
+1 , -2 , 0.2 , 0.5 , 1.2 , 3 , 7 , 18 , 28 , 4 , 15 , 0.1
+ 
+iter, gearRatio, module, Ns, Np, Nr, numPlanet, fwSunMM, fwPlanetMM, fwRingMM, mass, eff, peakTorque, Cost, Torque_Density, Outer_Bearing_mass, Actuator_width
+Motor_case_mass:  161.69749929782247
+ring_mass:  93.65716715536838
+carrier_mass:  33.65059839600511
+sun_mass:  102.54427352228836
+sec_carrier_mass:  10.275364171728816
+planet_mass:  29.742771114581426
+planet_bearing_combined_mass:  12.6
+sun2_bearing_mass:  50.0
+input_bearing_mass:  24.0
+output_bearing_mass:  31.0
+sun1_bearing_mass:  4.0
+Actuator_mass_without_bearing: 431.5676736577945
+Actuator_mass: 1078.1676736577947
+---------------------------------------------------
+Motor_case_mass:  161.02313107855437
+ring_mass:  83.7185288027502
+carrier_mass:  33.82898380367327
+sun_mass:  102.78809929284333
+sec_carrier_mass:  10.991703845415055
+planet_mass:  30.51087023830487
+planet_bearing_combined_mass:  12.6
+sun2_bearing_mass:  50.0
+input_bearing_mass:  24.0
+output_bearing_mass:  31.0
+sun1_bearing_mass:  4.0
+Actuator_mass_without_bearing: 422.86131706154106
+Actuator_mass: 1069.4613170615412
+---------------------------------------------------
+Motor_case_mass:  160.36314310452383
+ring_mass:  84.17662369674292
+carrier_mass:  33.02368402361758
+sun_mass:  102.36057313685957
+sec_carrier_mass:  10.416753182731801
+planet_mass:  26.589596984274404
+planet_bearing_combined_mass:  12.6
+sun2_bearing_mass:  50.0
+input_bearing_mass:  24.0
+output_bearing_mass:  31.0
+sun1_bearing_mass:  4.0
+Actuator_mass_without_bearing: 416.9303741287501
+Actuator_mass: 1063.53037412875
+---------------------------------------------------
+Motor_case_mass:  159.72054413712453
+ring_mass:  73.57630001078311
+carrier_mass:  33.307448135527764
+sun_mass:  102.64228747269786
+sec_carrier_mass:  11.284815947959455
+planet_mass:  27.393946184431712
+planet_bearing_combined_mass:  12.6
+sun2_bearing_mass:  50.0
+input_bearing_mass:  24.0
+output_bearing_mass:  31.0
+sun1_bearing_mass:  4.0
+Actuator_mass_without_bearing: 407.92534188852443
+Actuator_mass: 1054.5253418885245
+---------------------------------------------------
+Motor_case_mass:  159.53584662451945
+ring_mass:  78.53647696085923
+carrier_mass:  32.52332621642467
+sun_mass:  102.18431731601757
+sec_carrier_mass:  10.416753182731801
+planet_mass:  24.079216531205404
+planet_bearing_combined_mass:  12.6
+sun2_bearing_mass:  50.0
+input_bearing_mass:  24.0
+output_bearing_mass:  31.0
+sun1_bearing_mass:  4.0
+Actuator_mass_without_bearing: 407.2759368317581
+Actuator_mass: 1053.875936831758
+---------------------------------------------------
+Motor_case_mass:  158.91977030293137
+ring_mass:  67.22658102486739
+carrier_mass:  32.91159130134782
+sun_mass:  102.50425974320662
+sec_carrier_mass:  11.43278119203235
+planet_mass:  24.934930268910804
+planet_bearing_combined_mass:  12.6
+sun2_bearing_mass:  50.0
+input_bearing_mass:  24.0
+output_bearing_mass:  31.0
+sun1_bearing_mass:  4.0
+Actuator_mass_without_bearing: 397.92991383329627
+Actuator_mass: 1044.5299138332964
+---------------------------------------------------
+6 , 6.0 , 0.7 , 19 , 38 , 95 , 3 , 13.632 , 13.632 , 13.632 , 1.045 , 0.946 , 24.0 , 1.879806034935838 , 22.966507177033495 , 0.031 , 123.66369265558131
+
+
+Running Time (sec)
+0.01777505874633789
