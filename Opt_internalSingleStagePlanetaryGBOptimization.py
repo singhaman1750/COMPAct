@@ -1,9 +1,9 @@
 import sys
 import numpy as np
-from ISSPG_outside_gen_eq import internalsingleStagePlanetaryGearbox
-from ISSPG_outside_gen_eq import motor
-from ISSPG_outside_gen_eq import internalsingleStagePlanetaryActuator
-from ISSPG_outside_gen_eq import optimizationInternalSingleStageActuator
+from ISSPG_inside_gen_eq import internalsingleStagePlanetaryGearbox
+from ISSPG_inside_gen_eq import motor
+from ISSPG_inside_gen_eq import internalsingleStagePlanetaryActuator
+from ISSPG_inside_gen_eq import optimizationInternalSingleStageActuator
 import json
 import os
 
@@ -63,7 +63,7 @@ MotorRO100 = motor(
                   stator_height                = 31.5,
                   stator_OD                    = 100,
                   stator_top_rotor_top_offset  = 3,
-                  stator_hole_dia              = 2.5,
+                  stator_hole_dia              = 3,
                   stator_hole_PCD              = 82.5,
                   motor_rotor_hole_num         = 6,
                   motor_rotor_hole_dia         = 5,
@@ -99,6 +99,30 @@ MotorRO80 = motor(
                  motorMass                    = 0.265, # KG
                  motorName                    = "RO80")
 
+MotorRO60 = motor(
+                 motor_OD                     = 73.8,
+                 stator_ID                    = 32,
+                 motor_rotor_base_thickness   = 2,
+                 motor_rotor_base_ID          = 37,
+                 rotor_height                 = 19,
+                 rotor_ID                     = 63.1,
+                 motor_stator_extrusion_depth = 1.8,
+                 motor_stator_extrusion_dia   = 47.6,
+                 stator_height                = 19.5,
+                 stator_OD                    = 61.5,
+                 stator_top_rotor_top_offset  = 4,
+                 stator_hole_dia              = 3,
+                 stator_hole_PCD              = 40,
+                 motor_rotor_hole_num         = 6,
+                 motor_rotor_hole_dia         = 3,
+                 motor_rotor_hole_PCD         = 46,
+                 motor_height                 = 23,
+                 maxMotorAngVelRPM            = 5520,  # RPM
+                 maxMotorTorque               = 0.8,   # Nm
+                 maxMotorPower                = 0.8 * 5520 * 2*np.pi/60,  # W
+                 motorMass                    = 0.248, # KG
+                 motorName                    = "RO60")
+
 #--------------------------------------------------------
 # Gearboxes  
 #--------------------------------------------------------
@@ -124,6 +148,15 @@ Actuator_RO100    = internalsingleStagePlanetaryActuator(design_params          
 # RO80-Actuator
 Actuator_RO80    = internalsingleStagePlanetaryActuator(design_params            = isspg_design_params,
                                                         motor                    = MotorRO80,
+                                                        motor_driver_params      = Motor_Driver_OdrivePro_params,
+                                                        planetaryGearbox         = PlanetaryGearbox,
+                                                        FOS                      = 1.2,
+                                                        serviceFactor            = 1.5,
+                                                        stressAnalysisMethodName = "MIT") # Lewis or AGMA
+
+# RO60-Actuator
+Actuator_RO60    = internalsingleStagePlanetaryActuator(design_params            = isspg_design_params,
+                                                        motor                    = MotorRO60,
                                                         motor_driver_params      = Motor_Driver_OdrivePro_params,
                                                         planetaryGearbox         = PlanetaryGearbox,
                                                         FOS                      = 1.2,
@@ -180,6 +213,21 @@ Optimizer_RO80    = optimizationInternalSingleStageActuator(design_params     = 
                                                     GEAR_RATIO_MAX            = GEAR_RATIO_MAX      ,
                                                     GEAR_RATIO_STEP           = GEAR_RATIO_STEP     )
 
+Optimizer_RO60    = optimizationInternalSingleStageActuator(design_params     = isspg_design_params  ,
+                                                    gear_standard_paramaeters = Gear_standard_parameters,
+                                                    K_Mass                    = K_Mass              ,
+                                                    K_Eff                     = K_Eff               ,
+                                                    K_Width                   = K_Width             ,
+                                                    MODULE_MIN                = MODULE_MIN          ,
+                                                    MODULE_MAX                = MODULE_MAX          ,
+                                                    NUM_PLANET_MIN            = NUM_PLANET_MIN      ,
+                                                    NUM_PLANET_MAX            = NUM_PLANET_MAX      ,
+                                                    NUM_TEETH_SUN_MIN         = NUM_TEETH_SUN_MIN   ,
+                                                    NUM_TEETH_PLANET_MIN      = NUM_TEETH_PLANET_MIN,
+                                                    GEAR_RATIO_MIN            = GEAR_RATIO_MIN      ,
+                                                    GEAR_RATIO_MAX            = GEAR_RATIO_MAX      ,
+                                                    GEAR_RATIO_STEP           = GEAR_RATIO_STEP     )
+
 #=============================================================
 # run function to select the gearbox_type
 #=============================================================
@@ -204,6 +252,16 @@ def run(motor_name, gear_ratio):
             printOptParams=1,
             gearRatioReq=gear_ratio
         )
+
+    elif motor_name == "RO60":
+        return Optimizer_RO60.optimizeActuator(
+            Actuator_RO60,
+            UsePSCasVariable=0,
+            log=0,
+            csv=1,
+            printOptParams=1,
+            gearRatioReq=gear_ratio
+        )    
 
     else:
         raise ValueError(f"Unsupported motor: {motor_name}")
