@@ -2155,6 +2155,7 @@ class optimizationInternalSingleStageActuator:
                                 Actuator.planetaryGearbox.setNumPlanet(self.NUM_PLANET_MIN) # Setting number of Planet
                                 while Actuator.planetaryGearbox.numPlanet <= self.NUM_PLANET_MAX:
                                     self.cntrBeforeCons += 1
+                
                                     if (Actuator.planetaryGearbox.geometricConstraint() and 
                                         Actuator.planetaryGearbox.meshingConstraint() and 
                                         Actuator.planetaryGearbox.noPlanetInterferenceConstraint() and
@@ -2187,6 +2188,10 @@ class optimizationInternalSingleStageActuator:
                                                                     Actuator.planetaryGearbox.Np,
                                                                     Actuator.planetaryGearbox.Nr,
                                                                     Actuator.planetaryGearbox.module]
+                                                    
+                                                    #if Actuator.planetaryGearbox.module == 0.5 :
+                                                    #    print(opt_parameters)
+
                                                     opt_planetaryGearbox = internalsingleStagePlanetaryGearbox(design_params             = self.design_params,
                                                                                                                gear_standard_parameters  = self.gear_standard_parameters,
                                                                                                                Ns                        = Actuator.planetaryGearbox.Ns,
@@ -2211,8 +2216,8 @@ class optimizationInternalSingleStageActuator:
                                                     
                                                     opt_actuator.updateFacewidth()
                                                     opt_actuator.getMassKG_3DP()
-                                                    opt_actuator.print_mass_of_parts_3DP()
-                                                    # self.printOptimizationResults(Actuator, log, csv)
+                                                    #opt_actuator.print_mass_of_parts_3DP()
+                                                    #self.printOptimizationResults(Actuator, log, csv)
                                     Actuator.planetaryGearbox.setNumPlanet(Actuator.planetaryGearbox.numPlanet + 1)
                                 #Actuator.planetaryGearbox.setNr(Actuator.planetaryGearbox.Ns + 1)
                             Actuator.planetaryGearbox.setNp(Actuator.planetaryGearbox.Np + 1)
