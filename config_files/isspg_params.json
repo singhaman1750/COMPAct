@@ -14,8 +14,8 @@
 
     "isspg_3DP_design_parameters": {
         "planetMinDistanceMM"           : 5.0,
-        "sCarrierExtrusionDiaMM"        : 8.0,
-        "sCarrierExtrusionClearanceMM"  : 1.0,
+        "sCarrierExtrusionDiaMM"        : 7.0,
+        "sCarrierExtrusionClearanceMM"  : 0.5,
         "bearingIDClearanceMM"          : 10,
         "standard_clearance_1_5mm"      : 1.5,
         "standard_clearance_2_mm"       : 2,
