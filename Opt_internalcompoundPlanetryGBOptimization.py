@@ -95,7 +95,13 @@ MotorRO100_rotorCSKHeadUpperDiaMM  = motor_data["MotorRO100"]["rotorCSKHeadUpper
 MotorRO100_rotorMountHolePCDMM     = motor_data["MotorRO100"]["rotorMountHolePCDMM"]
 MotorRO100_rotorMountHoleDiaMM     = motor_data["MotorRO100"]["rotorMountHoleDiaMM"]
 
+MotorRO100_sun_bottom_casing_bearing_height = motor_data["MotorRO100"]["sun_bottom_casing_bearing_height"]
+MotorRO100_sun_bottom_casing_bearing_ID     = motor_data["MotorRO100"]["sun_bottom_casing_bearing_ID"]
+MotorRO100_sun_bottom_casing_bearing_OD     = motor_data["MotorRO100"]["sun_bottom_casing_bearing_OD"]
 
+MotorRO100_motor_height                   = motor_data["MotorRO100"]["motor_height"]
+MotorRO100_motor_stator_extrusion_dia        = motor_data["MotorRO100"]["motor_stator_extrusion_dia"]
+MotorRO100_motor_stator_extrusion_depth      = motor_data["MotorRO100"]["motor_stator_extrusion_depth"]
 # =====================================================
 # Motor RO80
 # =====================================================
@@ -137,6 +143,14 @@ MotorRO80_rotorCSKHeadUpperDiaMM  = motor_data["MotorRO80"]["rotorCSKHeadUpperDi
 MotorRO80_rotorMountHolePCDMM     = motor_data["MotorRO80"]["rotorMountHolePCDMM"]
 MotorRO80_rotorMountHoleDiaMM     = motor_data["MotorRO80"]["rotorMountHoleDiaMM"]
 
+MotorRO80_sun_bottom_casing_bearing_height = motor_data["MotorRO80"]["sun_bottom_casing_bearing_height"]
+MotorRO80_sun_bottom_casing_bearing_ID     = motor_data["MotorRO80"]["sun_bottom_casing_bearing_ID"]
+MotorRO80_sun_bottom_casing_bearing_OD     = motor_data["MotorRO80"]["sun_bottom_casing_bearing_OD"]
+
+MotorRO80_motor_height                   = motor_data["MotorRO80"]["motor_height"]
+MotorRO80_motor_stator_extrusion_dia        = motor_data["MotorRO80"]["motor_stator_extrusion_dia"]
+MotorRO80_motor_stator_extrusion_depth      = motor_data["MotorRO80"]["motor_stator_extrusion_depth"]
+
 
 # =====================================================
 # Motor - RO100
@@ -167,6 +181,15 @@ MotorRO100 = motor(
 
     rotorMountHolePCDMM      = MotorRO100_rotorMountHolePCDMM,
     rotorMountHoleDiaMM      = MotorRO100_rotorMountHoleDiaMM,
+
+    sun_bottom_casing_bearing_height  = MotorRO100_sun_bottom_casing_bearing_height ,
+    sun_bottom_casing_bearing_ID      = MotorRO100_sun_bottom_casing_bearing_ID,
+    sun_bottom_casing_bearing_OD      = MotorRO100_sun_bottom_casing_bearing_OD,
+
+    motor_stator_extrusion_dia   =  MotorRO100_motor_stator_extrusion_dia ,
+    motor_stator_extrusion_depth =  MotorRO100_motor_stator_extrusion_depth ,  
+
+    motor_height                    = MotorRO100_motor_height,
 
     motorName                = "RO100"
 )
@@ -200,6 +223,15 @@ MotorRO80 = motor(
 
     rotorMountHolePCDMM      = MotorRO80_rotorMountHolePCDMM,
     rotorMountHoleDiaMM      = MotorRO80_rotorMountHoleDiaMM,
+ 
+    sun_bottom_casing_bearing_height  = MotorRO80_sun_bottom_casing_bearing_height ,
+    sun_bottom_casing_bearing_ID      = MotorRO80_sun_bottom_casing_bearing_ID,
+    sun_bottom_casing_bearing_OD      = MotorRO80_sun_bottom_casing_bearing_OD,
+
+    motor_stator_extrusion_dia   =  MotorRO80_motor_stator_extrusion_dia ,
+    motor_stator_extrusion_depth =  MotorRO80_motor_stator_extrusion_depth ,  
+
+    motor_height                    = MotorRO80_motor_height,
 
     motorName                = "RO80"
 )

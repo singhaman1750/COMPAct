@@ -1,11 +1,11 @@
 import sys
 
 GEARBOX_DISPATCH = {
-    #"sspg": "Opt_singleStagePlanetaryGBOptimization",
-    #"dspg": "Opt_doubleStagePlanetaryGBOptimization",
-    #"cpg": "Opt_compoundPlanetaryGBOptimization",
+    "sspg": "Opt_singleStagePlanetaryGBOptimization",
+    "dspg": "Opt_doubleStagePlanetaryGBOptimization",
+    "cpg": "Opt_compoundPlanetaryGBOptimization",
     "icpg": "Opt_internalcompoundPlanetryGBOptimization",
-    #"wpg": "Opt_wolfromPlanetaryGBOptimization",
+    "wpg": "Opt_wolfromPlanetaryGBOptimization",
 }
 
 def main(motor, gearbox_type, gear_ratio=0):
@@ -32,6 +32,14 @@ def main(motor, gearbox_type, gear_ratio=0):
         print("Optimal Parameters:")
         print("Number of teeth: Sun(Ns):", opt_parameters[2], ", Planet(Np):", opt_parameters[3], ", Ring(Nr):", opt_parameters[4],
               ", Module(m):", opt_parameters[5], ", NumPlanet(n_p):", opt_parameters[1])
+        print("---")
+        print("Gear Ratio(GR):", opt_parameters[0],": 1")
+        print("-------------------------------")
+    elif(gearbox_type=="cpg"):
+        print("-------------------------------")
+        print("Optimal Parameters:")
+        print("Number of teeth: Sun1(Ns1):", opt_parameters[2], ", Planet1(Np1):", opt_parameters[3], ", Planet2(Np2):", opt_parameters[4], ", Ring(Nr):", opt_parameters[5],
+              ", Module(m):", opt_parameters[6], ", NumPlanet(n_p):", opt_parameters[1])
         print("---")
         print("Gear Ratio(GR):", opt_parameters[0],": 1")
         print("-------------------------------")
