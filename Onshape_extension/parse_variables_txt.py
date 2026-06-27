@@ -33,7 +33,13 @@ def parse_variable_file(filepath):
         "a2_Ns",
         "a2_Ns1",
         "a1_Ns2",
-        "a2_num_planet"
+        "a2_num_planet",
+        "motor_rotor_hole_num",
+        "stator_ring_hub_hole_num",
+        "magnet_mount_num_hole",
+        "ring_hub_to_case_hole_num",
+        "magnet_pattern_bulge_number",
+        "motor_mount_driver_hole_num",
     }
 
     with open(filepath, "r") as f:
