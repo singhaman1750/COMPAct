@@ -5,7 +5,8 @@ GEARBOX_DISPATCH = {
     "dspg": "Opt_doubleStagePlanetaryGBOptimization",
     "cpg": "Opt_compoundPlanetaryGBOptimization",
     "icpg": "Opt_internalcompoundPlanetryGBOptimization",
-    "insspg": "Opt_inrunnersinglestageGBOptimization",
+    "insspg_type_1": "Opt_inrunnersinglestageGBOptimization",
+    "insspg_type_2": "Opt_inrunnersinglestageGBOptimization",
     "wpg": "Opt_wolfromPlanetaryGBOptimization",
 }
 
@@ -21,7 +22,11 @@ def main(motor, gearbox_type, gear_ratio=0):
     print(f"  Gearbox     : {gearbox_type}")
     print(f"  Gear Ratio  : {gear_ratio}")
 
-    total_time, opt_parameters = module.run(motor, gear_ratio)
+    # Pass gearbox_type down if it's INSSPG, otherwise run normally
+    if gearbox_type in ["insspg_type_1", "insspg_type_2"]:
+        total_time, opt_parameters = module.run(motor, gear_ratio, gearbox_type)
+    else:
+        total_time, opt_parameters = module.run(motor, gear_ratio)
     print("Time taken:", total_time, "sec")
     if opt_parameters is None:
         print("No feasible solution found.")
@@ -70,7 +75,31 @@ def main(motor, gearbox_type, gear_ratio=0):
             print("Total Gearbox   :", round(opt_parameters[8], 3), "kg")
         print("-------------------------------")
 
-    elif(gearbox_type=="insspg"):
+    elif(gearbox_type=="insspg_type_1"):
+        print("-------------------------------")
+        print("Optimal Parameters:")
+        print("Number of teeth: Sun(Ns):", opt_parameters[2], ", Planet(Np):", opt_parameters[3], ", Ring(Nr):", opt_parameters[4],
+            ", Module(m):", opt_parameters[5], ", NumPlanet(n_p):", opt_parameters[1])
+        print("---")
+        print("Gear Ratio(GR):", opt_parameters[0],": 1")
+# --- NEW MASS BREAKDOWN BLOCK ---
+        if len(opt_parameters) > 10:
+            print("---")
+            print("Mass Breakdown (kg):")
+            print("  Sun Gear      :", round(opt_parameters[8], 4))
+            print("  Planets       :", round(opt_parameters[9], 4))
+            print("  Ring Gear     :", round(opt_parameters[10], 4))
+            print("  Main Carrier  :", round(opt_parameters[11], 4))
+            print("  Sec. Carrier  :", round(opt_parameters[12], 4))
+            print("  Motor Casing  :", round(opt_parameters[13], 4))
+            print("  Bearing Retainer :", round(opt_parameters[15], 4))
+            print("total_sum_except_motor_and_baering :" ,round(opt_parameters[14],4))
+            print("  Bearings      :", round(opt_parameters[7], 4))
+            print("---")
+            print("Total Gearbox   :", round(opt_parameters[6], 3), "kg")
+        print("-------------------------------")
+
+    elif(gearbox_type=="insspg_type_2"):
             print("-------------------------------")
             print("Optimal Parameters:")
             print("Number of teeth: Sun(Ns):", opt_parameters[2], ", Planet(Np):", opt_parameters[3], ", Ring(Nr):", opt_parameters[4],
@@ -87,7 +116,7 @@ def main(motor, gearbox_type, gear_ratio=0):
                 print("  Main Carrier  :", round(opt_parameters[11], 4))
                 print("  Sec. Carrier  :", round(opt_parameters[12], 4))
                 print("  Motor Casing  :", round(opt_parameters[13], 4))
-                print("  Brng Retainer :", round(opt_parameters[15], 4))
+                print("  Bearing Retainer :", round(opt_parameters[15], 4))
                 print("total_sum_except_motor_and_baering :" ,round(opt_parameters[14],4))
                 print("  Bearings      :", round(opt_parameters[7], 4))
                 print("---")
