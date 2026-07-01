@@ -1,10 +1,10 @@
 import sys
 import numpy as np
-from InrunnerCPG_type1_gen_eq import motor
-from InrunnerCPG_type1_gen_eq import material
-from InrunnerCPG_type1_gen_eq import inrunnerCompoundPlanetaryGearbox
-from InrunnerCPG_type1_gen_eq import inrunnerCompoundPlanetaryActuator
-from InrunnerCPG_type1_gen_eq import optimizationInrunnerCompoundPlanetaryActuator
+from InrunnerCPG_independent_gen_eq import motor
+from InrunnerCPG_independent_gen_eq import material
+from InrunnerCPG_independent_gen_eq import inrunnerCompoundPlanetaryGearbox
+from InrunnerCPG_independent_gen_eq import inrunnerCompoundPlanetaryActuator
+from InrunnerCPG_independent_gen_eq import optimizationInrunnerCompoundPlanetaryActuator
 import os
 import json
 

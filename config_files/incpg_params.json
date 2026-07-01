@@ -14,7 +14,8 @@
     },
 
     "incpg_3DP_design_parameters": {
-        "ringRadialWidthMM"                                  : 5,
+        "ring_gearbox_casing_thickness"                       : 5,
+        "ringRadialWidthMM"                                  : 3,
         "planetMinDistanceMM"                                : 5,
         "sCarrierExtrusionDiaMM"                             : 7,
         "sCarrierExtrusionClearanceMM"                       : 0.5,
