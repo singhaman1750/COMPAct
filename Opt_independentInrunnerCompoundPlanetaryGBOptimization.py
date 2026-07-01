@@ -16,14 +16,14 @@ current_dir = os.path.dirname(__file__)
 
 # Build the file path
 config_path = os.path.join(current_dir, "config_files/config.json")
-incpg_params_path = os.path.join(current_dir, "config_files/incpg_params.json")
+incpg_params_path = os.path.join(current_dir, "config_files/incpg_independent_params.json")
 
 # Load the JSON file
 with open(config_path, "r") as config_file:
     config_data = json.load(config_file)
 
-with open(incpg_params_path, "r") as incpg_params_file:
-    incpg_params = json.load(incpg_params_file)
+with open(incpg_params_path, "r") as incpg_independent_params_file:
+    incpg_params = json.load(incpg_independent_params_file)
 
 #---------------------------------------------------
 # Transferring relevant data to individual variables

@@ -2904,7 +2904,7 @@ class optimizationInrunnerCompoundPlanetaryActuator:
 # ═══════════════════════════════════════════════════════════════════
 
 GEARBOX_DISPATCH = {
-    "incpg": "Opt_inrunnerCompoundPlanetaryGBOptimization",
+    "incpg": "Opt_independentInrunnerCompoundPlanetaryGBOptimization",
 }
 
 def main(motor, gearbox_type, gear_ratio=0):
@@ -2939,7 +2939,7 @@ def main(motor, gearbox_type, gear_ratio=0):
 if __name__ == "__main__":
     if len(sys.argv) != 4:
         print("Usage:")
-        print("  InrunnerCPG_type1_gen_eq.py <motor> <gearbox_type> <gear_ratio>")
+        print("  InrunnerCPG_independent_gen_eq.py <motor> <gearbox_type> <gear_ratio>")
         sys.exit(1)
 
     motor = sys.argv[1]
