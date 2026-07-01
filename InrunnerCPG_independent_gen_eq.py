@@ -846,6 +846,32 @@ class inrunnerCompoundPlanetaryActuator:
         ring_ID = module * Nr - 2*module
         return ring_ID > output_bearing_ID + 2*self.standard_clearance_1_5mm
 
+    def planetPCDConstraint(self):
+        module    = self.inrunnerCompoundPlanetaryGearbox.moduleBig  # Module of the gear
+        Ns        = self.inrunnerCompoundPlanetaryGearbox.Ns
+        Np1       = self.inrunnerCompoundPlanetaryGearbox.NpBig
+        Np2       = self.inrunnerCompoundPlanetaryGearbox.NpSmall
+        Nr        = self.inrunnerCompoundPlanetaryGearbox.Nr
+        numPlanet = self.inrunnerCompoundPlanetaryGearbox.numPlanet
+        
+        planet_ID = module * Np2
+        planet_bearing_OD = self.planet_bearing_OD
+
+        return planet_ID > planet_bearing_OD + 2*self.standard_clearance_1_5mm*(2/3)
+
+    def sunPCDConstraint(self):
+        module    = self.inrunnerCompoundPlanetaryGearbox.moduleBig  # Module of the gear
+        Ns        = self.inrunnerCompoundPlanetaryGearbox.Ns
+        Np1       = self.inrunnerCompoundPlanetaryGearbox.NpBig
+        Np2       = self.inrunnerCompoundPlanetaryGearbox.NpSmall
+        Nr        = self.inrunnerCompoundPlanetaryGearbox.Nr
+        numPlanet = self.inrunnerCompoundPlanetaryGearbox.numPlanet
+        
+        sun_ID = module * Ns - 2*module*1.25
+        sun_shaft_bearing_ID = self.sun_shaft_bearing_ID
+
+        return sun_ID > sun_shaft_bearing_ID 
+
     def setVariables(self):
         #--------- Optimization Variable-----------
         self.Ns         = self.inrunnerCompoundPlanetaryGearbox.Ns
@@ -2617,7 +2643,7 @@ class optimizationInrunnerCompoundPlanetaryActuator:
                             while (2*Actuator.inrunnerCompoundPlanetaryGearbox.getPCRadiusPlanetBigM()*1000) <= Actuator.maxGearboxDiameter/2:
                                 # Setting Np Small
                                 Actuator.inrunnerCompoundPlanetaryGearbox.setNpSmall(self.NUM_TEETH_PLANET_SMALL_MIN)
-                                while (2*Actuator.inrunnerCompoundPlanetaryGearbox.getPCRadiusPlanetSmallM()*1000) <= Actuator.maxGearboxDiameter/2:
+                                while (2*Actuator.inrunnerCompoundPlanetaryGearbox.getPCRadiusPlanetSmallM()*1000) <= (2*Actuator.inrunnerCompoundPlanetaryGearbox.getPCRadiusPlanetBigM()*1000):
                                     # Setting Nr
                                     Actuator.inrunnerCompoundPlanetaryGearbox.setNr(Actuator.inrunnerCompoundPlanetaryGearbox.NpSmall + 
                                                                             Actuator.inrunnerCompoundPlanetaryGearbox.NpBig +
@@ -2630,7 +2656,9 @@ class optimizationInrunnerCompoundPlanetaryActuator:
                                             if (Actuator.inrunnerCompoundPlanetaryGearbox.geometricConstraint() and 
                                                 Actuator.inrunnerCompoundPlanetaryGearbox.meshingConstraint() and 
                                                 Actuator.inrunnerCompoundPlanetaryGearbox.noPlanetInterferenceConstraint() and
-                                                Actuator.noCarrierInterferenceConstraint()
+                                                Actuator.noCarrierInterferenceConstraint() and
+                                                Actuator.sunPCDConstraint() and
+                                                Actuator.planetPCDConstraint() 
                                                 ):
                                                 self.totalFeasibleGearboxes += 1
                                                 # Fiter for the Gear Ratio

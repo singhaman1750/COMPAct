@@ -9,8 +9,8 @@
         "NUM_PLANET_MIN"                   : 3,
         "NUM_PLANET_MAX"                   : 7,
         "NUM_TEETH_SUN_MIN"                : 18,
-        "NUM_TEETH_PLANET_MIN"             : 28,
-        "MAX_GB_DIA_MULT_FACTOR"           : 0.8
+        "NUM_TEETH_PLANET_MIN"             : 18,
+        "MAX_GB_DIA_MULT_FACTOR"           : 0.85
     },
 
     "incpg_3DP_design_parameters": {
