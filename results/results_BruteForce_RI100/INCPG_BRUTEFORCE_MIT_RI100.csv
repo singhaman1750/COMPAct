@@ -1,0 +1,90 @@
+Motor Parameters:
+maxMotorAngVelRPM, maxMotorAngVelRadPerSec, maxMotorTorque, maxMotorPower, motorMass, motorDia, motorLength
+4368 , 457.41589036267385 , 1.76 , 805.051967038306 , 0.5 , 104 , 24.5
+ 
+Gear strength and size parameters:
+FOS, serviceFactor, stressAnalysisMethodName, maxGearBoxDia, maxGearAllowableStressMPa
+1.2 , 1.5 , MIT , 83.2 , 70
+ 
+Optimization Parameters:
+K_mass, K_Eff, MODULE_BIG_MIN, MODULE_BIG_MAX, MODULE_SMALL_MIN, MODULE_SMALL_MAX, NUM_PLANET_MIN, NUM_PLANET_MAX, NUM_TEETH_SUN_MIN, NUM_TEETH_PLANET_BIG_MIN, NUM_TEETH_PLANET_SMALL_MIN, GEAR_RATIO_MIN, GEAR_RATIO_MAX, GEAR_RATIO_STEP
+1 , -2 , 0.5 , 1.2 , 0.5 , 1.2 , 3 , 7 , 18 , 28 , 28 , 4.0 , 20.0 , 1.0
+ 
+iter, gearRatio, moduleBig, moduleSmall, Ns, NpBig, NpSmall, Nr, numPlanet, fwSunMM, fwPlanetBigMM, fwPanetSmallMM, fwRingMM, mass, eff, peakTorque, Cost, Torque_Density, Output_bearing_mass, Actuator_width
+motor_case_mass:  82.39857569128692
+gearbox_casing_mass:  166.91170934376808
+rotor_top_bearing_holder_mass:  63.384577029286824
+carrier_mass:  49.099347049065564
+sun_mass:  16.30630153617492
+sec_carrier_mass:  9.754645189396308
+planet_mass:  16.0554320314456
+rotor_hub_mass:  25.029147210966222
+planet_bearing_combined_mass:  6.0
+sun_shaft_bearing_mass:  4.0
+output_bearing_mass:  81.0
+bearing_retainer_mass:  6.204645490839841
+rotor_top_shaft_bearing_mass:  23.0
+rotor_bottom_shaft_bearing_mass:  24.0
+Motor mass: 500.0
+Actuator_mass_without_bearing: 461.0505991442816
+Actuator_mass: 1105.2552446351215
+---------------------------------------------------
+motor_case_mass:  82.39857569128692
+gearbox_casing_mass:  166.97497715247428
+rotor_top_bearing_holder_mass:  63.384577029286824
+carrier_mass:  49.035364065660445
+sun_mass:  16.300080968343863
+sec_carrier_mass:  9.312858722485243
+planet_mass:  17.132849091594153
+rotor_hub_mass:  25.029147210966222
+planet_bearing_combined_mass:  6.0
+sun_shaft_bearing_mass:  4.0
+output_bearing_mass:  81.0
+bearing_retainer_mass:  6.204645490839841
+rotor_top_shaft_bearing_mass:  23.0
+rotor_bottom_shaft_bearing_mass:  24.0
+Motor mass: 500.0
+Actuator_mass_without_bearing: 463.83412811528626
+Actuator_mass: 1108.0387736061261
+---------------------------------------------------
+motor_case_mass:  82.39857569128692
+gearbox_casing_mass:  162.000824213695
+rotor_top_bearing_holder_mass:  63.384577029286824
+carrier_mass:  48.533751736253876
+sun_mass:  16.251313102984895
+sec_carrier_mass:  9.087547624360601
+planet_mass:  17.9232628902381
+rotor_hub_mass:  25.029147210966222
+planet_bearing_combined_mass:  6.0
+sun_shaft_bearing_mass:  4.0
+output_bearing_mass:  81.0
+bearing_retainer_mass:  6.204645490839841
+rotor_top_shaft_bearing_mass:  23.0
+rotor_bottom_shaft_bearing_mass:  24.0
+Motor mass: 500.0
+Actuator_mass_without_bearing: 460.45552527954857
+Actuator_mass: 1104.6601707703883
+---------------------------------------------------
+motor_case_mass:  82.39857569128692
+gearbox_casing_mass:  165.52053025984688
+rotor_top_bearing_holder_mass:  63.384577029286824
+carrier_mass:  57.647605432420306
+sun_mass:  16.20619451485631
+sec_carrier_mass:  11.780972450961723
+planet_mass:  19.861581238941927
+rotor_hub_mass:  25.029147210966222
+planet_bearing_combined_mass:  6.0
+sun_shaft_bearing_mass:  4.0
+output_bearing_mass:  103.0
+bearing_retainer_mass:  6.67588438887831
+rotor_top_shaft_bearing_mass:  23.0
+rotor_bottom_shaft_bearing_mass:  24.0
+Motor mass: 500.0
+Actuator_mass_without_bearing: 481.55234630645106
+Actuator_mass: 1148.2282306953293
+---------------------------------------------------
+4 , 14.05691056910569 , 0.5 , 0.5 , 18 , 73 , 41 , 132 , 3 , 12.245 , 12.245 , 15.219 , 15.219 , 1.148 , 0.942 , 24.74 , 5.325170897770505 , 21.551 , 0.103 , 83.46418179978767
+
+
+Running Time (sec)
+2.2221622467041016
