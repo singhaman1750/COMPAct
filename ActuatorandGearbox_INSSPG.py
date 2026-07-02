@@ -1232,7 +1232,7 @@ class singleStagePlanetaryActuator:
 
         #uper_casing_VOL = upper_casing_cy_2_VOL + upper_casing_cy_3_VOL
 
-        middle_casing_VOL = np.pi * (self.stator_height-self.stator_upper_step_height+standard_clearance_1_5mm) * ((self.Stator_OD/2+self.stator_casing_thickness)**2 - (self.Stator_OD/2)**2) * 1e-9
+        middle_casing_VOL = np.pi * (self.stator_height-self.stator_upper_step_height+standard_clearance_1_5mm*2.5) * ((self.Stator_OD/2+self.stator_casing_thickness)**2 - (self.Stator_OD/2)**2) * 1e-9
         
         bottom_casing_plate_VOL = np.pi * (self.stator_casing_thickness) * ((self.Stator_OD/2+self.stator_casing_thickness)**2) * 1e-9 + np.pi * (standard_clearance_1_5mm) * ((self.Stator_OD/2+self.stator_casing_thickness)**2 - (self.Stator_OD/2+self.stator_casing_thickness-2.5)**2)* 1e-9
         #bottom_casing_step_height_VOL = np.pi * (self.stator_bottom_step_height_-self.standard_clearance_1_5mm) * ((50/2)**2) * 1e-9 + np.pi * (standard_clearance_1_5mm) * ((self.rotor_support_bearing_ID/2+standard_clearance_1_5mm*2)**2)*1e-9
@@ -1571,17 +1571,24 @@ class singleStagePlanetaryActuator:
     
     def check_type2_geometry(self):
             """Returns True if the geometry is valid, False if it fails the condition."""
-            # Refresh variables to get the current carrier_PCD for this gear ratio step
+            # Refresh variables to get the current gear dimensions for this loop
             self.setVariables() 
             
-            # Calculate the required outer boundary of the planet shafts/carrier
+            # --- CONSTRAINT 1: Carrier must fit inside Stator ID ---
             required_diameter = (self.planet_shaft_dia + 
                                 (self.planet_shaft_step_offset * 2) + 
                                 self.carrier_PCD + 
                                 (self.standard_clearance_1_5mm * 2))
+            condition_1_passes = (required_diameter <= self.motor.Stator_ID)
             
-            # Condition: Must fit inside the Stator ID
-            if required_diameter <= self.motor.Stator_ID:
+            # --- CONSTRAINT 2: Sun gear must fit inside the secondary carrier bearing ---
+            sun_gear_dia = self.Ns * self.module
+            max_allowable_sun_dia = self.sun_sec_carrier_bearing_ID - self.loose_clearance_3DP
+            condition_2_passes = (sun_gear_dia <= max_allowable_sun_dia)
+            
+            # --- FINAL CHECK ---
+            # The geometry is only valid if BOTH conditions are true
+            if condition_1_passes and condition_2_passes:
                 return True
             else:
                 return False
