@@ -843,7 +843,7 @@ class inrunnerCompoundPlanetaryActuator:
         Bearings            = bearings_discrete(OutputIDrequiredMM)
         output_bearing_ID   = Bearings.getBearingIDMM()
         
-        ring_ID = module * Nr - 2*module
+        ring_ID = module * Nr - 2*module*1.25
         return ring_ID > output_bearing_ID + 2*self.standard_clearance_1_5mm
 
     def planetPCDConstraint(self):
@@ -998,7 +998,7 @@ class inrunnerCompoundPlanetaryActuator:
 
         # --- Rotor Top Bearing Holder ---
         self.rotor_top_bearing_holder_thickness = (self.bearing_step_width + self.rotor_top_bearing_width - 
-                                                    (self.stator_top_height + self.stator_mid_height - self.rotor_height - self.bearing_step_width))
+                                                    (self.standard_clearance_1_5mm/2 + self.stator_top_height + self.stator_mid_height - self.rotor_height - self.bearing_step_width))
 
         #------------------------------------------------------
         # Dependent variables
@@ -2092,7 +2092,7 @@ class inrunnerCompoundPlanetaryActuator:
         motor_OD          = self.motorDiaMM
         motor_case_ID     = motor_OD
         motor_height      = self.motorLengthMM
-        motor_case_height = self.stator_bottom_height + self.stator_mid_height 
+        motor_case_height = self.stator_bottom_height + self.stator_mid_height + standard_clearance_1_5mm/2 
 
         motor_case_OD = motor_case_ID + motor_case_thickness * 2
 
@@ -2111,8 +2111,9 @@ class inrunnerCompoundPlanetaryActuator:
         #--------------------------------------
         # Mass: rotor_top_bearing_holder
         #--------------------------------------
-        rotor_top_bearing_holder_height    = self.stator_top_height
-        rotor_top_bearing_holder_thickness = self.rotor_top_bearing_holder_thickness
+        rotor_top_bearing_holder_height    = self.stator_top_height + standard_clearance_1_5mm/2
+        rotor_top_bearing_holder_thickness = (bearing_step_width + self.rotor_top_bearing_width - 
+                                                    (standard_clearance_1_5mm/2 + self.stator_top_height + self.stator_mid_height - self.rotor_height - bearing_step_width))
         rotor_top_bearing_holder_ID        = self.stator_ID
 
         rotor_top_bearing_holder_extrude_ID = self.rotor_top_bearing_OD
@@ -2367,7 +2368,8 @@ class inrunnerCompoundPlanetaryActuator:
                                         + self.sun_mass 
                                         + self.sec_carrier_mass 
                                         + self.rotor_hub_mass
-                                        + self.planet_mass * numPlanet 
+                                        + self.planet_mass * numPlanet
+                                        + self.bearing_retainer_mass 
                                         )
         
         self.Actuator_mass = Actuator_mass
