@@ -1,0 +1,90 @@
+{
+    
+    "incpg_optimization_parameters":{
+        "GEAR_RATIO_MIN"                   : 4.0,
+        "GEAR_RATIO_MAX"                   : 20.0,
+        "GEAR_RATIO_STEP"                  : 1.0,
+        "MODULE_MIN"                       : 0.5,
+        "MODULE_MAX"                       : 1.2,
+        "NUM_PLANET_MIN"                   : 3,
+        "NUM_PLANET_MAX"                   : 7,
+        "NUM_TEETH_SUN_MIN"                : 18,
+        "NUM_TEETH_PLANET_MIN"             : 28,
+        "MAX_GB_DIA_MULT_FACTOR"           : 0.8
+    },
+
+    "incpg_3DP_design_parameters": {
+        "ring_gearbox_casing_thickness"                       : 5,
+        "ringRadialWidthMM"                                  : 3,
+        "planetMinDistanceMM"                                : 5,
+        "sCarrierExtrusionDiaMM"                             : 7,
+        "sCarrierExtrusionClearanceMM"                       : 0.5,
+        "clearance_planet"                                   : 1.5,
+        "clearance_case_mount_holes_shell_thickness"         : 1,
+        "standard_clearance_1_5mm"                           : 1.5,
+        "standard_clearance_2_mm"                            : 2,
+        "standard_fillet_1_5mm"                              : 1.5,
+        "standard_fillet_3_mm"                               : 3,
+        "standard_bearing_insertion_chamfer"                 : 0.5,
+        "bearingIDClearanceMM"                               : 10,
+        "tight_clearance_3DP"                                : 0.4,
+        "loose_clearance_3DP"                                : 0.8,
+        "bearing_step_width"                                 : 2,
+
+        "motor_mount_driver_hole_dia"                        : 3,
+        "motor_mount_driver_hole_num"                        : 4,
+
+        "rotor_hub_thickness"                                : 2,
+        "rotor_hub_height"                                   : 4,
+        "rotor_hub_sun_hole_dia"                             : 4,
+        "rotor_hub_sun_hole_num"                             : 4,
+
+        "min_rotor_top_bearing_ID"                           : 25,
+        
+        "rotor_bottom_bearing_ID"                            : 15,
+        "rotor_bottom_bearing_OD"                            : 24,
+        "rotor_bottom_bearing_width"                         : 5,
+
+        "planet_pin_bolt_dia"                                : 5,
+        "planet_shaft_step_offset"                           : 1,
+        "planet_bearing_OD"                                  : 12,
+        "planet_bearing_width"                               : 3.5,
+        "planet_bearing_ID"                                  : 8,
+
+        "sun_coupler_hub_thickness"                          : 5,
+        "sun_shaft_bearing_ID"                               : 8,
+        "sun_shaft_bearing_OD"                               : 16,
+        "sun_shaft_bearing_width"                            : 5,
+        "sun_central_bolt_dia"                               : 5,
+
+        "sec_carrier_thickness"                              : 6,
+
+        "carrier_trapezoidal_support_sun_offset"             : 5,
+        "carrier_trapezoidal_support_hole_PCD_offset_output_bearing_ID" : 4,
+        "carrier_trapezoidal_support_hole_dia"               : 3,
+
+        "case_mounting_surface_height"                       : 4,
+        "case_mounting_hole_dia"                             : 3,
+
+        "motor_case_thickness"                               : 4,
+
+        "output_mount_hole_dia"                              : 5,
+
+        "actuactor_mount_hole_dia"                           : 4,
+
+        "motor_case_OD_base_to_chamfer"                      : 4,
+        "pattern_offset_from_motor_case_OD_base"             : 2,
+        "pattern_bulge_dia"                                  : 2,
+        "pattern_num_bulge"                                  : 18,
+        "pattern_depth"                                      : 2,
+
+        "magnet_mount_hole_dia"                              : 3,
+        "magnet_thickness"                                   : 2,
+        "magnet_dia"                                         : 6,
+        "magnet_mount_thickness"                             : 2,
+        "magnet_pattern_bulge_dia"                           : 3,
+        "magnet_pattern_bulge_number"                        : 8,
+        "magnet_mount_height"                                : 2
+
+    }
+}
