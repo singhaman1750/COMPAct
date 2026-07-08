@@ -2197,7 +2197,6 @@ class optimizationInternalSingleStageActuator:
                                                     
                                                     opt_actuator.updateFacewidth()
                                                     opt_actuator.getMassKG_3DP()
-                                                    opt_actuator.print_mass_of_parts_3DP()
                                                     # self.printOptimizationResults(Actuator, log, csv)
                                     Actuator.planetaryGearbox.setNumPlanet(Actuator.planetaryGearbox.numPlanet + 1)
                                 #Actuator.planetaryGearbox.setNr(Actuator.planetaryGearbox.Ns + 1)
@@ -2205,13 +2204,6 @@ class optimizationInternalSingleStageActuator:
                         Actuator.planetaryGearbox.setNs(Actuator.planetaryGearbox.Ns + 1)
                     Actuator.planetaryGearbox.setModule(Actuator.planetaryGearbox.module + 0.100)
                 if (opt_done == 1):
-                    print(
-                        "FINAL OPT CHECK: Nr=", opt_actuator.planetaryGearbox.Nr,
-                        "module=", opt_actuator.planetaryGearbox.module,
-                        "maxRingGearOD=", opt_actuator.maxRingGearOD(),
-                        "max_ring_gear_ha=", opt_actuator.max_ring_gear_ha,
-                        file=sys.__stdout__
-                    )
                     self.printOptimizationResults(opt_actuator, log, csv)
                 self.gearRatioIter += self.GEAR_RATIO_STEP
 

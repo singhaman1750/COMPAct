@@ -1103,7 +1103,9 @@ class inrunnerCompoundPlanetaryActuator:
 
         #-----
         self.actuator_width =  (self.motor_case_thickness
+                                + self.standard_clearance_1_5mm/2
                                 + self.motor_height
+                                + self.standard_clearance_1_5mm/2
                                 + self.rotor_top_bearing_holder_thickness
                                 + self.standard_clearance_1_5mm
                                 + self.sec_carrier_thickness
@@ -1112,7 +1114,8 @@ class inrunnerCompoundPlanetaryActuator:
                                 + self.fw_p_s
                                 + self.clearance_planet
                                 + self.bearing_step_width
-                                + self.output_bearing_width)
+                                + self.output_bearing_width
+                                + self.bearing_step_width)
                                                                
     def genEquationFile(self, motor_name="NO_MOTOR", gearRatioLL = 0.0, gearRatioUL = 0.0):
         # writing values into text file imported which is imported into solidworks
@@ -2564,9 +2567,9 @@ class optimizationInrunnerCompoundPlanetaryActuator:
             
             Cost = self.cost(Actuator=Actuator)
             Output_bearing_mass = Actuator.output_bearing_mass
-            Actuator_width = Actuator.actuator_width
+            Actuator_width = Actuator.actuator_width            
             print(iter, ",", gearRatio, ",", moduleBig, ",", moduleSmall, ",", Ns, ",", NpBig, ",", NpSmall, ",", Nr, ",", numPlanet, ",", fwSunMM, ",", fwPlanetBigMM, ",", fwPlanetSmallMM, ",", fwRingMM, ",", mass, ",", eff, ",", peakTorque, ",", Cost, ",", Torque_Density, ",", Output_bearing_mass, ",", Actuator_width)
-
+ 
     def optimizeActuator(self, Actuator=inrunnerCompoundPlanetaryActuator, UsePSCasVariable = 0, log=1, csv=0, printOptParams=1, gearRatioReq = 0):   
         self.UsePSCasVariable = UsePSCasVariable
         totalTime = 0
@@ -2717,7 +2720,6 @@ class optimizationInrunnerCompoundPlanetaryActuator:
                                                                                                  stressAnalysisMethodName = "MIT") # Lewis or AGMA
                                                         opt_actuator.updateFacewidth()
                                                         opt_actuator.getMassKG_3DP()
-                                                        opt_actuator.print_mass_of_parts_3DP()
                                                         # self.printOptimizationResults(Actuator, log, csv)
                                             Actuator.inrunnerCompoundPlanetaryGearbox.setNumPlanet(Actuator.inrunnerCompoundPlanetaryGearbox.numPlanet + 1)
                                         # Actuator.inrunnerCompoundPlanetaryGearbox.setNr(Actuator.inrunnerCompoundPlanetaryGearbox.Nr + 1)
@@ -2730,6 +2732,7 @@ class optimizationInrunnerCompoundPlanetaryActuator:
                     Actuator.inrunnerCompoundPlanetaryGearbox.setModuleBig(round(Actuator.inrunnerCompoundPlanetaryGearbox.moduleBig, 1)) # Round Off
                 if (opt_done):
                     self.printOptimizationResults(opt_actuator, log, csv)
+                    opt_actuator.print_mass_of_parts_3DP()
                 self.gearRatioIter += self.GEAR_RATIO_STEP
             
                 if log:

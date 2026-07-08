@@ -2717,8 +2717,7 @@ class optimizationInrunnerCompoundPlanetaryActuator:
                                                                                                  maxGearboxDiameter       = Actuator.maxGearboxDiameter, # mm 
                                                                                                  stressAnalysisMethodName = "MIT") # Lewis or AGMA
                                                         opt_actuator.updateFacewidth()
-                                                        opt_actuator.getMassKG_3DP()
-                                                        opt_actuator.print_mass_of_parts_3DP()
+                                                        opt_actuator.getMassKG_3DP()                                                        
                                                         # self.printOptimizationResults(Actuator, log, csv)
                                             Actuator.inrunnerCompoundPlanetaryGearbox.setNumPlanet(Actuator.inrunnerCompoundPlanetaryGearbox.numPlanet + 1)
                                         # Actuator.inrunnerCompoundPlanetaryGearbox.setNr(Actuator.inrunnerCompoundPlanetaryGearbox.Nr + 1)
@@ -2731,6 +2730,7 @@ class optimizationInrunnerCompoundPlanetaryActuator:
                     Actuator.inrunnerCompoundPlanetaryGearbox.setModuleBig(round(Actuator.inrunnerCompoundPlanetaryGearbox.moduleBig, 1)) # Round Off
                 if (opt_done):
                     self.printOptimizationResults(opt_actuator, log, csv)
+                    opt_actuator.print_mass_of_parts_3DP()
                 self.gearRatioIter += self.GEAR_RATIO_STEP
             
                 if log:
