@@ -143,8 +143,9 @@ Run the Python script from the root directory to generate optimal gear parameter
 ```bash
 python actOpt.py <motor> <gearbox> <ratio>
 ```
-* **`<motor>`**: U8, U10, U12, MN8014, VT8020, MAD_M6C12
-* **`<gearbox>`**: sspg, cpg, dspg, wpg
+NOTE : For ICPG use ```actOpt_icpg.py``` and for INSSPG (both types) use ```actOpt_insspg.py```
+* **`<motor>`**: U8, U10, U12, MN8014, VT8020, MAD_M6C12 , RO100 , RI100
+* **`<gearbox>`**: sspg, cpg, dspg, wpg , icpg , insspg_type_1 , insspg_type_2 
 * **`<ratio>`**: Must be a value > 2.
 
 **Example:**
