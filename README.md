@@ -108,7 +108,7 @@ If you prefer not to use SolidWorks, the CAD models are also available on Onshap
 
 👉 **[Open DSPG in Onshape](https://cad.onshape.com/documents/b8d43d150fb932ea649dcd0f/w/aaa3fcc8da584cc207374389/e/12e148469fa8eb5b917f5bb1?renderMode=0&uiState=69e2408b879d9edde70b5d36)**
 
-👉 **[Open INSSPG_Dependent in Onshape](https://cad.onshape.com/documents/97af418b118f30715235cd6a/w/253f8dd6e8e424cb9f7bb1dd/e/bcd4cd4dc6121c4e6915a50e?renderMode=0&leftPanel=false&uiState=6a4e2a7f82db92af62774641)**
+👉 **[Open INSSPG_Dependent in Onshape](https://cad.onshape.com/documents/97af418b118f30715235cd6a/w/253f8dd6e8e424cb9f7bb1dd/e/bcd4cd4dc6121c4e6915a50e?renderMode=0&leftPanel=false&uiState=6a4e2b9a82db92af62774962)**
 
 👉 **[Open INSSPG_Independent in Onshape](https://cad.onshape.com/documents/e0cb8ed6bb2b36cfcadffcf4/w/a5de456488f59701ab182711/e/b8af8d5da69957495c24591f?renderMode=0&leftPanel=false&uiState=6a4e2ac13b9f34e29a45f140)**
 
