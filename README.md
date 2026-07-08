@@ -108,6 +108,14 @@ If you prefer not to use SolidWorks, the CAD models are also available on Onshap
 
 👉 **[Open DSPG in Onshape](https://cad.onshape.com/documents/b8d43d150fb932ea649dcd0f/w/aaa3fcc8da584cc207374389/e/12e148469fa8eb5b917f5bb1?renderMode=0&uiState=69e2408b879d9edde70b5d36)**
 
+👉 **[Open ISSPG Outside Bearing in Onshape](https://cad.onshape.com/documents/bf5f13d9187efab731a95ba7/w/1261f6088846b1d6dd38ea32/e/9442fa2e352d23d6eb88bc6e?renderMode=0&uiState=6a4e2ba1c2bd25dd66621fae)**
+
+👉 **[Open ISSPG Inside Bearing in Onshape](https://cad.onshape.com/documents/9fa91e98fe82c4e544284d41/w/828f637e6a1fef0940224c5c/e/c80b77fbcf87c09b3b593c8a?renderMode=0&uiState=6a4e2b7864f03bde749b5369)**
+
+👉 **[Open INCPG Dependent in Onshape](https://cad.onshape.com/documents/3e794c46f172f3b02cfa18e7/w/dfc878270d998ca1ea8223c8/e/c324bd70f7c31566e927c1f7?renderMode=0&uiState=6a4e2aa99c74fab5cc5dc0f1)**
+
+👉 **[Open INCPG Independent in Onshape](https://cad.onshape.com/documents/2519b08c3c51bbdac1923e25/w/095a9ef04c28fad58dcdbe6c/e/7335150ff09908ff2cd1b9b2?renderMode=0&uiState=6a4e2b048984a6ae63298aa8)**
+
 To get your own editable copy:
 1. Open the link above — you will see the model in view-only mode
 2. Click the **Onshape logo / menu icon** in the top-left corner
