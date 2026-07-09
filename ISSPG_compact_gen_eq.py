@@ -2383,7 +2383,7 @@ class optimizationInternalSingleStageActuator:
 # ═══════════════════════════════════════════════════════════════════
 
 GEARBOX_DISPATCH = {
-    "isspg": "Opt_internalSingleStagePlanetaryGBOptimization",
+    "isspg": "Opt_outBearingInternalSingleStagePlanetaryGBOptimization",
 }
 
 def main(motor, gearbox_type, gear_ratio=0):
@@ -2418,7 +2418,7 @@ def main(motor, gearbox_type, gear_ratio=0):
 if __name__ == "__main__":
     if len(sys.argv) != 4:
         print("Usage:")
-        print("  python ISSPG_outside_gen_eq.py <motor> <gearbox_type> <gear_ratio>")
+        print("  python ISSPG_compact_gen_eq.py <motor> <gearbox_type> <gear_ratio>")
         sys.exit(1)
 
     motor = sys.argv[1]

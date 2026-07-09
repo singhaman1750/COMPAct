@@ -2402,7 +2402,7 @@ class optimizationInternalSingleStageActuator:
 # ═══════════════════════════════════════════════════════════════════
 
 GEARBOX_DISPATCH = {
-    "isspg": "Opt_internalSingleStagePlanetaryGBOptimization",
+    "isspg": "Opt_inBearingInternalSingleStagePlanetaryGBOptimization",
 }
 
 def main(motor, gearbox_type, gear_ratio=0):
