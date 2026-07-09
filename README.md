@@ -149,27 +149,29 @@ python actOpt.py <motor> <gearbox> <ratio>
 * **`<motor>`**: U8, U10, U12, MN8014, VT8020, MAD_M6C12
 * **`<gearbox>`**: sspg, cpg, dspg, wpg
 * **`<ratio>`**: Must be a value > 2.
-  
-**Syntax for ISSPG:**  
-Note: Before running the code, open Opt_internalSingleStagePlanetaryGBOptimization.py and change it based on actuator_type  
-**Example:**  
-```python
-import sys
-import numpy as np
-from <actuator_type> import internalsingleStagePlanetaryGearbox
-from <actuator_type> import motor
-from <actuator_type> import internalsingleStagePlanetaryActuator
-from <actuator_type> import optimizationInternalSingleStageActuator
-import json
-import os
+
+**Example:**
+To optimize a **T-motor U8** with a **Single-Stage Planetary Gearbox** and a **ratio of 6.5**:
+
+```bash
+python actOpt.py U8 sspg 6.5
 ```
 
+**Syntax for ISSPG:**  
 ```bash
 python <actuator_type>.py <motor> isspg <ratio>
 ```
 * **`<actuator_type>`**: ISSPG_inside_gen_eq, ISSPG_compact_gen_eq
 * **`<motor>`**: RO80, RO100
-* **`<ratio>`**: Must be a value > 2.
+* **`<ratio>`**: Must be a value > 2.  
+Note: ISSPG_inside_gen_eq is for InBearing design and ISSPG_compact_gen_eq is for OutBearing design
+  
+**Example:**
+To optimize **RO100** with an **Internal Single-Stage Planetary Gearbox InBearing** and a **ratio of 6.5**:
+
+```bash
+python ISSPG_inside_gen_eq.py RO100 isspg 6.5
+```
 
 **Syntax for INCPG:**
 ```bash
@@ -180,10 +182,10 @@ python <actuator_type>.py <motor> incpg <ratio>
 * **`<ratio>`**: Must be a value > 2.
   
 **Example:**
-To optimize a **T-motor U8** with a **Single-Stage Planetary Gearbox** and a **ratio of 6.5**:
+To optimize **RI100** with an **Inrunner Compound Planetary Gearbox Independent** and a **ratio of 6.5**:
 
 ```bash
-python actOpt.py U8 sspg 6.5
+python InrunnerCPG_independent_gen_eq.py RI100 incpg 6.5
 ```
 
 ---
