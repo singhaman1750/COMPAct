@@ -143,16 +143,31 @@ Run the Python script from the root directory to generate optimal gear parameter
 ```bash
 python actOpt.py <motor> <gearbox> <ratio>
 ```
-NOTE : For ICPG use ```actOpt_icpg.py``` and for INSSPG (both types) use ```actOpt_insspg.py```
-* **`<motor>`**: U8, U10, U12, MN8014, VT8020, MAD_M6C12 , RO100 , RI100
+* **`<motor>`**: U8, U10, U12, MN8014, VT8020, MAD_M6C12 , RO100 , RI100,RO80
 * **`<gearbox>`**: sspg, cpg, dspg, wpg , icpg , insspg_type_1 , insspg_type_2 
 * **`<ratio>`**: Must be a value > 2.
 
 **Example:**
-To optimize a **T-motor U8** with a **Single-Stage Planetary Gearbox** and a **ratio of 6.5**:
+To optimize a **RO100** with a **Internal-Compound-Planetary Gearbox** and a **ratio of 6.5**:
 
 ```bash
-python actOpt.py U8 sspg 6.5
+python actOpt_icpg.py RI100 icpg 6.5
+```
+
+---
+**Example:**
+To optimize a **RI100** with a **Inrunner-Dependent-Single-Stage Planetary Gearbox** and a **ratio of 6.5**:
+
+```bash
+python actOpt_insspg.py RI100 insspg_type_2 6.5
+```
+
+---
+**Example:**
+To optimize a **RI100** with a **Inrunner-Independent-Single-Stage Planetary Gearbox** and a **ratio of 6.5**:
+
+```bash
+python actOpt_insspg.py RI100 insspg_type_1 6.5
 ```
 
 ---
