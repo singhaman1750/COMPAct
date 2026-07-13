@@ -1,0 +1,61 @@
+{   
+    "Gear_standard_parameters": {
+        "coefficientOfFriction": 0.3,
+        "pressureAngleDEG": 20
+    },
+    "Lewis_params": {
+        "FOS": 1.2,
+        "serviceFactor": 2.0
+    },
+    "MIT_params": {
+        "FOS": 1.2,
+        "serviceFactor": 1.5
+    },
+    "Material_properties": {
+        "Steel": {
+            "density": 1240.06,
+            "maxAllowableStressMPa": 70
+        },
+        "Aluminum": {
+            "density": 1240.06
+        },
+        "PLA": {
+            "density": 1240.06,
+            "maxAllowableStressMPa": 70
+        }
+    },
+    "Motors": {
+        "RI100": {
+            "Kv": 105,
+            "maxContinuousCurrent": 13.6,
+            "ratedVoltage": 48,
+            "power": 252,
+            "massKG": 0.5,
+            "Stator_ID": 57.0,
+            "Stator_OD": 104.0,
+            "stator_height": 24.5,
+            "stator_bottom_step_height_": 2.0,
+            "stator_upper_step_height": 2.0,
+            "stator_side_step_OD": 110.0,
+            "stator_mounting_holes_dia": 4.0,
+            "stator_hole_bolt_socket_head_dia": 7.5,
+            "Rotor_height": 15.0,
+            "Rotor_OD": 55.6,
+            "Rotor_ID": 45.0,
+            "rotor_mount_hole_dia": 4.0,
+            "rotor_mount_hole_CSK_OD": 8.0,
+            "rotor_mount_hole_CSK_head_hight": 3.0
+        }
+    },
+    "Design_parameters": {
+        "Internal_designs": {
+            "ringRadialWidthMM": 2.5,
+            "ringHousingWidthMM": 2.0
+        }
+    },
+    "Cost_gain_parameters": {
+        "K_Mass": 1,
+        "K_Eff": -2,
+        "K_Width": 0.2
+    }
+}

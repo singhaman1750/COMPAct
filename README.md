@@ -99,6 +99,7 @@ COMPAct-Actuator_design_framework/
 If you prefer not to use SolidWorks, the CAD models are also available on Onshape. No extraction or local files needed.
 
 #### 1. SSPG (Single-Stage Planetary Gearbox)
+[COPY PASTE THE LINK IF HYPERLINK DOESN'T OPEN] 
 
 👉 **[Open SSPG in Onshape](https://cad.onshape.com/documents/c1aac326515ba734f63b9b3f/w/f9cccd7b90ce6d7934076c7c/e/11d494d64974a13f1ae2def2?renderMode=0&leftPanel=false&uiState=69ba77262aa7d6ac3cb56ff9)**
 
@@ -108,6 +109,18 @@ If you prefer not to use SolidWorks, the CAD models are also available on Onshap
 
 👉 **[Open DSPG in Onshape](https://cad.onshape.com/documents/b8d43d150fb932ea649dcd0f/w/aaa3fcc8da584cc207374389/e/12e148469fa8eb5b917f5bb1?renderMode=0&uiState=69e2408b879d9edde70b5d36)**
 
+👉 **[Open INSSPG_Dependent in Onshape](https://cad.onshape.com/documents/97af418b118f30715235cd6a/w/253f8dd6e8e424cb9f7bb1dd/e/bcd4cd4dc6121c4e6915a50e?renderMode=0&leftPanel=false&uiState=6a4e2b9a82db92af62774962)**
+```
+https://cad.onshape.com/documents/97af418b118f30715235cd6a/w/253f8dd6e8e424cb9f7bb1dd/e/bcd4cd4dc6121c4e6915a50e?renderMode=0&leftPanel=false&uiState=6a4e2b9a82db92af62774962
+```
+👉 **[Open INSSPG_Independent in Onshape](https://cad.onshape.com/documents/e0cb8ed6bb2b36cfcadffcf4/w/a5de456488f59701ab182711/e/b8af8d5da69957495c24591f?renderMode=0&leftPanel=false&uiState=6a4e2ac13b9f34e29a45f140)**
+```
+https://cad.onshape.com/documents/e0cb8ed6bb2b36cfcadffcf4/w/a5de456488f59701ab182711/e/b8af8d5da69957495c24591f?renderMode=0&leftPanel=false&uiState=6a4e2ac13b9f34e29a45f140 
+```
+👉 **[Open ICPG in Onshape](https://cad.onshape.com/documents/1cec852caa1080765682d3d0/w/9b7913f319aab1fd6ef5de45/e/f9d06c56e5c97df7f6c68aa9?renderMode=0&uiState=6a4e2d38c2bd25dd666223f5)** 
+```
+https://cad.onshape.com/documents/1cec852caa1080765682d3d0/w/9b7913f319aab1fd6ef5de45/e/f9d06c56e5c97df7f6c68aa9?renderMode=0&uiState=6a4e2d38c2bd25dd666223f5 
+```
 To get your own editable copy:
 1. Open the link above — you will see the model in view-only mode
 2. Click the **Onshape logo / menu icon** in the top-left corner
@@ -125,15 +138,31 @@ Run the Python script from the root directory to generate optimal gear parameter
 ```bash
 python actOpt.py <motor> <gearbox> <ratio>
 ```
-* **`<motor>`**: U8, U10, U12, MN8014, VT8020, MAD_M6C12
-* **`<gearbox>`**: sspg, cpg, dspg, wpg
+* **`<motor>`**: U8, U10, U12, MN8014, VT8020, MAD_M6C12 , RO100 , RI100 , RO80
+* **`<gearbox>`**: sspg, cpg, dspg, wpg , icpg , insspg_type_1 {Independent} , insspg_type_2 {Dependent} 
 * **`<ratio>`**: Must be a value > 2.
 
 **Example:**
-To optimize a **T-motor U8** with a **Single-Stage Planetary Gearbox** and a **ratio of 6.5**:
+To optimize a **RO100** with a **Internal-Compound-Planetary Gearbox** and a **ratio of 6.5**:
 
 ```bash
-python actOpt.py U8 sspg 6.5
+python actOpt_icpg.py RO100 icpg 6.5
+```
+
+---
+**Example:**
+To optimize a **RI100** with a **Inrunner-Dependent-Single-Stage Planetary Gearbox** and a **ratio of 6.5**:
+
+```bash
+python actOpt_insspg.py RI100 insspg_type_2 6.5
+```
+
+---
+**Example:**
+To optimize a **RI100** with a **Inrunner-Independent-Single-Stage Planetary Gearbox** and a **ratio of 6.5**:
+
+```bash
+python actOpt_insspg.py RI100 insspg_type_1 6.5
 ```
 
 ---
@@ -162,7 +191,11 @@ Detailed parameter files are automatically generated in the following locations:
 * **CPG:** `CADs/CPG/cpg_equations.txt`
 * **DSPG:** `CADs/DSPG/dspg_equations.txt`
 * **WPG:** `CADs/WPG/wpg_equations.txt`
-
+  
+#### MASS ANALYSIS
+```
+https://docs.google.com/spreadsheets/d/1QYUox6946nNlciWFAQ1L-EqQNLNdAT6GV0OtC5uI0eU/edit?usp=sharing
+```
 ---
 
 ### Step 6: Generate Automated CAD designs
