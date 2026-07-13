@@ -68,7 +68,7 @@ cd COMPAct
 
 ```bash
 # Install required packages
-pip install numpy matplotlib pandas requests
+pip install -r requirements.txt
 ```
 
 ---

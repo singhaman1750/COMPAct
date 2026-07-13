@@ -1,0 +1,8 @@
+numpy
+matplotlib
+pandas
+requests
+
+# Optional: only needed for Onshape_extension (cloud CAD automation)
+python-dotenv
+onshape-robotics-toolkit
