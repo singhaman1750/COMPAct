@@ -29,7 +29,7 @@ class bearings_discrete:
             self.data_bearings = [
             [10,19,5,0.005],[12,21,5,0.006],[15,24,5,0.007],[17,26,5,0.007],
             [20,32,7,0.017],[25,32,4,0.021],[25,37,7,0.021],[28,52,12,0.096],[30,42,7,0.024],
-            [32,58,13,0.122],[35,47,7,0.027],[40,52,7,0.031],[45,58,7,0.038],
+            [32,58,13,0.122],[35,47,7,0.027],[40,50,6,0.023],[40,52,7,0.031],[45,58,7,0.038],
             [50,65,7,0.050],[55,72,9,0.081],[60,78,10,0.103],[65,85,10,0.128],
             [70,90,10,0.134],[76.2,88.9,6.35,0.07],[75,95,10,0.149],[80,100,10,0.151],[85,110,13,0.263],[88.9,101.6,6.35,0.0816],
             [90,115,13,0.276],[95,120,13,0.297],[100,125,13,0.31],[105,130,13,0.324],
@@ -849,8 +849,8 @@ class internalsingleStagePlanetaryActuator:
 
         actuactor_mount_hole_bolt = nuts_and_bolts_dimensions(bolt_dia=self.actuactor_mount_hole_dia, bolt_type="socket_head")
 
-        self.actuactor_mount_nut_wrench_size       = ring_hub_to_case_hole_bolt.nut_width_across_flats
-        self.actuactor_mount_nut_depth             = ring_hub_to_case_hole_bolt.nut_depth
+        self.actuactor_mount_nut_wrench_size       = actuactor_mount_hole_bolt.nut_width_across_flats
+        self.actuactor_mount_nut_depth             = actuactor_mount_hole_bolt.nut_depth
 
         # --- Planet Gear dimensions ---
         self.planet_pin_bolt_dia      = self.design_params["planet_pin_bolt_dia"] # 5 
@@ -1047,9 +1047,8 @@ class internalsingleStagePlanetaryActuator:
                                     )     
     
         #------------------------------------------
-        self.actuator_width = (  self.bearing_step_width
-                               + self.input_bearing_width 
-                               + self.motor_case_height
+        self.actuator_width = (  self.motor_case_thickness
+                               + self.motor_case_thickness
                                + self.motor_case_height
                                )
     
@@ -2224,13 +2223,6 @@ class optimizationInternalSingleStageActuator:
                         Actuator.planetaryGearbox.setNs(Actuator.planetaryGearbox.Ns + 1)
                     Actuator.planetaryGearbox.setModule(Actuator.planetaryGearbox.module + 0.100)
                 if (opt_done == 1):
-                    print(
-                        "FINAL OPT CHECK: Nr=", opt_actuator.planetaryGearbox.Nr,
-                        "module=", opt_actuator.planetaryGearbox.module,
-                        "maxRingGearOD=", opt_actuator.maxRingGearOD(),
-                        "max_ring_gear_ha=", opt_actuator.max_ring_gear_ha,
-                        file=sys.__stdout__
-                    )
                     self.printOptimizationResults(opt_actuator, log, csv)
                 self.gearRatioIter += self.GEAR_RATIO_STEP
 
@@ -2410,7 +2402,7 @@ class optimizationInternalSingleStageActuator:
 # ═══════════════════════════════════════════════════════════════════
 
 GEARBOX_DISPATCH = {
-    "isspg": "Opt_internalSingleStagePlanetaryGBOptimization",
+    "isspg": "Opt_inBearingInternalSingleStagePlanetaryGBOptimization",
 }
 
 def main(motor, gearbox_type, gear_ratio=0):
@@ -2445,7 +2437,7 @@ def main(motor, gearbox_type, gear_ratio=0):
 if __name__ == "__main__":
     if len(sys.argv) != 4:
         print("Usage:")
-        print("  python ISSPG_outside_gen_eq.py <motor> <gearbox_type> <gear_ratio>")
+        print("  python ISSPG_inside_gen_eq.py <motor> <gearbox_type> <gear_ratio>")
         sys.exit(1)
 
     motor = sys.argv[1]

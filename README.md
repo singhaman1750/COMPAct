@@ -103,24 +103,51 @@ If you prefer not to use SolidWorks, the CAD models are also available on Onshap
 
 👉 **[Open SSPG in Onshape](https://cad.onshape.com/documents/c1aac326515ba734f63b9b3f/w/f9cccd7b90ce6d7934076c7c/e/11d494d64974a13f1ae2def2?renderMode=0&leftPanel=false&uiState=69ba77262aa7d6ac3cb56ff9)**
 
+
 👉 **[Open CPG in Onshape](https://cad.onshape.com/documents/dabf50453c93c1c427cef77a/w/58e59ba240adf6d2a07794cc/e/2fd7bc338e9316193d1a2f79)**
+
 
 👉 **[Open WPG in Onshape](https://cad.onshape.com/documents/ad699ddbc25bac5c32e33135/w/758de9a639163030bca8fa73/e/4cb254c85cc1f2d31a39a63a?renderMode=0&uiState=69d8cb5213bdc8529ffa3f3c)**
 
+
 👉 **[Open DSPG in Onshape](https://cad.onshape.com/documents/b8d43d150fb932ea649dcd0f/w/aaa3fcc8da584cc207374389/e/12e148469fa8eb5b917f5bb1?renderMode=0&uiState=69e2408b879d9edde70b5d36)**
+
+
+👉 **[Open ISSPG OutBearing in Onshape](https://cad.onshape.com/documents/bf5f13d9187efab731a95ba7/w/1261f6088846b1d6dd38ea32/e/9442fa2e352d23d6eb88bc6e?renderMode=0&uiState=6a4e2ba1c2bd25dd66621fae)**
+```
+https://cad.onshape.com/documents/bf5f13d9187efab731a95ba7/w/1261f6088846b1d6dd38ea32/e/9442fa2e352d23d6eb88bc6e?renderMode=0&uiState=6a4e2ba1c2bd25dd66621fae
+```
+
+👉 **[Open ISSPG InBearing in Onshape](https://cad.onshape.com/documents/9fa91e98fe82c4e544284d41/w/828f637e6a1fef0940224c5c/e/c80b77fbcf87c09b3b593c8a?renderMode=0&uiState=6a4e2b7864f03bde749b5369)**
+```
+https://cad.onshape.com/documents/9fa91e98fe82c4e544284d41/w/828f637e6a1fef0940224c5c/e/c80b77fbcf87c09b3b593c8a?renderMode=0&uiState=6a4e2b7864f03bde749b5369
+```
+
+👉 **[Open INCPG Dependent in Onshape](https://cad.onshape.com/documents/3e794c46f172f3b02cfa18e7/w/dfc878270d998ca1ea8223c8/e/c324bd70f7c31566e927c1f7?renderMode=0&uiState=6a4e2aa99c74fab5cc5dc0f1)**
+```
+https://cad.onshape.com/documents/3e794c46f172f3b02cfa18e7/w/dfc878270d998ca1ea8223c8/e/c324bd70f7c31566e927c1f7?renderMode=0&uiState=6a4e2aa99c74fab5cc5dc0f1
+```
+
+👉 **[Open INCPG Independent in Onshape](https://cad.onshape.com/documents/2519b08c3c51bbdac1923e25/w/095a9ef04c28fad58dcdbe6c/e/7335150ff09908ff2cd1b9b2?renderMode=0&uiState=6a4e2b048984a6ae63298aa8)**
+```
+https://cad.onshape.com/documents/2519b08c3c51bbdac1923e25/w/095a9ef04c28fad58dcdbe6c/e/7335150ff09908ff2cd1b9b2?renderMode=0&uiState=6a4e2b048984a6ae63298aa8
+```
 
 👉 **[Open INSSPG_Dependent in Onshape](https://cad.onshape.com/documents/97af418b118f30715235cd6a/w/253f8dd6e8e424cb9f7bb1dd/e/bcd4cd4dc6121c4e6915a50e?renderMode=0&leftPanel=false&uiState=6a4e2b9a82db92af62774962)**
 ```
 https://cad.onshape.com/documents/97af418b118f30715235cd6a/w/253f8dd6e8e424cb9f7bb1dd/e/bcd4cd4dc6121c4e6915a50e?renderMode=0&leftPanel=false&uiState=6a4e2b9a82db92af62774962
 ```
+
 👉 **[Open INSSPG_Independent in Onshape](https://cad.onshape.com/documents/e0cb8ed6bb2b36cfcadffcf4/w/a5de456488f59701ab182711/e/b8af8d5da69957495c24591f?renderMode=0&leftPanel=false&uiState=6a4e2ac13b9f34e29a45f140)**
 ```
 https://cad.onshape.com/documents/e0cb8ed6bb2b36cfcadffcf4/w/a5de456488f59701ab182711/e/b8af8d5da69957495c24591f?renderMode=0&leftPanel=false&uiState=6a4e2ac13b9f34e29a45f140 
 ```
+
 👉 **[Open ICPG in Onshape](https://cad.onshape.com/documents/1cec852caa1080765682d3d0/w/9b7913f319aab1fd6ef5de45/e/f9d06c56e5c97df7f6c68aa9?renderMode=0&uiState=6a4e2d38c2bd25dd666223f5)** 
 ```
 https://cad.onshape.com/documents/1cec852caa1080765682d3d0/w/9b7913f319aab1fd6ef5de45/e/f9d06c56e5c97df7f6c68aa9?renderMode=0&uiState=6a4e2d38c2bd25dd666223f5 
 ```
+
 To get your own editable copy:
 1. Open the link above — you will see the model in view-only mode
 2. Click the **Onshape logo / menu icon** in the top-left corner
@@ -163,6 +190,37 @@ To optimize a **RI100** with a **Inrunner-Independent-Single-Stage Planetary Gea
 
 ```bash
 python actOpt_insspg.py RI100 insspg_type_1 6.5
+```
+
+**Syntax for ISSPG:**  
+```bash
+python <actuator_type>.py <motor> isspg <ratio>
+```
+* **`<actuator_type>`**: ISSPG_inside_gen_eq, ISSPG_compact_gen_eq
+* **`<motor>`**: RO80, RO100
+* **`<ratio>`**: Must be a value > 2.  
+Note: ISSPG_inside_gen_eq is for InBearing design and ISSPG_compact_gen_eq is for OutBearing design
+  
+**Example:**
+To optimize **RO100** with an **Internal Single-Stage Planetary Gearbox InBearing** and a **ratio of 6.5**:
+
+```bash
+python ISSPG_inside_gen_eq.py RO100 isspg 6.5
+```
+
+**Syntax for INCPG:**
+```bash
+python <actuator_type>.py <motor> incpg <ratio>
+```
+* **`<actuator_type>`**: InrunnerCPG_independent_gen_eq, InrunnerCPG_dependent_gen_eq
+* **`<motor>`**: RI100
+* **`<ratio>`**: Must be a value > 2.
+  
+**Example:**
+To optimize **RI100** with an **Inrunner Compound Planetary Gearbox Independent** and a **ratio of 6.5**:
+
+```bash
+python InrunnerCPG_independent_gen_eq.py RI100 incpg 6.5
 ```
 
 ---

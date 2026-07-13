@@ -17,7 +17,7 @@
             "maxAllowableStressMPa": 400
         },
         "Aluminum": {
-            "density": 2710
+            "density": 2700
         },
         "PLA": {
             "oldDensity": 1430,
