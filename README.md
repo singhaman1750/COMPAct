@@ -215,18 +215,6 @@ Detailed parameter files are automatically generated in the following locations:
 * **DSPG:** `CADs/DSPG/dspg_equations.txt`
 * **WPG:** `CADs/WPG/wpg_equations.txt`
 
-**Results of Mass analysis:**
-
-ISSPG:
-```
-https://docs.google.com/spreadsheets/d/1iHOrHwT1XycPNceC9ZO9XlC8stnNFCjJXmsxBHVuAno/edit?gid=0#gid=0
-```
-
-INCPG:
-```
-https://docs.google.com/spreadsheets/d/1efnk3SBvKK59gBMz1FQ60IVLhYDCnIjmzg_wK-VendI/edit?gid=0#gid=0
-```
-
 ---
 
 ### Step 6: Generate Automated CAD designs
