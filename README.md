@@ -109,11 +109,6 @@ If you prefer not to use SolidWorks, the CAD models are also available on Onshap
 
 👉 **[Open DSPG in Onshape](https://cad.onshape.com/documents/b8d43d150fb932ea649dcd0f/w/aaa3fcc8da584cc207374389/e/12e148469fa8eb5b917f5bb1?renderMode=0&uiState=69e2408b879d9edde70b5d36)**
 
-[INSSPG MASS ANALYSIS]
-```
-https://docs.google.com/spreadsheets/d/1QYUox6946nNlciWFAQ1L-EqQNLNdAT6GV0OtC5uI0eU/edit?usp=sharing
-```
-
 👉 **[Open INSSPG_Dependent in Onshape](https://cad.onshape.com/documents/97af418b118f30715235cd6a/w/253f8dd6e8e424cb9f7bb1dd/e/bcd4cd4dc6121c4e6915a50e?renderMode=0&leftPanel=false&uiState=6a4e2b9a82db92af62774962)**
 ```
 https://cad.onshape.com/documents/97af418b118f30715235cd6a/w/253f8dd6e8e424cb9f7bb1dd/e/bcd4cd4dc6121c4e6915a50e?renderMode=0&leftPanel=false&uiState=6a4e2b9a82db92af62774962
@@ -196,7 +191,11 @@ Detailed parameter files are automatically generated in the following locations:
 * **CPG:** `CADs/CPG/cpg_equations.txt`
 * **DSPG:** `CADs/DSPG/dspg_equations.txt`
 * **WPG:** `CADs/WPG/wpg_equations.txt`
-
+  
+#### INSSPG MASS ANALYSIS
+```
+https://docs.google.com/spreadsheets/d/1QYUox6946nNlciWFAQ1L-EqQNLNdAT6GV0OtC5uI0eU/edit?usp=sharing
+```
 ---
 
 ### Step 6: Generate Automated CAD designs
