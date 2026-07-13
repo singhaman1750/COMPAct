@@ -192,7 +192,7 @@ Detailed parameter files are automatically generated in the following locations:
 * **DSPG:** `CADs/DSPG/dspg_equations.txt`
 * **WPG:** `CADs/WPG/wpg_equations.txt`
   
-#### INSSPG MASS ANALYSIS
+#### MASS ANALYSIS
 ```
 https://docs.google.com/spreadsheets/d/1QYUox6946nNlciWFAQ1L-EqQNLNdAT6GV0OtC5uI0eU/edit?usp=sharing
 ```
