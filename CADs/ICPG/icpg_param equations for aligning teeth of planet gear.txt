@@ -1,0 +1,23 @@
+"D1@Sketch5"*0.5*(cos(t) + t*sin(t))
+"D1@Sketch5"*0.5*(sin(t) - t*cos(t))
+
+
+"D1@Sketch5"*0.5*(cos(-t-2*"D4@Sketch5"*pi/180)-t*sin(-t-2*"D4@Sketch5"*pi/180))
+"D1@Sketch5"*0.5*(sin(-t-2*"D4@Sketch5"*pi/180)+t*cos(-t-2*"D4@Sketch5"*pi/180))
+
+
+"D1@Sketch5"*0.5*(cos(t + "D4@Sketch5"*pi/180) + t*sin(t + "D4@Sketch5"*pi/180))
+"D1@Sketch5"*0.5*(sin(t + "D4@Sketch5"*pi/180) - t*cos(t + "D4@Sketch5"*pi/180))
+
+"D1@Sketch5"*0.5*(cos(-t-"D4@Sketch5"*pi/180)-t*sin(-t-"D4@Sketch5"*pi/180))
+"D1@Sketch5"*0.5*(sin(-t-"D4@Sketch5"*pi/180)+t*cos(-t-"D4@Sketch5"*pi/180))
+
+
+
+
+
+"D2@Sketch2"*0.5*(cos(t + "D4@Sketch2"*pi/180) + t*sin(t + "D4@Sketch2"*pi/180))
+"D2@Sketch2"*0.5*(sin(t + "D4@Sketch2"*pi/180) - t*cos(t + "D4@Sketch2"*pi/180))
+
+"D2@Sketch2"*0.5*(cos(-t-"D4@Sketch2"*pi/180)-t*sin(-t-"D4@Sketch2"*pi/180))
+"D2@Sketch2"*0.5*(sin(-t-"D4@Sketch2"*pi/180)+t*cos(-t-"D4@Sketch2"*pi/180))

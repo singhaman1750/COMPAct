@@ -103,11 +103,15 @@ If you prefer not to use SolidWorks, the CAD models are also available on Onshap
 
 👉 **[Open SSPG in Onshape](https://cad.onshape.com/documents/c1aac326515ba734f63b9b3f/w/f9cccd7b90ce6d7934076c7c/e/11d494d64974a13f1ae2def2?renderMode=0&leftPanel=false&uiState=69ba77262aa7d6ac3cb56ff9)**
 
+
 👉 **[Open CPG in Onshape](https://cad.onshape.com/documents/dabf50453c93c1c427cef77a/w/58e59ba240adf6d2a07794cc/e/2fd7bc338e9316193d1a2f79)**
+
 
 👉 **[Open WPG in Onshape](https://cad.onshape.com/documents/ad699ddbc25bac5c32e33135/w/758de9a639163030bca8fa73/e/4cb254c85cc1f2d31a39a63a?renderMode=0&uiState=69d8cb5213bdc8529ffa3f3c)**
 
+
 👉 **[Open DSPG in Onshape](https://cad.onshape.com/documents/b8d43d150fb932ea649dcd0f/w/aaa3fcc8da584cc207374389/e/12e148469fa8eb5b917f5bb1?renderMode=0&uiState=69e2408b879d9edde70b5d36)**
+
 
 👉 **[Open ISSPG OutBearing in Onshape](https://cad.onshape.com/documents/bf5f13d9187efab731a95ba7/w/1261f6088846b1d6dd38ea32/e/9442fa2e352d23d6eb88bc6e?renderMode=0&uiState=6a4e2ba1c2bd25dd66621fae)**
 ```
@@ -129,6 +133,21 @@ https://cad.onshape.com/documents/3e794c46f172f3b02cfa18e7/w/dfc878270d998ca1ea8
 https://cad.onshape.com/documents/2519b08c3c51bbdac1923e25/w/095a9ef04c28fad58dcdbe6c/e/7335150ff09908ff2cd1b9b2?renderMode=0&uiState=6a4e2b048984a6ae63298aa8
 ```
 
+👉 **[Open INSSPG_Dependent in Onshape](https://cad.onshape.com/documents/97af418b118f30715235cd6a/w/253f8dd6e8e424cb9f7bb1dd/e/bcd4cd4dc6121c4e6915a50e?renderMode=0&leftPanel=false&uiState=6a4e2b9a82db92af62774962)**
+```
+https://cad.onshape.com/documents/97af418b118f30715235cd6a/w/253f8dd6e8e424cb9f7bb1dd/e/bcd4cd4dc6121c4e6915a50e?renderMode=0&leftPanel=false&uiState=6a4e2b9a82db92af62774962
+```
+
+👉 **[Open INSSPG_Independent in Onshape](https://cad.onshape.com/documents/e0cb8ed6bb2b36cfcadffcf4/w/a5de456488f59701ab182711/e/b8af8d5da69957495c24591f?renderMode=0&leftPanel=false&uiState=6a4e2ac13b9f34e29a45f140)**
+```
+https://cad.onshape.com/documents/e0cb8ed6bb2b36cfcadffcf4/w/a5de456488f59701ab182711/e/b8af8d5da69957495c24591f?renderMode=0&leftPanel=false&uiState=6a4e2ac13b9f34e29a45f140 
+```
+
+👉 **[Open ICPG in Onshape](https://cad.onshape.com/documents/1cec852caa1080765682d3d0/w/9b7913f319aab1fd6ef5de45/e/f9d06c56e5c97df7f6c68aa9?renderMode=0&uiState=6a4e2d38c2bd25dd666223f5)** 
+```
+https://cad.onshape.com/documents/1cec852caa1080765682d3d0/w/9b7913f319aab1fd6ef5de45/e/f9d06c56e5c97df7f6c68aa9?renderMode=0&uiState=6a4e2d38c2bd25dd666223f5 
+```
+
 To get your own editable copy:
 1. Open the link above — you will see the model in view-only mode
 2. Click the **Onshape logo / menu icon** in the top-left corner
@@ -146,15 +165,31 @@ Run the Python script from the root directory to generate optimal gear parameter
 ```bash
 python actOpt.py <motor> <gearbox> <ratio>
 ```
-* **`<motor>`**: U8, U10, U12, MN8014, VT8020, MAD_M6C12
-* **`<gearbox>`**: sspg, cpg, dspg, wpg
+* **`<motor>`**: U8, U10, U12, MN8014, VT8020, MAD_M6C12 , RO100 , RI100 , RO80
+* **`<gearbox>`**: sspg, cpg, dspg, wpg , icpg , insspg_type_1 {Independent} , insspg_type_2 {Dependent} 
 * **`<ratio>`**: Must be a value > 2.
 
 **Example:**
-To optimize a **T-motor U8** with a **Single-Stage Planetary Gearbox** and a **ratio of 6.5**:
+To optimize a **RO100** with a **Internal-Compound-Planetary Gearbox** and a **ratio of 6.5**:
 
 ```bash
-python actOpt.py U8 sspg 6.5
+python actOpt_icpg.py RO100 icpg 6.5
+```
+
+---
+**Example:**
+To optimize a **RI100** with a **Inrunner-Dependent-Single-Stage Planetary Gearbox** and a **ratio of 6.5**:
+
+```bash
+python actOpt_insspg.py RI100 insspg_type_2 6.5
+```
+
+---
+**Example:**
+To optimize a **RI100** with a **Inrunner-Independent-Single-Stage Planetary Gearbox** and a **ratio of 6.5**:
+
+```bash
+python actOpt_insspg.py RI100 insspg_type_1 6.5
 ```
 
 **Syntax for ISSPG:**  
@@ -214,7 +249,11 @@ Detailed parameter files are automatically generated in the following locations:
 * **CPG:** `CADs/CPG/cpg_equations.txt`
 * **DSPG:** `CADs/DSPG/dspg_equations.txt`
 * **WPG:** `CADs/WPG/wpg_equations.txt`
-
+  
+#### MASS ANALYSIS
+```
+https://docs.google.com/spreadsheets/d/1QYUox6946nNlciWFAQ1L-EqQNLNdAT6GV0OtC5uI0eU/edit?usp=sharing
+```
 ---
 
 ### Step 6: Generate Automated CAD designs
