@@ -5,145 +5,7 @@ import numpy as np
 import sys
 import time
 
-#-------------------------------------------------------------------------
-# class material
-#-------------------------------------------------------------------------
-class material:
-    def __init__(self, density, maxAllowableStressMPa = 400, bhn = 2, youngsModulus = 10):
-        self.maxAllowableStressMPa = maxAllowableStressMPa
-        self.bhn = bhn
-        self.youngsModulus = youngsModulus
-        self.density = density
-
-# ═══════════════════════════════════════════════════════════════════
-#   BEARING LOOKUP CLASS
-# ═══════════════════════════════════════════════════════════════════
-class bearings_discrete:
-    def __init__(self, idRequiredMM, odRequiredMM=0):
-        # Bearing dataset entered according to e1102 in [idMM,odMM,widthMM,massKG] format pg no b10-12
-        if odRequiredMM != 0 :
-            self.data_bearings = [
-            [10,19,5,0.005],[12,21,5,0.006],[15,24,5,0.007],[17,26,5,0.007],
-            [20,32,7,0.017],[25,37,7,0.021],[30,42,7,0.024],
-            [35,47,7,0.027],[40,52,7,0.031],[44.45,53.975,6.35,0.031],[45,58,7,0.038],[50,62,6,0.036],
-            [50,65,7,0.050],[55,72,9,0.081],[60,78,10,0.103],[65,85,10,0.128],
-            [70,90,10,0.134],[75,95,10,0.149],[80,100,10,0.151],[85,110,13,0.263],
-            [90,115,13,0.276],[95,120,13,0.297],[100,125,13,0.31],[105,130,13,0.324],
-            [110,140,16,0.497],[120,150,16,0.537],[130,165,18,0.758],[140,170,18,0.832],
-            [150,190,20,1.15],[160,200,20,1.23]
-            ]
-            self.indexBearing = 0
-            while (self.indexBearing < len(self.data_bearings) - 1
-                   and self.data_bearings[self.indexBearing][1] < odRequiredMM):
-                self.indexBearing += 1
-        else :
-            self.data_bearings = [
-            [10,19,5,0.005],[12,21,5,0.006],[15,24,5,0.007],[17,26,5,0.007],
-            [20,32,7,0.017],[25,32,4,0.021],[25,37,7,0.021],[28,52,12,0.096],[30,42,7,0.024],
-            [32,58,13,0.122],[35,47,7,0.027],[40,50,6,0.023],[40,52,7,0.031],[45,58,7,0.038],
-            [50,65,7,0.050],[55,72,9,0.081],[60,78,10,0.103],[65,85,10,0.128],
-            [70,90,10,0.134],[75,95,10,0.149],[76.2,88.9,6.35,0.07],[80,100,10,0.151],[85,110,13,0.263],[88.9,101.6,6.35,0.0816],
-            [90,115,13,0.276],[95,120,13,0.297],[100,125,13,0.31],[105,130,13,0.324],
-            [110,140,16,0.497],[120,150,16,0.537],[130,165,18,0.758],[140,170,18,0.832],
-            [150,190,20,1.15],[160,200,20,1.23]
-            ]
-            self.indexBearing = 0
-            while (self.indexBearing < len(self.data_bearings) - 1
-                   and self.data_bearings[self.indexBearing][0] < idRequiredMM):
-                self.indexBearing += 1
-
-    def getBearingIDMM(self):
-        return self.data_bearings[self.indexBearing][0]
-    def getBearingODMM(self):
-        return self.data_bearings[self.indexBearing][1]
-    def getBearingWidthMM(self):
-        return self.data_bearings[self.indexBearing][2]
-    def getBearingMassKG(self):
-        return self.data_bearings[self.indexBearing][3]
-
-class nuts_and_bolts_dimensions:
-    def __init__(self, bolt_dia, bolt_type="socket_head"):
-        self.bolt_dia  = bolt_dia
-        self.bolt_type = bolt_type
-        self.bolt_head_dia, self.bolt_head_height = self.get_bolt_head_dimensions(diameter=self.bolt_dia, bolt_type=self.bolt_type)
-        self.nut_width_across_flats, self.nut_depth = self.get_nut_dimensions(diameter=self.bolt_dia)
-
-    def get_bolt_head_dimensions(self, diameter, bolt_type="socket_head"):
-        diameter = float(diameter)
-
-        socket_head_table = {
-            1.6: {"d2": (3.00), "k": (1.60)},
-            2.0: {"d2": (3.80), "k": (2.00)},
-            2.5: {"d2": (4.50), "k": (2.50)},
-            3.0: {"d2": (5.50), "k": (3.00)},
-            4.0: {"d2": (7.00), "k": (4.00)},
-            5.0: {"d2": (8.50), "k": (5.00)},
-            6.0: {"d2": (10.00), "k": (6.00)},
-            8.0: {"d2": (13.00), "k": (8.00)},
-            10.0: {"d2": (16.00), "k": (10.00)}
-        }
-
-        # Only dk is stored for CSK, t is calculated as (dk - d) / 2
-        csk_table = {
-            3.0: {"dk": 6},
-            4.0: {"dk": 8},
-            5.0: {"dk": 10},
-            6.0: {"dk": 12},
-            8.0: {"dk": 16},
-            10.0: {"dk": 20},
-            12.0: {"dk": 24},
-            16.0: {"dk": 30},
-            20.0: {"dk": 36}
-        }
-
-        if bolt_type == "socket_head":
-            spec = socket_head_table.get(diameter)
-            if not spec:
-                raise ValueError(f"Socket head bolt M{diameter} not found.")
-            return [spec["d2"], spec["k"]]  # Return d2, k
-
-        elif bolt_type == "CSK":
-            spec = csk_table.get(diameter)
-            if not spec:
-                raise ValueError(f"CSK bolt M{diameter} not found.")
-            dk = spec["dk"]
-            t = (dk - diameter) / 2
-            return [dk, round(t, 3)]  # Rounded for clarity
-
-        else:
-            raise ValueError("bolt_type must be 'socket_head' or 'CSK'")
-
-    def get_nut_dimensions(self, diameter):
-        diameter = float(diameter)
-
-        nut_table = {
-            2.0: {"width_across_flats": 4, "height": 1.6},
-            2.5: {"width_across_flats": 5, "height": 2},
-            3.0: {"width_across_flats": 5.5, "height": 2.4},
-            4.0: {"width_across_flats": 7, "height": 3.2},
-            5.0: {"width_across_flats": 8, "height": 4},
-            6.0: {"width_across_flats": 10, "height": 5},
-            7.0: {"width_across_flats": None, "height": 5.5},  # ISO not defined
-            8.0: {"width_across_flats": 13, "height": 6.5},
-            10.0: {"width_across_flats": 16, "height": 8},
-            12.0: {"width_across_flats": 18, "height": 10},
-            14.0: {"width_across_flats": 21, "height": 13},
-            16.0: {"width_across_flats": 24, "height": 13},
-            18.0: {"width_across_flats": 27, "height": 15},
-            20.0: {"width_across_flats": 30, "height": 16},
-            24.0: {"width_across_flats": 36, "height": 18},
-            27.0: {"width_across_flats": 40, "height": 20},
-            30.0: {"width_across_flats": 43, "height": 22},
-        }
-
-        spec = nut_table.get(diameter)
-        if not spec:
-            raise ValueError(f"No nut data found for bolt diameter M{diameter}")
-
-        width_across_flats = spec["width_across_flats"]
-        height = spec["height"]
-
-        return [width_across_flats, height]
+from CommonComponents import material, bearings_discrete, nuts_and_bolts_dimensions
 
 class motor:
     
@@ -1050,14 +912,14 @@ class inrunnerCompoundPlanetaryActuator:
         motor_mount_driver_bolt = nuts_and_bolts_dimensions(bolt_dia=self.motor_mount_driver_hole_dia , bolt_type="socket_head")
         
         self.motor_mount_driver_nut_wrench_size = motor_mount_driver_bolt.nut_width_across_flats 
-        self.motor_mount_driver_nut_depth       = motor_mount_driver_bolt.nut_depth
+        self.motor_mount_driver_nut_depth       = motor_mount_driver_bolt.nut_thickness
 
         # --- Planet Pin and Bearing ---
         planet_pin_bolt = nuts_and_bolts_dimensions(bolt_dia=self.planet_pin_bolt_dia , bolt_type="socket_head")
         
         self.planet_pin_socket_head_dia = planet_pin_bolt.bolt_head_dia
         self.planet_pin_nut_wrench_size = planet_pin_bolt.nut_width_across_flats 
-        self.planet_pin_nut_depth       = planet_pin_bolt.nut_depth
+        self.planet_pin_nut_depth       = planet_pin_bolt.nut_thickness
 
         # --- Sun coupler and sun central bolt ---
         sun_central_bolt = nuts_and_bolts_dimensions(bolt_dia = self.sun_central_bolt_dia, bolt_type="socket_head")
@@ -1092,30 +954,31 @@ class inrunnerCompoundPlanetaryActuator:
 
         self.carrier_trapezoidal_support_hole_socket_head_dia = carrier_trapezoidal_support_hole.bolt_head_dia
         self.carrier_trapezoidal_support_hole_wrench_size     = carrier_trapezoidal_support_hole.nut_width_across_flats        
-        self.carrier_trapezoidal_support_nut_depth            = carrier_trapezoidal_support_hole.nut_depth 
+        self.carrier_trapezoidal_support_nut_depth            = carrier_trapezoidal_support_hole.nut_thickness 
 
-        planet_pin_bolt = nuts_and_bolts_dimensions(bolt_dia=self.planet_pin_bolt_dia , bolt_type="socket_head")
+        # --- Planet Pin and Bearing ---
+        # planet_pin_bolt = nuts_and_bolts_dimensions(bolt_dia=self.planet_pin_bolt_dia , bolt_type="socket_head")
         
-        self.planet_pin_socket_head_dia = planet_pin_bolt.bolt_head_dia
-        self.planet_pin_nut_wrench_size = planet_pin_bolt.nut_width_across_flats 
-        self.planet_pin_nut_depth       = planet_pin_bolt.nut_depth
+        # self.planet_pin_socket_head_dia = planet_pin_bolt.bolt_head_dia
+        # self.planet_pin_nut_wrench_size = planet_pin_bolt.nut_width_across_flats 
+        # self.planet_pin_nut_depth       = planet_pin_bolt.nut_thickness
 
         #--------------------- Casings------------------------------------------
         case_mounting_hole_bolt = nuts_and_bolts_dimensions(bolt_dia=self.case_mounting_hole_dia, bolt_type="socket_head")
 
         self.case_mounting_hole_allen_socket_dia = case_mounting_hole_bolt.bolt_head_dia
         self.case_mounting_wrench_size       = case_mounting_hole_bolt.nut_width_across_flats
-        self.case_mounting_nut_depth     = case_mounting_hole_bolt.nut_depth
+        self.case_mounting_nut_depth     = case_mounting_hole_bolt.nut_thickness
 
         output_mount_hole_bolt = nuts_and_bolts_dimensions(bolt_dia=self.output_mount_hole_dia, bolt_type="socket_head")
 
         self.output_mount_nut_wrench_size       = output_mount_hole_bolt.nut_width_across_flats
-        self.output_mount_hole_nut_depth        = output_mount_hole_bolt.nut_depth
+        self.output_mount_hole_nut_depth        = output_mount_hole_bolt.nut_thickness
 
         actuactor_mount_hole_bolt = nuts_and_bolts_dimensions(bolt_dia=self.actuactor_mount_hole_dia, bolt_type="socket_head")
 
         self.actuactor_mount_nut_wrench_size       = actuactor_mount_hole_bolt.nut_width_across_flats
-        self.actuactor_mount_nut_depth             = actuactor_mount_hole_bolt.nut_depth
+        self.actuactor_mount_nut_depth             = actuactor_mount_hole_bolt.nut_thickness
 
         self.case_mounting_hole_shift = self.case_mounting_hole_dia / 2 
 
