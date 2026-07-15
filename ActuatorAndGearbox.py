@@ -4,7 +4,7 @@ import os
 import sys
 import time
 
-from CommonComponents import material, bearings_discrete, nuts_and_bolts_dimensions
+from CommonComponents import material, bearings_discrete, nuts_and_bolts_dimensions, motor_driver, motor_framed_outrunner as motor
 
 
 class bearings_continuous:
@@ -1990,123 +1990,6 @@ class doubleStagePlanetaryGearbox:
 #=========================================================================
 # Motor class
 #=========================================================================
-class motor:
-    def __init__(self, 
-                 maxMotorAngVelRPM     = 1190, # RPM
-                 maxMotorTorque        = 8.83, # Nm
-                 maxMotorPower         = 8.83 * 1190 * 2*np.pi/60, # W 
-                 motorMass             = 0.778, # KG
-                 motorDia              = 106.8, # mm
-                 motorLength           = 47.6,  # mm
-                 motor_mount_hole_PCD       = 32,
-                 motor_mount_hole_dia       = 4,
-                 motor_mount_hole_num       = 4,
-                 motor_output_hole_PCD      = 23,
-                 motor_output_hole_dia      = 4,
-                 motor_output_hole_num      = 4,
-                 wire_slot_dist_from_center = 30,
-                 wire_slot_length           = 10,
-                 wire_slot_radius           = 4,
-                 motorName             = "U12"):
-        
-        self.motorName                  = motorName
-        self.maxMotorAngVelRPM          = maxMotorAngVelRPM
-        self.maxMotorAngVelRadPerSec    = maxMotorAngVelRPM * (2 * np.pi / 60)
-        self.maxMotorTorque             = maxMotorTorque
-        self.maxMotorPower              = maxMotorPower
-        self.massKG                     = motorMass     # kg
-        self.motorDiaMM                 = motorDia      # mm #TODO: make use of this parameter
-        self.motorLengthMM              = motorLength   # mm #TODO: make use of this parameter
-        self.motor_mount_hole_PCD       = motor_mount_hole_PCD 
-        self.motor_mount_hole_dia       = motor_mount_hole_dia
-        self.motor_mount_hole_num       = motor_mount_hole_num
-        self.motor_output_hole_PCD      = motor_output_hole_PCD 
-        self.motor_output_hole_dia      = motor_output_hole_dia
-        self.motor_output_hole_num      = motor_output_hole_num
-        self.wire_slot_dist_from_center = wire_slot_dist_from_center 
-        self.wire_slot_length           = wire_slot_length 
-        self.wire_slot_radius           = wire_slot_radius
-
-    # Maximum motor angular velocity in rad/s
-    def getMaxMotorAngVelRadPerSec(self):
-        return self.maxMotorAngVelRadPerSec
-    
-    # Maximum motor power in W
-    def getMaxMotorPower(self):
-        return self.maxMotorPower
-    
-    # Maximum motor torque in Nm
-    def getMaxMotorTorque(self):
-        return self.maxMotorTorque
-    
-    # Mass of the motor in kg
-    def getMassKG(self):
-        return self.massKG
-    
-    #dimension of the motor in MM
-    def getDiaMM(self):
-        return self.motorDiaMM
-    
-    def getLengthMM(self):
-        return self.motorLengthMM
-    
-    #dimensions of Stator
-    def getStatorIDMM(self):
-        return self.motorStatorIDMM
-    
-    def getStatorODMM(self):
-        return self.motorStatorODMM
-    
-    def getStatorHeight(self):
-        return self.motorStatorHeightMM
-    
-    # Print the motor parameters
-    def printParameters(self):
-        print("Maximum motor angular velocity = ", self.maxMotorAngVelRPM, " RPM")
-        print("Maximum motor power = ", self.maxMotorPower, " W")
-        print("Maximum motor torque = ", self.maxMotorTorque, " Nm")
-        print("Maximum motor angular velocity = ", self.maxMotorAngVelRadPerSec, " rad/s")
-        print("Mass of the motor = ", self.massKG, " kg")
-        print ('Diameter of the motor = ', self.motorDiaMM, ' mm')
-        print( " Length of the motor = ", self.motorLengthMM, ' mm')
-        if (self.motorStatorIDMM != 0 and self.motorStatorODMM != 0 and self.motorStatorHeightMM !=0):
-            print (' Inner Diameter of Stator = ', self.motorStatorIDMM, ' mm')
-            print (' Outer Diameter of Stator = ', self.motorStatorODMM, ' mm')
-            print (' Height of Stator = ', self.motorStatorIDMM, ' mm')
-
-#=========================================================================
-# Motor Driver class
-#=========================================================================
-class motor_driver:
-    def __init__(self, driver_name, motor_driver_data):
-        self.driver_name                          = driver_name
-        self.driver_upper_holes_dist_from_center  = motor_driver_data["driver_upper_holes_dist_from_center"]
-        self.driver_lower_holes_dist_from_center  = motor_driver_data["driver_lower_holes_dist_from_center"]
-        self.driver_side_holes_dist_from_center   = motor_driver_data["driver_side_holes_dist_from_center"]
-        self.driver_mount_holes_dia               = motor_driver_data["driver_mount_holes_dia"]
-        self.driver_mount_inserts_OD              = motor_driver_data["driver_mount_inserts_OD"]
-        self.driver_mount_thickness               = motor_driver_data["driver_mount_thickness"]
-        self.driver_mount_height                  = motor_driver_data["driver_mount_height"]
-
-        # self.print_vars()
-    
-    def print_vars(self):
-        print("driver_name:", self.driver_name)
-        print("driver_upper_holes_dist_from_center: ", self.driver_upper_holes_dist_from_center)
-        print("driver_lower_holes_dist_from_center: ", self.driver_lower_holes_dist_from_center)
-        print("driver_side_holes_dist_from_center: ", self.driver_side_holes_dist_from_center)
-        print("driver_mount_holes_dia: ", self.driver_mount_holes_dia)
-        print("driver_mount_inserts_OD: ", self.driver_mount_inserts_OD)
-        print("driver_mount_thickness: ", self.driver_mount_thickness)
-        print("driver_mount_height: ", self.driver_mount_height)
-        print("---")
-
-#=========================================================================
-# Actuator classes
-#=========================================================================
-#-------------------------------------------------------------------------
-# Single Stage Actuator class
-#-------------------------------------------------------------------------
 class singleStagePlanetaryActuator:
     def __init__(self, 
                  design_params,

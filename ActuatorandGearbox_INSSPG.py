@@ -4,75 +4,8 @@ import sys
 import time
 import math
 
-from CommonComponents import material, bearings_discrete, nuts_and_bolts_dimensions
+from CommonComponents import material, bearings_discrete, nuts_and_bolts_dimensions, motor_frameless_inrunner_mahi as motor
 
-class motor:
-    def __init__(self,
-                 Kv                               = 55,
-                 maxContinuousCurrent             = 20,
-                 ratedVoltage                     = 48,
-                 power                            = 838,
-                 massKG                           = 0.50,
-                 Stator_ID                        = 57.0,
-                 Stator_OD                        = 104.0,
-                 stator_height                    = 24.5,
-                 Rotor_height                     = 15.0,
-                 Rotor_OD                         = 55.6,
-                 Rotor_ID                         = 45.0,
-                 rotor_mount_hole_dia             = 4.0,
-                 rotor_mount_hole_CSK_OD          = 8.0,
-                 rotor_mount_hole_CSK_head_hight  = 3.0,
-                 motorName                        = "RI100"):
-
-        self.motorName = motorName
-
-        self.Kv                   = Kv
-        self.maxContinuousCurrent = maxContinuousCurrent
-        self.ratedVoltage         = ratedVoltage
-        self.maxMotorPower        = power
-        self.massKG               = massKG
-
-        self.maxMotorAngVelRPM       = Kv * ratedVoltage
-        self.maxMotorAngVelRadPerSec = self.maxMotorAngVelRPM * (2 * np.pi / 60)
-        self.maxMotorTorque          = maxContinuousCurrent / (Kv * 2 * np.pi / 60)
-
-        self.Stator_ID                        = Stator_ID
-        self.Stator_OD                        = Stator_OD
-        self.stator_height                    = stator_height
-
-        self.Rotor_height                     = Rotor_height
-        self.Rotor_OD                         = Rotor_OD
-        self.Rotor_ID                         = Rotor_ID
-        self.rotor_mount_hole_dia             = rotor_mount_hole_dia
-        self.rotor_mount_hole_CSK_OD          = rotor_mount_hole_CSK_OD
-        self.rotor_mount_hole_CSK_head_hight  = rotor_mount_hole_CSK_head_hight
-
-        self.motorDiaMM    = Stator_OD
-        self.motorLengthMM = stator_height
-
-    def getMaxMotorAngVelRadPerSec(self): return self.maxMotorAngVelRadPerSec
-    def getMaxMotorPower(self):           return self.maxMotorPower
-    def getMaxMotorTorque(self):          return self.maxMotorTorque
-    def getMassKG(self):                  return self.massKG
-    def getDiaMM(self):                   return self.motorDiaMM
-    def getLengthMM(self):                return self.motorLengthMM
-    def getStatorODMM(self):              return self.Stator_OD
-    def getStatorIDMM(self):              return self.Stator_ID
-    def getStatorHeightMM(self):          return self.stator_height
-    def getRotorODMM(self):               return self.Rotor_OD
-    def getRotorIDMM(self):               return self.Rotor_ID
-    def getRotorHeightMM(self):           return self.Rotor_height
-
-    def printParameters(self):
-        print("Maximum motor angular velocity = ", round(self.maxMotorAngVelRPM, 2),         " RPM")
-        print("Maximum motor power            = ", self.maxMotorPower,                       " W")
-        print("Maximum continuous torque      = ", round(self.maxMotorTorque, 3),            " Nm")
-        print("Maximum angular velocity       = ", round(self.maxMotorAngVelRadPerSec, 2),    " rad/s")
-        print("Mass                           = ", self.massKG,                              " kg")
-
-#=========================================================================
-# Gearbox classes
-#=========================================================================
 class singleStagePlanetaryGearbox:
     def __init__(self, 
                  design_params,

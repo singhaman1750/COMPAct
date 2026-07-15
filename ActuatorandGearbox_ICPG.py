@@ -6,7 +6,7 @@ import time
 import math
 
 
-from CommonComponents import material, bearings_discrete, nuts_and_bolts_dimensions
+from CommonComponents import material, bearings_discrete, nuts_and_bolts_dimensions, motor_frameless_outrunner_mahi as motor
 
 
 # ╔══════════════════════════════════════════════════════════════════════════╗
@@ -370,134 +370,6 @@ class internalcompoundPlanetaryGearbox:
 
 # ╔══════════════════════════════════════════════════════════════════════════╗
 # ║  MOTOR                                                                  ║
-# ╚══════════════════════════════════════════════════════════════════════════╝
-class motor:
-    """
-    Stores all motor geometry and performance data.
-
-    Sections
-    ─────────
-    • Identification
-    • Performance parameters (Kv, torque, speed)
-    • Stator dimensions
-    • Rotor dimensions
-    • Bearing at motor–sun interface
-    • Compatibility aliases
-    """
-
-    def __init__(self,
-                 Kv                              = 55,
-                 maxContinuousCurrent            = 20,
-                 ratedVoltage                    = 48,
-                 power                           = 4560,
-                 massKG                          = 0.352,
-                 # ── Stator ──────────────────────────────────────────────
-                 statorODMM                      = 81,
-                 statorIDMM                      = 55,
-                 statorHeightMM                  = 23.8,
-                 statorMountingHolesPCDMM        = 63,
-                 motor_stator_extrusion_dia      = 88,
-                 motor_stator_extrusion_depth    = 2,
-                 # ── Rotor ───────────────────────────────────────────────
-                 rotorODMM                       = 92.6,
-                 rotorIDMM                       = 82.6,
-                 rotorHeightMM                   = 21.6,
-                 rotorBottomIDMM                 = 51,
-                 rotorBottomThicknessMM          = 2.6,
-                 rotorCSKHeadUpperDiaMM          = 8,
-                 rotorMountHolePCDMM             = 62,
-                 rotorMountHoleDiaMM             = 4,
-                 # ── Bearing at motor/sun interface ───────────────────────
-                 sun_bottom_casing_bearing_ID    = 50,
-                 sun_bottom_casing_bearing_OD    = 62,
-                 sun_bottom_casing_bearing_height= 6,
-                 sun_bottom_casing_bearing_massKG= 0.07,
-                 # ── Overall envelope ────────────────────────────────────
-                 motor_height                    = 36.2,
-                 motorName                       = "MotorR100"):
-
-        # ── Identification ─────────────────────────────────────────────────
-        self.motorName = motorName
-
-        # ── Performance parameters ─────────────────────────────────────────
-        self.Kv                   = Kv
-        self.maxContinuousCurrent = maxContinuousCurrent
-        self.ratedVoltage         = ratedVoltage
-        self.maxMotorPower        = power
-        self.massKG               = massKG
-
-        self.maxMotorAngVelRPM        = Kv * ratedVoltage
-        self.maxMotorAngVelRadPerSec  = self.maxMotorAngVelRPM * (2 * np.pi / 60)
-        self.maxMotorTorque           = maxContinuousCurrent / (Kv * 2 * np.pi / 60)
-
-        # ── Stator dimensions ──────────────────────────────────────────────
-        self.statorODMM                   = statorODMM
-        self.statorIDMM                   = statorIDMM
-        self.statorHeightMM               = statorHeightMM
-        self.statorMountingHolesPCDMM     = statorMountingHolesPCDMM
-        self.motor_stator_extrusion_dia   = motor_stator_extrusion_dia
-        self.motor_stator_extrusion_depth = motor_stator_extrusion_depth
-
-        # ── Rotor dimensions ───────────────────────────────────────────────
-        self.rotorODMM                = rotorODMM
-        self.rotorIDMM                = rotorIDMM
-        self.rotorHeightMM            = rotorHeightMM
-        self.rotorBottomIDMM          = rotorBottomIDMM
-        self.rotorBottomThicknessMM   = rotorBottomThicknessMM
-        self.rotorCSKHeadUpperDiaMM   = rotorCSKHeadUpperDiaMM
-        self.rotorMountHolePCDMM      = rotorMountHolePCDMM
-        self.rotorMountHoleDiaMM      = rotorMountHoleDiaMM
-
-        # ── Bearing at motor / sun interface ──────────────────────────────
-        self.sun_bottom_casing_bearing_ID     = sun_bottom_casing_bearing_ID
-        self.sun_bottom_casing_bearing_OD     = sun_bottom_casing_bearing_OD
-        self.sun_bottom_casing_bearing_height = sun_bottom_casing_bearing_height
-        self.sun_bottom_casing_bearing_massKG = sun_bottom_casing_bearing_massKG
-
-        # ── Overall envelope ───────────────────────────────────────────────
-        self.motor_height  = motor_height
-
-        # ── Compatibility aliases (used by Actuator class) ─────────────────
-        self.motorDiaMM    = rotorODMM
-        self.motorLengthMM = motor_height
-
-    # ── Getters ────────────────────────────────────────────────────────────
-    def getMaxMotorAngVelRadPerSec(self): return self.maxMotorAngVelRadPerSec
-    def getMaxMotorPower(self):           return self.maxMotorPower
-    def getMaxMotorTorque(self):          return self.maxMotorTorque
-    def getMassKG(self):                  return self.massKG
-    def getDiaMM(self):                   return self.motorDiaMM
-    def getLengthMM(self):                return self.motorLengthMM
-
-    # ─ Stator getters
-    def getStatorODMM(self):              return self.statorODMM
-    def getStatorIDMM(self):              return self.statorIDMM
-    def getStatorHeightMM(self):          return self.statorHeightMM
-
-    # ─ Rotor getters
-    def getRotorODMM(self):               return self.rotorODMM
-    def getRotorIDMM(self):               return self.rotorIDMM
-    def getRotorHeightMM(self):           return self.rotorHeightMM
-
-    # ── Print ──────────────────────────────────────────────────────────────
-    def printParameters(self):
-        print("Maximum motor angular velocity = ", round(self.maxMotorAngVelRPM, 2),         " RPM")
-        print("Maximum motor power            = ", self.maxMotorPower,                        " W")
-        print("Maximum continuous torque      = ", round(self.maxMotorTorque, 3),             " Nm")
-        print("Maximum angular velocity       = ", round(self.maxMotorAngVelRadPerSec, 2),    " rad/s")
-        print("Mass                           = ", self.massKG,                               " kg")
-        print("── Stator ──────────────────────────────────────────────")
-        print("  Outer Diameter = ", self.statorODMM, " mm")
-        print("  Inner Diameter = ", self.statorIDMM, " mm")
-        print("  Height         = ", self.statorHeightMM, " mm")
-        print("── Rotor ───────────────────────────────────────────────")
-        print("  Outer Diameter = ", self.rotorODMM, " mm")
-        print("  Inner Diameter = ", self.rotorIDMM, " mm")
-        print("  Height         = ", self.rotorHeightMM, " mm")
-
-
-# ╔══════════════════════════════════════════════════════════════════════════╗
-# ║  INTERNAL COMPOUND PLANETARY ACTUATOR                                   ║
 # ╚══════════════════════════════════════════════════════════════════════════╝
 class internalcompoundPlanetaryActuator:
 
