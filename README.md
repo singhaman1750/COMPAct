@@ -173,7 +173,7 @@ python actOpt.py <motor> <gearbox> <ratio>
 To optimize a **RO100** with a **Internal-Compound-Planetary Gearbox** and a **ratio of 6.5**:
 
 ```bash
-python actOpt_icpg.py RO100 icpg 6.5
+python actOpt.py RO100 icpg 6.5
 ```
 
 ---
@@ -181,7 +181,7 @@ python actOpt_icpg.py RO100 icpg 6.5
 To optimize a **RI100** with a **Inrunner-Dependent-Single-Stage Planetary Gearbox** and a **ratio of 6.5**:
 
 ```bash
-python actOpt_insspg.py RI100 insspg_type_2 6.5
+python actOpt.py RI100 insspg_type_2 6.5
 ```
 
 ---
@@ -189,30 +189,29 @@ python actOpt_insspg.py RI100 insspg_type_2 6.5
 To optimize a **RI100** with a **Inrunner-Independent-Single-Stage Planetary Gearbox** and a **ratio of 6.5**:
 
 ```bash
-python actOpt_insspg.py RI100 insspg_type_1 6.5
+python actOpt.py RI100 insspg_type_1 6.5
 ```
 
 **Syntax for ISSPG:**  
 ```bash
-python <actuator_type>.py <motor> isspg <ratio>
+python actOpt.py <motor> <gearbox_type> <ratio>
 ```
-* **`<actuator_type>`**: ISSPG_inside_gen_eq, ISSPG_compact_gen_eq
+* **`<gearbox_type>`**: isspg_inside (InBearing design), isspg_compact (OutBearing design)
 * **`<motor>`**: RO80, RO100
-* **`<ratio>`**: Must be a value > 2.  
-Note: ISSPG_inside_gen_eq is for InBearing design and ISSPG_compact_gen_eq is for OutBearing design
-  
+* **`<ratio>`**: Must be a value > 2.
+
 **Example:**
 To optimize **RO100** with an **Internal Single-Stage Planetary Gearbox InBearing** and a **ratio of 6.5**:
 
 ```bash
-python ISSPG_inside_gen_eq.py RO100 isspg 6.5
+python actOpt.py RO100 isspg_inside 6.5
 ```
 
 **Syntax for INCPG:**
 ```bash
-python <actuator_type>.py <motor> incpg <ratio>
+python actOpt.py <motor> <gearbox_type> <ratio>
 ```
-* **`<actuator_type>`**: InrunnerCPG_independent_gen_eq, InrunnerCPG_dependent_gen_eq
+* **`<gearbox_type>`**: incpg_independent, incpg_dependent
 * **`<motor>`**: RI100
 * **`<ratio>`**: Must be a value > 2.
   
@@ -220,7 +219,7 @@ python <actuator_type>.py <motor> incpg <ratio>
 To optimize **RI100** with an **Inrunner Compound Planetary Gearbox Independent** and a **ratio of 6.5**:
 
 ```bash
-python InrunnerCPG_independent_gen_eq.py RI100 incpg 6.5
+python actOpt.py RI100 incpg_independent 6.5
 ```
 
 ---
