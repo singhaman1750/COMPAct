@@ -377,13 +377,18 @@ class motor_frameless_outrunner_mahi:
                  rotorBottomIDMM                 = 51,
                  rotorBottomThicknessMM          = 2.6,
                  rotorCSKHeadUpperDiaMM          = 8,
+                 rotorCSKHeadHeightMM            = 2.3,
                  rotorMountHolePCDMM             = 62,
                  rotorMountHoleDiaMM             = 4,
-                 # ── Bearing at motor/sun interface ───────────────────────
-                 sun_bottom_casing_bearing_ID    = 50,
-                 sun_bottom_casing_bearing_OD    = 62,
-                 sun_bottom_casing_bearing_height= 6,
-                 sun_bottom_casing_bearing_massKG= 0.07,
+                #  # ── Bearing at motor/sun interface ───────────────────────
+                #  sun_bottom_casing_bearing_ID    = 50,
+                #  sun_bottom_casing_bearing_OD    = 62,
+                #  sun_bottom_casing_bearing_height= 6,
+                #  sun_bottom_casing_bearing_massKG= 0.07,
+                 # ---
+                 stator_top_rotor_top_offset  = 4.8,
+                 stator_hole_dia              = 3,
+                 motor_rotor_hole_num         = 6,
                  # ── Overall envelope ────────────────────────────────────
                  motor_height                    = 36.2,
                  motorName                       = "MotorR100"):
@@ -416,15 +421,8 @@ class motor_frameless_outrunner_mahi:
         self.rotorHeightMM            = rotorHeightMM
         self.rotorBottomIDMM          = rotorBottomIDMM
         self.rotorBottomThicknessMM   = rotorBottomThicknessMM
-        self.rotorCSKHeadUpperDiaMM   = rotorCSKHeadUpperDiaMM
         self.rotorMountHolePCDMM      = rotorMountHolePCDMM
         self.rotorMountHoleDiaMM      = rotorMountHoleDiaMM
-
-        # ── Bearing at motor / sun interface ──────────────────────────────
-        self.sun_bottom_casing_bearing_ID     = sun_bottom_casing_bearing_ID
-        self.sun_bottom_casing_bearing_OD     = sun_bottom_casing_bearing_OD
-        self.sun_bottom_casing_bearing_height = sun_bottom_casing_bearing_height
-        self.sun_bottom_casing_bearing_massKG = sun_bottom_casing_bearing_massKG
 
         # ── Overall envelope ───────────────────────────────────────────────
         self.motor_height  = motor_height
@@ -432,6 +430,23 @@ class motor_frameless_outrunner_mahi:
         # ── Compatibility aliases (used by Actuator class) ─────────────────
         self.motorDiaMM    = rotorODMM
         self.motorLengthMM = motor_height
+
+        # ---------------Extra missing parameters from The other version-----
+        self.rotorCSKHeadUpperDiaMM   = rotorCSKHeadUpperDiaMM
+
+        # -----------------Variables needed ------------------
+        # TODO:not used in CAD
+        self.motor_rotor_hole_num = motor_rotor_hole_num
+        self.stator_top_rotor_top_offset = stator_top_rotor_top_offset
+        self.stator_hole_dia = stator_hole_dia
+        self.rotorCSKHeadHeightMM = rotorCSKHeadHeightMM
+
+        # # ── Bearing at motor / sun interface ──────────────────────────────
+        # self.sun_bottom_casing_bearing_ID     = sun_bottom_casing_bearing_ID
+        # self.sun_bottom_casing_bearing_OD     = sun_bottom_casing_bearing_OD
+        # self.sun_bottom_casing_bearing_height = sun_bottom_casing_bearing_height
+        # self.sun_bottom_casing_bearing_massKG = sun_bottom_casing_bearing_massKG
+
 
     # ── Getters ────────────────────────────────────────────────────────────
     def getMaxMotorAngVelRadPerSec(self): return self.maxMotorAngVelRadPerSec
@@ -472,7 +487,6 @@ class motor_frameless_outrunner_mahi:
 # Frameless Outrunner motor — ISSPG version (from ISSPG_inside_gen_eq.py / ISSPG_compact_gen_eq.py)
 # -------------------------------------------------------------------------
 class motor_frameless_outrunner_suyash:
-    
     def __init__(self,
                  motor_OD                     = 92.6,
                  stator_ID                    = 55,
@@ -491,6 +505,8 @@ class motor_frameless_outrunner_suyash:
                  motor_rotor_hole_dia         = 4.2,
                  motor_rotor_hole_PCD         = 62,
                  motor_height                 = 26.4,
+                 rotorCSKHeadUpperDiaMM       = 8,
+                 rotorCSKHeadHeightMM         = 2.3,
                  maxMotorAngVelRPM            = 5040,  # RPM
                  maxMotorTorque               = 1.3,   # Nm
                  maxMotorPower                = 1.3 * 5040 * 2*np.pi/60,  # W
@@ -510,10 +526,7 @@ class motor_frameless_outrunner_suyash:
         self.motor_stator_extrusion_dia   = motor_stator_extrusion_dia
         self.stator_height                = stator_height
         self.stator_OD                    = stator_OD
-        self.stator_top_rotor_top_offset  = stator_top_rotor_top_offset
-        self.stator_hole_dia              = stator_hole_dia
         self.stator_hole_PCD              = stator_hole_PCD
-        self.motor_rotor_hole_num         = motor_rotor_hole_num
         self.motor_rotor_hole_dia         = motor_rotor_hole_dia
         self.motor_rotor_hole_PCD         = motor_rotor_hole_PCD   
         self.motor_height                 = motor_height
@@ -524,6 +537,16 @@ class motor_frameless_outrunner_suyash:
         self.maxMotorTorque               = maxMotorTorque
         self.maxMotorPower                = maxMotorPower
         self.massKG                       = motorMass     # kg
+
+        # ---------------Extra missing parameters from The other version-----
+        self.motor_rotor_hole_num         = motor_rotor_hole_num
+        self.stator_top_rotor_top_offset  = stator_top_rotor_top_offset
+        self.stator_hole_dia              = stator_hole_dia
+
+        # ----
+        # TODO: add in the CAD
+        self.rotorCSKHeadUpperDiaMM = rotorCSKHeadUpperDiaMM
+        self.rotorCSKHeadHeightMM = rotorCSKHeadHeightMM
 
     # ------------------------------------------------------------------
     # Convenience getters (mirror reference code style)

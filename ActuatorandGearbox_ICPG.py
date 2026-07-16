@@ -481,6 +481,8 @@ class internalcompoundPlanetaryActuator:
         self.stator_mounting_holes_PCD    = self.motor.statorMountingHolesPCDMM
         self.motor_stator_extrusion_dia   = self.motor.motor_stator_extrusion_dia
         self.motor_stator_extrusion_depth = self.motor.motor_stator_extrusion_depth
+        self.stator_top_rotor_top_offset = self.motor.stator_top_rotor_top_offset
+        self.stator_hole_dia             = self.motor.stator_hole_dia
 
         # ── Motor: rotor dimensions ────────────────────────────────────────
         self.Rotor_OD                 = self.motor.getRotorODMM()
@@ -489,9 +491,11 @@ class internalcompoundPlanetaryActuator:
         self.Rotor_bottom_ID          = self.motor.rotorBottomIDMM
         self.rotor_bottom_thickness   = self.motor.rotorBottomThicknessMM
         self.Rotor_csk_head_upper_dia = self.motor.rotorCSKHeadUpperDiaMM
+        self.Rotor_csk_head_height    = self.motor.rotorCSKHeadHeightMM
         self.rotor_mount_hole_PCD     = self.motor.rotorMountHolePCDMM
         self.rotor_mount_hole_dia     = self.motor.rotorMountHoleDiaMM
-        self.rotor_mount_hole_num     = getattr(self.motor, 'rotorMountHoleNum', 6)
+        self.rotor_mount_hole_num     = self.motor.motor_rotor_hole_num
+        
 
         # ── Planet shaft & bearing parameters ─────────────────────────────
         self.planet_pin_bolt_dia      = self.design_params["planet_pin_bolt_dia"]
@@ -516,12 +520,23 @@ class internalcompoundPlanetaryActuator:
         self.sun_central_bolt_socket_head_dia = sun_central_bolt.bolt_head_dia
 
         # ── Bottom casing bearing (motor / sun interface) ──────────────────
-        self.sun_bottom_casing_bearing_height   = self.motor.sun_bottom_casing_bearing_height
-        self.sun_bottom_casing_bearing_ID       = self.motor.sun_bottom_casing_bearing_ID
-        self.sun_bottom_casing_bearing_OD       = self.motor.sun_bottom_casing_bearing_OD
-        self.sun_bottom_casing_bearing_massKG   = self.motor.sun_bottom_casing_bearing_massKG
         self.sun_gear_rotor_nut_wrench_size      = self.design_params["sun_gear_rotor_nut_wrench_size"]
         self.sun_gear_rotor_nut_height           = self.design_params["sun_gear_rotor_nut_height"]
+        
+        sun_hub_dia_min = self.rotor_mount_hole_PCD + self.sun_gear_rotor_nut_wrench_size + self.standard_clearance_1_5mm * 4
+        
+        sun_bottom_casing_bearing_ID_required  = sun_hub_dia_min #self.motor_rotor_base_ID
+        sun_bottom_casing_bearing              = bearings_discrete(InputBearingIDrequiredMM)
+        
+        # self.sun_bottom_casing_bearing_height   = self.motor.sun_bottom_casing_bearing_height
+        # self.sun_bottom_casing_bearing_ID       = self.motor.sun_bottom_casing_bearing_ID
+        # self.sun_bottom_casing_bearing_OD       = self.motor.sun_bottom_casing_bearing_OD
+        # self.sun_bottom_casing_bearing_massKG   = self.motor.sun_bottom_casing_bearing_massKG
+
+        self.sun_bottom_casing_bearing_height   = sun_bottom_casing_bearing.getBearingWidthMM()
+        self.sun_bottom_casing_bearing_ID       = sun_bottom_casing_bearing.getBearingIDMM()
+        self.sun_bottom_casing_bearing_OD       = sun_bottom_casing_bearing.getBearingODMM()
+        self.sun_bottom_casing_bearing_massKG   = sun_bottom_casing_bearing.getBearingMassKG()
 
         # ── Secondary carrier bearing ──────────────────────────────────────
         self.sun_sec_carrier_bearing_height = self.design_params["sun_sec_carrier_bearing_height"]
@@ -696,6 +711,8 @@ class internalcompoundPlanetaryActuator:
             f'"stator_ID"= {self.stator_ID}\n',
             f'"stator_height"= {self.stator_height}\n',
             f'"stator_mounting_holes_PCD"= {self.stator_mounting_holes_PCD}\n',
+            f'"stator_top_rotor_top_offset"= {self.stator_top_rotor_top_offset}\n',
+            f'"stator_hole_dia"= {self.stator_hole_dia}\n',
             f'"bearing_retainer_hole_dia"= {self.bearing_retainer_hole_dia}\n',
             f'"bearing_retainer_hole_num"= {self.bearing_retainer_hole_num}\n',
             f'"Rotor_ID"= {self.Rotor_ID}\n',
@@ -704,6 +721,7 @@ class internalcompoundPlanetaryActuator:
             f'"Rotor_bottom_ID"= {self.Rotor_bottom_ID}\n',
             f'"rotor_bottom_thickness"= {self.rotor_bottom_thickness}\n',
             f'"Rotor_csk_head_upper_dia"= {self.Rotor_csk_head_upper_dia}\n',
+            f'"Rotor_csk_head_height"= {self.Rotor_csk_head_height}\n',
             f'"ring_gear_thickness_mounting_casing"= {self.ring_gear_thickness_mounting_casing}\n',
             f'"motor_casing_thickness"= {self.Motor_case_thickness}\n',
             f'"sun_sec_carrier_bearing_height"= {self.sun_sec_carrier_bearing_height}\n',

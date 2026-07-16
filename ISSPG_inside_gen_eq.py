@@ -687,6 +687,8 @@ class internalsingleStagePlanetaryActuator:
         self.motor_rotor_hole_num         = self.motor.motor_rotor_hole_num
         self.motor_rotor_hole_dia         = self.motor.motor_rotor_hole_dia
         self.motor_rotor_hole_PCD         = self.motor.motor_rotor_hole_PCD
+        self.rotorCSKHeadUpperDiaMM       = self.motor.rotorCSKHeadUpperDiaMM
+        self.rotorCSKHeadHeightMM         = self.motor.rotorCSKHeadHeightMM
 
         #------------------------------------------------------
         # Dependent variables
@@ -921,6 +923,8 @@ class internalsingleStagePlanetaryActuator:
                 f'"motor_rotor_hole_num"= {self.motor_rotor_hole_num}\n',
                 f'"motor_rotor_hole_dia"= {self.motor_rotor_hole_dia}\n',
                 f'"motor_rotor_hole_PCD"= {self.motor_rotor_hole_PCD}\n',
+                f'"rotorCSKHeadUpperDiaMM"= {self.rotorCSKHeadUpperDiaMM}\n',
+                f'"rotorCSKHeadHeightMM"= {self.rotorCSKHeadHeightMM}\n',
 
                 f'"h_a"= {self.h_a}\n',
                 f'"h_b"= {self.h_b}\n',
