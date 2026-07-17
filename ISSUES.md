@@ -1,91 +1,57 @@
-# Known Issues / Findings — `bearings_discrete` and `nuts_and_bolts_dimensions`
-
-Notes from an audit of the `bearings_discrete` and `nuts_and_bolts_dimensions` classes,
-duplicated across:
-
-- `ActuatorAndGearbox.py` (OLD — shared by SSPG/CPG/DSPG/WPG)
-- `ActuatorandGearbox_ICPG.py`
-- `ActuatorandGearbox_INSSPG.py`
-- `ActuatorAndGearbox_ISSPG_inside.py`
-- `ActuatorAndGearbox_ISSPG_compact.py`
-- `ActuatorAndGearbox_INCPG_dependent.py`
-- `ActuatorAndGearbox_INCPG_independent.py`
+# Known Issues / Findings
 
 ## 1. `bearings_discrete` — OD table vs ID table content differ
 
-`bearings_discrete` supports two lookup modes: by inner diameter (`idRequiredMM`, the
-default) and by outer diameter (`odRequiredMM`, opt-in). These two modes drew from
-**two different bearing catalogues**, not one shared table:
-
-- **28 rows are common** to both tables.
-- **Rows only in the OD-table** (not available to an ID-based lookup):
+**Description:** `bearings_discrete` (in `CommonComponents.py`) supports two lookup
+modes — by inner diameter (`idRequiredMM`, the default) and by outer diameter
+(`odRequiredMM`, opt-in) — but the two modes draw from **two different bearing
+catalogues**, not one shared table. 28 rows are common to both, but:
+- Rows only in the OD-table (never reachable via an ID-based lookup):
   `[44.45, 53.975, 6.35, 0.031]`, `[50, 62, 6, 0.036]`
-- **Rows only in the ID-table** (not available to an OD-based lookup):
+- Rows only in the ID-table (never reachable via an OD-based lookup):
   `[28, 52, 12, 0.096]`, `[32, 58, 13, 0.122]`
 
-Practical effect: a request that could resolve to one of these non-overlapping rows
-gets a **different physical bearing** depending on whether you look up by ID or by OD
-— e.g. a bearing needing `OD ≈ 53mm` only exists in the OD-table, and a bearing needing
-`ID ≈ 28mm` with a wide 12mm section only exists in the ID-table.
+Practical effect: the same nominal bearing requirement can resolve to a **different
+physical bearing** depending on whether the caller looks it up by ID or by OD.
 
-**Status:** documented, not merged into one catalogue. Unifying the two tables into a
-single combined catalogue is a bigger, more consequential change (it would alter which
-physical bearing gets selected for some inputs) and was intentionally left as a
-separate decision rather than folded in silently.
+**Reproduce:**
+```python
+from CommonComponents import bearings_discrete
 
-## 2. Both tables were unsorted — now fixed
+b_od = bearings_discrete(idRequiredMM=0, odRequiredMM=62)
+print(b_od.getBearingIDMM(), b_od.getBearingODMM(), b_od.getBearingWidthMM(), b_od.getBearingMassKG())
+# 50 62 6 0.036
 
-The bearing lookup in both branches is a **linear scan** that assumes the table is
-sorted ascending by the column it searches on. Neither table actually was:
+b_id = bearings_discrete(idRequiredMM=50)
+print(b_id.getBearingIDMM(), b_id.getBearingODMM(), b_id.getBearingWidthMM(), b_id.getBearingMassKG())
+# 50 65 7 0.05
+```
+Both calls describe a "50mm ID bearing," but the OD-lookup returns a 50×62×6mm bearing
+while the ID-lookup returns a 50×65×7mm bearing — verified live, output as shown above.
 
-- **ID-table**: `[76.2, 88.9, 6.35, 0.07]` (ID = 76.2mm) was placed *before*
-  `[75, 95, 10, 0.149]` (ID = 75mm) — i.e. a larger-ID row appeared before a
-  smaller-ID row. For a request of `idRequiredMM = 75`, the scan would stop at the
-  76.2mm row and never reach the exact 75mm match later in the list.
-- **OD-table**: `[44.45, 53.975, 6.35, 0.031]` (OD = 53.975mm) was placed *before*
-  `[40, 52, 7, 0.031]` (OD = 52mm) — same class of bug on the OD axis.
+**Probable fix:** merge the two catalogues into one combined table so both lookup modes
+draw from the same rows. This is a bigger, more consequential change than a typical bug
+fix — it would alter which physical bearing gets selected for some existing inputs — so
+it should be a deliberate decision rather than folded in silently.
 
-Both were present identically in all 7 files (the ID-table bug in
-`ActuatorAndGearbox_ISSPG_inside.py`, `ActuatorAndGearbox_INCPG_dependent.py`,
-`ActuatorAndGearbox_INCPG_independent.py`, and `ActuatorAndGearbox_ISSPG_compact.py`'s
-missing-rows predecessor; the OD-table bug in all four dual-mode files plus the three
-files it was later ported into).
+**Status:** open — not yet fixed.
 
-**Status:** fixed. Both tables are now sorted ascending by their respective lookup
-column (ID for the ID-table, OD for the OD-table) in all 7 files, and the linear scans
-now behave correctly. `bearings_discrete` is fully converged — identical constructor
-signature, table content, sort order, and bounds-checking — across all 7 files.
+## 2. `nuts_and_bolts_dimensions` — downstream attribute naming (`nut_thickness` vs `nut_depth`)
 
-## 3. `nuts_and_bolts_dimensions` — two remaining differences
+**Description:** `nuts_and_bolts_dimensions` itself was consolidated into a single class
+in `CommonComponents.py`, and its own attribute is uniformly `self.nut_thickness` — there
+is no `self.nut_depth` at the class level, so the class is already unifiable/mergeable as
+intended. Downstream, some `ActuatorAndGearbox_*.py` files copy that value onto their own
+Actuator objects under a differently-named local attribute (`self.<component>_nut_depth`
+in `ISSPG_inside`/`ISSPG_compact`/`INCPG_dependent`/`INCPG_independent` vs.
+`self.<component>_nut_thickness` in the OLD file and `INSSPG`), but this is just each
+file's own local naming choice, not a difference in the shared class.
 
-Unlike `bearings_discrete`, this class was already mostly consistent. Two real
-(non-cosmetic) differences remain open:
+**Status:** closed — not a bug. The goal was a single, consistent `nuts_and_bolts_dimensions`
+class (to allow merging its implementations), which is already true. Downstream files are
+free to name their own derived attributes however they like.
 
-### 3a. `ActuatorandGearbox_INSSPG.py` silently falls back instead of raising
-
-| Situation | OLD / ICPG / ISSPG_inside / ISSPG_compact / INCPG_dependent / INCPG_independent | INSSPG |
-|---|---|---|
-| Unknown socket-head bolt diameter | `raise ValueError(f"Socket head bolt M{diameter} not found.")` | `return [diameter*1.5, diameter]  # Safe fallback` |
-| Unknown CSK bolt diameter | `raise ValueError(f"CSK bolt M{diameter} not found.")` | `return [diameter*2, diameter*0.5]  # Safe fallback` |
-| Unknown nut diameter | `raise ValueError(f"No nut data found for bolt diameter M{diameter}")` | `return [diameter*1.5, diameter*0.8]  # Safe fallback` |
-
-INSSPG is the only one of the 7 files that never raises here — an unlisted bolt/nut
-size silently returns an estimated dimension instead of erroring out.
-
-### 3b. Attribute name split: `nut_thickness` vs `nut_depth`
-
-| Files using `self.nut_thickness` | Files using `self.nut_depth` |
-|---|---|
-| OLD, ICPG, INSSPG | `ActuatorAndGearbox_ISSPG_inside.py`, `ActuatorAndGearbox_ISSPG_compact.py`, `ActuatorAndGearbox_INCPG_dependent.py`, `ActuatorAndGearbox_INCPG_independent.py` |
-
-Same computed value, different attribute name. Code reading `.nut_thickness` off an
-ISSPG/INCPG instance (or `.nut_depth` off an OLD/ICPG/INSSPG instance) would raise
-`AttributeError`.
-
-**Status:** open — not yet fixed. Everything else in this class (bolt-head dimension
-table, nut dimension table) is identical across all 7 files.
-
-## 4. ISSPG "inside" and "compact" variants silently overwrite each other's equations file
+## 3. ISSPG "inside" and "compact" variants silently overwrite each other's equations file
 
 **Description:** `ActuatorAndGearbox_ISSPG_inside.py` and `ActuatorAndGearbox_ISSPG_compact.py`
 both call `genEquationFile_editCADdirectly()` automatically whenever `optimizeActuator()` finds a
