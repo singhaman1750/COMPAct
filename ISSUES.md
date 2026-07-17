@@ -36,22 +36,7 @@ it should be a deliberate decision rather than folded in silently.
 
 **Status:** open — not yet fixed.
 
-## 2. `nuts_and_bolts_dimensions` — downstream attribute naming (`nut_thickness` vs `nut_depth`)
-
-**Description:** `nuts_and_bolts_dimensions` itself was consolidated into a single class
-in `CommonComponents.py`, and its own attribute is uniformly `self.nut_thickness` — there
-is no `self.nut_depth` at the class level, so the class is already unifiable/mergeable as
-intended. Downstream, some `ActuatorAndGearbox_*.py` files copy that value onto their own
-Actuator objects under a differently-named local attribute (`self.<component>_nut_depth`
-in `ISSPG_inside`/`ISSPG_compact`/`INCPG_dependent`/`INCPG_independent` vs.
-`self.<component>_nut_thickness` in the OLD file and `INSSPG`), but this is just each
-file's own local naming choice, not a difference in the shared class.
-
-**Status:** closed — not a bug. The goal was a single, consistent `nuts_and_bolts_dimensions`
-class (to allow merging its implementations), which is already true. Downstream files are
-free to name their own derived attributes however they like.
-
-## 3. ISSPG "inside" and "compact" variants silently overwrite each other's equations file
+## 2. ISSPG "inside" and "compact" variants silently overwrite each other's equations file
 
 **Description:** `ActuatorAndGearbox_ISSPG_inside.py` and `ActuatorAndGearbox_ISSPG_compact.py`
 both call `genEquationFile_editCADdirectly()` automatically whenever `optimizeActuator()` finds a
