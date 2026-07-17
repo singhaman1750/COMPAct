@@ -494,9 +494,9 @@ class internalsingleStagePlanetaryActuator:
         self.motorHeightMM           = self.motor.getMotorHeightMM()
         self.motorODMM               = self.motor.getMotorODMM()
         self.motorMassKG             = self.motor.getMassKG()
-        self.MaxMotorTorque          = self.motor.maxMotorTorque          # Nm
-        self.MaxMotorAngVelRPM       = self.motor.maxMotorAngVelRPM       # RPM
-        self.MaxMotorAngVelRadPerSec = self.motor.maxMotorAngVelRadPerSec # radians/sec
+        self.MaxMotorTorque          = self.motor.getMaxMotorTorque()          # Nm
+        self.MaxMotorAngVelRPM       = self.motor.getMaxMotorAngVelRPM()       # RPM
+        self.MaxMotorAngVelRadPerSec = self.motor.getMaxMotorAngVelRadPerSec() # radians/sec
 
         #============================================
         # Actuator Design Parameters
@@ -675,21 +675,21 @@ class internalsingleStagePlanetaryActuator:
         # --- Motor --- 
         self.motor_OD                     = self.motorODMM
         self.motor_height                 = self.motorHeightMM
-        self.stator_ID                    = self.motor.stator_ID
-        self.motor_rotor_base_thickness   = self.motor.motor_rotor_base_thickness
-        self.motor_rotor_base_ID          = self.motor.motor_rotor_base_ID
-        self.rotor_height                 = self.motor.rotor_height
-        self.rotor_ID                     = self.motor.rotor_ID
-        self.motor_stator_extrusion_depth = self.motor.motor_stator_extrusion_depth
-        self.motor_stator_extrusion_dia   = self.motor.motor_stator_extrusion_dia
-        self.stator_height                = self.motor.stator_height
-        self.stator_OD                    = self.motor.stator_OD
-        self.stator_top_rotor_top_offset  = self.motor.stator_top_rotor_top_offset
-        self.stator_hole_dia              = self.motor.stator_hole_dia
-        self.stator_hole_PCD              = self.motor.stator_hole_PCD
-        self.motor_rotor_hole_num         = self.motor.motor_rotor_hole_num
-        self.motor_rotor_hole_dia         = self.motor.motor_rotor_hole_dia
-        self.motor_rotor_hole_PCD         = self.motor.motor_rotor_hole_PCD
+        self.stator_ID                    = self.motor.getStatorIDMM()
+        self.motor_rotor_base_thickness   = self.motor.getRotorBottomThicknessMM()
+        self.motor_rotor_base_ID          = self.motor.getRotorBottomIDMM()
+        self.rotor_height                 = self.motor.getRotorHeightMM()
+        self.rotor_ID                     = self.motor.getRotorIDMM()
+        self.motor_stator_extrusion_depth = self.motor.getMotorStatorExtrusionDepth()
+        self.motor_stator_extrusion_dia   = self.motor.getMotorStatorExtrusionDia()
+        self.stator_height                = self.motor.getStatorHeightMM()
+        self.stator_OD                    = self.motor.getStatorODMM()
+        self.stator_top_rotor_top_offset  = self.motor.getStatorTopRotorTopOffset()
+        self.stator_hole_dia              = self.motor.getStatorHoleDia()
+        self.stator_hole_PCD              = self.motor.getStatorMountingHolePCD()
+        self.motor_rotor_hole_num         = self.motor.getMotorRotorHoleNum()
+        self.motor_rotor_hole_dia         = self.motor.getRotorMountHoleDiaMM()
+        self.motor_rotor_hole_PCD         = self.motor.getRotorMountHolePCDMM()
 
         #------------------------------------------------------
         # Dependent variables

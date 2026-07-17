@@ -95,10 +95,6 @@ MotorRO100_rotorCSKHeadUpperDiaMM  = motor_data["MotorRO100"]["rotorCSKHeadUpper
 MotorRO100_rotorMountHolePCDMM     = motor_data["MotorRO100"]["rotorMountHolePCDMM"]
 MotorRO100_rotorMountHoleDiaMM     = motor_data["MotorRO100"]["rotorMountHoleDiaMM"]
 
-MotorRO100_sun_bottom_casing_bearing_height = motor_data["MotorRO100"]["sun_bottom_casing_bearing_height"]
-MotorRO100_sun_bottom_casing_bearing_ID     = motor_data["MotorRO100"]["sun_bottom_casing_bearing_ID"]
-MotorRO100_sun_bottom_casing_bearing_OD     = motor_data["MotorRO100"]["sun_bottom_casing_bearing_OD"]
-
 MotorRO100_motor_height                   = motor_data["MotorRO100"]["motor_height"]
 MotorRO100_motor_stator_extrusion_dia        = motor_data["MotorRO100"]["motor_stator_extrusion_dia"]
 MotorRO100_motor_stator_extrusion_depth      = motor_data["MotorRO100"]["motor_stator_extrusion_depth"]
@@ -143,10 +139,6 @@ MotorRO80_rotorCSKHeadUpperDiaMM  = motor_data["MotorRO80"]["rotorCSKHeadUpperDi
 MotorRO80_rotorMountHolePCDMM     = motor_data["MotorRO80"]["rotorMountHolePCDMM"]
 MotorRO80_rotorMountHoleDiaMM     = motor_data["MotorRO80"]["rotorMountHoleDiaMM"]
 
-MotorRO80_sun_bottom_casing_bearing_height = motor_data["MotorRO80"]["sun_bottom_casing_bearing_height"]
-MotorRO80_sun_bottom_casing_bearing_ID     = motor_data["MotorRO80"]["sun_bottom_casing_bearing_ID"]
-MotorRO80_sun_bottom_casing_bearing_OD     = motor_data["MotorRO80"]["sun_bottom_casing_bearing_OD"]
-
 MotorRO80_motor_height                   = motor_data["MotorRO80"]["motor_height"]
 MotorRO80_motor_stator_extrusion_dia        = motor_data["MotorRO80"]["motor_stator_extrusion_dia"]
 MotorRO80_motor_stator_extrusion_depth      = motor_data["MotorRO80"]["motor_stator_extrusion_depth"]
@@ -158,33 +150,29 @@ MotorRO80_motor_stator_extrusion_depth      = motor_data["MotorRO80"]["motor_sta
 
 
 MotorRO100 = motor(
-    Kv                       = MotorRO100_Kv,
-    ratedVoltage             = MotorRO100_ratedVoltage,
-    power                    = MotorRO100_power,
+    maxMotorAngVelRPM        = MotorRO100_maxMotorAngVelRPM,
+    maxMotorTorque           = MotorRO100_maxTorque,
+    maxMotorPower            = MotorRO100_power,
 
-    massKG                   = MotorRO100_massKG,
+    motorMass                = MotorRO100_massKG,
 
-    statorODMM               = MotorRO100_statorODMM,
-    statorIDMM               = MotorRO100_statorIDMM,
-    statorHeightMM           = MotorRO100_statorHeightMM,
+    stator_OD                = MotorRO100_statorODMM,
+    stator_ID                = MotorRO100_statorIDMM,
+    stator_height            = MotorRO100_statorHeightMM,
 
-    statorMountingHolesPCDMM = MotorRO100_statorMountingHolesPCDMM,
+    stator_hole_PCD          = MotorRO100_statorMountingHolesPCDMM,
 
-    rotorODMM                = MotorRO100_rotorODMM,
-    rotorIDMM                = MotorRO100_rotorIDMM,
-    rotorHeightMM            = MotorRO100_rotorHeightMM,
+    motor_OD                 = MotorRO100_rotorODMM,
+    rotor_ID                 = MotorRO100_rotorIDMM,
+    rotor_height             = MotorRO100_rotorHeightMM,
 
-    rotorBottomIDMM          = MotorRO100_rotorBottomIDMM,
-    rotorBottomThicknessMM   = MotorRO100_rotorBottomThicknessMM,
+    motor_rotor_base_ID      = MotorRO100_rotorBottomIDMM,
+    motor_rotor_base_thickness = MotorRO100_rotorBottomThicknessMM,
 
     rotorCSKHeadUpperDiaMM   = MotorRO100_rotorCSKHeadUpperDiaMM,
 
-    rotorMountHolePCDMM      = MotorRO100_rotorMountHolePCDMM,
-    rotorMountHoleDiaMM      = MotorRO100_rotorMountHoleDiaMM,
-
-    sun_bottom_casing_bearing_height  = MotorRO100_sun_bottom_casing_bearing_height ,
-    sun_bottom_casing_bearing_ID      = MotorRO100_sun_bottom_casing_bearing_ID,
-    sun_bottom_casing_bearing_OD      = MotorRO100_sun_bottom_casing_bearing_OD,
+    motor_rotor_hole_PCD     = MotorRO100_rotorMountHolePCDMM,
+    motor_rotor_hole_dia     = MotorRO100_rotorMountHoleDiaMM,
 
     motor_stator_extrusion_dia   =  MotorRO100_motor_stator_extrusion_dia ,
     motor_stator_extrusion_depth =  MotorRO100_motor_stator_extrusion_depth ,  
@@ -200,33 +188,29 @@ MotorRO100 = motor(
 # =====================================================
 
 MotorRO80 = motor(
-    Kv                       = MotorRO80_Kv,
-    ratedVoltage             = MotorRO80_ratedVoltage,
-    power                    = MotorRO80_power,
+    maxMotorAngVelRPM        = MotorRO80_maxMotorAngVelRPM,
+    maxMotorTorque           = MotorRO80_maxTorque,
+    maxMotorPower            = MotorRO80_power,
 
-    massKG                   = MotorRO80_massKG,
+    motorMass                = MotorRO80_massKG,
 
-    statorODMM               = MotorRO80_statorODMM,
-    statorIDMM               = MotorRO80_statorIDMM,
-    statorHeightMM           = MotorRO80_statorHeightMM,
+    stator_OD                = MotorRO80_statorODMM,
+    stator_ID                = MotorRO80_statorIDMM,
+    stator_height            = MotorRO80_statorHeightMM,
 
-    statorMountingHolesPCDMM = MotorRO80_statorMountingHolesPCDMM,
+    stator_hole_PCD          = MotorRO80_statorMountingHolesPCDMM,
 
-    rotorODMM                = MotorRO80_rotorODMM,
-    rotorIDMM                = MotorRO80_rotorIDMM,
-    rotorHeightMM            = MotorRO80_rotorHeightMM,
+    motor_OD                 = MotorRO80_rotorODMM,
+    rotor_ID                 = MotorRO80_rotorIDMM,
+    rotor_height             = MotorRO80_rotorHeightMM,
 
-    rotorBottomIDMM          = MotorRO80_rotorBottomIDMM,
-    rotorBottomThicknessMM   = MotorRO80_rotorBottomThicknessMM,
+    motor_rotor_base_ID      = MotorRO80_rotorBottomIDMM,
+    motor_rotor_base_thickness = MotorRO80_rotorBottomThicknessMM,
 
     rotorCSKHeadUpperDiaMM   = MotorRO80_rotorCSKHeadUpperDiaMM,
 
-    rotorMountHolePCDMM      = MotorRO80_rotorMountHolePCDMM,
-    rotorMountHoleDiaMM      = MotorRO80_rotorMountHoleDiaMM,
- 
-    sun_bottom_casing_bearing_height  = MotorRO80_sun_bottom_casing_bearing_height ,
-    sun_bottom_casing_bearing_ID      = MotorRO80_sun_bottom_casing_bearing_ID,
-    sun_bottom_casing_bearing_OD      = MotorRO80_sun_bottom_casing_bearing_OD,
+    motor_rotor_hole_PCD     = MotorRO80_rotorMountHolePCDMM,
+    motor_rotor_hole_dia     = MotorRO80_rotorMountHoleDiaMM,
 
     motor_stator_extrusion_dia   =  MotorRO80_motor_stator_extrusion_dia ,
     motor_stator_extrusion_depth =  MotorRO80_motor_stator_extrusion_depth ,  
@@ -253,12 +237,12 @@ maxGBDia_multFactor = cpg_optimization_params["MAX_GB_DIA_MULT_FACTOR"]
 # Internal Gearbox Packaging Limits
 maxGearboxDiameter_RO80  = (
     maxGBDia_multFactor
-    * MotorRO80.statorIDMM
+    * MotorRO80.getStatorIDMM()
 )
 
 maxGearboxDiameter_RO100 = (
     maxGBDia_multFactor
-    * MotorRO100.statorIDMM
+    * MotorRO100.getStatorIDMM()
 )
 
 

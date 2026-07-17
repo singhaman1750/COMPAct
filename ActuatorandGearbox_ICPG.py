@@ -471,30 +471,30 @@ class internalcompoundPlanetaryActuator:
         self.bearingIDClearance_3DP             = self.design_params["bearingIDClearanceMM"]
 
         # ── Motor: overall envelope ────────────────────────────────────────
-        self.motor_OD     = self.motor.motorDiaMM
-        self.motor_height = self.motor.getLengthMM()
+        self.motor_OD     = self.motor.getMotorODMM()
+        self.motor_height = self.motor.getMotorHeightMM()
 
         # ── Motor: stator dimensions ───────────────────────────────────────
         self.stator_OD                    = self.motor.getStatorODMM()
         self.stator_ID                    = self.motor.getStatorIDMM()
         self.stator_height                = self.motor.getStatorHeightMM()
-        self.stator_mounting_holes_PCD    = self.motor.statorMountingHolesPCDMM
-        self.motor_stator_extrusion_dia   = self.motor.motor_stator_extrusion_dia
-        self.motor_stator_extrusion_depth = self.motor.motor_stator_extrusion_depth
-        self.stator_top_rotor_top_offset = self.motor.stator_top_rotor_top_offset
-        self.stator_hole_dia             = self.motor.stator_hole_dia
+        self.stator_mounting_holes_PCD    = self.motor.getStatorMountingHolePCD()
+        self.motor_stator_extrusion_dia   = self.motor.getMotorStatorExtrusionDia()
+        self.motor_stator_extrusion_depth = self.motor.getMotorStatorExtrusionDepth()
+        self.stator_top_rotor_top_offset = self.motor.getStatorTopRotorTopOffset()
+        self.stator_hole_dia             = self.motor.getStatorHoleDia()
 
         # ── Motor: rotor dimensions ────────────────────────────────────────
         self.Rotor_OD                 = self.motor.getRotorODMM()
         self.Rotor_ID                 = self.motor.getRotorIDMM()
         self.Rotor_height             = self.motor.getRotorHeightMM()
-        self.Rotor_bottom_ID          = self.motor.rotorBottomIDMM
-        self.rotor_bottom_thickness   = self.motor.rotorBottomThicknessMM
-        self.Rotor_csk_head_upper_dia = self.motor.rotorCSKHeadUpperDiaMM
-        self.Rotor_csk_head_height    = self.motor.rotorCSKHeadHeightMM
-        self.rotor_mount_hole_PCD     = self.motor.rotorMountHolePCDMM
-        self.rotor_mount_hole_dia     = self.motor.rotorMountHoleDiaMM
-        self.rotor_mount_hole_num     = self.motor.motor_rotor_hole_num
+        self.Rotor_bottom_ID          = self.motor.getRotorBottomIDMM()
+        self.rotor_bottom_thickness   = self.motor.getRotorBottomThicknessMM()
+        self.Rotor_csk_head_upper_dia = self.motor.getRotorCSKHeadUpperDiaMM()
+        self.Rotor_csk_head_height    = self.motor.getRotorCSKHeadHeightMM()
+        self.rotor_mount_hole_PCD     = self.motor.getRotorMountHolePCDMM()
+        self.rotor_mount_hole_dia     = self.motor.getRotorMountHoleDiaMM()
+        self.rotor_mount_hole_num     = self.motor.getMotorRotorHoleNum()
         
 
         # ── Planet shaft & bearing parameters ─────────────────────────────
@@ -526,7 +526,7 @@ class internalcompoundPlanetaryActuator:
         sun_hub_dia_min = self.rotor_mount_hole_PCD + self.sun_gear_rotor_nut_wrench_size + self.standard_clearance_1_5mm * 4
         
         sun_bottom_casing_bearing_ID_required  = sun_hub_dia_min #self.motor_rotor_base_ID
-        sun_bottom_casing_bearing              = bearings_discrete(InputBearingIDrequiredMM)
+        sun_bottom_casing_bearing              = bearings_discrete(sun_bottom_casing_bearing_ID_required)
         
         # self.sun_bottom_casing_bearing_height   = self.motor.sun_bottom_casing_bearing_height
         # self.sun_bottom_casing_bearing_ID       = self.motor.sun_bottom_casing_bearing_ID
@@ -1375,13 +1375,13 @@ class optimizationInternalCompoundPlanetaryActuator:
 
     # ── Reporting ──────────────────────────────────────────────────────────
     def printOptimizationParameters(self, Actuator=internalcompoundPlanetaryActuator, log=1, csv=0):
-        maxMotorAngVelRPM       = Actuator.motor.maxMotorAngVelRPM
-        maxMotorAngVelRadPerSec = Actuator.motor.maxMotorAngVelRadPerSec
-        maxMotorTorque          = Actuator.motor.maxMotorTorque
-        maxMotorPower           = Actuator.motor.maxMotorPower
-        motorMass               = Actuator.motor.massKG
-        motorDia                = Actuator.motor.rotorODMM
-        motorLength             = Actuator.motor.statorHeightMM
+        maxMotorAngVelRPM       = Actuator.motor.getMaxMotorAngVelRPM()
+        maxMotorAngVelRadPerSec = Actuator.motor.getMaxMotorAngVelRadPerSec()
+        maxMotorTorque          = Actuator.motor.getMaxMotorTorque()
+        maxMotorPower           = Actuator.motor.getMaxMotorPower()
+        motorMass               = Actuator.motor.getMassKG()
+        motorDia                = Actuator.motor.getRotorODMM()
+        motorLength             = Actuator.motor.getStatorHeightMM()
         maxGearAllowableStressMPa = Actuator.internalcompoundPlanetaryGearbox.maxGearAllowableStressMPa
         FOS                      = Actuator.FOS
         serviceFactor            = Actuator.serviceFactor
