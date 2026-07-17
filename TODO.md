@@ -32,3 +32,34 @@ Root currently holds 7 `ActuatorAndGearbox*.py` model files + 10 `Opt_*.py` driv
 8. Commit — *~5 min*
 
 **Estimated total (working together, interactively):** ~2 to 2.5 hours, likely spread across more than one sitting.
+
+## README rewrite
+
+Audited `README.md` against the actual current code (`actOpt.py`'s `GEARBOX_DISPATCH`, every `Opt_*.py` motor branch, `CADs/` folder contents). Findings, in order of severity:
+
+**Stale/incomplete content:**
+- **"Supported Hardware" tables only cover ~half the framework.** Motors table lists 6 (`U8, U10, U12, MN8014, VT8020, MAD_M6C12`) but the code supports 10 — missing `RO60, RO80, RO100, RI100`. Gearbox Topologies table lists 4 (`sspg, cpg, wpg, dspg`) but `actOpt.py` dispatches 11 — missing `icpg, insspg_type_1, insspg_type_2, incpg_dependent, incpg_independent, isspg_inside, isspg_compact`. These tables look like they predate the whole R-motor/inrunner-gearbox line of work.
+- **Step 4 (Run Optimization) documents the 7 newer gearbox types as 5 separate repetitive "Syntax + Example" blocks** instead of one table — same info as the Supported Hardware tables should have, just duplicated inconsistently in prose instead.
+- **ISSPG's motor list is wrong** — README says `<motor>`: RO80, RO100, but `Opt_ISSPG_inside.py`/`Opt_ISSPG_compact.py` also support `RO60` (confirmed via `motor_name == "RO60"` branches in both files).
+- **`insspg_type_1`/`insspg_type_2` labels need a domain check.** README calls them "Independent"/"Dependent" respectively, but nothing found in `Opt_INSSPG.py`/`ActuatorandGearbox_INSSPG.py` confirms that mapping in those terms — the code just branches on a `"fw_s_used"` face-width formula, described as "TYPE 1 MATH" vs "TYPE 2 MATH". **Needs your confirmation** before the rewrite states it either way.
+- **Step 5/6 CAD-output paths only cover SSPG/CPG/DSPG/WPG** (`CADs/<TYPE>/<type>_equations.txt`); the other 7 gearbox types write elsewhere (`CADs/ICPG/icpg_equations.txt`, `CADs/INSSPG/insspg_equations.txt`, `CADs/INCPG/incpg_equations.txt`, `CADs/ISSPG/isspg_equations_onshape.txt`, `CADs/DSPG/Equation_Files/<motor>/...`) and aren't documented at all.
+- **No "Project Structure" section** — nothing in the README maps the repo's file layout (`actOpt.py`, `Opt_*.py`, `ActuatorAndGearbox_*.py`, `CommonComponents.py`, `config_files/`, `CADs/`, `results/`) for a new reader.
+
+**Presentation/formatting issues:**
+- Onshape links are inconsistently formatted — some gearbox types show only a clickable `👉 **[Open X in Onshape](url)**` link, others additionally repeat the same URL in a raw, unlabeled code block right below it (ISSPG/INCPG/INSSPG do this, SSPG/CPG/WPG/DSPG don't).
+- A dead HTML comment block (lines ~332-340, "iv. Set the Equations File") is left in the raw source — should be deleted or resolved, not commented out.
+- The `[COPY PASTE THE LINK IF HYPERLINK DOESN'T OPEN]` note appears exactly once (above the SSPG link only) even though the same problem would apply to every link.
+- Mass Analysis Google Sheets link (Step 5) uses a bare, unlabeled code fence, inconsistent with the `👉 **[Open X](...)**` link style used everywhere else.
+
+**Separately — not a README issue, a real bug found during this audit:** `ActuatorAndGearbox_ISSPG_inside.py` and `ActuatorAndGearbox_ISSPG_compact.py` both write their Onshape equations file to the exact same path, `CADs/ISSPG/isspg_equations_onshape.txt` — running one gearbox type after the other silently overwrites the first result. Worth its own fix, independent of this README task (flag if you want it added to `ISSUES.md` or fixed directly).
+
+**Plan:**
+1. **Resolve the `insspg_type_1`/`insspg_type_2` → Independent/Dependent question** with you before writing anything — *~5 min*
+2. **Rebuild "Supported Hardware" as the single source of truth**: one motor table (10 rows) and one gearbox-topology table (11 rows), each gearbox row noting which motors it accepts — *~20 min*
+3. **Collapse Step 4's 5 repetitive Syntax/Example blocks** into one syntax block + one combined compatibility table (reusing table from step 2) + 2-3 representative examples instead of one per type — *~20-30 min*
+4. **Fix the ISSPG motor list** (add RO60) and **document all 7 CAD-output paths** missing from Step 5/6 — *~15 min*
+5. **Add a short "Project Structure" section** (file/folder map, one line each) — *~15-20 min*
+6. **Clean up formatting inconsistencies**: normalize Onshape link presentation (pick one style, apply everywhere), delete the dead HTML comment block, fix the Mass Analysis link style — *~15-20 min*
+7. **Review pass together** — read the rewritten README end-to-end against the live repo one more time before committing — *~15 min*
+
+**Estimated total (working together, interactively):** ~1.5 to 2 hours.
