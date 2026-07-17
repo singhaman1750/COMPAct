@@ -84,3 +84,30 @@ ISSPG/INCPG instance (or `.nut_depth` off an OLD/ICPG/INSSPG instance) would rai
 
 **Status:** open — not yet fixed. Everything else in this class (bolt-head dimension
 table, nut dimension table) is identical across all 7 files.
+
+## 4. ISSPG "inside" and "compact" variants silently overwrite each other's equations file
+
+**Description:** `ActuatorAndGearbox_ISSPG_inside.py` and `ActuatorAndGearbox_ISSPG_compact.py`
+both call `genEquationFile_editCADdirectly()` automatically whenever `optimizeActuator()` finds a
+feasible solution, and both write to the exact same path:
+`CADs/ISSPG/isspg_equations_onshape.txt`. Running one gearbox type after the other silently
+clobbers the first run's output — no error, no warning, and no filename distinction between
+`isspg_inside` and `isspg_compact` results.
+
+**Reproduce:**
+```bash
+python actOpt.py RO100 isspg_inside 6.5
+# CADs/ISSPG/isspg_equations_onshape.txt now holds the isspg_inside solution
+
+python actOpt.py RO100 isspg_compact 6.5
+# CADs/ISSPG/isspg_equations_onshape.txt has been silently overwritten with the
+# isspg_compact solution instead — confirmed via file size/mtime change (4254 -> 4190 bytes)
+```
+
+**Probable fix:** give each variant its own output filename, e.g.
+`CADs/ISSPG/isspg_inside_equations_onshape.txt` and
+`CADs/ISSPG/isspg_compact_equations_onshape.txt` — a one-line change to the `file_path`
+construction in each file's `genEquationFile_editCADdirectly()` (currently at
+`ActuatorAndGearbox_ISSPG_inside.py:818` and `ActuatorAndGearbox_ISSPG_compact.py:811`).
+
+**Status:** open — not yet fixed.
