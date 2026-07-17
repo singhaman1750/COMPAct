@@ -341,9 +341,9 @@ class motor_framed_outrunner:
 
 
 # -------------------------------------------------------------------------
-# Frameless Outrunner motor — ICPG version (from ActuatorandGearbox_ICPG.py)
+# Frameless Outrunner motor (from ActuatorandGearbox_ICPG.py / ActuatorAndGearbox_ISSPG_inside.py / ActuatorAndGearbox_ISSPG_compact.py)
 # -------------------------------------------------------------------------
-class motor_frameless_outrunner_mahi:
+class motor_frameless_outrunner:
     """
     Stores all motor geometry and performance data.
 
@@ -353,7 +353,6 @@ class motor_frameless_outrunner_mahi:
     • Performance parameters (Kv, torque, speed)
     • Stator dimensions
     • Rotor dimensions
-    • Bearing at motor–sun interface
     • Compatibility aliases
     """
 
@@ -379,12 +378,6 @@ class motor_frameless_outrunner_mahi:
                  rotorCSKHeadHeightMM            = 2.3,
                  motor_rotor_hole_PCD            = 62,
                  motor_rotor_hole_dia            = 4,
-                #  # ── Bearing at motor/sun interface ───────────────────────
-                #  sun_bottom_casing_bearing_ID    = 50,
-                #  sun_bottom_casing_bearing_OD    = 62,
-                #  sun_bottom_casing_bearing_height= 6,
-                #  sun_bottom_casing_bearing_massKG= 0.07,
-                 # ---
                  stator_top_rotor_top_offset  = 4.8,
                  stator_hole_dia              = 3,
                  motor_rotor_hole_num         = 6,
@@ -436,12 +429,6 @@ class motor_frameless_outrunner_mahi:
         self.stator_hole_dia = stator_hole_dia
         self.rotorCSKHeadHeightMM = rotorCSKHeadHeightMM
 
-        # # ── Bearing at motor / sun interface ──────────────────────────────
-        # self.sun_bottom_casing_bearing_ID     = sun_bottom_casing_bearing_ID
-        # self.sun_bottom_casing_bearing_OD     = sun_bottom_casing_bearing_OD
-        # self.sun_bottom_casing_bearing_height = sun_bottom_casing_bearing_height
-        # self.sun_bottom_casing_bearing_massKG = sun_bottom_casing_bearing_massKG
-
 
     # ── Getters ────────────────────────────────────────────────────────────
     def getMaxMotorAngVelRadPerSec(self): return self.maxMotorAngVelRadPerSec
@@ -489,163 +476,6 @@ class motor_frameless_outrunner_mahi:
         print("  Outer Diameter = ", self.motor_OD, " mm")
         print("  Inner Diameter = ", self.rotor_ID, " mm")
         print("  Height         = ", self.rotor_height, " mm")
-
-
-# -------------------------------------------------------------------------
-# Frameless Outrunner motor — ISSPG version (from ActuatorAndGearbox_ISSPG_inside.py / ActuatorAndGearbox_ISSPG_compact.py)
-# -------------------------------------------------------------------------
-class motor_frameless_outrunner_suyash:
-    def __init__(self,
-                 motor_OD                     = 92.6,
-                 stator_ID                    = 55,
-                 motor_rotor_base_thickness   = 2.6,
-                 motor_rotor_base_ID          = 51,
-                 rotor_height                 = 21.6,
-                 rotor_ID                     = 82.6,
-                 motor_stator_extrusion_depth = 2,
-                 motor_stator_extrusion_dia   = 88,
-                 stator_height                = 22,
-                 stator_OD                    = 81,
-                 stator_top_rotor_top_offset  = 4.8,
-                 stator_hole_dia              = 3,
-                 stator_hole_PCD              = 63,
-                 motor_rotor_hole_num         = 6,
-                 motor_rotor_hole_dia         = 4,
-                 motor_rotor_hole_PCD         = 62,
-                 motor_height                 = 36.2,
-                 rotorCSKHeadUpperDiaMM       = 8,
-                 rotorCSKHeadHeightMM         = 2.3,
-                 maxMotorAngVelRPM            = 5040,  # RPM
-                 maxMotorTorque               = 1.3,   # Nm
-                 maxMotorPower                = 1.3 * 5040 * 2*np.pi/60,  # W
-                 motorMass                    = 0.265, # KG
-                 motorName                    = "RO100"):
-
-        self.motorName = motorName
-
-        # Physical geometry
-        self.motor_OD                     = motor_OD
-        self.stator_ID                    = stator_ID
-        self.motor_rotor_base_thickness   = motor_rotor_base_thickness
-        self.motor_rotor_base_ID          = motor_rotor_base_ID
-        self.rotor_height                 = rotor_height
-        self.rotor_ID                     = rotor_ID
-        self.motor_stator_extrusion_depth = motor_stator_extrusion_depth
-        self.motor_stator_extrusion_dia   = motor_stator_extrusion_dia
-        self.stator_height                = stator_height
-        self.stator_OD                    = stator_OD
-        self.stator_hole_PCD              = stator_hole_PCD
-        self.motor_rotor_hole_dia         = motor_rotor_hole_dia
-        self.motor_rotor_hole_PCD         = motor_rotor_hole_PCD   
-        self.motor_height                 = motor_height
-
-        #Motor other param
-        self.maxMotorAngVelRPM            = maxMotorAngVelRPM
-        self.maxMotorAngVelRadPerSec      = maxMotorAngVelRPM * (2 * np.pi / 60)
-        self.maxMotorTorque               = maxMotorTorque
-        self.maxMotorPower                = maxMotorPower
-        self.massKG                       = motorMass     # kg
-
-        # ---------------Extra missing parameters from The other version-----
-        self.motor_rotor_hole_num         = motor_rotor_hole_num
-        self.stator_top_rotor_top_offset  = stator_top_rotor_top_offset
-        self.stator_hole_dia              = stator_hole_dia
-
-        # ----
-        # TODO: add in the CAD
-        self.rotorCSKHeadUpperDiaMM = rotorCSKHeadUpperDiaMM
-        self.rotorCSKHeadHeightMM = rotorCSKHeadHeightMM
-
-    # ------------------------------------------------------------------
-    # Convenience getters (mirror reference code style)
-    # ------------------------------------------------------------------
-    
-    # Maximum motor angular velocity in rad/s
-    def getMaxMotorAngVelRadPerSec(self):
-        return self.maxMotorAngVelRadPerSec
-    
-    # Maximum motor power in W
-    def getMaxMotorPower(self):
-        return self.maxMotorPower
-    
-    # Maximum motor torque in Nm
-    def getMaxMotorTorque(self):
-        return self.maxMotorTorque
-    
-    # Mass of the motor in kg
-    def getMassKG(self):
-        return self.massKG
-
-    def getMotorODMM(self):
-       return self.motor_OD
-
-    def getMotorHeightMM(self): 
-        return self.motor_height
-
-    def getStatorIDMM(self):
-        return self.stator_ID
-
-    def getStatorODMM(self):
-        return self.stator_OD
-
-    def getStatorHeightMM(self):
-        return self.stator_height
-
-    def getRotorODMM(self):
-        return self.motor_OD
-
-    def getRotorIDMM(self):
-        return self.rotor_ID
-
-    def getRotorHeightMM(self):
-        return self.rotor_height
-
-    def getMaxMotorAngVelRPM(self):
-        return self.maxMotorAngVelRPM
-
-    def getStatorMountingHolePCD(self):
-        return self.stator_hole_PCD
-
-    def getMotorStatorExtrusionDia(self):
-        return self.motor_stator_extrusion_dia
-
-    def getMotorStatorExtrusionDepth(self):
-        return self.motor_stator_extrusion_depth
-
-    def getStatorTopRotorTopOffset(self):
-        return self.stator_top_rotor_top_offset
-
-    def getStatorHoleDia(self):
-        return self.stator_hole_dia
-
-    def getRotorBottomIDMM(self):
-        return self.motor_rotor_base_ID
-
-    def getRotorBottomThicknessMM(self):
-        return self.motor_rotor_base_thickness
-
-    def getRotorCSKHeadUpperDiaMM(self):
-        return self.rotorCSKHeadUpperDiaMM
-
-    def getRotorCSKHeadHeightMM(self):
-        return self.rotorCSKHeadHeightMM
-
-    def getRotorMountHolePCDMM(self):
-        return self.motor_rotor_hole_PCD
-
-    def getRotorMountHoleDiaMM(self):
-        return self.motor_rotor_hole_dia
-
-    def getMotorRotorHoleNum(self):
-        return self.motor_rotor_hole_num
-
-    def printParameters(self):
-        print(f"Motor: {self.motorName}")
-        print(f"  motor_OD           = {self.motor_OD} mm")
-        print(f"  motor_height       = {self.motor_height} mm")
-        print(f"  stator_ID          = {self.stator_ID} mm")
-        print(f"  stator_hole_PCD    = {self.stator_hole_PCD} mm")
-        print(f"  rotor_height       = {self.rotor_height} mm")
 
 
 # -------------------------------------------------------------------------

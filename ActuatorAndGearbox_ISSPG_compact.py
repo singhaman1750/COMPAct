@@ -5,7 +5,7 @@ import numpy as np
 import sys
 import time
 
-from CommonComponents import bearings_discrete, nuts_and_bolts_dimensions, motor_driver, motor_frameless_outrunner_suyash as motor
+from CommonComponents import bearings_discrete, nuts_and_bolts_dimensions, motor_driver, motor_frameless_outrunner as motor
 
 class internalsingleStagePlanetaryGearbox:
     def __init__(self, 

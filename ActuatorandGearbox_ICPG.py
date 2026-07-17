@@ -6,7 +6,7 @@ import time
 import math
 
 
-from CommonComponents import material, bearings_discrete, nuts_and_bolts_dimensions, motor_frameless_outrunner_mahi as motor
+from CommonComponents import material, bearings_discrete, nuts_and_bolts_dimensions, motor_frameless_outrunner as motor
 
 
 # ╔══════════════════════════════════════════════════════════════════════════╗
