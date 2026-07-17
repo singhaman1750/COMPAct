@@ -6,10 +6,10 @@ duplicated across:
 - `ActuatorAndGearbox.py` (OLD — shared by SSPG/CPG/DSPG/WPG)
 - `ActuatorandGearbox_ICPG.py`
 - `ActuatorandGearbox_INSSPG.py`
-- `ISSPG_inside_gen_eq.py`
-- `ISSPG_compact_gen_eq.py`
-- `InrunnerCPG_dependent_gen_eq.py`
-- `InrunnerCPG_independent_gen_eq.py`
+- `ActuatorAndGearbox_ISSPG_inside.py`
+- `ActuatorAndGearbox_ISSPG_compact.py`
+- `ActuatorAndGearbox_INCPG_dependent.py`
+- `ActuatorAndGearbox_INCPG_independent.py`
 
 ## 1. `bearings_discrete` — OD table vs ID table content differ
 
@@ -46,10 +46,10 @@ sorted ascending by the column it searches on. Neither table actually was:
   `[40, 52, 7, 0.031]` (OD = 52mm) — same class of bug on the OD axis.
 
 Both were present identically in all 7 files (the ID-table bug in
-`ISSPG_inside_gen_eq.py`, `InrunnerCPG_dependent_gen_eq.py`,
-`InrunnerCPG_independent_gen_eq.py`, and `ISSPG_compact_gen_eq.py`'s missing-rows
-predecessor; the OD-table bug in all four dual-mode files plus the three files it was
-later ported into).
+`ActuatorAndGearbox_ISSPG_inside.py`, `ActuatorAndGearbox_INCPG_dependent.py`,
+`ActuatorAndGearbox_INCPG_independent.py`, and `ActuatorAndGearbox_ISSPG_compact.py`'s
+missing-rows predecessor; the OD-table bug in all four dual-mode files plus the three
+files it was later ported into).
 
 **Status:** fixed. Both tables are now sorted ascending by their respective lookup
 column (ID for the ID-table, OD for the OD-table) in all 7 files, and the linear scans
@@ -76,7 +76,7 @@ size silently returns an estimated dimension instead of erroring out.
 
 | Files using `self.nut_thickness` | Files using `self.nut_depth` |
 |---|---|
-| OLD, ICPG, INSSPG | ISSPG_inside, ISSPG_compact, INCPG_dependent, INCPG_independent |
+| OLD, ICPG, INSSPG | `ActuatorAndGearbox_ISSPG_inside.py`, `ActuatorAndGearbox_ISSPG_compact.py`, `ActuatorAndGearbox_INCPG_dependent.py`, `ActuatorAndGearbox_INCPG_independent.py` |
 
 Same computed value, different attribute name. Code reading `.nut_thickness` off an
 ISSPG/INCPG instance (or `.nut_depth` off an OLD/ICPG/INSSPG instance) would raise

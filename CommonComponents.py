@@ -492,7 +492,7 @@ class motor_frameless_outrunner_mahi:
 
 
 # -------------------------------------------------------------------------
-# Frameless Outrunner motor — ISSPG version (from ISSPG_inside_gen_eq.py / ISSPG_compact_gen_eq.py)
+# Frameless Outrunner motor — ISSPG version (from ActuatorAndGearbox_ISSPG_inside.py / ActuatorAndGearbox_ISSPG_compact.py)
 # -------------------------------------------------------------------------
 class motor_frameless_outrunner_suyash:
     def __init__(self,
@@ -717,7 +717,7 @@ class motor_frameless_inrunner_mahi:
 
 
 # -------------------------------------------------------------------------
-# Frameless Inrunner motor — INCPG version (from InrunnerCPG_dependent_gen_eq.py / InrunnerCPG_independent_gen_eq.py)
+# Frameless Inrunner motor — INCPG version (from ActuatorAndGearbox_INCPG_dependent.py / ActuatorAndGearbox_INCPG_independent.py)
 # -------------------------------------------------------------------------
 class motor_frameless_inrunner_suyash:
     

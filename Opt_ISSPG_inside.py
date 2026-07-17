@@ -1,9 +1,9 @@
 import sys
 import numpy as np
-from ISSPG_compact_gen_eq import internalsingleStagePlanetaryGearbox
-from ISSPG_compact_gen_eq import motor
-from ISSPG_compact_gen_eq import internalsingleStagePlanetaryActuator
-from ISSPG_compact_gen_eq import optimizationInternalSingleStageActuator
+from ActuatorAndGearbox_ISSPG_inside import internalsingleStagePlanetaryGearbox
+from ActuatorAndGearbox_ISSPG_inside import motor
+from ActuatorAndGearbox_ISSPG_inside import internalsingleStagePlanetaryActuator
+from ActuatorAndGearbox_ISSPG_inside import optimizationInternalSingleStageActuator
 import json
 import os
 

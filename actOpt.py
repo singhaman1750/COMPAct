@@ -1,17 +1,17 @@
 import sys
 
 GEARBOX_DISPATCH = {
-    "sspg": "Opt_singleStagePlanetaryGBOptimization",
-    "dspg": "Opt_doubleStagePlanetaryGBOptimization",
-    "cpg": "Opt_compoundPlanetaryGBOptimization",
-    "icpg": "Opt_internalcompoundPlanetryGBOptimization",
-    "insspg_type_1": "Opt_inrunnersinglestageGBOptimization",
-    "insspg_type_2": "Opt_inrunnersinglestageGBOptimization",
-    "wpg": "Opt_wolfromPlanetaryGBOptimization",
-    "incpg_dependent": "Opt_dependentInrunnerCompoundPlanetaryGBOptimization",
-    "incpg_independent": "Opt_independentInrunnerCompoundPlanetaryGBOptimization",
-    "isspg_inside": "Opt_inBearingInternalSingleStagePlanetaryGBOptimization",
-    "isspg_compact": "Opt_outBearingInternalSingleStagePlanetaryGBOptimization",
+    "sspg": "Opt_SSPG",
+    "dspg": "Opt_DSPG",
+    "cpg": "Opt_CPG",
+    "icpg": "Opt_ICPG",
+    "insspg_type_1": "Opt_INSSPG",
+    "insspg_type_2": "Opt_INSSPG",
+    "wpg": "Opt_WPG",
+    "incpg_dependent": "Opt_INCPG_dependent",
+    "incpg_independent": "Opt_INCPG_independent",
+    "isspg_inside": "Opt_ISSPG_inside",
+    "isspg_compact": "Opt_ISSPG_compact",
 }
 
 def main(motor, gearbox_type, gear_ratio=0):

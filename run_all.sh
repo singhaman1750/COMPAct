@@ -1,4 +1,4 @@
-python Opt_singleStagePlanetaryGBOptimization.py
-python Opt_compoundPlanetaryGBOptimization.py
-python Opt_wolfromPlanetaryGBOptimization.py
-python Opt_doubleStagePlanetaryGBOptimization.py
+python Opt_SSPG.py
+python Opt_CPG.py
+python Opt_WPG.py
+python Opt_DSPG.py

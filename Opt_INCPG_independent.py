@@ -1,10 +1,10 @@
 import sys
 import numpy as np
-from InrunnerCPG_dependent_gen_eq import motor
-from InrunnerCPG_dependent_gen_eq import material
-from InrunnerCPG_dependent_gen_eq import inrunnerCompoundPlanetaryGearbox
-from InrunnerCPG_dependent_gen_eq import inrunnerCompoundPlanetaryActuator
-from InrunnerCPG_dependent_gen_eq import optimizationInrunnerCompoundPlanetaryActuator
+from ActuatorAndGearbox_INCPG_independent import motor
+from ActuatorAndGearbox_INCPG_independent import material
+from ActuatorAndGearbox_INCPG_independent import inrunnerCompoundPlanetaryGearbox
+from ActuatorAndGearbox_INCPG_independent import inrunnerCompoundPlanetaryActuator
+from ActuatorAndGearbox_INCPG_independent import optimizationInrunnerCompoundPlanetaryActuator
 import os
 import json
 
@@ -16,14 +16,14 @@ current_dir = os.path.dirname(__file__)
 
 # Build the file path
 config_path = os.path.join(current_dir, "config_files/config.json")
-incpg_params_path = os.path.join(current_dir, "config_files/incpg_dependent_params.json")
+incpg_params_path = os.path.join(current_dir, "config_files/incpg_independent_params.json")
 
 # Load the JSON file
 with open(config_path, "r") as config_file:
     config_data = json.load(config_file)
 
-with open(incpg_params_path, "r") as incpg_dependent_params_file:
-    incpg_params = json.load(incpg_dependent_params_file)
+with open(incpg_params_path, "r") as incpg_independent_params_file:
+    incpg_params = json.load(incpg_independent_params_file)
 
 #---------------------------------------------------
 # Transferring relevant data to individual variables
