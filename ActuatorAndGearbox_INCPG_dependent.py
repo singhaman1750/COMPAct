@@ -5,7 +5,7 @@ import numpy as np
 import sys
 import time
 
-from CommonComponents import material, bearings_discrete, nuts_and_bolts_dimensions, motor_driver, motor_frameless_inrunner_suyash as motor
+from CommonComponents import material, bearings_discrete, nuts_and_bolts_dimensions, motor_driver, motor_frameless_inrunner as motor
 
 class inrunnerCompoundPlanetaryGearbox:
     def __init__(self,
@@ -673,12 +673,12 @@ class inrunnerCompoundPlanetaryActuator:
         self.stator_height        = self.motor.stator_height
         self.stator_OD            = self.motor.stator_OD
         self.stator_hole_dia      = self.motor.stator_hole_dia
-        self.stator_top_height    = self.motor.stator_top_height
+        self.stator_top_height    = self.motor.stator_wire_top_height
         self.stator_mid_height    = self.motor.stator_mid_height
-        self.stator_bottom_height = self.motor.stator_bottom_height
-        self.stator_inside_OD     = self.motor.stator_inside_OD
+        self.stator_bottom_height = self.motor.stator_wire_bottom_height
+        self.stator_inside_OD     = self.motor.stator_wire_OD
         self.stator_hole_num      = self.motor.stator_hole_num
-        self.stator_inside_ID     = self.motor.stator_inside_ID
+        self.stator_inside_ID     = self.motor.stator_wire_ID
 
         # --- Driver Dimensions ---
         self.driver_upper_holes_dist_from_center = self.motor_driver_params["driver_upper_holes_dist_from_center"]

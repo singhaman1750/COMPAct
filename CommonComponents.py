@@ -479,78 +479,10 @@ class motor_frameless_outrunner:
 
 
 # -------------------------------------------------------------------------
-# Frameless Inrunner motor — INSSPG version (from ActuatorandGearbox_INSSPG.py)
+# Frameless Inrunner motor (from ActuatorandGearbox_INSSPG.py / ActuatorAndGearbox_INCPG_dependent.py / ActuatorAndGearbox_INCPG_independent.py)
 # -------------------------------------------------------------------------
-class motor_frameless_inrunner_mahi:
-    def __init__(self,
-                 Kv                               = 55,
-                 maxContinuousCurrent             = 20,
-                 ratedVoltage                     = 48,
-                 power                            = 838,
-                 massKG                           = 0.50,
-                 Stator_ID                        = 57.0,
-                 Stator_OD                        = 104.0,
-                 stator_height                    = 24.5,
-                 Rotor_height                     = 15.0,
-                 Rotor_OD                         = 55.6,
-                 Rotor_ID                         = 45.0,
-                 rotor_mount_hole_dia             = 4.0,
-                 rotor_mount_hole_CSK_OD          = 8.0,
-                 rotor_mount_hole_CSK_head_hight  = 3.0,
-                 motorName                        = "RI100"):
+class motor_frameless_inrunner:
 
-        self.motorName = motorName
-
-        self.Kv                   = Kv
-        self.maxContinuousCurrent = maxContinuousCurrent
-        self.ratedVoltage         = ratedVoltage
-        self.maxMotorPower        = power
-        self.massKG               = massKG
-
-        self.maxMotorAngVelRPM       = Kv * ratedVoltage
-        self.maxMotorAngVelRadPerSec = self.maxMotorAngVelRPM * (2 * np.pi / 60)
-        self.maxMotorTorque          = maxContinuousCurrent / (Kv * 2 * np.pi / 60)
-
-        self.Stator_ID                        = Stator_ID
-        self.Stator_OD                        = Stator_OD
-        self.stator_height                    = stator_height
-
-        self.Rotor_height                     = Rotor_height
-        self.Rotor_OD                         = Rotor_OD
-        self.Rotor_ID                         = Rotor_ID
-        self.rotor_mount_hole_dia             = rotor_mount_hole_dia
-        self.rotor_mount_hole_CSK_OD          = rotor_mount_hole_CSK_OD
-        self.rotor_mount_hole_CSK_head_hight  = rotor_mount_hole_CSK_head_hight
-
-        self.motorDiaMM    = Stator_OD
-        self.motorLengthMM = stator_height
-
-    def getMaxMotorAngVelRadPerSec(self): return self.maxMotorAngVelRadPerSec
-    def getMaxMotorPower(self):           return self.maxMotorPower
-    def getMaxMotorTorque(self):          return self.maxMotorTorque
-    def getMassKG(self):                  return self.massKG
-    def getDiaMM(self):                   return self.motorDiaMM
-    def getLengthMM(self):                return self.motorLengthMM
-    def getStatorODMM(self):              return self.Stator_OD
-    def getStatorIDMM(self):              return self.Stator_ID
-    def getStatorHeightMM(self):          return self.stator_height
-    def getRotorODMM(self):               return self.Rotor_OD
-    def getRotorIDMM(self):               return self.Rotor_ID
-    def getRotorHeightMM(self):           return self.Rotor_height
-
-    def printParameters(self):
-        print("Maximum motor angular velocity = ", round(self.maxMotorAngVelRPM, 2),         " RPM")
-        print("Maximum motor power            = ", self.maxMotorPower,                       " W")
-        print("Maximum continuous torque      = ", round(self.maxMotorTorque, 3),            " Nm")
-        print("Maximum angular velocity       = ", round(self.maxMotorAngVelRadPerSec, 2),    " rad/s")
-        print("Mass                           = ", self.massKG,                              " kg")
-
-
-# -------------------------------------------------------------------------
-# Frameless Inrunner motor — INCPG version (from ActuatorAndGearbox_INCPG_dependent.py / ActuatorAndGearbox_INCPG_independent.py)
-# -------------------------------------------------------------------------
-class motor_frameless_inrunner_suyash:
-    
     def __init__(self,
                  rotor_OD                     = 55.6,
                  stator_ID                    = 57,
@@ -559,75 +491,78 @@ class motor_frameless_inrunner_suyash:
                  stator_height                = 24.5,
                  stator_OD                    = 104,
                  stator_hole_dia              = 3,
-                 stator_top_height            = 7,
+                 stator_wire_top_height       = 7,
                  stator_mid_height            = 13,
-                 stator_bottom_height         = 4.5,
-                 stator_inside_OD             = 101,
+                 stator_wire_bottom_height    = 4.5,
+                 stator_wire_OD               = 101,
                  stator_hole_num              = 4,
-                 stator_inside_ID             = 58,
+                 stator_wire_ID               = 58,
                  maxMotorAngVelRPM            = 5040,  # RPM
                  maxMotorTorque               = 1.3,   # Nm
                  maxMotorPower                = 1.3 * 5040 * 2*np.pi/60,  # W
                  motorMass                    = 0.265, # KG
-                 motorName                    = "RO100"):
+                 motorName                    = "RI100"):
 
         self.motorName = motorName
 
         # Physical geometry
-        self.rotor_OD                     = rotor_OD
-        self.stator_ID                    = stator_ID
-        self.rotor_height                 = rotor_height
-        self.rotor_ID                     = rotor_ID
-        self.stator_height                = stator_height
-        self.stator_OD                    = stator_OD
-        self.stator_hole_dia              = stator_hole_dia
-        self.stator_top_height            = stator_top_height
-        self.stator_mid_height            = stator_mid_height
-        self.stator_bottom_height         = stator_bottom_height
-        self.stator_inside_OD             = stator_inside_OD
-        self.stator_hole_num              = stator_hole_num
-        self.stator_inside_ID             = stator_inside_ID
-        self.motorDiaMM                   =  self.stator_OD
-        self.motorLengthMM                = self.stator_top_height + self.stator_mid_height + self.stator_bottom_height 
+        self.rotor_OD      = rotor_OD
+        self.stator_ID     = stator_ID
+        self.rotor_height  = rotor_height
+        self.rotor_ID      = rotor_ID
+        self.stator_height = stator_height
+        self.stator_OD     = stator_OD
+        self.motorDiaMM    = self.stator_OD
 
-        #Motor other param
-        self.maxMotorAngVelRPM            = maxMotorAngVelRPM
-        self.maxMotorAngVelRadPerSec      = maxMotorAngVelRPM * (2 * np.pi / 60)
-        self.maxMotorTorque               = maxMotorTorque
-        self.maxMotorPower                = maxMotorPower
-        self.massKG                       = motorMass     # kg
+        # Stator parameters
+        self.stator_hole_dia           = stator_hole_dia
+        self.stator_wire_top_height    = stator_wire_top_height
+        self.stator_wire_bottom_height = stator_wire_bottom_height
+        self.stator_wire_ID            = stator_wire_ID
+        self.stator_wire_OD            = stator_wire_OD
+        self.stator_mid_height         = stator_mid_height
+        self.stator_hole_num           = stator_hole_num
+
+        # Motor length same as stator_height
+        self.motorLengthMM = (self.stator_wire_top_height +
+                              self.stator_mid_height +
+                              self.stator_wire_bottom_height)
+
+        # Motor other param
+        self.maxMotorAngVelRPM       = maxMotorAngVelRPM
+        self.maxMotorAngVelRadPerSec = maxMotorAngVelRPM * (2 * np.pi / 60)
+        self.maxMotorTorque          = maxMotorTorque
+        self.maxMotorPower           = maxMotorPower
+        self.massKG                  = motorMass     # kg
 
     # ------------------------------------------------------------------
     # Convenience getters (mirror reference code style)
     # ------------------------------------------------------------------
     
     # Maximum motor angular velocity in rad/s
-    def getMaxMotorAngVelRadPerSec(self):
-        return self.maxMotorAngVelRadPerSec
-    
+    def getMaxMotorAngVelRadPerSec(self): return self.maxMotorAngVelRadPerSec
     # Maximum motor power in W
-    def getMaxMotorPower(self):
-        return self.maxMotorPower
-    
+    def getMaxMotorPower(self):  return self.maxMotorPower
     # Maximum motor torque in Nm
-    def getMaxMotorTorque(self):
-        return self.maxMotorTorque
-    
+    def getMaxMotorTorque(self): return self.maxMotorTorque
     # Mass of the motor in kg
-    def getMassKG(self):
-        return self.massKG
-
-    def getDiaMM(self):
-       return self.motorDiaMM
-
-    def getLengthMM(self): 
-        return self.motorLengthMM
-
-    def getRotorIDMM(self):  
-        return self.rotor_ID
+    def getMassKG(self):         return self.massKG
+    def getDiaMM(self):          return self.motorDiaMM
+    def getLengthMM(self):       return self.motorLengthMM
+    def getRotorIDMM(self):      return self.rotor_ID
+    def getStatorODMM(self):     return self.stator_OD
+    def getStatorIDMM(self):     return self.stator_ID
+    def getStatorHeightMM(self): return self.stator_height
+    def getRotorODMM(self):      return self.rotor_OD
+    def getRotorHeightMM(self):  return self.rotor_height
 
     def printParameters(self):
         print(f"Motor: {self.motorName}")
+        print("Maximum motor angular velocity = ", round(self.maxMotorAngVelRPM, 2),         " RPM")
+        print("Maximum motor power            = ", self.maxMotorPower,                       " W")
+        print("Maximum continuous torque      = ", round(self.maxMotorTorque, 3),            " Nm")
+        print("Maximum angular velocity       = ", round(self.maxMotorAngVelRadPerSec, 2),    " rad/s")
+        print("Mass                           = ", self.massKG,                              " kg")
         print(f"  rotor_OD              = {self.rotor_OD} mm")
         print(f"  stator_ID             = {self.stator_ID} mm")
         print(f"  rotor_height          = {self.rotor_height} mm")
@@ -635,9 +570,9 @@ class motor_frameless_inrunner_suyash:
         print(f"  stator_height         = {self.stator_height} mm")
         print(f"  stator_OD             = {self.stator_OD} mm")
         print(f"  stator_hole_dia       = {self.stator_hole_dia} mm")
-        print(f"  stator_top_height     = {self.stator_top_height} mm")
+        print(f"  stator_wire_top_height     = {self.stator_wire_top_height} mm")
         print(f"  stator_mid_height     = {self.stator_mid_height} mm")
-        print(f"  stator_bottom_height  = {self.stator_bottom_height} mm")
-        print(f"  stator_inside_OD      = {self.stator_inside_OD} mm")
+        print(f"  stator_wire_bottom_height  = {self.stator_wire_bottom_height} mm")
+        print(f"  stator_wire_OD      = {self.stator_wire_OD} mm")
         print(f"  stator_hole_num       = {self.stator_hole_num}")
-        print(f"  stator_inside_ID      = {self.stator_inside_ID} mm")
+        print(f"  stator_wire_ID      = {self.stator_wire_ID} mm")

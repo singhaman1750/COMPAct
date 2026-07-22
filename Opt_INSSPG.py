@@ -61,21 +61,33 @@ motor_name = "RI100"
 m_data     = motor_data[motor_name]
 
 # Instantiate your new Inrunner Motor
+# Kv-based performance spec is converted to direct spec here, since the motor
+# class itself only accepts direct performance parameters (matches the outrunner
+# motor class convention).
+MotorRI100_Kv                   = m_data["Kv"]
+MotorRI100_maxContinuousCurrent = m_data["maxContinuousCurrent"]
+MotorRI100_ratedVoltage         = m_data["ratedVoltage"]
+MotorRI100_maxMotorAngVelRPM    = MotorRI100_Kv * MotorRI100_ratedVoltage
+MotorRI100_maxMotorTorque       = MotorRI100_maxContinuousCurrent / (MotorRI100_Kv * 2 * np.pi / 60)
+
 MotorRI100 = motor(
-    Kv                              = m_data["Kv"],
-    maxContinuousCurrent            = m_data["maxContinuousCurrent"],
-    ratedVoltage                    = m_data["ratedVoltage"],
-    power                           = m_data["power"],
-    massKG                          = m_data["massKG"],
-    Stator_ID                       = m_data["Stator_ID"],
-    Stator_OD                       = m_data["Stator_OD"],
+    rotor_OD                        = m_data["Rotor_OD"],
+    stator_ID                       = m_data["Stator_ID"],
+    rotor_height                    = m_data["Rotor_height"],
+    rotor_ID                        = m_data["Rotor_ID"],
     stator_height                   = m_data["stator_height"],
-    Rotor_height                    = m_data["Rotor_height"],
-    Rotor_OD                        = m_data["Rotor_OD"],
-    Rotor_ID                        = m_data["Rotor_ID"],
-    rotor_mount_hole_dia            = m_data["rotor_mount_hole_dia"],
-    rotor_mount_hole_CSK_OD         = m_data["rotor_mount_hole_CSK_OD"],
-    rotor_mount_hole_CSK_head_hight = m_data["rotor_mount_hole_CSK_head_hight"],
+    stator_OD                       = m_data["Stator_OD"],
+    stator_hole_dia                 = m_data["stator_mounting_holes_dia"],
+    stator_wire_top_height          = m_data["stator_upper_step_height"],
+    stator_wire_bottom_height       = m_data["stator_bottom_step_height_"],
+    stator_wire_OD                  = m_data["stator_side_step_OD"],
+    stator_wire_ID                  = m_data["stator_side_step_ID"],
+    stator_mid_height               = m_data["stator_mid_height"],
+    stator_hole_num                 = m_data["stator_hole_num"],
+    maxMotorAngVelRPM               = MotorRI100_maxMotorAngVelRPM,
+    maxMotorTorque                  = MotorRI100_maxMotorTorque,
+    maxMotorPower                   = m_data["power"],
+    motorMass                       = m_data["massKG"],
     motorName                       = motor_name
 )
 

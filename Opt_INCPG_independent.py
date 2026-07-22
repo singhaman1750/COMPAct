@@ -62,12 +62,12 @@ MotorRI100  = motor(rotor_OD                     = 55.6,
                   stator_height                = 24.5,
                   stator_OD                    = 104,
                   stator_hole_dia              = 3,
-                  stator_top_height            = 7,
+                  stator_wire_top_height       = 7,
                   stator_mid_height            = 13,
-                  stator_bottom_height         = 4.5,
-                  stator_inside_OD             = 101,
+                  stator_wire_bottom_height    = 4.5,
+                  stator_wire_OD               = 101,
                   stator_hole_num              = 4,
-                  stator_inside_ID             = 58,
+                  stator_wire_ID               = 58,
                   maxMotorAngVelRPM            = 4368,  # RPM
                   maxMotorTorque               = 1.76,   # Nm
                   maxMotorPower                = 1.76 * 4368 * 2*np.pi/60,  # W

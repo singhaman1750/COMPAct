@@ -4,7 +4,7 @@ import sys
 import time
 import math
 
-from CommonComponents import material, bearings_discrete, nuts_and_bolts_dimensions, motor_frameless_inrunner_mahi as motor
+from CommonComponents import material, bearings_discrete, nuts_and_bolts_dimensions, motor_frameless_inrunner as motor
 
 class singleStagePlanetaryGearbox:
     def __init__(self, 
@@ -427,13 +427,27 @@ class singleStagePlanetaryActuator:
         # --- Inrunner Motor: Rotor & Stator ---
         self.motor_OD      = self.motorDiaMM
         self.motor_height  = self.motorLengthMM
-        self.Rotor_ID      = self.design_params.get("Rotor_ID", 45)
-        self.Rotor_OD      = self.design_params.get("Rotor_OD", 55.6)
-        self.Rotor_height  = self.design_params.get("Rotor_height", 15)
-        self.Stator_ID     = self.design_params.get("Stator_ID", 57)
-        self.Stator_OD     = self.design_params.get("Stator_OD", 104)
-        self.stator_height = self.design_params.get("stator_height", 24.5)
+        self.Rotor_ID             = self.motor.rotor_ID
+        self.Rotor_OD             = self.motor.rotor_OD
+        self.Rotor_height         = self.motor.rotor_height
+        self.Stator_ID            = self.motor.stator_ID
+        self.Stator_OD            = self.motor.stator_OD
+        self.stator_height        = self.motor.stator_height
+        self.stator_mounting_holes_dia  = self.motor.stator_hole_dia # self.design_params.get("stator_mounting_holes_dia", 3)
+        self.stator_upper_step_height   = self.motor.stator_wire_top_height # self.design_params.get("stator_upper_step_height", 7)
+        self.stator_mid_height          = self.motor.stator_mid_height
+        self.stator_bottom_step_height_ = self.motor.stator_wire_bottom_height # self.design_params.get("stator_bottom_step_height_", 4.5)
+        self.stator_side_step_OD        = self.motor.stator_wire_OD # self.design_params.get("stator_side_step_OD", 101)
+        self.stator_side_step_ID        = self.motor.stator_wire_ID # self.design_params.get("stator_side_step_ID", 90)
+        self.stator_hole_num            = self.motor.stator_hole_num
         
+        # self.Rotor_ID      = self.design_params.get("Rotor_ID", 45)
+        # self.Rotor_OD      = self.design_params.get("Rotor_OD", 55.6)
+        # self.Rotor_height  = self.design_params.get("Rotor_height", 15)
+        # self.Stator_ID     = self.design_params.get("Stator_ID", 57)
+        # self.Stator_OD     = self.design_params.get("Stator_OD", 104)
+        # self.stator_height = self.design_params.get("stator_height", 24.5)
+
         self.rotor_mount_hole_dia            = self.design_params.get("rotor_mount_hole_dia", 4)
         self.rotor_mount_hole_CSK_OD         = self.design_params.get("rotor_mount_hole_CSK_OD", 8)
         self.rotor_mount_hole_CSK_head_hight = self.design_params.get("rotor_mount_hole_CSK_head_hight", 2)
@@ -456,14 +470,9 @@ class singleStagePlanetaryActuator:
 
         # --- Stator Casings ---
         self.stator_casing_thickness                 = self.design_params.get("stator_casing_thickness", 3.5)
-        self.stator_bottom_step_height_              = self.design_params.get("stator_bottom_step_height_", 4.5)
-        self.stator_upper_step_height                = self.design_params.get("stator_upper_step_height", 7)
-        self.stator_side_step_OD                     = self.design_params.get("stator_side_step_OD", 101)
-        self.stator_mounting_holes_dia               = self.design_params.get("stator_mounting_holes_dia", 3)
+        self.stator_casing_hole_dia                  = self.design_params.get("stator_casing_hole_dia", 4)
         self.stator_hole_bolt_socket_head_dia        = self.design_params.get("stator_hole_bolt_socket_head_dia", 5.5)
         self.stator_bearing_support_casing_thickness = self.design_params.get("stator_bearing_support_casing_thickness", 2.5)
-
-        self.stator_casing_hole_dia                  = self.design_params.get("stator_casing_hole_dia", 4)
         self.stator_casing_hole_socket_head_dia      = self.design_params.get("stator_casing_hole_socket_head_dia", 7.25)
 
         # --- Case Mounting & Output Dimensions ---
@@ -511,7 +520,7 @@ class singleStagePlanetaryActuator:
         self.sun_shaft_bearing_OD     = self.design_params.get("sun_shaft_bearing_OD", 16)
         self.sun_shaft_bearing_width  = self.design_params.get("sun_shaft_bearing_width", 5)
 
-        ##-------bearing mount thickness ------ ##
+        # #-------bearing mount thickness ------ ##
         self.bearing_mount_thickness = self.design_params.get("bearing_mount_thickness",2)
 
         #------------------------------------------------------
@@ -1413,7 +1422,7 @@ class singleStagePlanetaryActuator:
                                 (self.planet_shaft_step_offset * 2) + 
                                 self.carrier_PCD + 
                                 (self.standard_clearance_1_5mm * 2))
-            condition_1_passes = (required_diameter <= self.motor.Stator_ID)
+            condition_1_passes = (required_diameter <= self.motor.stator_ID)
             
             # --- CONSTRAINT 2: Sun gear must fit inside the secondary carrier bearing ---
             sun_gear_dia = self.Ns * self.module
