@@ -1,4 +1,4 @@
-import sys
+import argparse
 
 GEARBOX_DISPATCH = {
     "sspg": "Opt_SSPG",
@@ -182,13 +182,14 @@ def main(motor, gearbox_type, gear_ratio=0):
         print("-------------------------------")
 
 if __name__ == "__main__":
-    if len(sys.argv) != 4:
-        print("Usage:")
-        print("  python actOpt.py <motor> <gearbox_type> <gear_ratio>")
-        sys.exit(1)
+    parser = argparse.ArgumentParser(
+        prog="actOpt.py",
+        description="Run planetary gearbox actuator optimization."
+    )
+    parser.add_argument("--motor", required=True, help="Motor name, e.g. U8, RO100, RI100")
+    parser.add_argument("--gb_type", required=True, help="Gearbox type, e.g. sspg, icpg, insspg_type_1")
+    parser.add_argument("--gr", required=True, type=float, help="Gear ratio (must be > 2)")
 
-    motor = sys.argv[1]
-    gearbox_type = sys.argv[2]
-    gear_ratio = float(sys.argv[3])
+    args = parser.parse_args()
 
-    main(motor, gearbox_type, gear_ratio)
+    main(args.motor, args.gb_type, args.gr)

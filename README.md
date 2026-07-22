@@ -163,17 +163,17 @@ Run the Python script from the root directory to generate optimal gear parameter
 
 **Syntax:**
 ```bash
-python actOpt.py <motor> <gearbox> <ratio>
+python actOpt.py --motor <motor> --gb_type <gearbox_type> --gr <ratio>
 ```
-* **`<motor>`**: U8, U10, U12, MN8014, VT8020, MAD_M6C12 , RO100 , RI100 , RO80
-* **`<gearbox>`**: sspg, cpg, dspg, wpg , icpg , insspg_type_1 {Independent} , insspg_type_2 {Dependent} 
-* **`<ratio>`**: Must be a value > 2.
+* **`--motor`**: U8, U10, U12, MN8014, VT8020, MAD_M6C12 , RO100 , RI100 , RO80
+* **`--gb_type`**: sspg, cpg, dspg, wpg , icpg , insspg_type_1 {Independent} , insspg_type_2 {Dependent} 
+* **`--gr`**: Must be a value > 2.
 
 **Example:**
 To optimize a **RO100** with a **Internal-Compound-Planetary Gearbox** and a **ratio of 6.5**:
 
 ```bash
-python actOpt.py RO100 icpg 6.5
+python actOpt.py --motor RO100 --gb_type icpg --gr 6.5
 ```
 
 ---
@@ -181,7 +181,7 @@ python actOpt.py RO100 icpg 6.5
 To optimize a **RI100** with a **Inrunner-Dependent-Single-Stage Planetary Gearbox** and a **ratio of 6.5**:
 
 ```bash
-python actOpt.py RI100 insspg_type_2 6.5
+python actOpt.py --motor RI100 --gb_type insspg_type_2 --gr 6.5
 ```
 
 ---
@@ -189,37 +189,37 @@ python actOpt.py RI100 insspg_type_2 6.5
 To optimize a **RI100** with a **Inrunner-Independent-Single-Stage Planetary Gearbox** and a **ratio of 6.5**:
 
 ```bash
-python actOpt.py RI100 insspg_type_1 6.5
+python actOpt.py --motor RI100 --gb_type insspg_type_1 --gr 6.5
 ```
 
 **Syntax for ISSPG:**  
 ```bash
-python actOpt.py <motor> <gearbox_type> <ratio>
+python actOpt.py --motor <motor> --gb_type <gearbox_type> --gr <ratio>
 ```
-* **`<gearbox_type>`**: isspg_inside (InBearing design), isspg_compact (OutBearing design)
-* **`<motor>`**: RO80, RO100
-* **`<ratio>`**: Must be a value > 2.
+* **`--gb_type`**: isspg_inside (InBearing design), isspg_compact (OutBearing design)
+* **`--motor`**: RO80, RO100
+* **`--gr`**: Must be a value > 2.
 
 **Example:**
 To optimize **RO100** with an **Internal Single-Stage Planetary Gearbox InBearing** and a **ratio of 6.5**:
 
 ```bash
-python actOpt.py RO100 isspg_inside 6.5
+python actOpt.py --motor RO100 --gb_type isspg_inside --gr 6.5
 ```
 
 **Syntax for INCPG:**
 ```bash
-python actOpt.py <motor> <gearbox_type> <ratio>
+python actOpt.py --motor <motor> --gb_type <gearbox_type> --gr <ratio>
 ```
-* **`<gearbox_type>`**: incpg_independent, incpg_dependent
-* **`<motor>`**: RI100
-* **`<ratio>`**: Must be a value > 2.
+* **`--gb_type`**: incpg_independent, incpg_dependent
+* **`--motor`**: RI100
+* **`--gr`**: Must be a value > 2.
   
 **Example:**
 To optimize **RI100** with an **Inrunner Compound Planetary Gearbox Independent** and a **ratio of 6.5**:
 
 ```bash
-python actOpt.py RI100 incpg_independent 6.5
+python actOpt.py --motor RI100 --gb_type incpg_independent --gr 6.5
 ```
 
 ---
