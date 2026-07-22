@@ -66,6 +66,27 @@ Audited `README.md` against the actual current code (`actOpt.py`'s `GEARBOX_DISP
 
 **Estimated total (working together, interactively):** ~1.5 to 2 hours.
 
+### Motor-parameter pipeline — organize the motor JSON config files and make every gearbox type config-driven
+
+Audited how each of the 10 `Opt_*.py` files actually sources its motor values. Only 3 of the 10 are properly config-driven; the rest either hardcode motor values directly in the Python source or load a config file whose relevant data is never used.
+
+**Findings:**
+- **Three different, incompatibly-shaped "motor config" JSON files already exist**, each invented independently: `config_files/config.json` (`"Motors"` keyed by `"MotorU8_framed"` etc., Kv-based, used by SSPG/CPG/DSPG/WPG), `config_files/motor_config.json` (`"Motors"` keyed by `"MotorRO100"`/`"MotorRO80"`, Kv-based, used by ICPG only), and `config_files/insspg_motor_config.json` (`"Motors"` keyed by `"RI100"`, direct-spec, used by INSSPG only — the one we just fixed). No shared schema, no shared key-naming convention.
+- **`Opt_INCPG_dependent.py` and `Opt_INCPG_independent.py` don't read motor data from JSON at all.** Both load `config_files/config.json` at the top, but its `"Motors"` section doesn't even contain an `RI100` entry, and `motor_data[...]` is never indexed anywhere in either file. The actual `MotorRI100 = motor(...)` call hardcodes every value as a literal directly in the source — and that literal block is identically duplicated across both files.
+- **`Opt_ISSPG_inside.py` and `Opt_ISSPG_compact.py` have the same problem.** They load `config_files/config.json` and `config_files/isspg_params.json`, but `isspg_params.json` has no `"Motors"` section at all (only `isspg_optimization_parameters`/`isspg_3DP_design_parameters`), and `motor_data` is never referenced. `MotorRO100`/`MotorRO80`/`MotorRO60` are hardcoded literals, duplicated identically across both files.
+- **Net effect:** updating a motor's spec for INCPG or ISSPG today means manually editing the same numbers in two separate `.py` files, with no config file as the source of truth — exactly the kind of drift that caused the RO80 `maxContinuousCurrent` bug found earlier this session.
+
+**Plan:**
+1. **Design one common motor-config JSON schema** that covers both Kv-based (framed outrunner) and direct-spec (RO/RI frameless) motors, and decide how much motor-class-specific geometry (stator wire dims, rotor mount holes, etc.) belongs in the shared schema vs. per-gearbox-type files — needs your input on the "properly organized" shape, since it touches domain judgment calls, not just code moves — *~20-30 min*
+2. **Consolidate the 3 existing motor-config files** (`config.json`'s `Motors` section, `motor_config.json`, `insspg_motor_config.json`) into that one schema, deciding what happens to the non-motor sections of `config.json` (material properties, motor drivers, gear standards) that other files still depend on — *~30-40 min*
+3. **Add motor entries for INCPG's `RI100`** and **ISSPG's `RO100`/`RO80`/`RO60`** to the consolidated config, using the values currently hardcoded in the 4 affected `Opt_*.py` files as the source of truth to migrate from — *~20-30 min*
+4. **Rewire all 10 `Opt_*.py` files** to read motor values from the single consolidated config via a consistent lookup pattern (mirroring how SSPG/CPG/DSPG/WPG and the now-fixed INSSPG already do it) — *~40-60 min*
+5. **Delete the dead config-loading code** in the 4 affected files (currently loads `config.json`/`isspg_params.json` without ever using their motor data) once the real lookups are wired in — *~10 min*
+6. **Verify**: syntax check, grep sweep for any remaining hardcoded motor literals, live-run all 11 gearbox-type combos through `actOpt.py` and confirm identical output to the established baseline — *~30-45 min (mostly wait time on the slower combos, e.g. DSPG)*
+7. Commit — *~5 min*
+
+**Estimated total (working together, interactively):** ~2.5 to 3.5 hours, likely spread across more than one sitting given the schema-design decision in step 1.
+
 ## Bugs
 
 ### 1. `bearings_discrete` — OD table vs ID table content differ
