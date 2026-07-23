@@ -50,7 +50,8 @@ Motor_Driver_OdrivePro_params = motor_driver_data["OdrivePro"]
 
 #--------------------------------------------------------
 # Motors
-#--------------------------------------------------------
+#-------------------------------------------------------- 
+##TODO: Consider loading motor parameters from a JSON file for better maintainability
 MotorRO100 = motor(
                   motor_OD                     = 113.5,
                   stator_ID                    = 74,
@@ -62,7 +63,7 @@ MotorRO100 = motor(
                   motor_stator_extrusion_dia   = 88,
                   stator_height                = 31.5,
                   stator_OD                    = 100,
-                  stator_top_rotor_top_offset  = 3,
+                  stator_top_rotor_top_offset  = 3,     ## TODO: this value is wrong, need to check with the motor datasheet (not the same as json file)
                   stator_hole_dia              = 3,
                   stator_hole_PCD              = 82.5,
                   motor_rotor_hole_num         = 6,
@@ -73,7 +74,7 @@ MotorRO100 = motor(
                   maxMotorTorque               = 4,     # Nm
                   maxMotorPower                = 4 * 2550 * 2*np.pi/60,  # W
                   motorMass                    = 0.525, # KG
-                  motorName                    = "RO100")
+                  motorName                    = "RO100")    
 
 MotorRO80 = motor(
                  motor_OD                     = 92.6,

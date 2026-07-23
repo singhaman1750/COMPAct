@@ -105,7 +105,10 @@
         "sun_bottom_casing_bearing_height": 5.0,
         "sun_sec_carrier_bearing_ID": 25.0,
         "sun_sec_carrier_bearing_OD": 32.0,
-        "sun_sec_carrier_bearing_height": 4.0
+        "sun_sec_carrier_bearing_height": 4.0,
+        "rotor_mount_hole_dia": 4.0,
+        "rotor_mount_hole_CSK_OD": 8.0,
+        "rotor_mount_hole_CSK_head_hight": 3.0
 
     }
 }

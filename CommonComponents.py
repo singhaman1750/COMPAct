@@ -378,7 +378,7 @@ class motor_frameless_outrunner:
                  rotorCSKHeadHeightMM            = 2.3,
                  motor_rotor_hole_PCD            = 62,
                  motor_rotor_hole_dia            = 4,
-                 stator_top_rotor_top_offset  = 4.8,
+                 stator_top_rotor_top_offset  = 2.75,
                  stator_hole_dia              = 3,
                  motor_rotor_hole_num         = 6,
                  # ── Overall envelope ────────────────────────────────────

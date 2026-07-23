@@ -496,7 +496,7 @@ class internalcompoundPlanetaryActuator:
         self.rotor_mount_hole_dia     = self.motor.getRotorMountHoleDiaMM()
         self.rotor_mount_hole_num     = self.motor.getMotorRotorHoleNum()
         
-
+        self.stator_mounting_hole_allen_socket_head_dia = self.design_params["stator_mounting_hole_allen_socket_head_dia"]
         # ── Planet shaft & bearing parameters ─────────────────────────────
         self.planet_pin_bolt_dia      = self.design_params["planet_pin_bolt_dia"]
         self.planet_shaft_dia         = self.design_params["planet_shaft_dia"]
@@ -712,6 +712,7 @@ class internalcompoundPlanetaryActuator:
             f'"stator_height"= {self.stator_height}\n',
             f'"stator_mounting_holes_PCD"= {self.stator_mounting_holes_PCD}\n',
             f'"stator_top_rotor_top_offset"= {self.stator_top_rotor_top_offset}\n',
+            f'"stator_mounting_hole_allen_socket_head_dia"= {self.stator_mounting_hole_allen_socket_head_dia}\n',
             f'"stator_hole_dia"= {self.stator_hole_dia}\n',
             f'"bearing_retainer_hole_dia"= {self.bearing_retainer_hole_dia}\n',
             f'"bearing_retainer_hole_num"= {self.bearing_retainer_hole_num}\n',

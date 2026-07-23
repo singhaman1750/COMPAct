@@ -98,6 +98,7 @@ MotorRO100_rotorMountHoleDiaMM     = motor_data["MotorRO100"]["rotorMountHoleDia
 MotorRO100_motor_height                   = motor_data["MotorRO100"]["motor_height"]
 MotorRO100_motor_stator_extrusion_dia        = motor_data["MotorRO100"]["motor_stator_extrusion_dia"]
 MotorRO100_motor_stator_extrusion_depth      = motor_data["MotorRO100"]["motor_stator_extrusion_depth"]
+MotorRO100_stator_top_rotor_top_offset      = motor_data["MotorRO100"]["stator_top_rotor_top_offset"]
 # =====================================================
 # Motor RO80
 # =====================================================
@@ -142,7 +143,7 @@ MotorRO80_rotorMountHoleDiaMM     = motor_data["MotorRO80"]["rotorMountHoleDiaMM
 MotorRO80_motor_height                   = motor_data["MotorRO80"]["motor_height"]
 MotorRO80_motor_stator_extrusion_dia        = motor_data["MotorRO80"]["motor_stator_extrusion_dia"]
 MotorRO80_motor_stator_extrusion_depth      = motor_data["MotorRO80"]["motor_stator_extrusion_depth"]
-
+MotorRO80_stator_top_rotor_top_offset      = motor_data["MotorRO80"]["stator_top_rotor_top_offset"]
 
 # =====================================================
 # Motor - RO100
@@ -175,7 +176,8 @@ MotorRO100 = motor(
     motor_rotor_hole_dia     = MotorRO100_rotorMountHoleDiaMM,
 
     motor_stator_extrusion_dia   =  MotorRO100_motor_stator_extrusion_dia ,
-    motor_stator_extrusion_depth =  MotorRO100_motor_stator_extrusion_depth ,  
+    motor_stator_extrusion_depth =  MotorRO100_motor_stator_extrusion_depth , 
+    stator_top_rotor_top_offset  =  MotorRO100_stator_top_rotor_top_offset ,
 
     motor_height                    = MotorRO100_motor_height,
 
@@ -214,6 +216,7 @@ MotorRO80 = motor(
 
     motor_stator_extrusion_dia   =  MotorRO80_motor_stator_extrusion_dia ,
     motor_stator_extrusion_depth =  MotorRO80_motor_stator_extrusion_depth ,  
+    stator_top_rotor_top_offset  =  MotorRO80_stator_top_rotor_top_offset ,
 
     motor_height                    = MotorRO80_motor_height,
 
