@@ -12,6 +12,7 @@ GEARBOX_DISPATCH = {
     "incpg_independent": "Opt_INCPG_independent",
     "isspg_inside": "Opt_ISSPG_inside",
     "isspg_compact": "Opt_ISSPG_compact",
+    "inwpg_compact": "Opt_INWPG_compact"
 }
 
 def main(motor, gearbox_type, gear_ratio=0):
@@ -177,6 +178,15 @@ def main(motor, gearbox_type, gear_ratio=0):
         print("Optimal Parameters:")
         print("Number of teeth: Sun(Ns):", opt_parameters[2], ", Planet(Np):", opt_parameters[3], ", Ring(Nr):", opt_parameters[4],
                 ", Module(m):", opt_parameters[5], ", NumPlanet(n_p):", opt_parameters[1])
+        print("---")
+        print("Gear Ratio(GR):", opt_parameters[0],": 1")
+        print("-------------------------------")
+
+    elif(gearbox_type=="inwpg_compact"):
+        print("-------------------------------")
+        print("Optimal Parameters:")
+        print("Number of teeth: Sun1(Ns1):", opt_parameters[2], ", Planet1(Np1):", opt_parameters[3], ", Ring1(R1):", opt_parameters[4], ", Planet2(Np2):", opt_parameters[5], ", Ring2(Nr2):", opt_parameters[6],
+              ", Module1(m1):", opt_parameters[7], ", Module2(m2):", opt_parameters[8], ", NumPlanet(n_p):", opt_parameters[1])
         print("---")
         print("Gear Ratio(GR):", opt_parameters[0],": 1")
         print("-------------------------------")
