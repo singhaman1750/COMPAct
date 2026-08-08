@@ -46,6 +46,7 @@ class bearings_discrete:
                [50, 65, 7, 0.050],
                [55, 72, 9, 0.081],
                [60, 78, 10, 0.103],
+               [63.5, 76.2, 6.35, 0.07],
                [65, 85, 10, 0.128],
                [70, 90, 10, 0.134],
                [75, 95, 10, 0.149],
@@ -341,7 +342,7 @@ class motor_framed_outrunner:
 
 
 # -------------------------------------------------------------------------
-# Frameless Outrunner motor (from ActuatorandGearbox_ICPG.py / ActuatorAndGearbox_ISSPG_inside.py / ActuatorAndGearbox_ISSPG_compact.py)
+# Frameless Outrunner motor (from ActuatorandGearbox_ICPG.py / ActuatorAndGearbox_ISSPG_inside.py / ActuatorAndGearbox_ISSPG_compact.py / ActuatorAndGearbox_IDSPG.py)
 # -------------------------------------------------------------------------
 class motor_frameless_outrunner:
     """
@@ -552,6 +553,7 @@ class motor_frameless_inrunner:
     def getRotorIDMM(self):      return self.rotor_ID
     def getStatorODMM(self):     return self.stator_OD
     def getStatorIDMM(self):     return self.stator_ID
+    def getStator_wire_OD(self): return self.stator_wire_OD
     def getStatorHeightMM(self): return self.stator_height
     def getRotorODMM(self):      return self.rotor_OD
     def getRotorHeightMM(self):  return self.rotor_height

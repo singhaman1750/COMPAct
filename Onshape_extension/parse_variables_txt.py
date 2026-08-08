@@ -1,7 +1,9 @@
 import re
+import sys
 
 def parse_variable_file(filepath):
     variables = []
+    seen_names = set()
 
     NUMBER_VARS = {
         "pattern_num_bulge",
@@ -42,7 +44,10 @@ def parse_variable_file(filepath):
         "motor_mount_driver_hole_num",
         "rotor_hub_sun_hole_num",
         "stator_hole_num",
-        "bearing_retainer_hole_num"
+        "bearing_retainer_hole_num",
+        "stator_mounting_hole_num",
+        "rotor_mount_hole_num",
+        "a2_bearing_retainer_hole_num"
     }
 
     with open(filepath, "r") as f:

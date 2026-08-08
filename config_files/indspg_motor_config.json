@@ -1,0 +1,96 @@
+{   
+    "Gear_standard_parameters":{
+        "coefficientOfFriction": 0.3,
+        "pressureAngleDEG": 20
+    },
+    "Lewis_params": {
+        "FOS": 1.2,
+        "serviceFactor": 2.0
+    },
+    "MIT_params": {
+        "FOS": 1.2,
+        "serviceFactor": 1.5
+    },
+    "Material_properties":{
+        "Steel": {
+            "density": 1245.6,
+            "maxAllowableStressMPa": 70
+        },
+        "Aluminum": {
+            "density": 1245.6
+        },
+        "PLA": {
+            "density": 1245.6,
+            "maxAllowableStressMPa": 70
+        }
+    },
+    "Motors": {
+        "MotorRI100": {
+            "Kv"                         : 55,
+            "maxContinuousCurrent"       : 20,
+            "ratedVoltage"               : 48,
+            "power"                      : 838,
+            "massKG"                  : 0.71,
+            "statorODMM"              : 100,
+            "statorIDMM"              : 74,
+            "statorHeightMM"          : 31.5,
+            "rotorODMM"               : 113.5,
+            "rotorIDMM"               : 101.8,
+            "rotorHeightMM"           : 33.45,
+            "stator_mounting_hole_num"    : 6,     
+            "statorMountingHolesPCDMM": 82.5,
+            "stator_mounting_holes_diaMM" : 3, 
+            "rotorBottomIDMM"         : 60,
+            "rotorBottomThicknessMM"  : 3.2,
+            "rotorCSKHeadUpperDiaMM"  : 8,
+            "rotorCSKHead_heightMM" : 2.5,     
+            "rotorMountHolePCDMM"     : 74,
+            "rotorMountHoleDiaMM"     : 4,
+            "rotor_mount_hole_num"    : 6,    
+            "motor_height"            : 36.2 ,
+            "motor_stator_extrusion_dia" : 88 ,
+            "motor_stator_extrusion_depth" : 2,
+            "stator_top_rotor_top_offset" : 2.75
+        },
+        "MotorRO80": {
+            "Kv"                         : 105,
+            "maxContinuousCurrent"       : 15,
+            "ratedVoltage"               : 48,
+            "power"                      : 490,
+            "massKG"                  : 0.352,
+            "statorODMM"              : 81,
+            "statorIDMM"              : 55,
+            "statorHeightMM"          : 22,
+            "rotorODMM"               : 92.6,
+            "rotorIDMM"               : 82.6,
+            "rotorHeightMM"           : 21.6,
+            "stator_mounting_hole_num": 6,    
+            "statorMountingHolesPCDMM": 63,
+            "stator_mounting_holes_diaMM" : 4, 
+            "rotorBottomIDMM"         : 51,
+            "rotorBottomThicknessMM"  : 2.6,
+            "rotorCSKHeadUpperDiaMM"  : 8,
+            "rotorCSKHead_heightMM" : 2.5,    
+            "rotorMountHolePCDMM"     : 62,
+            "rotorMountHoleDiaMM"     : 4,
+            "rotor_mount_hole_num"    : 6,    
+            "motor_height"            : 26.4 ,
+            "motor_stator_extrusion_dia" : 68 ,
+            "motor_stator_extrusion_depth" : 1.5,
+            "stator_top_rotor_top_offset" : 4.8
+        }
+    },
+    
+    "Design_parameters":{
+        "Internal_designs": {
+            "ringRadialWidthMM": 2.5,
+            "ringHousingWidthMM": 2.0
+        }
+    },
+    "Cost_gain_parameters":{
+        "K_Mass": 1,
+        "K_Eff": -2,
+        "K_Width": 0.2
+    }
+}
+
