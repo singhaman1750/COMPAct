@@ -42,8 +42,16 @@ def parse_variable_file(filepath):
         "motor_mount_driver_hole_num",
         "rotor_hub_sun_hole_num",
         "stator_hole_num",
-        "bearing_retainer_hole_num"
+        "bearing_retainer_hole_num",
+        "stator_mounting_hole_num",
+        "a2_bearing_retainer_hole_num",
+        "rotor_mount_hole_num",
+        "stator_mounting_hole_num"
     }
+
+    def _is_angle_variable(value: str) -> bool:
+        lower_value = value.lower()
+        return "deg" in lower_value or "rad" in lower_value
 
     with open(filepath, "r") as f:
         for line in f:
@@ -68,7 +76,7 @@ def parse_variable_file(filepath):
                 continue
 
 
-            if "deg" in value:
+            if _is_angle_variable(value):
                 var_type = "ANGLE"
                 expression = value
             else:
