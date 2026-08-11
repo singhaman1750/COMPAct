@@ -48,9 +48,9 @@
         "MAX_GB_DIA_MULT_FACTOR_MAD_M6C12" : 1.25
     },
     "idspg_design_parameters_3DP":{
-        "sCarrierExtrusionDiaMM_Stg1"                             : 8,
+        "sCarrierExtrusionDiaMM_Stg1"                             : 6,
         "sCarrierExtrusionClearanceMM_Stg1"                       : 2,
-        "sCarrierExtrusionDiaMM_Stg2"                             : 8,
+        "sCarrierExtrusionDiaMM_Stg2"                             : 6,
         "sCarrierExtrusionClearanceMM_Stg2"                       : 2,
         "ring_radial_thickness"                                   : 5,
         "planetMinDistanceMM"                                     : 5,

@@ -217,7 +217,7 @@ class doubleStagePlanetaryActuator:
         mass = self.getMassKG_3DP()
         eff = self.doubleStagePlanetaryGearbox.getEfficiency()
         width = self.doubleStagePlanetaryGearbox.Stage1.fwPlanetMM + self.doubleStagePlanetaryGearbox.Stage2.fwPlanetMM    #TODO : MAKE IT TO ACTUAL GEARBOX WIDTH
-        cost = mass - 2 * eff + 0.2 * width
+        cost = mass - 2 * eff + 0.5 * width     #TODO : bring it back to cost = mass - 2 * eff + 0.5 * width
         return cost 
 
     def setVariables_stg1(self):
@@ -449,97 +449,105 @@ class doubleStagePlanetaryActuator:
                             - self.carrier_bearing_step_width
                             - self.bearing_retainer_thickness )
 
-        if not bearing_too_large and not fw_interference:
-                # ── CASE A ── default: stator-side constrained ──────────────────────
+        # if not bearing_too_large and not fw_interference:
+        #         # ── CASE A ── default: stator-side constrained ──────────────────────
 
-            #------- defining stg 2 varibales for this relation -----------#
+        #     #------- defining stg 2 varibales for this relation -----------#
                 
-            self.a2_sec_carrier_thickness = self.design_params["sec_carrier_thickness2"]
+        #     self.a2_sec_carrier_thickness = self.design_params["sec_carrier_thickness2"]
 
-            #--------------------------------------------------------------#
+        #     #--------------------------------------------------------------#
 
-            a1_ring_gear_relation = (self.Stator_height 
-                                    + self.a1_ring_gear_thickness_mounting_casing
-                                    - self.a2_sec_carrier_thickness
-                                    - self.standard_clearance_1_5mm
-                                    - self.bearing_retainer_thickness
-                                    - self.bearing1_height
-                                    - self.carrier_bearing_step_width
-                                    - self.clearance_planet
-                                    - self.fw_r1 )
+        #     a1_ring_gear_relation = (self.Stator_height 
+        #                             + self.a1_ring_gear_thickness_mounting_casing
+        #                             - self.a2_sec_carrier_thickness
+        #                             - self.standard_clearance_1_5mm
+        #                             - self.bearing_retainer_thickness
+        #                             - self.bearing1_height
+        #                             - self.carrier_bearing_step_width
+        #                             - self.clearance_planet
+        #                             - self.fw_r1 )
                                                 
 
-            a1_fw_s_used         = ( self.Rotor_height
-                                            + self.a1_ring_gear_thickness_mounting_casing
-                                            + self.stator_rotor_top_offset
-                                            - self.a2_sec_carrier_thickness
-                                            - self.standard_clearance_1_5mm
-                                            - self.bearing1_height
-                                            - self.standard_clearance_1_5mm
-                                            - self.carrier_bearing_step_width
-                                            - self.bearing_retainer_thickness
-                                            )
+        #     a1_fw_s_used         = ( self.Rotor_height
+        #                                     + self.a1_ring_gear_thickness_mounting_casing
+        #                                     + self.stator_rotor_top_offset
+        #                                     - self.a2_sec_carrier_thickness
+        #                                     - self.standard_clearance_1_5mm
+        #                                     - self.bearing1_height
+        #                                     - self.standard_clearance_1_5mm
+        #                                     - self.carrier_bearing_step_width
+        #                                     - self.bearing_retainer_thickness
+        #                                     )
 
-        elif not bearing_too_large and fw_interference:
-            # ── CASE B ── rotor-side constrained (wide planet, bearing fits) ────
-            a1_ring_gear_relation = ( - self.rotor_bottom_thickness
-                                            - (self.Rotor_height
-                                               + self.stator_rotor_top_offset
-                                               - self.Stator_height
-                                            )
-                                            + self.standard_clearance_1_5mm
-                                            + self.sec_carrier_thickness1
-                                            - self.standard_clearance_1_5mm*0.5
-                                            + self.clearance_planet
-                                            )
+        # elif not bearing_too_large and fw_interference:
+        #     # ── CASE B ── rotor-side constrained (wide planet, bearing fits) ────
+        #     a1_ring_gear_relation = ( - self.rotor_bottom_thickness
+        #                                     - (self.Rotor_height
+        #                                        + self.stator_rotor_top_offset
+        #                                        - self.Stator_height
+        #                                     )
+        #                                     + self.standard_clearance_1_5mm
+        #                                     + self.sec_carrier_thickness1
+        #                                     - self.standard_clearance_1_5mm*0.5
+        #                                     + self.clearance_planet
+        #                                     )
 
-            a1_fw_s_used          = ( self.standard_clearance_1_5mm
-                                            + self.sec_carrier_thickness1
-                                            + self.clearance_planet
-                                            + self.fw_p1 )
+        #     a1_fw_s_used          = ( self.standard_clearance_1_5mm
+        #                                     + self.sec_carrier_thickness1
+        #                                     + self.clearance_planet
+        #                                     + self.fw_p1 )
 
-        elif bearing_too_large and not fw_interference:
-            # ── CASE C ── bearing-only override (narrow planet, sec carrier cant fit)
-            a1_ring_gear_relation = ( self.Stator_height 
-                                            + self.a1_ring_gear_thickness_mounting_casing
-                                            - self.bearing_retainer_thickness
-                                            - self.bearing1_height
-                                            - self.carrier_bearing_step_width
-                                            - self.clearance_planet
-                                            - self.fw_r1 
-                                            - self.clearance_planet*0.5
-                                            )
+        # elif bearing_too_large and not fw_interference:
+        #     # ── CASE C ── bearing-only override (narrow planet, sec carrier cant fit)
+        #     a1_ring_gear_relation = ( self.Stator_height 
+        #                                     + self.a1_ring_gear_thickness_mounting_casing
+        #                                     - self.bearing_retainer_thickness
+        #                                     - self.bearing1_height
+        #                                     - self.carrier_bearing_step_width
+        #                                     - self.clearance_planet
+        #                                     - self.fw_r1 
+        #                                     - self.clearance_planet*0.5
+        #                                     )
 
-            a1_fw_s_used          = a1_fw_s_used_min
+        #     a1_fw_s_used          = a1_fw_s_used_min
 
-        else:
-            # ── CASE D ── both constraints fire ──────────────────────────────────
-            # a1_fw_s_used = same as Case B (no clamping)
-            # a1_fw_s_used_min stored separately
-            # if a1_fw_s_used < a1_fw_s_used_min → add difference into a2_fw_s_used
-            a1_ring_gear_relation = ( - self.rotor_bottom_thickness
-                                            - (self.Rotor_height
-                                               + self.stator_rotor_top_offset
-                                               - self.Stator_height
-                                            )
-                                            + self.standard_clearance_1_5mm
-                                            + self.sec_carrier_thickness1
-                                            - self.standard_clearance_1_5mm*0.5
-                                            + self.clearance_planet
-                                            )
+        # else:
+        #     # ── CASE D ── both constraints fire ──────────────────────────────────
+        #     # a1_fw_s_used = same as Case B (no clamping)
+        #     # a1_fw_s_used_min stored separately
+        #     # if a1_fw_s_used < a1_fw_s_used_min → add difference into a2_fw_s_used
+        #     a1_ring_gear_relation = ( - self.rotor_bottom_thickness
+        #                                     - (self.Rotor_height
+        #                                        + self.stator_rotor_top_offset
+        #                                        - self.Stator_height
+        #                                     )
+        #                                     + self.standard_clearance_1_5mm
+        #                                     + self.sec_carrier_thickness1
+        #                                     - self.standard_clearance_1_5mm*0.5
+        #                                     + self.clearance_planet
+        #                                     )
 
-            a1_fw_s_used         = ( self.standard_clearance_1_5mm
-                                            + self.sec_carrier_thickness1
-                                            + self.clearance_planet
-                                            + self.fw_p1 
-            )
+        #     a1_fw_s_used         = ( self.standard_clearance_1_5mm
+        #                                     + self.sec_carrier_thickness1
+        #                                     + self.clearance_planet
+        #                                     + self.fw_p1 
+        #     )
         
 
-            shortfall = max(0, a1_fw_s_used_min - a1_fw_s_used)
+        #     shortfall = max(0, a1_fw_s_used_min - a1_fw_s_used)
 
         # --- final variable all cases ---
-
-        self.fw_s1_used = a1_fw_s_used
+        a1_ring_gear_relation = ( self.Stator_height 
+                                                    + self.a1_ring_gear_thickness_mounting_casing
+                                                    - self.bearing_retainer_thickness
+                                                    - self.bearing1_height
+                                                    - self.carrier_bearing_step_width
+                                                    - self.clearance_planet
+                                                    - self.fw_r1 
+                                                    - self.clearance_planet*0.5
+                                                    )
+        self.fw_s1_used = a1_fw_s_used_min
         self.a1_ring_gear_relation = a1_ring_gear_relation
         self.shortfall = shortfall  
 

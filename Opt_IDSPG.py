@@ -86,7 +86,7 @@ maxGBDia_multFactor = idspg_optimization_params["MAX_GB_DIA_MULT_FACTOR"]
 
 maxGearboxDiameter_RO100 = (
     maxGBDia_multFactor
-    * ( MotorRO100.getMotorODMM() )
+    * ( MotorRO100.getMotorODMM() + idspg_design_params["standard_clearance_1_5mm"]*2 )      #TODO: this is corrrect and implemen in other also
 )
 
 
