@@ -17,6 +17,7 @@ current_dir = os.path.dirname(__file__)
 # Build the file path
 config_path = os.path.join(current_dir, "config_files/config.json")
 inwpg_params_path = os.path.join(current_dir, "config_files/inwpg_params_compact.json")
+inwpg_motor_config_path = os.path.join(current_dir, "config_files/insspg_motor_config.json")
 
 # Load the JSON file
 with open(config_path, "r") as config_file:
@@ -25,10 +26,13 @@ with open(config_path, "r") as config_file:
 with open(inwpg_params_path, "r") as inwpg_params_file:
     inwpg_params = json.load(inwpg_params_file)
 
+with open(inwpg_motor_config_path, "r") as inwpg_motor_config_file:
+    inwpg_motor_config = json.load(inwpg_motor_config_file)
+
 #---------------------------------------------------
 # Transferring relevant data to individual variables
 #---------------------------------------------------
-motor_data          = config_data["Motors"]
+motor_data          = inwpg_motor_config["Motors"]
 material_properties = config_data["Material_properties"]
 
 Gear_standard_parameters = config_data["Gear_standard_parameters"]
@@ -54,24 +58,49 @@ Motor_Driver_OdrivePro_params = motor_driver_data["OdrivePro"]
 # Motors
 #--------------------------------------------------------
 
+#Motor RI100
+MotorRI100_Kv                   = motor_data["RI100"]["Kv"]                   # rpm/V
+MotorRI100_maxContinuousCurrent = motor_data["RI100"]["maxContinuousCurrent"] # A
+
+MotorRI100_maxTorque                  = MotorRI100_maxContinuousCurrent / (MotorRI100_Kv * 2 * np.pi / 60)
+MotorRI100_power                      = motor_data["RI100"]["power"]                 # W 
+
+MotorRI100_ratedVoltage               = motor_data["RI100"]["ratedVoltage"]   
+MotorRI100_maxMotorAngVelRPM          = MotorRI100_Kv * MotorRI100_ratedVoltage # RPM 
+MotorRI100_mass                       = motor_data["RI100"]["massKG"]                  # kg 
+
+MotorRI100_rotor_OD                  = motor_data["RI100"]["Rotor_OD"]
+MotorRI100_stator_ID                 = motor_data["RI100"]["Stator_ID"]
+MotorRI100_rotor_height              = motor_data["RI100"]["Rotor_height"]
+MotorRI100_rotor_ID                  = motor_data["RI100"]["Rotor_ID"]
+MotorRI100_stator_height             = motor_data["RI100"]["stator_height"]
+MotorRI100_stator_OD                 = motor_data["RI100"]["Stator_OD"]
+MotorRI100_stator_hole_dia           = motor_data["RI100"]["stator_mounting_holes_dia"]
+MotorRI100_stator_wire_top_height    = motor_data["RI100"]["stator_upper_step_height"]
+MotorRI100_stator_mid_height         = motor_data["RI100"]["stator_mid_height"]
+MotorRI100_stator_wire_bottom_height = motor_data["RI100"]["stator_bottom_step_height_"]
+MotorRI100_stator_wire_OD            = motor_data["RI100"]["stator_side_step_OD"]
+MotorRI100_stator_hole_num           = motor_data["RI100"]["stator_hole_num"]
+MotorRI100_stator_wire_ID            = motor_data["RI100"]["stator_side_step_ID"]
+
 # Motor-RI100
-MotorRI100  = motor(rotor_OD                     = 55.6,
-                  stator_ID                    = 57,
-                  rotor_height                 = 15,
-                  rotor_ID                     = 45,
-                  stator_height                = 24.5,
-                  stator_OD                    = 104,
-                  stator_hole_dia              = 3,
-                  stator_wire_top_height       = 7,
-                  stator_mid_height            = 13,
-                  stator_wire_bottom_height    = 4.5,
-                  stator_wire_OD               = 101,
-                  stator_hole_num              = 4,
-                  stator_wire_ID               = 58,
-                  maxMotorAngVelRPM            = 4368,  # RPM
-                  maxMotorTorque               = 1.76,   # Nm
-                  maxMotorPower                = 1.76 * 4368 * 2*np.pi/60,  # W
-                  motorMass                    = 0.500, # KG
+MotorRI100  = motor(rotor_OD                   = MotorRI100_rotor_OD,
+                  stator_ID                    = MotorRI100_stator_ID,
+                  rotor_height                 = MotorRI100_rotor_height,
+                  rotor_ID                     = MotorRI100_rotor_ID,
+                  stator_height                = MotorRI100_stator_height,
+                  stator_OD                    = MotorRI100_stator_OD,
+                  stator_hole_dia              = MotorRI100_stator_hole_dia,
+                  stator_wire_top_height       = MotorRI100_stator_wire_top_height,
+                  stator_mid_height            = MotorRI100_stator_mid_height,
+                  stator_wire_bottom_height    = MotorRI100_stator_wire_bottom_height,
+                  stator_wire_OD               = MotorRI100_stator_wire_OD,          
+                  stator_hole_num              = MotorRI100_stator_hole_num,     
+                  stator_wire_ID               = MotorRI100_stator_wire_ID,      
+                  maxMotorAngVelRPM            = MotorRI100_maxMotorAngVelRPM,
+                  maxMotorTorque               = MotorRI100_maxTorque,
+                  maxMotorPower                = MotorRI100_power,
+                  motorMass                    = MotorRI100_mass,
                   motorName                    = "RI100")
 
 #-------------------------------------------------------
@@ -89,7 +118,7 @@ inrunnerWolfromPlanetaryGearboxInstance = inrunnerWolfromPlanetaryGearbox(design
 #-----------------------------------------------------
 maxGBDia_multFactor           = inwpg_optimization_params["MAX_GB_DIA_MULT_FACTOR"] # 1
 
-maxGearboxDiameter_RI100         = maxGBDia_multFactor * MotorRI100.motorDiaMM       
+maxGearboxDiameter_RI100      = maxGBDia_multFactor * MotorRI100.motorDiaMM       
 
 # RI100-Actuator
 Actuator_RI100 = inrunnerWolfromPlanetaryActuator(design_parameters        = inwpg_design_params,
