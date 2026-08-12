@@ -9,80 +9,7 @@ from ActuatorAndGearbox import singleStagePlanetaryGearbox
 
 from CommonComponents import material, bearings_discrete, nuts_and_bolts_dimensions, motor_frameless_inrunner as motor
 
-class bearings_continuous:
-    def __init__(self, idRequiredMM):
-        # Bearing dataset entered according to e1102 in 
-        # [idMM, odMM, widthMM, massKG] format pg no b10-12
-        self.data_bearings = [[25, 37, 7, 0.021],
-                              [28, 52, 12, 0.096],
-                              [30, 42, 7, 0.024],
-                              [32, 58, 13, 0.122],
-                              [35, 47, 7, 0.027],
-                              [40, 52, 7, 0.031],
-                              [45, 58, 7, 0.038],
-                              [50, 65, 7, 0.050],
-                              [55, 72, 9, 0.081],
-                              [60, 78, 10, 0.103],
-                              [65, 85, 10, 0.128],
-                              [70, 90, 10, 0.134],
-                              [75, 95, 10, 0.149],
-                              [80, 100, 10, 0.151],
-                              [85, 110, 13, 0.263],
-                              [90, 115, 13, 0.276],
-                              [95, 120, 13, 0.297],
-                              [100, 125, 13, 0.31],
-                              [105, 130, 13, 0.324],
-                              [110, 140, 16, 0.497],
-                              [120, 150, 16, 0.537],
-                              [130, 165, 18, 0.758],
-                              [140, 170, 18, 0.832],
-                              [150, 190, 20, 1.15],
-                              [160, 200, 20, 1.23]]
-        self.idRequiredMM = idRequiredMM
-        self.indexBearing = 0
 
-        # while (self.data_bearings[self.indexBearing][0] < self.idRequiredMM):
-        #     self.indexBearing +=1
-        # # Extract columns
-        # data_bearings = np.array(self.data_bearings)
-        # self.d = data_bearings[:, 0].reshape(-1, 1)  # Inner diameters
-        # self.D = data_bearings[:, 1]  # Outer diameters
-        # self.B = data_bearings[:, 2]  # Widths
-        # self.L = data_bearings[:, 3]  # Load ratings
-
-        # # Create linear regression models
-        # self.lr_D = LinearRegression().fit(self.d, self.D)
-        # self.lr_B = LinearRegression().fit(self.d, self.B)
-        # self.lr_L = LinearRegression().fit(self.d, self.L)
-
-    def getBearingIDMM(self):
-        return self.idRequiredMM
-        return self.data_bearings[self.indexBearing][0]
-    
-    def getBearingODMM(self):
-        a_OD = 1.180682635961756 
-        b_OD = 8.566071759021273
-        Bearing_OD = a_OD * self.idRequiredMM + b_OD
-        return Bearing_OD
-        return self.data_bearings[self.indexBearing][1]
-    
-    def getBearingWidthMM(self):
-        a_widths  = 0.09293718515472396
-        b_widths  = 4.617962372776808
-
-        Bearing_Width = a_widths * self.idRequiredMM + b_widths
-        return Bearing_Width
-        return self.data_bearings[self.indexBearing][2]
-    
-    def getBearingMassKG(self):
-        a_weights = 8.4777526725202e-05
-        b_weights = -0.006890846402773096
-        c_weights = 0.18849936113412308
-
-        Bearing_Weight = a_weights * self.idRequiredMM * self.idRequiredMM + b_weights * self.idRequiredMM + c_weights
-        return Bearing_Weight
-        return self.data_bearings[self.indexBearing][3]
-    
 # ╔══════════════════════════════════════════════════════════════════════════╗
 # ║  INTERNAL DOUBLE STAGE PLANETARY GEARBOX                                 ║
 # ╚══════════════════════════════════════════════════════════════════════════╝
@@ -98,20 +25,20 @@ class inrunnerdoubleStagePlanetaryGearbox:
                  densityGears = 7850.0,
                  densityStructure = 2710.0,
                  fwSun1MM = 5.0, fwRing1MM = 5.0, fwPlanet1MM = 5.0,
-                 fwSun2MM = 5.0, fwRing2MM = 5.0, fwPlanet2MM = 5.0,
+                 fwSun2MM = 5.0, fwRing2MM = 15.0, fwPlanet2MM = 5.0,
                  maxGearAllowableStressMPa = 400) :
         
         #------------------------------------------------------------------
         # Converting the available DSPG data to stg-1 and stg-2 SSPG data 
         #------------------------------------------------------------------
-        dspg_stg1_parameters = {
+        indspg_stg1_parameters = {
             "sCarrierExtrusionDiaMM"       : design_parameters["sCarrierExtrusionDiaMM_Stg1"],
             "sCarrierExtrusionClearanceMM" : design_parameters["sCarrierExtrusionClearanceMM_Stg1"],
             "ringRadialWidthMM"            : design_parameters["ring_radial_thickness"], 
             "planetMinDistanceMM"          : design_parameters["planetMinDistanceMM"]
         }
 
-        dspg_stg2_parameters = {
+        indspg_stg2_parameters = {
             "sCarrierExtrusionDiaMM"       : design_parameters["sCarrierExtrusionDiaMM_Stg2"],
             "sCarrierExtrusionClearanceMM" : design_parameters["sCarrierExtrusionClearanceMM_Stg2"],
             "ringRadialWidthMM"            : design_parameters["ring_radial_thickness"], 
@@ -120,16 +47,16 @@ class inrunnerdoubleStagePlanetaryGearbox:
 
         self.densityGears     = densityGears
         self.densityStructure = densityStructure
-        self.fwSun1MM          = fwSun1MM
-        self.fwSun2MM          = fwSun2MM
-        self.fwRing1MM         = fwRing1MM
-        self.fwRing2MM         = fwRing2MM
-        self.fwPlanet1MM       = fwPlanet1MM
-        self.fwPlanet2MM       = fwPlanet2MM
+        # self.fwSun1MM          = fwSun1MM
+        # self.fwSun2MM          = fwSun2MM
+        # self.fwRing1MM         = fwRing1MM
+        # self.fwRing2MM         = fwRing2MM
+        # self.fwPlanet1MM       = fwPlanet1MM
+        # self.fwPlanet2MM       = fwPlanet2MM
 
         # Using single Layer Planetary Gearbox for the first and second layer
         # Stage-1
-        self.Stage1 = singleStagePlanetaryGearbox(design_params             = dspg_stg1_parameters,
+        self.Stage1 = singleStagePlanetaryGearbox(design_params             = indspg_stg1_parameters,
                                                   gear_standard_parameters  = gear_standard_parameters,
                                                   Ns                        = Ns1, 
                                                   Np                        = Np1, 
@@ -144,7 +71,7 @@ class inrunnerdoubleStagePlanetaryGearbox:
                                                   densityStructure          = self.densityStructure)
                 
         # Stage-2
-        self.Stage2 = singleStagePlanetaryGearbox(design_params             = dspg_stg2_parameters,
+        self.Stage2 = singleStagePlanetaryGearbox(design_params             = indspg_stg2_parameters,
                                                   gear_standard_parameters  = gear_standard_parameters,
                                                   Ns                        = Ns2, 
                                                   Np                        = Np2, 
@@ -310,7 +237,7 @@ class inrunnerdoubleStageActuator:
         self.Ns1 = self.inrunnerdoubleStagePlanetaryGearbox.Stage1.Ns
         self.Np1 = self.inrunnerdoubleStagePlanetaryGearbox.Stage1.Np
         self.num_planet1 = self.inrunnerdoubleStagePlanetaryGearbox.Stage1.numPlanet
-        self.module1 = self.inrunnerdoubleStagePlanetaryGearbox.Stage1.module
+        self.module1 = self.inrunnerdoubleStagePlanetaryGearbox.Stage1.module     
 
         self.fw_s1_calc = self.inrunnerdoubleStagePlanetaryGearbox.Stage1.fwSunMM
         self.fw_r1      = self.inrunnerdoubleStagePlanetaryGearbox.Stage1.fwRingMM
@@ -1558,6 +1485,8 @@ class inrunnerdoubleStageActuator:
             self.AGMAStressAnalysisMinFacewidth()
         elif self.stressAnalysisMethodName == "MIT":
             self.mitStressAnalysisMinFacewidth()
+        self.fw_r1 = self.inrunnerdoubleStagePlanetaryGearbox.Stage1.fwRingMM
+        self.fw_r2 = self.inrunnerdoubleStagePlanetaryGearbox.Stage2.fwRingMM      # update the face width of ring gear in stage 1 & 2
 
     def getMassKG_3DP_stg1(self):
         module    = self.inrunnerdoubleStagePlanetaryGearbox.Stage1.module
@@ -1931,8 +1860,17 @@ class inrunnerdoubleStageActuator:
         bearing_height = WidthBearingMM    
         bearing_mass   = BearingMassKG      
 
-        ring_gear_volume = (np.pi * (((ring_OD*0.5)**2) - ((ring_ID*0.5)**2)) * ringFwUsedMM) * 1e-9
-        ring_gear_mass   = ring_gear_volume * density_3DP_material
+        ring_gear_casing_support_OD = (self.rotor_OD+self.stator_casing_thickness*2+standard_clearance_1_5mm*4)
+        bearing_support_OD = bearing_OD + (self.a2_bearing_retainer_nut_wrench_size + standard_clearance_1_5mm)*2
+
+        ring_gear_volume = np.pi * ((ring_OD*0.5)**2 - (ring_ID*0.5)**2) * (ringFwUsedMM+standard_clearance_1_5mm) * 1e-9
+        ring_gear_casing_support_volume = np.pi * (((ring_gear_casing_support_OD)*0.5)**2 - (ring_OD*0.5)**2) * self.stator_casing_thickness * 1e-9
+        ring_bearing_step_volume = np.pi * ((bearing_support_OD*0.5)**2 - (ring_OD*0.5)**2) * (standard_clearance_1_5mm) * 1e-9
+        ring_gear_bearing_support_volume = np.pi * ((bearing_support_OD*0.5)**2 - (bearing_OD*0.5)**2) * (bearing_height+standard_clearance_1_5mm) * 1e-9
+
+        total_ring_gear_volume = ring_gear_volume + ring_gear_casing_support_volume + ring_bearing_step_volume + ring_gear_bearing_support_volume
+        ring_gear_mass = total_ring_gear_volume * density_3DP_material
+
 
         #----------------------------------
         # Mass: dspg_carrier
@@ -1941,14 +1879,22 @@ class inrunnerdoubleStageActuator:
         carrier_ID     = sun_shaft_bearing_OD - standard_clearance_1_5mm * 2
         carrier_height = bearing_height + carrier_bearing_step_width
 
-        carrier_shaft_OD = planet_shaft_dia
-        carrier_shaft_height = planetFwMM + clearance_planet * 2
-        carrier_shaft_num = numPlanet * 2
+        #---------------------------------- new one
+       
+        r_carrier_outer     = (bearing_ID / 2) / 1000
+        r_carrier_trapezoid = ((bearing_ID
+                                - (Ns * module + 2 * self.carrier_trapezoidal_support_sun_offset2))
+                                / 4) / 1000
+        
+        fw_carrier = self.fw_p2 / 1000                       #TODO : check if this is correct or not
 
-        carrier_volume = (np.pi * (((carrier_OD*0.5)**2) - ((carrier_ID)*0.5)**2) * carrier_height
-                        + np.pi * ((carrier_shaft_OD*0.5)**2) * carrier_shaft_height * carrier_shaft_num) * 1e-9
+        # Volume sub-components
+        vol_carrier_disk      = np.pi * (bearing_height / 1000) * r_carrier_outer     ** 2
+        vol_carrier_trapezoid = np.pi * fw_carrier * r_carrier_trapezoid ** 2
 
-        carrier_mass = carrier_volume * density_3DP_material
+        vol_carrier_net = vol_carrier_disk + 3 * vol_carrier_trapezoid   # 3 trapezoidal arms
+
+        carrier_mass = vol_carrier_net * density_3DP_material
 
         #--------------------------------------
         # Mass: dspg_planet
@@ -2202,8 +2148,8 @@ class optimizationDoubleStageActuator:
                                                         self.cntrIterBeforeCons += 1
                                                         #print("Before Constraints", cntrIterBeforeCons)
                                                         if (Actuator.inrunnerdoubleStagePlanetaryGearbox.geometricConstraint() and 
-                                                            Actuator.inrunnerdoubleStagePlanetaryGearbox.meshingConstraint() #and 
-                                                            #Actuator.inrunnerdoubleStagePlanetaryGearbox.noPlanetInterferenceConstraint()        #TODO:  CHANGE IT BACK TO ORIGINAL
+                                                            Actuator.inrunnerdoubleStagePlanetaryGearbox.meshingConstraint()   and
+                                                            Actuator.inrunnerdoubleStagePlanetaryGearbox.noPlanetInterferenceConstraint()       
                                                             ):
                                                             self.totalFeasibleGearboxes += 1
                                                             # Fiter for the Gear Ratio
