@@ -5,9 +5,9 @@ import time
 import json
 import numpy as np
 from ActuatorandGearbox_IDSPG import material
-from ActuatorandGearbox_IDSPG import doubleStagePlanetaryGearbox
-from ActuatorandGearbox_IDSPG import doubleStagePlanetaryActuator
-from ActuatorandGearbox_IDSPG import optimizationDoubleStagePlanetaryActuator
+from ActuatorandGearbox_IDSPG import internaldoubleStagePlanetaryGearbox
+from ActuatorandGearbox_IDSPG import internaldoubleStagePlanetaryActuator
+from ActuatorandGearbox_IDSPG import optimizationinternalDoubleStagePlanetaryActuator
 
 #----------motor variables from common components----------#
 from CommonComponents import motor_frameless_outrunner as Motor
@@ -63,7 +63,7 @@ Motor_Driver_OdrivePro_params = motor_driver_data["OdrivePro"]
 #--------------------------------------------------------
 # Gearbox 
 #--------------------------------------------------------
-doubleStagePlanetaryGearboxInstance = doubleStagePlanetaryGearbox(design_parameters   = idspg_design_params,
+internaldoubleStagePlanetaryGearboxInstance = internaldoubleStagePlanetaryGearbox(design_parameters   = idspg_design_params,
                                                                   gear_standard_parameters  = Gear_standard_parameters,
                                                                   densityGears              = PLA["density"],
                                                                   densityStructure          = PLA["density"],
@@ -102,7 +102,7 @@ maxGearboxDiameter_Stg1_RO100 = (MotorRO100.getStatorIDMM() - idspg_design_param
 # Actuator_RI80 = inrunnerdoubleStageActuator(
 #     design_parameters        = indspg_design_params,
 #     motor                    = MotorRI80,
-#     inrunnerdoubleStagePlanetaryGearbox=inrunnerdoubleStagePlanetaryGearboxInstance,
+#     inrunnerinternaldoubleStagePlanetaryGearbox=inrunnerinternaldoubleStagePlanetaryGearboxInstance,
 #     FOS                      = MIT_params["FOS"],
 #     serviceFactor            = MIT_params["serviceFactor"],
 
@@ -117,11 +117,11 @@ maxGearboxDiameter_Stg1_RO100 = (MotorRO100.getStatorIDMM() - idspg_design_param
 # RI100 Actuator
 #-----------------------------------------------------
 
-Actuator_RO100 = doubleStagePlanetaryActuator(
+Actuator_RO100 = internaldoubleStagePlanetaryActuator(
     design_parameters        = idspg_design_params,
     motor                    = MotorRO100,
     motor_driver_params      = Motor_Driver_OdrivePro_params,
-    doubleStagePlanetaryGearbox=doubleStagePlanetaryGearboxInstance,
+    internaldoubleStagePlanetaryGearbox=internaldoubleStagePlanetaryGearboxInstance,
 
     FOS                      = MIT_params["FOS"],
     serviceFactor            = MIT_params["serviceFactor"],
@@ -155,7 +155,7 @@ NUM_PLANET_STAGE2_MAX = idspg_optimization_params["NUM_PLANET_STAGE2_MAX"] # 5
 NUM_TEETH_SUN_MIN     = idspg_optimization_params["NUM_TEETH_SUN_MIN"]     # 20  
 NUM_TEETH_PLANET_MIN  = idspg_optimization_params["NUM_TEETH_PLANET_MIN"]  # 20   
 
-Optimizer_RO100     = optimizationDoubleStagePlanetaryActuator(design_parameters        = idspg_design_params,
+Optimizer_RO100     = optimizationinternalDoubleStagePlanetaryActuator(design_parameters        = idspg_design_params,
                                                             gear_standard_parameters = Gear_standard_parameters,
                                                             K_Mass                   = K_Mass                ,
                                                             K_Eff                    = K_Eff                 ,
