@@ -1,10 +1,10 @@
 import sys
 import numpy as np
-from ActuatorAndGearbox_INWPG_compact import motor
-from ActuatorAndGearbox_INWPG_compact import material
-from ActuatorAndGearbox_INWPG_compact import inrunnerWolfromPlanetaryGearbox
-from ActuatorAndGearbox_INWPG_compact import inrunnerWolfromPlanetaryActuator
-from ActuatorAndGearbox_INWPG_compact import optimizationInrunnerWolfromPlanetaryActuator
+from ActuatorAndGearbox_INWPG_dependent import motor
+from ActuatorAndGearbox_INWPG_dependent import material
+from ActuatorAndGearbox_INWPG_dependent import inrunnerWolfromPlanetaryGearbox
+from ActuatorAndGearbox_INWPG_dependent import inrunnerWolfromPlanetaryActuator
+from ActuatorAndGearbox_INWPG_dependent import optimizationInrunnerWolfromPlanetaryActuator
 import os
 import json
 
@@ -16,7 +16,7 @@ current_dir = os.path.dirname(__file__)
 
 # Build the file path
 config_path = os.path.join(current_dir, "config_files/config.json")
-inwpg_params_path = os.path.join(current_dir, "config_files/inwpg_params_compact.json")
+inwpg_params_path = os.path.join(current_dir, "config_files/inwpg_params_dependent.json")
 inwpg_motor_config_path = os.path.join(current_dir, "config_files/insspg_motor_config.json")
 
 # Load the JSON file
