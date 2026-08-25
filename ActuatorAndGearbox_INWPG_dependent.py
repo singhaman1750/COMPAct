@@ -877,7 +877,7 @@ class inrunnerWolfromPlanetaryActuator:
         self.rotor_top_bearing_OD     = RotorTopBearings.getBearingODMM()
         self.rotor_top_bearing_width  = RotorTopBearings.getBearingWidthMM()
 
-        return self.rotor_ID - self.standard_clearance_1_5mm > self.rotor_top_bearing_OD + 6*self.standard_clearance_1_5mm
+        return self.rotor_ID - self.standard_clearance_1_5mm > self.rotor_top_bearing_OD + 7*self.standard_clearance_1_5mm
     
     def noSecCarrierInterferenceConstraint(self):
         module    = self.inrunnerWolfromPlanetaryGearbox.moduleBig  # Module of the gear
@@ -2428,7 +2428,7 @@ class inrunnerWolfromPlanetaryActuator:
         # 3. Case mounting structure
         #--------------------------------------
         ring_ID      = Nr1 * module
-        ringFwUsedMM = ring1FwMM
+        ring1FwUsedMM = ring1FwMM
         ring_OD      = ring_ID + 2*module + 2*big_ring_radial_thickness
 
         output_bearing_ID     = OutputInnerDiaBearingMM 
@@ -2437,7 +2437,7 @@ class inrunnerWolfromPlanetaryActuator:
   
         bearing_holding_structure_OD     = output_bearing_OD + 2*self.actuactor_mount_nut_wrench_size + 2*standard_clearance_1_5mm
         bearing_holding_structure_ID     = output_bearing_OD 
-        bearing_holding_structure_height = output_bearing_width + bearing_step_width
+        bearing_holding_structure_height = output_bearing_width + bearing_step_width + ring_gearbox_casing_thickness/2
 
         case_mounting_structure_OD     = (Nr1)*module + 2*standard_clearance_1_5mm + 2*ring_gearbox_casing_thickness
         case_mounting_structure_ID     = case_mounting_structure_OD - 2*ring_gearbox_casing_thickness
@@ -2447,13 +2447,13 @@ class inrunnerWolfromPlanetaryActuator:
 
         gearbox_casing_top_ID     = ring_OD
         gearbox_casing_top_OD     = ring_OD + 2*ring_gearbox_casing_thickness
-        gearbox_casing_top_height = (ringFwUsedMM - (ring_gearbox_casing_thickness/2) + planet2FwMM + clearance_planet + self.carrier_thickness
+        gearbox_casing_top_height = (planet2FwMM + clearance_planet + self.carrier_thickness
                                     + bearing_step_width + self.carrier_ring_bearing_width +
                                     bearing_step_width - self.output_bearing_width - bearing_step_width)
         
         gearbox_casing_bottom_height = self.stator_top_height + standard_clearance_1_5mm/2
 
-        ring_volume                      = np.pi * (((ring_OD*0.5)**2) - ((ring_ID)*0.5)**2) * ringFwUsedMM * 1e-9
+        ring_volume                      = np.pi * (((gearbox_casing_top_OD*0.5)**2) - ((ring_ID)*0.5)**2) * ring1FwUsedMM * 1e-9
         bearing_holding_structure_volume = np.pi * (((bearing_holding_structure_OD*0.5)**2) - 
                                                     ((bearing_holding_structure_ID*0.5)**2)) * bearing_holding_structure_height * 1e-9
         case_mounting_structure_volume   = np.pi * (((case_mounting_structure_OD*0.5)**2) - 
@@ -2463,14 +2463,14 @@ class inrunnerWolfromPlanetaryActuator:
         gearbox_casing_top_volume = np.pi * (((gearbox_casing_top_OD*0.5)**2) - ((gearbox_casing_top_ID*0.5)**2)) * gearbox_casing_top_height * 1e-9
         gearbox_casing_bottom_volume = np.pi * (((motor_case_OD*0.5)**2) - ((motor_case_ID*0.5)**2)) * gearbox_casing_bottom_height * 1e-9
             
-        gearbox_casing_volume = ring_volume + bearing_holding_structure_volume + case_mounting_structure_volume + case_mounting_plate_volume + gearbox_casing_bottom_volume + gearbox_casing_bottom_volume
+        gearbox_casing_volume = ring_volume + bearing_holding_structure_volume + case_mounting_structure_volume + case_mounting_plate_volume + gearbox_casing_top_volume + gearbox_casing_bottom_volume 
         gearbox_casing_mass = gearbox_casing_volume * density_3DP_material
 
         #----------------------------------
         # Mass: small_ring
         #----------------------------------
         small_ring_OD     = module * (Nr2) + 2*module + 2*self.small_ring_radial_width
-        small_ring_ID     = module * (Nr2) + 2*1.25*module
+        small_ring_ID     = module * (Nr2) 
         small_ring_height = ring2FwMM + self.carrier_thickness + bearing_step_width + clearance_planet
 
         small_ring_bearing_structure_OD = small_ring_OD
@@ -2552,7 +2552,7 @@ class inrunnerWolfromPlanetaryActuator:
         #--------------------------------------
         # Mass: inwpg_sec_carrier
         #--------------------------------------
-        sec_carrier_top_OD = output_bearing_ID
+        sec_carrier_top_OD = carrier_OD
         sec_carrier_top_ID = (DiaSunMM + DiaPlanet1MM) - self.planet_pin_nut_wrench_size - 2*standard_clearance_1_5mm
         sec_carrier_top_thickness = sec_carrier_thickness 
 

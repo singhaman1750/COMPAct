@@ -2282,7 +2282,7 @@ class inrunnerWolfromPlanetaryActuator:
             self.mitStressAnalysisMinFacewidth()
 
     def getMassKG_3DP(self):
-        module   = self.inrunnerWolfromPlanetaryGearbox.moduleBig  # Module of the gear
+        module    = self.inrunnerWolfromPlanetaryGearbox.moduleBig  # Module of the gear
         Ns        = self.inrunnerWolfromPlanetaryGearbox.Ns
         Np1       = self.inrunnerWolfromPlanetaryGearbox.NpBig
         Np2       = self.inrunnerWolfromPlanetaryGearbox.NpSmall
@@ -2374,20 +2374,39 @@ class inrunnerWolfromPlanetaryActuator:
         motor_OD          = self.motorDiaMM
         motor_case_ID     = motor_OD
         motor_height      = self.motorLengthMM
-        motor_case_height = self.stator_bottom_height + self.stator_mid_height + standard_clearance_1_5mm/2
+        motor_case_height = self.stator_bottom_height + self.stator_mid_height + standard_clearance_1_5mm/2 
 
         motor_case_OD = motor_case_ID + motor_case_thickness * 2
 
-        motor_case_base_ID = self.rotor_bottom_bearing_OD
+        motor_case_base_ID = self.rotor_bottom_bearing_ID - 2*standard_clearance_1_5mm * 3
 
-        motor_case_bearing_structure_height = self.rotor_bottom_bearing_width + bearing_step_width - motor_case_thickness
-        motor_case_bearing_structure_OD     = motor_case_base_ID + 2*(standard_clearance_1_5mm + standard_clearance_1_5mm + self.motor_mount_driver_nut_wrench_size)
+        motor_case_bearing_structure_height = self.rotor_bottom_bearing_width + self.stator_bottom_height
+        motor_case_bearing_structure_OD     = self.rotor_bottom_bearing_ID 
 
         motor_case_volume = (  np.pi * (((motor_case_OD * 0.5)**2)-(motor_case_base_ID * 0.5)**2) * motor_case_thickness 
                             + np.pi * ((motor_case_OD * 0.5)**2 - (motor_case_ID * 0.5)**2) * motor_case_height
+                            + np.pi * ((motor_case_bearing_structure_OD * 0.5)**2 - (motor_case_base_ID * 0.5)**2) * motor_case_bearing_structure_height
         ) * 1e-9
 
         motor_case_mass = motor_case_volume * density_3DP_material
+
+        #--------------------------------------
+        # Mass: rotor_top_bearing_holder
+        #--------------------------------------
+        rotor_top_bearing_holder_height    = self.stator_top_height + standard_clearance_1_5mm/2
+        rotor_top_bearing_holder_thickness = (bearing_step_width + self.rotor_top_bearing_width - 
+                                                    (standard_clearance_1_5mm/2 + self.stator_top_height + self.stator_mid_height - self.rotor_height - bearing_step_width))
+        rotor_top_bearing_holder_ID        = self.stator_ID
+
+        rotor_top_bearing_holder_extrude_ID = self.rotor_top_bearing_OD
+        rotor_top_bearing_holder_extrude_thickness = self.rotor_top_bearing_width + bearing_step_width
+
+        rotor_top_bearing_holder_volume= (np.pi * (((motor_case_OD) * 0.5)**2 - (rotor_top_bearing_holder_ID * 0.5)**2) * rotor_top_bearing_holder_thickness 
+                                        + np.pi * (((motor_case_OD) * 0.5)**2 - (motor_case_ID * 0.5)**2) * rotor_top_bearing_holder_height 
+                                        + np.pi * (((rotor_top_bearing_holder_ID) * 0.5)**2 - (rotor_top_bearing_holder_extrude_ID * 0.5)**2) * rotor_top_bearing_holder_extrude_thickness
+                                        )* 1e-9
+                                        
+        rotor_top_bearing_holder_mass = rotor_top_bearing_holder_volume * density_3DP_material
 
         #--------------------------------------
         # Mass: incpg_gearbox_casing
@@ -2398,7 +2417,7 @@ class inrunnerWolfromPlanetaryActuator:
         # 3. Case mounting structure
         #--------------------------------------
         ring_ID      = Nr1 * module
-        ringFwUsedMM = ring1FwMM
+        ring1FwUsedMM = ring1FwMM
         ring_OD      = ring_ID + 2*module + 2*big_ring_radial_thickness
 
         output_bearing_ID     = OutputInnerDiaBearingMM 
@@ -2407,40 +2426,35 @@ class inrunnerWolfromPlanetaryActuator:
   
         bearing_holding_structure_OD     = output_bearing_OD + 2*self.actuactor_mount_nut_wrench_size + 2*standard_clearance_1_5mm
         bearing_holding_structure_ID     = output_bearing_OD 
-        bearing_holding_structure_height = output_bearing_width + bearing_step_width
+        bearing_holding_structure_height = output_bearing_width + bearing_step_width + ring_gearbox_casing_thickness/2 
 
-        case_mounting_structure_OD     = (Nr1)*module + 2*standard_clearance_1_5mm + 2*ring_gearbox_casing_thickness
-        case_mounting_structure_ID     = case_mounting_structure_OD - 2*ring_gearbox_casing_thickness
-        case_mounting_structure_height =(self.rotor_hub_height + sun_coupler_hub_thickness+ bearing_step_width/2
-                                         + self.rotor_top_bearing_width + fw_s_used - planet2FwMM - planet1FwMM
-                                         - standard_clearance_1_5mm/2 - self.stator_top_height - self.stator_mid_height)           
+        case_mounting_structure_OD     = ring_OD + 2*ring_gearbox_casing_thickness
+        case_mounting_structure_ID     = (Nr1)*module + 2*standard_clearance_1_5mm 
+        case_mounting_structure_height = clearance_planet + sec_carrier_thickness + standard_clearance_1_5mm           
 
         gearbox_casing_top_ID     = ring_OD
         gearbox_casing_top_OD     = ring_OD + 2*ring_gearbox_casing_thickness
-        gearbox_casing_top_height = (ringFwUsedMM - (ring_gearbox_casing_thickness/2) + planet2FwMM + clearance_planet + self.carrier_thickness
+        gearbox_casing_top_height = (planet2FwMM + clearance_planet + self.carrier_thickness
                                     + bearing_step_width + self.carrier_ring_bearing_width +
-                                    bearing_step_width - self.output_bearing_width - bearing_step_width)
-        
-        gearbox_casing_bottom_height = self.stator_top_height + standard_clearance_1_5mm/2
+                                    bearing_step_width - self.output_bearing_width - bearing_step_width)        
 
-        ring_volume                      = np.pi * (((ring_OD*0.5)**2) - ((ring_ID)*0.5)**2) * ringFwUsedMM * 1e-9
+        ring_volume                      = np.pi * (((gearbox_casing_top_OD*0.5)**2) - ((ring_ID)*0.5)**2) * ring1FwUsedMM * 1e-9
         bearing_holding_structure_volume = np.pi * (((bearing_holding_structure_OD*0.5)**2) - 
                                                     ((bearing_holding_structure_ID*0.5)**2)) * bearing_holding_structure_height * 1e-9
         case_mounting_structure_volume   = np.pi * (((case_mounting_structure_OD*0.5)**2) - 
                                                     ((case_mounting_structure_ID*0.5)**2)) * case_mounting_structure_height * 1e-9
         case_mounting_plate_volume       = np.pi * (((motor_case_OD*0.5)**2) - 
-                                                    ((case_mounting_structure_ID*0.5)**2)) * motor_case_thickness * 1e-9
+                                                    ((case_mounting_structure_OD*0.5)**2)) * motor_case_thickness * 1e-9
         gearbox_casing_top_volume = np.pi * (((gearbox_casing_top_OD*0.5)**2) - ((gearbox_casing_top_ID*0.5)**2)) * gearbox_casing_top_height * 1e-9
-        gearbox_casing_bottom_volume = np.pi * (((motor_case_OD*0.5)**2) - ((motor_case_ID*0.5)**2)) * gearbox_casing_bottom_height * 1e-9
             
-        gearbox_casing_volume = ring_volume + bearing_holding_structure_volume + case_mounting_structure_volume + case_mounting_plate_volume + gearbox_casing_bottom_volume + gearbox_casing_bottom_volume
+        gearbox_casing_volume = ring_volume + bearing_holding_structure_volume + case_mounting_structure_volume + case_mounting_plate_volume + gearbox_casing_top_volume 
         gearbox_casing_mass = gearbox_casing_volume * density_3DP_material
 
         #----------------------------------
         # Mass: small_ring
         #----------------------------------
         small_ring_OD     = module * (Nr2) + 2*module + 2*self.small_ring_radial_width
-        small_ring_ID     = module * (Nr2) + 2*1.25*module
+        small_ring_ID     = module * (Nr2) 
         small_ring_height = ring2FwMM + self.carrier_thickness + bearing_step_width + clearance_planet
 
         small_ring_bearing_structure_OD = small_ring_OD
@@ -2489,26 +2503,33 @@ class inrunnerWolfromPlanetaryActuator:
         # 3. sun shaft
         # 4. sun magnet mount shaft
         #--------------------------------------
-        sun_hub_dia = self.rotor_ID - 2*self.rotor_hub_thickness - 2*standard_clearance_1_5mm
+        sun_hub_dia = self.rotor_top_bearing_ID - 2*self.rotor_hub_thickness - 2*standard_clearance_1_5mm
+
+        fw_s_used        = planet1FwMM + planet2FwMM + clearance_planet + sec_carrier_thickness + standard_clearance_1_5mm
         
-        sun_rotor_top_bearing_structure_dia = self.rotor_top_bearing_ID
-        sun_rotor_top_bearing_structure_height = bearing_step_width/2 + self.rotor_top_bearing_width
+        sun_extrsuion_dia = sun_hub_dia - 2*self.rotor_hub_sun_hole_CSK_OD 
+        sun_extrsuion_height = fw_s_used - planet1FwMM - planet2FwMM - clearance_planet
         
         sun_shaft_dia    = sun_shaft_bearing_ID
         sun_shaft_height = sun_shaft_bearing_width + bearing_step_width
 
-        sun_rotor_bottom_bearing_structure_dia    = self.rotor_bottom_bearing_ID
-        sun_rotor_bottom_bearing_structure_height = self.rotor_hub_height + self.stator_bottom_height + motor_case_thickness - bearing_step_width 
+        sun_magnet_mount_shaft_dia    = sun_hub_dia - self.rotor_hub_sun_hole_CSK_OD - self.rotor_hub_sun_hole_dia/2 - 2*standard_clearance_1_5mm
+        sun_magnet_mount_shaft_height = self.rotor_height + self.stator_bottom_height 
 
         sun_hub_volume   = np.pi * ((sun_hub_dia*0.5) ** 2) * sun_coupler_hub_thickness * 1e-9
-        sun_rotor_top_bearing_structure_volume = np.pi * ((sun_rotor_top_bearing_structure_dia*0.5) ** 2) * sun_rotor_top_bearing_structure_height * 1e-9
-        sun_gear_volume = np.pi * ((DiaSunMM*0.5) ** 2) * fw_s_used * 1e-9
-        sun_shaft_volume = np.pi * ((sun_shaft_dia*0.5) ** 2) * sun_shaft_height * 1e-9
-        sun_rotor_bottom_bearing_structure_volume = np.pi * ((sun_rotor_bottom_bearing_structure_dia*0.5) ** 2) * sun_rotor_bottom_bearing_structure_height * 1e-9
-        central_bolt_volume = (np.pi * ((self.sun_central_bolt_dia*0.5)**2)
-                                *(fw_s_used+sun_shaft_height+sun_rotor_top_bearing_structure_height+sun_coupler_hub_thickness+sun_rotor_bottom_bearing_structure_height))* 1e-9
 
-        sun_volume       = sun_hub_volume + sun_rotor_top_bearing_structure_volume+ sun_gear_volume + sun_shaft_volume + sun_rotor_bottom_bearing_structure_volume - central_bolt_volume
+        if sun_extrsuion_dia < DiaSunMM:
+            sun_gear_volume = np.pi * ((DiaSunMM*0.5) ** 2) * fw_s_used * 1e-9
+        else:
+            sun_gear_volume = (np.pi * ((sun_extrsuion_dia*0.5) ** 2) * sun_extrsuion_height 
+                             + np.pi * ((DiaSunMM*0.5) ** 2) * (fw_s_used - sun_extrsuion_height)) * 1e-9
+
+        sun_shaft_volume = np.pi * ((sun_shaft_dia*0.5) ** 2) * sun_shaft_height * 1e-9
+        sun_magnet_mount_shaft_volume = np.pi * ((sun_magnet_mount_shaft_dia*0.5) ** 2) * sun_magnet_mount_shaft_height * 1e-9
+        central_bolt_volume = (np.pi * ((self.sun_central_bolt_dia*0.5)**2)
+                                *(fw_s_used+sun_shaft_height+sun_magnet_mount_shaft_height+sun_coupler_hub_thickness))* 1e-9
+
+        sun_volume       = sun_hub_volume + sun_gear_volume + sun_shaft_volume + sun_magnet_mount_shaft_volume - central_bolt_volume
         sun_mass         = sun_volume * density_3DP_material
 
         #--------------------------------------
@@ -2522,20 +2543,14 @@ class inrunnerWolfromPlanetaryActuator:
         #--------------------------------------
         # Mass: inwpg_sec_carrier
         #--------------------------------------
-        sec_carrier_top_OD = output_bearing_ID
-        sec_carrier_top_ID = (DiaSunMM + DiaPlanet1MM) - self.planet_pin_nut_wrench_size - 2*standard_clearance_1_5mm
-        sec_carrier_top_thickness = sec_carrier_thickness 
+        sec_carrier_OD = carrier_OD
+        sec_carrier_ID = (DiaSunMM + DiaPlanet1MM) - self.planet_pin_nut_wrench_size - 2*standard_clearance_1_5mm
 
-        sec_carrier_bottom_OD = self.rotor_top_bearing_OD + 2*standard_clearance_1_5mm*3 
-        sec_carrier_bottom_ID = self.rotor_top_bearing_OD
-        sec_carrier_bottom_thickness = self.rotor_top_bearing_width + bearing_step_width 
-
-        sec_carrier_volume = ((np.pi * ((sec_carrier_top_OD*0.5)**2 - (sec_carrier_top_ID*0.5)**2) * sec_carrier_top_thickness)
-                            +(np.pi * ((sec_carrier_bottom_OD*0.5)**2 - (sec_carrier_bottom_ID*0.5)**2) * sec_carrier_bottom_thickness)) * 1e-9
+        sec_carrier_volume = (np.pi * ((sec_carrier_OD*0.5)**2 - (sec_carrier_ID*0.5)**2) * sec_carrier_thickness) * 1e-9
         sec_carrier_mass   = sec_carrier_volume * density_3DP_material
         
         #--------------------------------------
-        # Mass: inwpg_rotor_hub
+        # Mass: rotor_hub
         #--------------------------------------
         # Mass of the rotor_hub includes the mass of: 
         # 1. base hub
@@ -2543,25 +2558,26 @@ class inrunnerWolfromPlanetaryActuator:
         # 3. Bottom bearing holding structure
         #--------------------------------------
         rotor_base_hub_OD = self.rotor_ID
-        rotor_base_hub_ID = self.rotor_bottom_bearing_ID + 2*standard_clearance_1_5mm
+        rotor_base_hub_ID = sun_magnet_mount_shaft_dia
         rotor_base_hub_height = self.rotor_hub_height
 
         rotor_hub_thickness = self.rotor_hub_thickness
 
-        rotor_top_hub_ID = rotor_base_hub_OD - 2*rotor_hub_thickness
-        rotor_top_hub_height = rotor_base_hub_height
+        rotor_top_bearing_holder_OD = self.rotor_top_bearing_ID
+        rotor_top_bearing_holder_ID = rotor_top_bearing_holder_OD - 2*rotor_hub_thickness
+        rotor_top_bearing_holder_height = self.rotor_top_bearing_width + bearing_step_width
 
-        rotor_bottom_hub_OD = self.rotor_OD
-        rotor_bottom_hub_ID = rotor_top_hub_ID
-        rotor_bottom_hub_height = rotor_hub_thickness
+        rotor_bottom_bearing_holder_OD = rotor_base_hub_OD
+        rotor_bottom_bearing_holder_ID = self.rotor_bottom_bearing_OD
+        rotor_bottom_bearing_holder_height = self.rotor_height - rotor_base_hub_height
 
         rotor_base_hub_volume = np.pi * ((rotor_base_hub_OD*0.5)**2 - (rotor_base_hub_ID*0.5)**2) * rotor_base_hub_height * 1e-9
-        rotor_top_hub_volume = np.pi * ((rotor_base_hub_OD*0.5)**2 
-                                          - (rotor_top_hub_ID*0.5)**2) * rotor_top_hub_height * 1e-9
-        rotor_bottom_hub_volume = np.pi * ((rotor_bottom_hub_OD*0.5)**2 
-                                             - (rotor_bottom_hub_ID*0.5)**2) * rotor_bottom_hub_height * 1e-9
+        rotor_top_bearing_holder_volume = np.pi * ((rotor_top_bearing_holder_OD*0.5)**2 
+                                          - (rotor_top_bearing_holder_ID*0.5)**2) * rotor_top_bearing_holder_height * 1e-9
+        rotor_bottom_bearing_holder_volume = np.pi * ((rotor_bottom_bearing_holder_OD*0.5)**2 
+                                             - (rotor_bottom_bearing_holder_ID*0.5)**2) * rotor_bottom_bearing_holder_height * 1e-9
         
-        rotor_hub_volume = rotor_base_hub_volume + rotor_top_hub_volume #+ rotor_bottom_hub_volume(Commented out to accomodate for the holes in hub)
+        rotor_hub_volume = rotor_base_hub_volume + rotor_top_bearing_holder_volume + rotor_bottom_bearing_holder_volume
         rotor_hub_mass = rotor_hub_volume * density_aluminum
 
         #--------------------------------------
@@ -2607,6 +2623,7 @@ class inrunnerWolfromPlanetaryActuator:
         bearing_retainer_mass   = bearing_retainer_volume * density_3DP_material
 
         self.motor_case_mass                    = motor_case_mass
+        self.rotor_top_bearing_holder_mass      = rotor_top_bearing_holder_mass
         self.gearbox_casing_mass                = gearbox_casing_mass
         self.small_ring_mass                    = small_ring_mass
         self.carrier_mass                       = carrier_mass
@@ -2628,7 +2645,8 @@ class inrunnerWolfromPlanetaryActuator:
         #----------------------------------------
 
         Actuator_mass = (self.motorMassKG 
-                        + self.motor_case_mass 
+                        + self.motor_case_mass
+                        + self.rotor_top_bearing_holder_mass
                         + self.gearbox_casing_mass
                         + self.small_ring_mass 
                         + self.carrier_mass 
@@ -2644,7 +2662,8 @@ class inrunnerWolfromPlanetaryActuator:
                         + self.bearing_retainer_mass
                         + self.carrier_ring_bearing_mass)
 
-        Actuator_mass_without_bearing = (self.motor_case_mass 
+        Actuator_mass_without_bearing = (self.motor_case_mass
+                                        + self.rotor_top_bearing_holder_mass 
                                         + self.gearbox_casing_mass
                                         + self.small_ring_mass
                                         + self.carrier_mass 
@@ -2662,6 +2681,7 @@ class inrunnerWolfromPlanetaryActuator:
 
     def print_mass_of_parts_3DP(self):
         print("motor_case_mass: ",                 1000 * self.motor_case_mass)
+        print("rotor_top_bearing_holder_mass: ",    1000 * self.rotor_top_bearing_holder_mass)
         print("gearbox_casing_mass: ",             1000 * self.gearbox_casing_mass)
         print("small_ring_mass: ",                 1000 * self.small_ring_mass)
         print("carrier_mass: ",                    1000 * self.carrier_mass)
