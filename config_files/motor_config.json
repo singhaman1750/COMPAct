@@ -49,7 +49,8 @@
             "sun_bottom_casing_bearing_massKG"      : 0.07,
             "motor_height"                      : 36.2 ,
             "motor_stator_extrusion_dia" : 88 ,
-            "motor_stator_extrusion_depth" : 2
+            "motor_stator_extrusion_depth" : 2,
+            "stator_top_rotor_top_offset" : 2.75
         },
         "MotorRO80": {
             "Kv"                         : 105,
@@ -75,9 +76,10 @@
             "sun_sec_carrier_bearing_massKG"      : 0.068,
             "motor_height"                      : 26.4 ,
             "motor_stator_extrusion_dia" : 68 ,
-            "motor_stator_extrusion_depth" : 1.5
-    }
-},
+            "motor_stator_extrusion_depth" : 1.5,
+            "stator_top_rotor_top_offset" : 4.8
+        }
+    },
     
     "Design_parameters":{
         "Internal_designs": {

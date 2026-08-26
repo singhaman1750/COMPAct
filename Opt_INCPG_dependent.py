@@ -1,10 +1,10 @@
 import sys
 import numpy as np
-from InrunnerCPG_dependent_gen_eq import motor
-from InrunnerCPG_dependent_gen_eq import material
-from InrunnerCPG_dependent_gen_eq import inrunnerCompoundPlanetaryGearbox
-from InrunnerCPG_dependent_gen_eq import inrunnerCompoundPlanetaryActuator
-from InrunnerCPG_dependent_gen_eq import optimizationInrunnerCompoundPlanetaryActuator
+from ActuatorAndGearbox_INCPG_dependent import motor
+from ActuatorAndGearbox_INCPG_dependent import material
+from ActuatorAndGearbox_INCPG_dependent import inrunnerCompoundPlanetaryGearbox
+from ActuatorAndGearbox_INCPG_dependent import inrunnerCompoundPlanetaryActuator
+from ActuatorAndGearbox_INCPG_dependent import optimizationInrunnerCompoundPlanetaryActuator
 import os
 import json
 
@@ -62,12 +62,12 @@ MotorRI100  = motor(rotor_OD                     = 55.6,
                   stator_height                = 24.5,
                   stator_OD                    = 104,
                   stator_hole_dia              = 3,
-                  stator_top_height            = 7,
+                  stator_wire_top_height       = 7,
                   stator_mid_height            = 13,
-                  stator_bottom_height         = 4.5,
-                  stator_inside_OD             = 101,
+                  stator_wire_bottom_height    = 4.5,
+                  stator_wire_OD               = 101,
                   stator_hole_num              = 4,
-                  stator_inside_ID             = 58,
+                  stator_wire_ID               = 58,
                   maxMotorAngVelRPM            = 4368,  # RPM
                   maxMotorTorque               = 1.76,   # Nm
                   maxMotorPower                = 1.76 * 4368 * 2*np.pi/60,  # W

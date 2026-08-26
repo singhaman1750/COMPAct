@@ -5,263 +5,8 @@ import numpy as np
 import sys
 import time
 
-#-------------------------------------------------------------------------
-# class material
-#-------------------------------------------------------------------------
-class material:
-    def __init__(self, density, maxAllowableStressMPa = 400, bhn = 2, youngsModulus = 10):
-        self.maxAllowableStressMPa = maxAllowableStressMPa
-        self.bhn = bhn
-        self.youngsModulus = youngsModulus
-        self.density = density
-# ═══════════════════════════════════════════════════════════════════
-#   BEARING LOOKUP CLASS
-# ═══════════════════════════════════════════════════════════════════
-class bearings_discrete:
-    def __init__(self, idRequiredMM, odRequiredMM=0):
-        # Bearing dataset entered according to e1102 in [idMM,odMM,widthMM,massKG] format pg no b10-12
-        if odRequiredMM != 0 :
-            self.data_bearings = [
-            [10,19,5,0.005],[12,21,5,0.006],[15,24,5,0.007],[17,26,5,0.007],
-            [20,32,7,0.017],[25,37,7,0.021],[30,42,7,0.024],
-            [35,47,7,0.027],[44.45,53.975,6.35,0.031],[40,52,7,0.031],[45,58,7,0.038],[50,62,6,0.036],
-            [50,65,7,0.050],[55,72,9,0.081],[60,78,10,0.103],[65,85,10,0.128],
-            [70,90,10,0.134],[75,95,10,0.149],[80,100,10,0.151],[85,110,13,0.263],
-            [90,115,13,0.276],[95,120,13,0.297],[100,125,13,0.31],[105,130,13,0.324],
-            [110,140,16,0.497],[120,150,16,0.537],[130,165,18,0.758],[140,170,18,0.832],
-            [150,190,20,1.15],[160,200,20,1.23]
-            ]
-            self.indexBearing = 0
-            while self.data_bearings[self.indexBearing][1] < odRequiredMM:
-                self.indexBearing += 1            
-        else :
-            self.data_bearings = [
-            [10,19,5,0.005],[12,21,5,0.006],[15,24,5,0.007],[17,26,5,0.007],
-            [20,32,7,0.017],[25,32,4,0.021],[25,37,7,0.021],[28,52,12,0.096],[30,42,7,0.024],
-            [32,58,13,0.122],[35,47,7,0.027],[40,50,6,0.023],[40,52,7,0.031],[45,58,7,0.038],
-            [50,65,7,0.050],[55,72,9,0.081],[60,78,10,0.103],[65,85,10,0.128],
-            [70,90,10,0.134],[76.2,88.9,6.35,0.07],[75,95,10,0.149],[80,100,10,0.151],[85,110,13,0.263],[88.9,101.6,6.35,0.0816],
-            [90,115,13,0.276],[95,120,13,0.297],[100,125,13,0.31],[105,130,13,0.324],
-            [110,140,16,0.497],[120,150,16,0.537],[130,165,18,0.758],[140,170,18,0.832],
-            [150,190,20,1.15],[160,200,20,1.23]
-            ]
-            self.indexBearing = 0
-            while self.data_bearings[self.indexBearing][0] < idRequiredMM:
-                self.indexBearing += 1
+from CommonComponents import material, bearings_discrete, nuts_and_bolts_dimensions, motor_driver, motor_frameless_inrunner as motor
 
-    def getBearingIDMM(self):
-        return self.data_bearings[self.indexBearing][0]
-    def getBearingODMM(self):
-        return self.data_bearings[self.indexBearing][1]
-    def getBearingWidthMM(self):
-        return self.data_bearings[self.indexBearing][2]
-    def getBearingMassKG(self):
-        return self.data_bearings[self.indexBearing][3]
-
-class nuts_and_bolts_dimensions:
-    def __init__(self, bolt_dia, bolt_type="socket_head"):
-        self.bolt_dia  = bolt_dia
-        self.bolt_type = bolt_type
-        self.bolt_head_dia, self.bolt_head_height = self.get_bolt_head_dimensions(diameter=self.bolt_dia, bolt_type=self.bolt_type)
-        self.nut_width_across_flats, self.nut_depth = self.get_nut_dimensions(diameter=self.bolt_dia)
-
-    def get_bolt_head_dimensions(self, diameter, bolt_type="socket_head"):
-        diameter = float(diameter)
-
-        socket_head_table = {
-            1.6: {"d2": (3.00), "k": (1.60)},
-            2.0: {"d2": (3.80), "k": (2.00)},
-            2.5: {"d2": (4.50), "k": (2.50)},
-            3.0: {"d2": (5.50), "k": (3.00)},
-            4.0: {"d2": (7.00), "k": (4.00)},
-            5.0: {"d2": (8.50), "k": (5.00)},
-            6.0: {"d2": (10.00), "k": (6.00)},
-            8.0: {"d2": (13.00), "k": (8.00)},
-            10.0: {"d2": (16.00), "k": (10.00)}
-        }
-
-        # Only dk is stored for CSK, t is calculated as (dk - d) / 2
-        csk_table = {
-            3.0: {"dk": 6},
-            4.0: {"dk": 8},
-            5.0: {"dk": 10},
-            6.0: {"dk": 12},
-            8.0: {"dk": 16},
-            10.0: {"dk": 20},
-            12.0: {"dk": 24},
-            16.0: {"dk": 30},
-            20.0: {"dk": 36}
-        }
-
-        if bolt_type == "socket_head":
-            spec = socket_head_table.get(diameter)
-            if not spec:
-                raise ValueError(f"Socket head bolt M{diameter} not found.")
-            return [spec["d2"], spec["k"]]  # Return d2, k
-
-        elif bolt_type == "CSK":
-            spec = csk_table.get(diameter)
-            if not spec:
-                raise ValueError(f"CSK bolt M{diameter} not found.")
-            dk = spec["dk"]
-            t = (dk - diameter) / 2
-            return [dk, round(t, 3)]  # Rounded for clarity
-
-        else:
-            raise ValueError("bolt_type must be 'socket_head' or 'CSK'")
-
-    def get_nut_dimensions(self, diameter):
-        diameter = float(diameter)
-
-        nut_table = {
-            2.0: {"width_across_flats": 4, "height": 1.6},
-            2.5: {"width_across_flats": 5, "height": 2},
-            3.0: {"width_across_flats": 5.5, "height": 2.4},
-            4.0: {"width_across_flats": 7, "height": 3.2},
-            5.0: {"width_across_flats": 8, "height": 4},
-            6.0: {"width_across_flats": 10, "height": 5},
-            7.0: {"width_across_flats": None, "height": 5.5},  # ISO not defined
-            8.0: {"width_across_flats": 13, "height": 6.5},
-            10.0: {"width_across_flats": 16, "height": 8},
-            12.0: {"width_across_flats": 18, "height": 10},
-            14.0: {"width_across_flats": 21, "height": 13},
-            16.0: {"width_across_flats": 24, "height": 13},
-            18.0: {"width_across_flats": 27, "height": 15},
-            20.0: {"width_across_flats": 30, "height": 16},
-            24.0: {"width_across_flats": 36, "height": 18},
-            27.0: {"width_across_flats": 40, "height": 20},
-            30.0: {"width_across_flats": 43, "height": 22},
-        }
-
-        spec = nut_table.get(diameter)
-        if not spec:
-            raise ValueError(f"No nut data found for bolt diameter M{diameter}")
-
-        width_across_flats = spec["width_across_flats"]
-        height = spec["height"]
-
-        return [width_across_flats, height]
-
-class motor:
-    
-    def __init__(self,
-                 rotor_OD                     = 55.6,
-                 stator_ID                    = 57,
-                 rotor_height                 = 15,
-                 rotor_ID                     = 45,
-                 stator_height                = 24.5,
-                 stator_OD                    = 104,
-                 stator_hole_dia              = 3,
-                 stator_top_height            = 7,
-                 stator_mid_height            = 13,
-                 stator_bottom_height         = 4.5,
-                 stator_inside_OD             = 101,
-                 stator_hole_num              = 4,
-                 stator_inside_ID             = 58,
-                 maxMotorAngVelRPM            = 5040,  # RPM
-                 maxMotorTorque               = 1.3,   # Nm
-                 maxMotorPower                = 1.3 * 5040 * 2*np.pi/60,  # W
-                 motorMass                    = 0.265, # KG
-                 motorName                    = "RO100"):
-
-        self.motorName = motorName
-
-        # Physical geometry
-        self.rotor_OD                     = rotor_OD
-        self.stator_ID                    = stator_ID
-        self.rotor_height                 = rotor_height
-        self.rotor_ID                     = rotor_ID
-        self.stator_height                = stator_height
-        self.stator_OD                    = stator_OD
-        self.stator_hole_dia              = stator_hole_dia
-        self.stator_top_height            = stator_top_height
-        self.stator_mid_height            = stator_mid_height
-        self.stator_bottom_height         = stator_bottom_height
-        self.stator_inside_OD             = stator_inside_OD
-        self.stator_hole_num              = stator_hole_num
-        self.stator_inside_ID             = stator_inside_ID
-        self.motorDiaMM                   =  self.stator_OD
-        self.motorLengthMM                = self.stator_top_height + self.stator_mid_height + self.stator_bottom_height 
-
-        #Motor other param
-        self.maxMotorAngVelRPM            = maxMotorAngVelRPM
-        self.maxMotorAngVelRadPerSec      = maxMotorAngVelRPM * (2 * np.pi / 60)
-        self.maxMotorTorque               = maxMotorTorque
-        self.maxMotorPower                = maxMotorPower
-        self.massKG                       = motorMass     # kg
-
-    # ------------------------------------------------------------------
-    # Convenience getters (mirror reference code style)
-    # ------------------------------------------------------------------
-    
-    # Maximum motor angular velocity in rad/s
-    def getMaxMotorAngVelRadPerSec(self):
-        return self.maxMotorAngVelRadPerSec
-    
-    # Maximum motor power in W
-    def getMaxMotorPower(self):
-        return self.maxMotorPower
-    
-    # Maximum motor torque in Nm
-    def getMaxMotorTorque(self):
-        return self.maxMotorTorque
-    
-    # Mass of the motor in kg
-    def getMassKG(self):
-        return self.massKG
-
-    def getDiaMM(self):
-       return self.motorDiaMM
-
-    def getLengthMM(self): 
-        return self.motorLengthMM
-
-    def getRotorIDMM(self):  
-        return self.rotor_ID
-
-    def printParameters(self):
-        print(f"Motor: {self.motorName}")
-        print(f"  rotor_OD              = {self.rotor_OD} mm")
-        print(f"  stator_ID             = {self.stator_ID} mm")
-        print(f"  rotor_height          = {self.rotor_height} mm")
-        print(f"  rotor_ID              = {self.rotor_ID} mm")
-        print(f"  stator_height         = {self.stator_height} mm")
-        print(f"  stator_OD             = {self.stator_OD} mm")
-        print(f"  stator_hole_dia       = {self.stator_hole_dia} mm")
-        print(f"  stator_top_height     = {self.stator_top_height} mm")
-        print(f"  stator_mid_height     = {self.stator_mid_height} mm")
-        print(f"  stator_bottom_height  = {self.stator_bottom_height} mm")
-        print(f"  stator_inside_OD      = {self.stator_inside_OD} mm")
-        print(f"  stator_hole_num       = {self.stator_hole_num}")
-        print(f"  stator_inside_ID      = {self.stator_inside_ID} mm")
-
-class motor_driver:
-    def __init__(self, driver_name, motor_driver_data):
-        self.driver_name                          = driver_name
-        self.driver_upper_holes_dist_from_center  = motor_driver_data["driver_upper_holes_dist_from_center"]
-        self.driver_lower_holes_dist_from_center  = motor_driver_data["driver_lower_holes_dist_from_center"]
-        self.driver_side_holes_dist_from_center   = motor_driver_data["driver_side_holes_dist_from_center"]
-        self.driver_mount_holes_dia               = motor_driver_data["driver_mount_holes_dia"]
-        self.driver_mount_inserts_OD              = motor_driver_data["driver_mount_inserts_OD"]
-        self.driver_mount_thickness               = motor_driver_data["driver_mount_thickness"]
-        self.driver_mount_height                  = motor_driver_data["driver_mount_height"]
-
-        # self.print_vars()
-    
-    def print_vars(self):
-        print("driver_name:", self.driver_name)
-        print("driver_upper_holes_dist_from_center: ", self.driver_upper_holes_dist_from_center)
-        print("driver_lower_holes_dist_from_center: ", self.driver_lower_holes_dist_from_center)
-        print("driver_side_holes_dist_from_center: ", self.driver_side_holes_dist_from_center)
-        print("driver_mount_holes_dia: ", self.driver_mount_holes_dia)
-        print("driver_mount_inserts_OD: ", self.driver_mount_inserts_OD)
-        print("driver_mount_thickness: ", self.driver_mount_thickness)
-        print("driver_mount_height: ", self.driver_mount_height)
-        print("---")
-
-#-------------------------------------------------------------------------
-# Compound Planetary Gearbox
-#-------------------------------------------------------------------------
 class inrunnerCompoundPlanetaryGearbox:
     def __init__(self,
                  design_parameters,
@@ -840,8 +585,8 @@ class inrunnerCompoundPlanetaryActuator:
         numPlanet = self.inrunnerCompoundPlanetaryGearbox.numPlanet
 
         OutputIDrequiredMM = module * (Ns + Np1) + self.bearingIDClearanceMM
-        OutputBearings            = bearings_discrete(OutputIDrequiredMM)
-        output_bearing_ID   = OutputBearings.getBearingIDMM()
+        Bearings            = bearings_discrete(OutputIDrequiredMM)
+        output_bearing_ID   = Bearings.getBearingIDMM()
         
         ring_ID = module * Nr - 2*module*1.25
         return ring_ID > output_bearing_ID + 2*self.standard_clearance_1_5mm
@@ -871,22 +616,6 @@ class inrunnerCompoundPlanetaryActuator:
         sun_shaft_bearing_ID = self.sun_shaft_bearing_ID
 
         return sun_ID > sun_shaft_bearing_ID 
-    
-    def noSecCarrierInterferenceConstraint(self):
-        module    = self.inrunnerCompoundPlanetaryGearbox.moduleBig  # Module of the gear
-        Ns        = self.inrunnerCompoundPlanetaryGearbox.Ns
-        Np1       = self.inrunnerCompoundPlanetaryGearbox.NpBig
-        Np2       = self.inrunnerCompoundPlanetaryGearbox.NpSmall
-        Nr        = self.inrunnerCompoundPlanetaryGearbox.Nr
-        numPlanet = self.inrunnerCompoundPlanetaryGearbox.numPlanet
-
-        OutputIDrequiredMM = module * (Ns + Np1) + self.bearingIDClearanceMM
-        OutputBearings            = bearings_discrete(OutputIDrequiredMM)
-        output_bearing_ID   = OutputBearings.getBearingIDMM()
-        
-        sec_carrier_OD = output_bearing_ID
-        max_sec_carrier_OD = self.stator_ID
-        return max_sec_carrier_OD >= sec_carrier_OD
 
     def setVariables(self):
         #--------- Optimization Variable-----------
@@ -928,12 +657,12 @@ class inrunnerCompoundPlanetaryActuator:
         self.stator_height        = self.motor.stator_height
         self.stator_OD            = self.motor.stator_OD
         self.stator_hole_dia      = self.motor.stator_hole_dia
-        self.stator_top_height    = self.motor.stator_top_height
+        self.stator_top_height    = self.motor.stator_wire_top_height
         self.stator_mid_height    = self.motor.stator_mid_height
-        self.stator_bottom_height = self.motor.stator_bottom_height
-        self.stator_inside_OD     = self.motor.stator_inside_OD
+        self.stator_bottom_height = self.motor.stator_wire_bottom_height
+        self.stator_inside_OD     = self.motor.stator_wire_OD
         self.stator_hole_num      = self.motor.stator_hole_num
-        self.stator_inside_ID     = self.motor.stator_inside_ID
+        self.stator_inside_ID     = self.motor.stator_wire_ID
 
         # --- Driver Dimensions ---
         self.driver_upper_holes_dist_from_center = self.motor_driver_params["driver_upper_holes_dist_from_center"]
@@ -951,6 +680,10 @@ class inrunnerCompoundPlanetaryActuator:
         self.rotor_hub_height        = self.design_params["rotor_hub_height"]
         self.rotor_hub_sun_hole_dia  = self.design_params["rotor_hub_sun_hole_dia"]        
         self.rotor_hub_sun_hole_num = self.design_params["rotor_hub_sun_hole_num"]
+
+        self.rotor_top_bearing_ID  = self.design_params["rotor_top_bearing_ID"]
+        self.rotor_top_bearing_OD  = self.design_params["rotor_top_bearing_OD"]
+        self.rotor_top_bearing_width = self.design_params["rotor_top_bearing_width"]
 
         self.rotor_bottom_bearing_ID  = self.design_params["rotor_bottom_bearing_ID"]
         self.rotor_bottom_bearing_OD  = self.design_params["rotor_bottom_bearing_OD"]
@@ -1007,7 +740,11 @@ class inrunnerCompoundPlanetaryActuator:
 
         # --- Ring ---
         self.ring_radial_width = self.design_params["ringRadialWidthMM"] # 3
-        
+
+        # --- Rotor Top Bearing Holder ---
+        self.rotor_top_bearing_holder_thickness = (self.bearing_step_width + self.rotor_top_bearing_width - 
+                                                    (self.standard_clearance_1_5mm/2 + self.stator_top_height + self.stator_mid_height - self.rotor_height - self.bearing_step_width))
+
         #------------------------------------------------------
         # Dependent variables
         #------------------------------------------------------
@@ -1047,14 +784,14 @@ class inrunnerCompoundPlanetaryActuator:
         motor_mount_driver_bolt = nuts_and_bolts_dimensions(bolt_dia=self.motor_mount_driver_hole_dia , bolt_type="socket_head")
         
         self.motor_mount_driver_nut_wrench_size = motor_mount_driver_bolt.nut_width_across_flats 
-        self.motor_mount_driver_nut_depth       = motor_mount_driver_bolt.nut_depth
+        self.motor_mount_driver_nut_depth       = motor_mount_driver_bolt.nut_thickness
 
         # --- Planet Pin and Bearing ---
         planet_pin_bolt = nuts_and_bolts_dimensions(bolt_dia=self.planet_pin_bolt_dia , bolt_type="socket_head")
         
         self.planet_pin_socket_head_dia = planet_pin_bolt.bolt_head_dia
         self.planet_pin_nut_wrench_size = planet_pin_bolt.nut_width_across_flats 
-        self.planet_pin_nut_depth       = planet_pin_bolt.nut_depth
+        self.planet_pin_nut_depth       = planet_pin_bolt.nut_thickness
 
         # --- Sun coupler and sun central bolt ---
         sun_central_bolt = nuts_and_bolts_dimensions(bolt_dia = self.sun_central_bolt_dia, bolt_type="socket_head")
@@ -1065,64 +802,56 @@ class inrunnerCompoundPlanetaryActuator:
         self.rotor_hub_sun_hole_CSK_OD          = rotor_hub_sun_bolt.bolt_head_dia   
         self.rotor_hub_sun_hole_CSK_head_height = rotor_hub_sun_bolt.bolt_head_height
 
-        self.sun_hub_dia = self.rotor_ID - 2*self.rotor_hub_thickness - 2*self.standard_clearance_1_5mm
+        self.sun_hub_dia = self.rotor_top_bearing_ID - 2*self.rotor_hub_thickness - 2*self.standard_clearance_1_5mm
 
         #----------------------- Bearings------------------------------------
-        OutputIDrequiredMM         = self.module * (self.Ns + self.Np_b) + self.bearingIDClearanceMM
-        OutputBearings             = bearings_discrete(OutputIDrequiredMM)
-        self.output_bearing_ID     = OutputBearings.getBearingIDMM()
-        self.output_bearing_OD     = OutputBearings.getBearingODMM()
-        self.output_bearing_width  = OutputBearings.getBearingWidthMM()
-
-        if self.design_params["min_rotor_top_bearing_ID"] < self.module * self.Ns + 2*self.standard_clearance_1_5mm:
-            RotorTopBearingIDrequiredMM   = self.module * self.Ns + 2*self.standard_clearance_1_5mm
-        else:
-            RotorTopBearingIDrequiredMM   = self.design_params["min_rotor_top_bearing_ID"]
-
-        RotorTopBearings              = bearings_discrete(RotorTopBearingIDrequiredMM)
-        self.rotor_top_bearing_ID     = RotorTopBearings.getBearingIDMM()
-        self.rotor_top_bearing_OD     = RotorTopBearings.getBearingODMM()
-        self.rotor_top_bearing_width  = RotorTopBearings.getBearingWidthMM()
+        OutputIDrequiredMM = self.module * (self.Ns + self.Np_b) + self.bearingIDClearanceMM
+        Bearings            = bearings_discrete(OutputIDrequiredMM)
+        self.output_bearing_ID     = Bearings.getBearingIDMM()
+        self.output_bearing_OD     = Bearings.getBearingODMM()
+        self.output_bearing_width  = Bearings.getBearingWidthMM()
 
         #------------------- Carrier & Sec Carrier-----------------------------        
         carrier_trapezoidal_support_hole = nuts_and_bolts_dimensions(bolt_dia=self.carrier_trapezoidal_support_hole_dia, bolt_type="socket_head")
 
         self.carrier_trapezoidal_support_hole_socket_head_dia = carrier_trapezoidal_support_hole.bolt_head_dia
         self.carrier_trapezoidal_support_hole_wrench_size     = carrier_trapezoidal_support_hole.nut_width_across_flats        
-        self.carrier_trapezoidal_support_nut_depth            = carrier_trapezoidal_support_hole.nut_depth 
+        self.carrier_trapezoidal_support_nut_depth            = carrier_trapezoidal_support_hole.nut_thickness 
 
-        planet_pin_bolt = nuts_and_bolts_dimensions(bolt_dia=self.planet_pin_bolt_dia , bolt_type="socket_head")
+        # planet_pin_bolt = nuts_and_bolts_dimensions(bolt_dia=self.planet_pin_bolt_dia , bolt_type="socket_head")
         
-        self.planet_pin_socket_head_dia = planet_pin_bolt.bolt_head_dia
-        self.planet_pin_nut_wrench_size = planet_pin_bolt.nut_width_across_flats 
-        self.planet_pin_nut_depth       = planet_pin_bolt.nut_depth
+        # self.planet_pin_socket_head_dia = planet_pin_bolt.bolt_head_dia
+        # self.planet_pin_nut_wrench_size = planet_pin_bolt.nut_width_across_flats 
+        # self.planet_pin_nut_depth       = planet_pin_bolt.nut_thickness
 
         #--------------------- Casings------------------------------------------
         case_mounting_hole_bolt = nuts_and_bolts_dimensions(bolt_dia=self.case_mounting_hole_dia, bolt_type="socket_head")
 
         self.case_mounting_hole_allen_socket_dia = case_mounting_hole_bolt.bolt_head_dia
         self.case_mounting_wrench_size       = case_mounting_hole_bolt.nut_width_across_flats
-        self.case_mounting_nut_depth     = case_mounting_hole_bolt.nut_depth
+        self.case_mounting_nut_depth     = case_mounting_hole_bolt.nut_thickness
 
         output_mount_hole_bolt = nuts_and_bolts_dimensions(bolt_dia=self.output_mount_hole_dia, bolt_type="socket_head")
 
         self.output_mount_nut_wrench_size       = output_mount_hole_bolt.nut_width_across_flats
-        self.output_mount_hole_nut_depth        = output_mount_hole_bolt.nut_depth
+        self.output_mount_hole_nut_depth        = output_mount_hole_bolt.nut_thickness
 
         actuactor_mount_hole_bolt = nuts_and_bolts_dimensions(bolt_dia=self.actuactor_mount_hole_dia, bolt_type="socket_head")
 
         self.actuactor_mount_nut_wrench_size       = actuactor_mount_hole_bolt.nut_width_across_flats
-        self.actuactor_mount_nut_depth             = actuactor_mount_hole_bolt.nut_depth
+        self.actuactor_mount_nut_depth             = actuactor_mount_hole_bolt.nut_thickness
 
         self.case_mounting_hole_shift = self.case_mounting_hole_dia / 2 
 
-        # ---- Sun Gear ----
-
-        self.fw_s_used = self.bearing_step_width + self.sec_carrier_thickness +self.clearance_planet +self.fw_p_b+self.fw_p_s
+        self.fw_s_used = (self.bearing_step_width + self.rotor_top_bearing_width - self.sun_coupler_hub_thickness + self.bearing_step_width
+                          + self.standard_clearance_1_5mm + self.sec_carrier_thickness + self.clearance_planet + self.fw_p_b + self.fw_p_s)
 
         #-----
         self.actuator_width =  (self.motor_case_thickness
+                                + self.standard_clearance_1_5mm/2
                                 + self.motor_height
+                                + self.standard_clearance_1_5mm/2
+                                + self.rotor_top_bearing_holder_thickness
                                 + self.standard_clearance_1_5mm
                                 + self.sec_carrier_thickness
                                 + self.clearance_planet
@@ -1130,7 +859,8 @@ class inrunnerCompoundPlanetaryActuator:
                                 + self.fw_p_s
                                 + self.clearance_planet
                                 + self.bearing_step_width
-                                + self.output_bearing_width)
+                                + self.output_bearing_width
+                                + self.bearing_step_width)
                                                                
     def genEquationFile(self, motor_name="NO_MOTOR", gearRatioLL = 0.0, gearRatioUL = 0.0):
         # writing values into text file imported which is imported into solidworks
@@ -1224,6 +954,7 @@ class inrunnerCompoundPlanetaryActuator:
                     f'"magnet_mount_height"= {self.magnet_mount_height}\n',
                     f'"ring_radial_width"= {self.ring_radial_width}\n',
                     f'"ring_gearbox_casing_thickness"= {self.ring_gearbox_casing_thickness}\n',
+                    f'"rotor_top_bearing_holder_thickness"= {self.rotor_top_bearing_holder_thickness}\n',
                     f'"h_a"= {self.h_a}\n',
                     f'"h_b"= {self.h_b}\n',
                     f'"h_f"= {self.h_f}\n',
@@ -1365,6 +1096,7 @@ class inrunnerCompoundPlanetaryActuator:
                     f'"magnet_mount_height"= {self.magnet_mount_height}\n',
                     f'"ring_radial_width"= {self.ring_radial_width}\n',
                     f'"ring_gearbox_casing_thickness"= {self.ring_gearbox_casing_thickness}\n',
+                    f'"rotor_top_bearing_holder_thickness"= {self.rotor_top_bearing_holder_thickness}\n',
                     f'"h_a"= {self.h_a}\n',
                     f'"h_b"= {self.h_b}\n',
                     f'"h_f"= {self.h_f}\n',
@@ -1509,6 +1241,7 @@ class inrunnerCompoundPlanetaryActuator:
                     f'"magnet_mount_height"= {self.magnet_mount_height}\n',
                     f'"ring_radial_width"= {self.ring_radial_width}\n',
                     f'"ring_gearbox_casing_thickness"= {self.ring_gearbox_casing_thickness}\n',
+                    f'"rotor_top_bearing_holder_thickness"= {self.rotor_top_bearing_holder_thickness}\n',
                     f'"h_a"= {self.h_a}\n',
                     f'"h_b"= {self.h_b}\n',
                     f'"h_f"= {self.h_f}\n',
@@ -1650,6 +1383,7 @@ class inrunnerCompoundPlanetaryActuator:
                     f'"magnet_mount_height"= {self.magnet_mount_height}\n',
                     f'"ring_radial_width"= {self.ring_radial_width}\n',
                     f'"ring_gearbox_casing_thickness"= {self.ring_gearbox_casing_thickness}\n',
+                    f'"rotor_top_bearing_holder_thickness"= {self.rotor_top_bearing_holder_thickness}\n',
                     f'"h_a"= {self.h_a}\n',
                     f'"h_b"= {self.h_b}\n',
                     f'"h_f"= {self.h_f}\n',
@@ -2069,11 +1803,6 @@ class inrunnerCompoundPlanetaryActuator:
         OutputWidthBearingMM    = OutputBearings.getBearingWidthMM()
         OutputBearingMassKG     = OutputBearings.getBearingMassKG()
 
-       
-        RotorTopBearingIDrequiredMM   = self.rotor_top_bearing_ID 
-        RotorTopBearings              = bearings_discrete(RotorTopBearingIDrequiredMM)
-        RotorTopBearingMassKG         = RotorTopBearings.getBearingMassKG()
-
         #======================================
         # Mass Calculation
         #======================================
@@ -2094,15 +1823,13 @@ class inrunnerCompoundPlanetaryActuator:
         sun_shaft_bearing_ID           = self.sun_shaft_bearing_ID        
         sun_shaft_bearing_width        = self.sun_shaft_bearing_width     
         motor_case_OD_base_to_chamfer  = self.motor_case_OD_base_to_chamfer #5
-        ring_gearbox_casing_thickness  = self.ring_gearbox_casing_thickness
+        ring_gearbox_casing_thickness   = self.ring_gearbox_casing_thickness
 
         #--------------------------------------
         # Dependent variables
         #--------------------------------------
         h_b1 = 1.25 * module1
         h_b2 = 1.25 * module2
-
-        fw_s_used = bearing_step_width + sec_carrier_thickness + clearance_planet + planet1FwMM + planet2FwMM
 
         #--------------------------------------
         # Mass: incpg_motor_casing
@@ -2113,20 +1840,39 @@ class inrunnerCompoundPlanetaryActuator:
         motor_OD          = self.motorDiaMM
         motor_case_ID     = motor_OD
         motor_height      = self.motorLengthMM
-        motor_case_height = self.stator_bottom_height + self.stator_mid_height + standard_clearance_1_5mm/2
+        motor_case_height = self.stator_bottom_height + self.stator_mid_height + standard_clearance_1_5mm/2 
 
         motor_case_OD = motor_case_ID + motor_case_thickness * 2
 
-        motor_case_base_ID = self.rotor_bottom_bearing_OD
+        motor_case_base_ID = self.rotor_bottom_bearing_ID - 2*standard_clearance_1_5mm * 3
 
-        motor_case_bearing_structure_height = self.rotor_bottom_bearing_width + bearing_step_width - motor_case_thickness
-        motor_case_bearing_structure_OD     = motor_case_base_ID + 2*(standard_clearance_1_5mm/3 + standard_clearance_1_5mm + self.motor_mount_driver_nut_wrench_size)
+        motor_case_bearing_structure_height = self.rotor_bottom_bearing_width + self.stator_bottom_height
+        motor_case_bearing_structure_OD     = self.rotor_bottom_bearing_ID 
 
         motor_case_volume = (  np.pi * (((motor_case_OD * 0.5)**2)-(motor_case_base_ID * 0.5)**2) * motor_case_thickness 
                             + np.pi * ((motor_case_OD * 0.5)**2 - (motor_case_ID * 0.5)**2) * motor_case_height
+                            + np.pi * ((motor_case_bearing_structure_OD * 0.5)**2 - (motor_case_base_ID * 0.5)**2) * motor_case_bearing_structure_height
         ) * 1e-9
 
         motor_case_mass = motor_case_volume * density_3DP_material
+
+        #--------------------------------------
+        # Mass: rotor_top_bearing_holder
+        #--------------------------------------
+        rotor_top_bearing_holder_height    = self.stator_top_height + standard_clearance_1_5mm/2
+        rotor_top_bearing_holder_thickness = (bearing_step_width + self.rotor_top_bearing_width - 
+                                                    (standard_clearance_1_5mm/2 + self.stator_top_height + self.stator_mid_height - self.rotor_height - bearing_step_width))
+        rotor_top_bearing_holder_ID        = self.stator_ID
+
+        rotor_top_bearing_holder_extrude_ID = self.rotor_top_bearing_OD
+        rotor_top_bearing_holder_extrude_thickness = self.rotor_top_bearing_width + bearing_step_width
+
+        rotor_top_bearing_holder_volume= (np.pi * (((motor_case_OD) * 0.5)**2 - (rotor_top_bearing_holder_ID * 0.5)**2) * rotor_top_bearing_holder_thickness 
+                                        + np.pi * (((motor_case_OD) * 0.5)**2 - (motor_case_ID * 0.5)**2) * rotor_top_bearing_holder_height 
+                                        + np.pi * (((rotor_top_bearing_holder_ID) * 0.5)**2 - (rotor_top_bearing_holder_extrude_ID * 0.5)**2) * rotor_top_bearing_holder_extrude_thickness
+                                        )* 1e-9
+                                        
+        rotor_top_bearing_holder_mass = rotor_top_bearing_holder_volume * density_3DP_material
 
         #--------------------------------------
         # Mass: incpg_gearbox_casing
@@ -2150,12 +1896,9 @@ class inrunnerCompoundPlanetaryActuator:
 
         case_mounting_structure_OD     = (Ns+2*Np1)*module1 + 2*standard_clearance_1_5mm + 2*ring_gearbox_casing_thickness
         case_mounting_structure_ID     = case_mounting_structure_OD - 2*ring_gearbox_casing_thickness
-        case_mounting_structure_height =(self.rotor_hub_height + sun_coupler_hub_thickness+ bearing_step_width/2
-                                         + self.rotor_top_bearing_width + fw_s_used - planet2FwMM +
-                                        standard_clearance_1_5mm - standard_clearance_1_5mm/2 - self.stator_top_height - self.stator_mid_height)           
+        case_mounting_structure_height = (standard_clearance_1_5mm + planet1FwMM + clearance_planet 
+                                        + sec_carrier_thickness + standard_clearance_1_5mm - motor_case_thickness)           
         
-        gearbox_casing_bottom_height = self.stator_top_height + standard_clearance_1_5mm/2
-
         if bearing_holding_structure_OD > case_mounting_structure_OD:
             ring_OD_used = bearing_holding_structure_OD
             ring_casing_chamfer_ID = case_mounting_structure_OD
@@ -2176,7 +1919,6 @@ class inrunnerCompoundPlanetaryActuator:
                                                     ((case_mounting_structure_ID*0.5)**2)) * motor_case_thickness * 1e-9
         ring_casing_chamfer_volume       = 0.5* np.pi * (((ring_casing_chamfer_OD*0.5)**2) -
                                                     ((ring_casing_chamfer_ID*0.5)**2)) * ring_casing_chamfer_height * 1e-9
-        gearbox_casing_bottom_volume = np.pi * (((motor_case_OD*0.5)**2) - ((motor_case_ID*0.5)**2)) * gearbox_casing_bottom_height * 1e-9
         
         large_fillet_ID     = case_mounting_structure_OD
         
@@ -2189,7 +1931,7 @@ class inrunnerCompoundPlanetaryActuator:
         large_fillet_volume = 0.2146  * (np.pi * (((large_fillet_OD*0.5)**2) - ((large_fillet_ID)*0.5)**2) * large_fillet_height) * 1e-9
 
     
-        gearbox_casing_volume = ring_volume + bearing_holding_structure_volume + case_mounting_structure_volume + case_mounting_plate_volume  - ring_casing_chamfer_volume + gearbox_casing_bottom_volume# + large_fillet_volume(accomated in the air vents in motor casing) 
+        gearbox_casing_volume = ring_volume + bearing_holding_structure_volume + case_mounting_structure_volume + case_mounting_plate_volume  - ring_casing_chamfer_volume + large_fillet_volume
         gearbox_casing_mass = gearbox_casing_volume * density_3DP_material
 
         #----------------------------------
@@ -2217,26 +1959,33 @@ class inrunnerCompoundPlanetaryActuator:
         # 3. sun shaft
         # 4. sun magnet mount shaft
         #--------------------------------------
-        sun_hub_dia = self.rotor_ID - 2*self.rotor_hub_thickness - 2*standard_clearance_1_5mm
+        sun_hub_dia = self.rotor_top_bearing_ID - 2*self.rotor_hub_thickness - 2*standard_clearance_1_5mm
+
+        fw_s_used        = planet1FwMM + planet2FwMM + clearance_planet + sec_carrier_thickness + standard_clearance_1_5mm
         
-        sun_rotor_top_bearing_structure_dia = self.rotor_top_bearing_ID
-        sun_rotor_top_bearing_structure_height = bearing_step_width/2 + self.rotor_top_bearing_width
+        sun_extrsuion_dia = sun_hub_dia - 2*self.rotor_hub_sun_hole_CSK_OD 
+        sun_extrsuion_height = fw_s_used - planet1FwMM - planet2FwMM - clearance_planet
         
         sun_shaft_dia    = sun_shaft_bearing_ID
         sun_shaft_height = sun_shaft_bearing_width + bearing_step_width
 
-        sun_rotor_bottom_bearing_structure_dia    = self.rotor_bottom_bearing_ID
-        sun_rotor_bottom_bearing_structure_height = self.rotor_hub_height + self.stator_bottom_height + motor_case_thickness - bearing_step_width 
+        sun_magnet_mount_shaft_dia    = sun_hub_dia - self.rotor_hub_sun_hole_CSK_OD - self.rotor_hub_sun_hole_dia/2 - 2*standard_clearance_1_5mm
+        sun_magnet_mount_shaft_height = self.rotor_height + self.stator_bottom_height 
 
         sun_hub_volume   = np.pi * ((sun_hub_dia*0.5) ** 2) * sun_coupler_hub_thickness * 1e-9
-        sun_rotor_top_bearing_structure_volume = np.pi * ((sun_rotor_top_bearing_structure_dia*0.5) ** 2) * sun_rotor_top_bearing_structure_height * 1e-9
-        sun_gear_volume = np.pi * ((DiaSunMM*0.5) ** 2) * fw_s_used * 1e-9
-        sun_shaft_volume = np.pi * ((sun_shaft_dia*0.5) ** 2) * sun_shaft_height * 1e-9
-        sun_rotor_bottom_bearing_structure_volume = np.pi * ((sun_rotor_bottom_bearing_structure_dia*0.5) ** 2) * sun_rotor_bottom_bearing_structure_height * 1e-9
-        central_bolt_volume = (np.pi * ((self.sun_central_bolt_dia*0.5)**2)
-                                *(fw_s_used+sun_shaft_height+sun_rotor_top_bearing_structure_height+sun_coupler_hub_thickness+sun_rotor_bottom_bearing_structure_height))* 1e-9
 
-        sun_volume       = sun_hub_volume + sun_rotor_top_bearing_structure_volume+ sun_gear_volume + sun_shaft_volume + sun_rotor_bottom_bearing_structure_volume - central_bolt_volume
+        if sun_extrsuion_dia < DiaSunMM:
+            sun_gear_volume = np.pi * ((DiaSunMM*0.5) ** 2) * fw_s_used * 1e-9
+        else:
+            sun_gear_volume = (np.pi * ((sun_extrsuion_dia*0.5) ** 2) * sun_extrsuion_height 
+                             + np.pi * ((DiaSunMM*0.5) ** 2) * (fw_s_used - sun_extrsuion_height)) * 1e-9
+
+        sun_shaft_volume = np.pi * ((sun_shaft_dia*0.5) ** 2) * sun_shaft_height * 1e-9
+        sun_magnet_mount_shaft_volume = np.pi * ((sun_magnet_mount_shaft_dia*0.5) ** 2) * sun_magnet_mount_shaft_height * 1e-9
+        central_bolt_volume = (np.pi * ((self.sun_central_bolt_dia*0.5)**2)
+                                *(fw_s_used+sun_shaft_height+sun_magnet_mount_shaft_height+sun_coupler_hub_thickness))* 1e-9
+
+        sun_volume       = sun_hub_volume + sun_gear_volume + sun_shaft_volume + sun_magnet_mount_shaft_volume - central_bolt_volume
         sun_mass         = sun_volume * density_3DP_material
 
         #--------------------------------------
@@ -2250,18 +1999,12 @@ class inrunnerCompoundPlanetaryActuator:
         #--------------------------------------
         # Mass: incpg_sec_carrier
         #--------------------------------------
-        sec_carrier_top_OD = output_bearing_ID
-        sec_carrier_top_ID = (DiaSunMM + DiaPlanet1MM) - self.planet_pin_nut_wrench_size - 2*standard_clearance_1_5mm
-        sec_carrier_top_thickness = sec_carrier_thickness 
+        sec_carrier_OD = output_bearing_ID
+        sec_carrier_ID = (DiaSunMM + DiaPlanet1MM) - self.planet_pin_nut_wrench_size - 2*standard_clearance_1_5mm
 
-        sec_carrier_bottom_OD = self.rotor_top_bearing_OD + 2*standard_clearance_1_5mm*3 
-        sec_carrier_bottom_ID = self.rotor_top_bearing_OD
-        sec_carrier_bottom_thickness = self.rotor_top_bearing_width + bearing_step_width 
-
-        sec_carrier_volume = ((np.pi * ((sec_carrier_top_OD*0.5)**2 - (sec_carrier_top_ID*0.5)**2) * sec_carrier_top_thickness)
-                            +(np.pi * ((sec_carrier_bottom_OD*0.5)**2 - (sec_carrier_bottom_ID*0.5)**2) * sec_carrier_bottom_thickness)) * 1e-9
+        sec_carrier_volume = (np.pi * ((sec_carrier_OD*0.5)**2 - (sec_carrier_ID*0.5)**2) * sec_carrier_thickness) * 1e-9
         sec_carrier_mass   = sec_carrier_volume * density_3DP_material
-        
+
         #--------------------------------------
         # Mass: rotor_hub
         #--------------------------------------
@@ -2271,36 +2014,37 @@ class inrunnerCompoundPlanetaryActuator:
         # 3. Bottom bearing holding structure
         #--------------------------------------
         rotor_base_hub_OD = self.rotor_ID
-        rotor_base_hub_ID = self.rotor_bottom_bearing_ID + 2*standard_clearance_1_5mm
+        rotor_base_hub_ID = sun_magnet_mount_shaft_dia
         rotor_base_hub_height = self.rotor_hub_height
 
         rotor_hub_thickness = self.rotor_hub_thickness
 
-        rotor_top_hub_ID = rotor_base_hub_OD - 2*rotor_hub_thickness
-        rotor_top_hub_height = rotor_base_hub_height
+        rotor_top_bearing_holder_OD = self.rotor_top_bearing_ID
+        rotor_top_bearing_holder_ID = rotor_top_bearing_holder_OD - 2*rotor_hub_thickness
+        rotor_top_bearing_holder_height = self.rotor_top_bearing_width + bearing_step_width
 
-        rotor_bottom_hub_OD = self.rotor_OD
-        rotor_bottom_hub_ID = rotor_top_hub_ID
-        rotor_bottom_hub_height = rotor_hub_thickness
+        rotor_bottom_bearing_holder_OD = rotor_base_hub_OD
+        rotor_bottom_bearing_holder_ID = self.rotor_bottom_bearing_OD
+        rotor_bottom_bearing_holder_height = self.rotor_height - rotor_base_hub_height
 
         rotor_base_hub_volume = np.pi * ((rotor_base_hub_OD*0.5)**2 - (rotor_base_hub_ID*0.5)**2) * rotor_base_hub_height * 1e-9
-        rotor_top_hub_volume = np.pi * ((rotor_base_hub_OD*0.5)**2 
-                                          - (rotor_top_hub_ID*0.5)**2) * rotor_top_hub_height * 1e-9
-        rotor_bottom_hub_volume = np.pi * ((rotor_bottom_hub_OD*0.5)**2 
-                                             - (rotor_bottom_hub_ID*0.5)**2) * rotor_bottom_hub_height * 1e-9
+        rotor_top_bearing_holder_volume = np.pi * ((rotor_top_bearing_holder_OD*0.5)**2 
+                                          - (rotor_top_bearing_holder_ID*0.5)**2) * rotor_top_bearing_holder_height * 1e-9
+        rotor_bottom_bearing_holder_volume = np.pi * ((rotor_bottom_bearing_holder_OD*0.5)**2 
+                                             - (rotor_bottom_bearing_holder_ID*0.5)**2) * rotor_bottom_bearing_holder_height * 1e-9
         
-        rotor_hub_volume = rotor_base_hub_volume + rotor_top_hub_volume #+ rotor_bottom_hub_volume(Commented out to accomodate for the holes in hub)
+        rotor_hub_volume = rotor_base_hub_volume + rotor_top_bearing_holder_volume + rotor_bottom_bearing_holder_volume
         rotor_hub_mass = rotor_hub_volume * density_aluminum
-       
+
         #--------------------------------------
         # Mass: incpg_rotor_top_bearing
         #--------------------------------------
-        rotor_top_bearing_mass =  RotorTopBearingMassKG
+        rotor_top_shaft_bearing_mass =  0.023 # kg
 
         #--------------------------------------
         # Mass: incpg_rotor_bottom_bearing
         #--------------------------------------
-        rotor_bottom_bearing_mass = 0.007 # kg
+        rotor_bottom_shaft_bearing_mass = 0.024 # kg
 
         #--------------------------------------
         # Mass: incpg_sun_shaft_bearing
@@ -2331,13 +2075,14 @@ class inrunnerCompoundPlanetaryActuator:
 
         self.motor_case_mass                    = motor_case_mass
         self.gearbox_casing_mass                = gearbox_casing_mass
+        self.rotor_top_bearing_holder_mass      = rotor_top_bearing_holder_mass
         self.carrier_mass                       = carrier_mass
         self.sun_mass                           = sun_mass
         self.sec_carrier_mass                   = sec_carrier_mass
         self.planet_mass                        = planet_mass
         self.rotor_hub_mass                     = rotor_hub_mass
-        self.rotor_top_bearing_mass             = rotor_top_bearing_mass
-        self.rotor_bottom_bearing_mass          = rotor_bottom_bearing_mass
+        self.rotor_top_shaft_bearing_mass       = rotor_top_shaft_bearing_mass
+        self.rotor_bottom_shaft_bearing_mass    = rotor_bottom_shaft_bearing_mass
         self.planet_bearing_combined_mass       = planet_bearing_combined_mass
         self.sun_shaft_bearing_mass             = sun_shaft_bearing_mass
         self.output_bearing_mass                = output_bearing_mass
@@ -2351,13 +2096,14 @@ class inrunnerCompoundPlanetaryActuator:
         Actuator_mass = (self.motorMassKG 
                         + self.motor_case_mass 
                         + self.gearbox_casing_mass 
+                        + self.rotor_top_bearing_holder_mass
                         + self.carrier_mass 
                         + self.sun_mass 
                         + self.sec_carrier_mass 
                         + self.rotor_hub_mass
                         + self.planet_mass * numPlanet
-                        + self.rotor_top_bearing_mass
-                        + self.rotor_bottom_bearing_mass 
+                        + self.rotor_top_shaft_bearing_mass
+                        + self.rotor_bottom_shaft_bearing_mass 
                         + self.planet_bearing_combined_mass 
                         + self.sun_shaft_bearing_mass 
                         + self.output_bearing_mass 
@@ -2365,12 +2111,13 @@ class inrunnerCompoundPlanetaryActuator:
 
         Actuator_mass_without_bearing = (self.motor_case_mass 
                                         + self.gearbox_casing_mass
+                                        + self.rotor_top_bearing_holder_mass 
                                         + self.carrier_mass 
                                         + self.sun_mass 
                                         + self.sec_carrier_mass 
                                         + self.rotor_hub_mass
-                                        + self.planet_mass * numPlanet 
-                                        + self.bearing_retainer_mass
+                                        + self.planet_mass * numPlanet
+                                        + self.bearing_retainer_mass 
                                         )
         
         self.Actuator_mass = Actuator_mass
@@ -2381,6 +2128,7 @@ class inrunnerCompoundPlanetaryActuator:
     def print_mass_of_parts_3DP(self):
         print("motor_case_mass: ",                 1000 * self.motor_case_mass)
         print("gearbox_casing_mass: ",             1000 * self.gearbox_casing_mass)
+        print("rotor_top_bearing_holder_mass: ",   1000 * self.rotor_top_bearing_holder_mass)
         print("carrier_mass: ",                    1000 * self.carrier_mass)
         print("sun_mass: ",                        1000 * self.sun_mass)
         print("sec_carrier_mass: ",                1000 * self.sec_carrier_mass)
@@ -2390,8 +2138,8 @@ class inrunnerCompoundPlanetaryActuator:
         print("sun_shaft_bearing_mass: ",          1000 * self.sun_shaft_bearing_mass)
         print("output_bearing_mass: ",             1000 * self.output_bearing_mass)
         print("bearing_retainer_mass: ",           1000 * self.bearing_retainer_mass)
-        print("rotor_top_bearing_mass: ",          1000 * self.rotor_top_bearing_mass)
-        print("rotor_bottom_bearing_mass: ",       1000 * self.rotor_bottom_bearing_mass)
+        print("rotor_top_shaft_bearing_mass: ",    1000 * self.rotor_top_shaft_bearing_mass)
+        print("rotor_bottom_shaft_bearing_mass: ", 1000 * self.rotor_bottom_shaft_bearing_mass)
         print("Motor mass:",                       1000 * self.motorMassKG)
 
         print("Actuator_mass_without_bearing:",    1000 * self.Actuator_mass_without_bearing)
@@ -2564,9 +2312,9 @@ class optimizationInrunnerCompoundPlanetaryActuator:
             
             Cost = self.cost(Actuator=Actuator)
             Output_bearing_mass = Actuator.output_bearing_mass
-            Actuator_width = Actuator.actuator_width
+            Actuator_width = Actuator.actuator_width            
             print(iter, ",", gearRatio, ",", moduleBig, ",", moduleSmall, ",", Ns, ",", NpBig, ",", NpSmall, ",", Nr, ",", numPlanet, ",", fwSunMM, ",", fwPlanetBigMM, ",", fwPlanetSmallMM, ",", fwRingMM, ",", mass, ",", eff, ",", peakTorque, ",", Cost, ",", Torque_Density, ",", Output_bearing_mass, ",", Actuator_width)
-
+ 
     def optimizeActuator(self, Actuator=inrunnerCompoundPlanetaryActuator, UsePSCasVariable = 0, log=1, csv=0, printOptParams=1, gearRatioReq = 0):   
         self.UsePSCasVariable = UsePSCasVariable
         totalTime = 0
@@ -2660,8 +2408,7 @@ class optimizationInrunnerCompoundPlanetaryActuator:
                                                 Actuator.inrunnerCompoundPlanetaryGearbox.noPlanetInterferenceConstraint() and
                                                 Actuator.noCarrierInterferenceConstraint() and
                                                 Actuator.sunPCDConstraint() and
-                                                Actuator.planetPCDConstraint() and
-                                                Actuator.noSecCarrierInterferenceConstraint()
+                                                Actuator.planetPCDConstraint() 
                                                 ):
                                                 self.totalFeasibleGearboxes += 1
                                                 # Fiter for the Gear Ratio
@@ -2717,7 +2464,7 @@ class optimizationInrunnerCompoundPlanetaryActuator:
                                                                                                  maxGearboxDiameter       = Actuator.maxGearboxDiameter, # mm 
                                                                                                  stressAnalysisMethodName = "MIT") # Lewis or AGMA
                                                         opt_actuator.updateFacewidth()
-                                                        opt_actuator.getMassKG_3DP()                                                        
+                                                        opt_actuator.getMassKG_3DP()
                                                         # self.printOptimizationResults(Actuator, log, csv)
                                             Actuator.inrunnerCompoundPlanetaryGearbox.setNumPlanet(Actuator.inrunnerCompoundPlanetaryGearbox.numPlanet + 1)
                                         # Actuator.inrunnerCompoundPlanetaryGearbox.setNr(Actuator.inrunnerCompoundPlanetaryGearbox.Nr + 1)
@@ -2934,47 +2681,3 @@ class optimizationInrunnerCompoundPlanetaryActuator:
 #   Format per line: "name"= value
 # ═══════════════════════════════════════════════════════════════════
 
-GEARBOX_DISPATCH = {
-    "incpg": "Opt_dependentInrunnerCompoundPlanetaryGBOptimization",
-}
-
-def main(motor, gearbox_type, gear_ratio=0):
-    if gearbox_type not in GEARBOX_DISPATCH:
-        raise ValueError(f"Unknown gearbox type: {gearbox_type}")
-
-    module_name = GEARBOX_DISPATCH[gearbox_type]
-    module = __import__(module_name)
-    module = __import__(module_name)
-
-    print(f"Running optimization:")
-    print(f"  Motor       : {motor}")
-    print(f"  Gearbox     : {gearbox_type}")
-    print(f"  Gear Ratio  : {gear_ratio}")
-
-    total_time, opt_parameters = module.run(motor, gear_ratio)
-    print("Time taken:", total_time, "sec")
-    if opt_parameters is None:
-        print("No feasible solution found.")
-        return
-    else:
-        print("Optimization Completed.")
-        
-    print("-------------------------------")
-    print("Optimal Parameters:")
-    print("Number of teeth: Sun1(Ns1):", opt_parameters[2], ", Planet1(Np1):", opt_parameters[3], ", Planet2(Np2):", opt_parameters[4], ", Ring(Nr):", opt_parameters[5],
-          ", Module(m):", opt_parameters[6], ", NumPlanet(n_p):", opt_parameters[1])
-    print("---")
-    print("Gear Ratio(GR):", opt_parameters[0],": 1")
-    print("-------------------------------")
-
-if __name__ == "__main__":
-    if len(sys.argv) != 4:
-        print("Usage:")
-        print("  InrunnerCPG_dependent_gen_eq.py <motor> <gearbox_type> <gear_ratio>")
-        sys.exit(1)
-
-    motor = sys.argv[1]
-    gearbox_type = sys.argv[2]
-    gear_ratio = float(sys.argv[3])
-
-    main(motor, gearbox_type, gear_ratio)    

@@ -42,6 +42,7 @@ def parse_variable_file(filepath):
         "motor_mount_driver_hole_num",
         "rotor_hub_sun_hole_num",
         "stator_hole_num",
+        "bearing_retainer_hole_num"
     }
 
     with open(filepath, "r") as f:

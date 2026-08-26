@@ -4,174 +4,8 @@ import sys
 import time
 import math
 
-# ╔══════════════════════════════════════════════════════════════════════════╗
-# ║  UTILITY & HARDWARE CLASSES                                              ║
-# ╚══════════════════════════════════════════════════════════════════════════╝
-class material:
-    def __init__(self, density, maxAllowableStressMPa=400, bhn=2, youngsModulus=10):
-        self.maxAllowableStressMPa = maxAllowableStressMPa
-        self.bhn                   = bhn
-        self.youngsModulus         = youngsModulus
-        self.density               = density
+from CommonComponents import material, bearings_discrete, nuts_and_bolts_dimensions, motor_frameless_inrunner as motor
 
-class bearings_discrete:
-    def __init__(self, idRequiredMM):
-        # fmt: off
-        self.data_bearings = [
-            [10,19,5,0.005],[12,21,5,0.006],[15,24,5,0.007],[17,26,5,0.007],
-            [20,32,7,0.017],[25,37,7,0.021],[28,52,12,0.096],[30,42,7,0.024],
-            [32,58,13,0.122],[35,47,7,0.027],[40,52,7,0.031],[45,58,7,0.038],
-            [50,65,7,0.050],[55,72,9,0.081],[60,78,10,0.103],[65,85,10,0.128],
-            [70,90,10,0.134],[75,95,10,0.149],[80,100,10,0.151],[85,110,13,0.263],
-            [90,115,13,0.276],[95,120,13,0.297],[100,125,13,0.31],[105,130,13,0.324],
-            [110,140,16,0.497],[120,150,16,0.537],[130,165,18,0.758],[140,170,18,0.832],
-            [150,190,20,1.15],[160,200,20,1.23],
-        ]
-        # fmt: on
-        
-        self.idRequiredMM = idRequiredMM
-        self.indexBearing = 0
-        while (self.indexBearing < len(self.data_bearings) - 1
-               and self.data_bearings[self.indexBearing][0] < self.idRequiredMM):
-            self.indexBearing += 1
-
-    def getBearingIDMM(self):    return self.data_bearings[self.indexBearing][0]
-    def getBearingODMM(self):    return self.data_bearings[self.indexBearing][1]
-    def getBearingWidthMM(self): return self.data_bearings[self.indexBearing][2]
-    def getBearingMassKG(self):  return self.data_bearings[self.indexBearing][3]
-
-class nuts_and_bolts_dimensions:
-    def __init__(self, bolt_dia, bolt_type="socket_head"):
-        self.bolt_dia  = bolt_dia
-        self.bolt_type = bolt_type
-        self.bolt_head_dia, self.bolt_head_height = self.get_bolt_head_dimensions(
-            diameter=self.bolt_dia, bolt_type=self.bolt_type)
-        self.nut_width_across_flats, self.nut_thickness = self.get_nut_dimensions(
-            diameter=self.bolt_dia)
-
-    def get_bolt_head_dimensions(self, diameter, bolt_type="socket_head"):
-        diameter = float(diameter)
-        socket_head_table = {
-            1.6: {"d2": 3.00,  "k": 1.60},
-            2.0: {"d2": 3.80,  "k": 2.00},
-            2.5: {"d2": 4.50,  "k": 2.50},
-            3.0: {"d2": 5.50,  "k": 3.00},
-            4.0: {"d2": 7.00,  "k": 4.00},
-            5.0: {"d2": 8.50,  "k": 5.00},
-            6.0: {"d2": 10.00, "k": 6.00},
-            8.0: {"d2": 13.00, "k": 8.00},
-            10.0:{"d2": 16.00, "k": 10.00},
-        }
-        csk_table = {
-            3.0: {"dk": 6},  4.0: {"dk": 8},  5.0: {"dk": 10},  6.0: {"dk": 12},
-            8.0: {"dk": 16}, 10.0:{"dk": 20}, 12.0:{"dk": 24},  16.0:{"dk": 30},
-            20.0:{"dk": 36},
-        }
-
-        if bolt_type == "socket_head":
-            spec = socket_head_table.get(diameter)
-            if not spec:
-                return [diameter * 1.5, diameter] # Safe fallback
-            return [spec["d2"], spec["k"]]
-        elif bolt_type == "CSK":
-            spec = csk_table.get(diameter)
-            if not spec:
-                return [diameter * 2, diameter * 0.5] # Safe fallback
-            dk = spec["dk"]
-            t  = (dk - diameter) / 2
-            return [dk, round(t, 3)]
-        else:
-            raise ValueError("bolt_type must be 'socket_head' or 'CSK'")
-
-    def get_nut_dimensions(self, diameter):
-        diameter = float(diameter)
-        nut_table = {
-            2.0: {"width_across_flats": 4,    "height": 1.6},
-            2.5: {"width_across_flats": 5,    "height": 2  },
-            3.0: {"width_across_flats": 5.5,  "height": 2.4},
-            4.0: {"width_across_flats": 7,    "height": 3.2},
-            5.0: {"width_across_flats": 8,    "height": 4  },
-            6.0: {"width_across_flats": 10,   "height": 5  },
-            7.0: {"width_across_flats": 7,    "height": 5.5},
-            8.0: {"width_across_flats": 13,   "height": 6.5},
-            10.0:{"width_across_flats": 16,   "height": 8  },
-            12.0:{"width_across_flats": 18,   "height": 10 },
-        }
-        spec = nut_table.get(diameter)
-        if not spec:
-            return [diameter * 1.5, diameter * 0.8] # Safe fallback
-        return [spec["width_across_flats"], spec["height"]]
-
-# ╔══════════════════════════════════════════════════════════════════════════╗
-# ║  INRUNNER MOTOR CLASS (INSSPG)                                           ║
-# ╚══════════════════════════════════════════════════════════════════════════╝
-class motor:
-    def __init__(self,
-                 Kv                               = 55,
-                 maxContinuousCurrent             = 20,
-                 ratedVoltage                     = 48,
-                 power                            = 838,
-                 massKG                           = 0.50,
-                 Stator_ID                        = 57.0,
-                 Stator_OD                        = 104.0,
-                 stator_height                    = 24.5,
-                 Rotor_height                     = 15.0,
-                 Rotor_OD                         = 55.6,
-                 Rotor_ID                         = 45.0,
-                 rotor_mount_hole_dia             = 4.0,
-                 rotor_mount_hole_CSK_OD          = 8.0,
-                 rotor_mount_hole_CSK_head_hight  = 3.0,
-                 motorName                        = "RI100"):
-
-        self.motorName = motorName
-
-        self.Kv                   = Kv
-        self.maxContinuousCurrent = maxContinuousCurrent
-        self.ratedVoltage         = ratedVoltage
-        self.maxMotorPower        = power
-        self.massKG               = massKG
-
-        self.maxMotorAngVelRPM       = Kv * ratedVoltage
-        self.maxMotorAngVelRadPerSec = self.maxMotorAngVelRPM * (2 * np.pi / 60)
-        self.maxMotorTorque          = maxContinuousCurrent / (Kv * 2 * np.pi / 60)
-
-        self.Stator_ID                        = Stator_ID
-        self.Stator_OD                        = Stator_OD
-        self.stator_height                    = stator_height
-
-        self.Rotor_height                     = Rotor_height
-        self.Rotor_OD                         = Rotor_OD
-        self.Rotor_ID                         = Rotor_ID
-        self.rotor_mount_hole_dia             = rotor_mount_hole_dia
-        self.rotor_mount_hole_CSK_OD          = rotor_mount_hole_CSK_OD
-        self.rotor_mount_hole_CSK_head_hight  = rotor_mount_hole_CSK_head_hight
-
-        self.motorDiaMM    = Stator_OD
-        self.motorLengthMM = stator_height
-
-    def getMaxMotorAngVelRadPerSec(self): return self.maxMotorAngVelRadPerSec
-    def getMaxMotorPower(self):           return self.maxMotorPower
-    def getMaxMotorTorque(self):          return self.maxMotorTorque
-    def getMassKG(self):                  return self.massKG
-    def getDiaMM(self):                   return self.motorDiaMM
-    def getLengthMM(self):                return self.motorLengthMM
-    def getStatorODMM(self):              return self.Stator_OD
-    def getStatorIDMM(self):              return self.Stator_ID
-    def getStatorHeightMM(self):          return self.stator_height
-    def getRotorODMM(self):               return self.Rotor_OD
-    def getRotorIDMM(self):               return self.Rotor_ID
-    def getRotorHeightMM(self):           return self.Rotor_height
-
-    def printParameters(self):
-        print("Maximum motor angular velocity = ", round(self.maxMotorAngVelRPM, 2),         " RPM")
-        print("Maximum motor power            = ", self.maxMotorPower,                       " W")
-        print("Maximum continuous torque      = ", round(self.maxMotorTorque, 3),            " Nm")
-        print("Maximum angular velocity       = ", round(self.maxMotorAngVelRadPerSec, 2),    " rad/s")
-        print("Mass                           = ", self.massKG,                              " kg")
-
-#=========================================================================
-# Gearbox classes
-#=========================================================================
 class singleStagePlanetaryGearbox:
     def __init__(self, 
                  design_params,
@@ -572,16 +406,16 @@ class singleStagePlanetaryActuator:
         self.pressure_angle_deg = self.planetaryGearbox.getPressureAngleRad() * 180 / np.pi
         
         # --- Clearances & Tolerances ---
-        self.clearance_planet                   = self.design_params.get("clearance_planet", 1.5)
-        self.standard_clearance_1_5mm           = self.design_params.get("standard_clearance_1_5mm", 1.5)
-        self.standard_fillet_1_5mm              = self.design_params.get("standard_fillet_1_5mm", 1.5)
-        self.standard_bearing_insertion_chamfer = self.design_params.get("standard_bearing_insertion_chamfer", 0.5)
-        self.tight_clearance_3DP                = self.design_params.get("tight_clearance_3DP", 0.4)
-        self.loose_clearance_3DP                = self.design_params.get("loose_clearance_3DP", 0.8)
-        self.Rotor_tight_clearance              = self.design_params.get("Rotor_tight_clearance", 0.04)
+        self.clearance_planet                   = self.design_params.get("clearance_planet")
+        self.standard_clearance_1_5mm           = self.design_params.get("standard_clearance_1_5mm" )
+        self.standard_fillet_1_5mm              = self.design_params.get("standard_fillet_1_5mm")
+        self.standard_bearing_insertion_chamfer = self.design_params.get("standard_bearing_insertion_chamfer")
+        self.tight_clearance_3DP                = self.design_params.get("tight_clearance_3DP")
+        self.loose_clearance_3DP                = self.design_params.get("loose_clearance_3DP")
+        self.Rotor_tight_clearance              = self.design_params.get("Rotor_tight_clearance")
 
         # --- Dynamic Bearing Lookup ---
-        self.bearingIDClearanceMM = self.design_params.get("bearingIDClearanceMM", 10)
+        self.bearingIDClearanceMM = self.design_params.get("bearingIDClearanceMM")
         IdrequiredMM              = (self.module * (self.Ns + self.Np)) + self.planet_pin_socket_head_dia + (self.loose_clearance_3DP * 2)
         Bearings                  = bearings_discrete(IdrequiredMM)
         
@@ -593,92 +427,102 @@ class singleStagePlanetaryActuator:
         # --- Inrunner Motor: Rotor & Stator ---
         self.motor_OD      = self.motorDiaMM
         self.motor_height  = self.motorLengthMM
-        self.Rotor_ID      = self.design_params.get("Rotor_ID", 45)
-        self.Rotor_OD      = self.design_params.get("Rotor_OD", 55.6)
-        self.Rotor_height  = self.design_params.get("Rotor_height", 15)
-        self.Stator_ID     = self.design_params.get("Stator_ID", 57)
-        self.Stator_OD     = self.design_params.get("Stator_OD", 104)
-        self.stator_height = self.design_params.get("stator_height", 24.5)
+        self.Rotor_ID             = self.motor.rotor_ID
+        self.Rotor_OD             = self.motor.rotor_OD
+        self.Rotor_height         = self.motor.rotor_height
+        self.Stator_ID            = self.motor.stator_ID
+        self.Stator_OD            = self.motor.stator_OD
+        self.stator_height        = self.motor.stator_height
+        self.stator_mounting_holes_dia  = self.motor.stator_hole_dia # self.design_params.get("stator_mounting_holes_dia", 3)
+        self.stator_upper_step_height   = self.motor.stator_wire_top_height # self.design_params.get("stator_upper_step_height", 7)
+        self.stator_mid_height          = self.motor.stator_mid_height
+        self.stator_bottom_step_height_ = self.motor.stator_wire_bottom_height # self.design_params.get("stator_bottom_step_height_", 4.5)
+        self.stator_side_step_OD        = self.motor.stator_wire_OD # self.design_params.get("stator_side_step_OD", 101)
+        self.stator_side_step_ID        = self.motor.stator_wire_ID # self.design_params.get("stator_side_step_ID", 90)
+        self.stator_hole_num            = self.motor.stator_hole_num
         
-        self.rotor_mount_hole_dia            = self.design_params.get("rotor_mount_hole_dia", 4)
-        self.rotor_mount_hole_CSK_OD         = self.design_params.get("rotor_mount_hole_CSK_OD", 8)
-        self.rotor_mount_hole_CSK_head_hight = self.design_params.get("rotor_mount_hole_CSK_head_hight", 2)
+        # self.Rotor_ID      = self.design_params.get("Rotor_ID", 45)
+        # self.Rotor_OD      = self.design_params.get("Rotor_OD", 55.6)
+        # self.Rotor_height  = self.design_params.get("Rotor_height", 15)
+        # self.Stator_ID     = self.design_params.get("Stator_ID", 57)
+        # self.Stator_OD     = self.design_params.get("Stator_OD", 104)
+        # self.stator_height = self.design_params.get("stator_height", 24.5)
+
+        self.rotor_mount_hole_dia            = self.design_params.get("rotor_mount_hole_dia")
+        self.rotor_mount_hole_CSK_OD         = self.design_params.get("rotor_mount_hole_CSK_OD")
+        self.rotor_mount_hole_CSK_head_hight = self.design_params.get("rotor_mount_hole_CSK_head_hight")
 
         # --- Type 1 Rotor Support Bearings ---
-        self.rotor_support_bearing_ID           = self.design_params.get("rotor_support_bearing_ID", 30)
-        self.rotor_support_bearing_OD           = self.design_params.get("rotor_support_bearing_OD", 42)
-        self.rotor_support_bearing_height       = self.design_params.get("rotor_support_bearing_height", 7)
-        self.rotor_upper_support_bearing_ID     = self.design_params.get("rotor_upper_support_bearing_ID", 40)
-        self.rotor_upper_support_bearing_OD     = self.design_params.get("rotor_upper_support_bearing_OD", 50)
-        self.rotor_upper_support_bearing_height = self.design_params.get("rotor_upper_support_bearing_height", 6)
+        self.rotor_support_bearing_ID           = self.design_params.get("rotor_support_bearing_ID")
+        self.rotor_support_bearing_OD           = self.design_params.get("rotor_support_bearing_OD")
+        self.rotor_support_bearing_height       = self.design_params.get("rotor_support_bearing_height")
+        self.rotor_upper_support_bearing_ID     = self.design_params.get("rotor_upper_support_bearing_ID")
+        self.rotor_upper_support_bearing_OD     = self.design_params.get("rotor_upper_support_bearing_OD")
+        self.rotor_upper_support_bearing_height = self.design_params.get("rotor_upper_support_bearing_height")
 
         # --- Type 2 Sun Bearings ---
-        self.sun_bottom_casing_bearing_OD     = self.design_params.get("sun_bottom_casing_bearing_OD", 24)
-        self.sun_bottom_casing_bearing_ID     = self.design_params.get("sun_bottom_casing_bearing_ID", 15)
-        self.sun_bottom_casing_bearing_height = self.design_params.get("sun_bottom_casing_bearing_height", 5)
-        self.sun_sec_carrier_bearing_ID       = self.design_params.get("sun_sec_carrier_bearing_ID", 25)
-        self.sun_sec_carrier_bearing_OD       = self.design_params.get("sun_sec_carrier_bearing_OD", 32)
-        self.sun_sec_carrier_bearing_height   = self.design_params.get("sun_sec_carrier_bearing_height", 4)
+        self.sun_bottom_casing_bearing_OD     = self.design_params.get("sun_bottom_casing_bearing_OD")
+        self.sun_bottom_casing_bearing_ID     = self.design_params.get("sun_bottom_casing_bearing_ID")
+        self.sun_bottom_casing_bearing_height = self.design_params.get("sun_bottom_casing_bearing_height")
+        self.sun_sec_carrier_bearing_ID       = self.design_params.get("sun_sec_carrier_bearing_ID")
+        self.sun_sec_carrier_bearing_OD       = self.design_params.get("sun_sec_carrier_bearing_OD")
+        self.sun_sec_carrier_bearing_height   = self.design_params.get("sun_sec_carrier_bearing_height")
 
         # --- Stator Casings ---
-        self.stator_casing_thickness                 = self.design_params.get("stator_casing_thickness", 3.5)
-        self.stator_bottom_step_height_              = self.design_params.get("stator_bottom_step_height_", 4.5)
-        self.stator_upper_step_height                = self.design_params.get("stator_upper_step_height", 7)
-        self.stator_side_step_OD                     = self.design_params.get("stator_side_step_OD", 101)
-        self.stator_mounting_holes_dia               = self.design_params.get("stator_mounting_holes_dia", 3)
-        self.stator_hole_bolt_socket_head_dia        = self.design_params.get("stator_hole_bolt_socket_head_dia", 5.5)
-        self.stator_bearing_support_casing_thickness = self.design_params.get("stator_bearing_support_casing_thickness", 2.5)
-
-        self.stator_casing_hole_dia                  = self.design_params.get("stator_casing_hole_dia", 4)
-        self.stator_casing_hole_socket_head_dia      = self.design_params.get("stator_casing_hole_socket_head_dia", 7.25)
+        self.stator_casing_thickness                 = self.design_params.get("stator_casing_thickness")
+        self.stator_casing_hole_dia                  = self.design_params.get("stator_casing_hole_dia")
+        self.stator_hole_bolt_socket_head_dia        = self.design_params.get("stator_hole_bolt_socket_head_dia")
+        self.stator_bearing_support_casing_thickness = self.design_params.get("stator_bearing_support_casing_thickness")
+        self.stator_casing_hole_socket_head_dia      = self.design_params.get("stator_casing_hole_socket_head_dia")
+        self.stator_casing_hole_wrench_size            = self.design_params.get("stator_casing_hole_wrench_size")
 
         # --- Case Mounting & Output Dimensions ---
-        self.case_mounting_hole_dia              = self.design_params.get("case_mounting_hole_dia", 4)
-        self.case_mounting_wrench_thickness      = self.design_params.get("case_mounting_wrench_thickness", 3)
-        self.case_mounting_hole_allen_socket_dia = self.design_params.get("case_mounting_hole_allen_socket_dia", 5.5)
-        self.case_mounting_bolt_depth            = self.design_params.get("case_mounting_bolt_depth", 4.5)
-        self.case_mounting_wrench_size           = self.design_params.get("case_mounting_wrench_size", 7)
+        self.case_mounting_hole_dia              = self.design_params.get("case_mounting_hole_dia")
+        self.case_mounting_wrench_thickness      = self.design_params.get("case_mounting_wrench_thickness")
+        self.case_mounting_hole_allen_socket_dia = self.design_params.get("case_mounting_hole_allen_socket_dia")
+        self.case_mounting_bolt_depth            = self.design_params.get("case_mounting_bolt_depth")
+        self.case_mounting_wrench_size           = self.design_params.get("case_mounting_wrench_size")
 
-        self.rotor_output_hole_PCD           = self.design_params.get("rotor_output_hole_PCD", 29)
-        self.Rotor_output_hole_num           = self.design_params.get("Rotor_output_hole_num", 4)
-        self.output_mounting_nut_thickness   = self.design_params.get("output_mounting_nut_thickness", 3.8)
-        self.output_mounting_nut_wrench_size = self.design_params.get("output_mounting_nut_wrench_size", 7.8)
-        self.output_mounting_hole_dia        = self.design_params.get("output_mounting_hole_dia", 5)
+        self.rotor_output_hole_PCD           = self.design_params.get("rotor_output_hole_PCD")
+        self.Rotor_output_hole_num           = self.design_params.get("Rotor_output_hole_num")
+        self.output_mounting_nut_thickness   = self.design_params.get("output_mounting_nut_thickness")
+        self.output_mounting_nut_wrench_size = self.design_params.get("output_mounting_nut_wrench_size")
+        self.output_mounting_hole_dia        = self.design_params.get("output_mounting_hole_dia")
 
         # --- Base Gearbox Components ---
-        self.sec_carrier_thickness             = self.design_params.get("sec_carrier_thickness", 5)
-        self.sun_coupler_hub_thickness         = self.design_params.get("sun_coupler_hub_thickness", 4)
-        self.clearance_sun_coupler_sec_carrier = self.design_params.get("clearance_sun_coupler_sec_carrier", 1.5)
+        self.sec_carrier_thickness             = self.design_params.get("sec_carrier_thickness")
+        self.sun_coupler_hub_thickness         = self.design_params.get("sun_coupler_hub_thickness")
+        self.clearance_sun_coupler_sec_carrier = self.design_params.get("clearance_sun_coupler_sec_carrier")
         
         # --- Planet Parameters ---
-        self.planet_bore              = self.design_params.get("planet_bore", 10)
-        self.planet_pin_bolt_dia      = self.design_params.get("planet_pin_bolt_dia", 5)
-        self.planet_pin_socket_head_dia= self.design_params.get("planet_pin_socket_head_dia", 8.5)
-        self.planet_shaft_dia         = self.design_params.get("planet_shaft_dia", 8)
-        self.planet_pin_bolt_wrench_size = self.design_params.get("planet_pin_bolt_wrench_size", 8)
-        self.planet_shaft_step_offset = self.design_params.get("planet_shaft_step_offset", 1)
-        self.planet_bearing_OD        = self.design_params.get("planet_bearing_OD", 12)
-        self.planet_bearing_width     = self.design_params.get("planet_bearing_width", 3.5)
-        self.bearing_retainer_thickness = self.design_params.get("bearing_retainer_thickness", 2)
+        self.planet_bore              = self.design_params.get("planet_bore")
+        self.planet_pin_bolt_dia      = self.design_params.get("planet_pin_bolt_dia")
+        self.planet_pin_socket_head_dia= self.design_params.get("planet_pin_socket_head_dia")
+        self.planet_shaft_dia         = self.design_params.get("planet_shaft_dia")
+        self.planet_pin_bolt_wrench_size = self.design_params.get("planet_pin_bolt_wrench_size")
+        self.planet_shaft_step_offset = self.design_params.get("planet_shaft_step_offset")
+        self.planet_bearing_OD        = self.design_params.get("planet_bearing_OD")
+        self.planet_bearing_width     = self.design_params.get("planet_bearing_width")
+        self.bearing_retainer_thickness = self.design_params.get("bearing_retainer_thickness")
 
         # --- Carrier Trapezoidal Dimensions ---
-        self.carrier_trapezoidal_support_sun_offset                 = self.design_params.get("carrier_trapezoidal_support_sun_offset", 5)
-        self.carrier_trapezoidal_support_hole_PCD_offset_bearing_ID = self.design_params.get("carrier_trapezoidal_support_hole_PCD_offset_bearing_ID", 4)
-        self.carrier_trapezoidal_support_hole_dia                   = self.design_params.get("carrier_trapezoidal_support_hole_dia", 3)
-        self.carrier_trapezoidal_support_hole_socket_head_dia       = self.design_params.get("carrier_trapezoidal_support_hole_socket_head_dia", 5.5)
-        self.carrier_trapezoidal_support_hole_wrench_size           = self.design_params.get("carrier_trapezoidal_support_hole_wrench_size", 5.5)
-        self.carrier_bearing_step_width                             = self.design_params.get("carrier_bearing_step_width", 1.5)
+        self.carrier_trapezoidal_support_sun_offset                 = self.design_params.get("carrier_trapezoidal_support_sun_offset")
+        self.carrier_trapezoidal_support_hole_PCD_offset_bearing_ID = self.design_params.get("carrier_trapezoidal_support_hole_PCD_offset_bearing_ID")
+        self.carrier_trapezoidal_support_hole_dia                   = self.design_params.get("carrier_trapezoidal_support_hole_dia")
+        self.carrier_trapezoidal_support_hole_socket_head_dia       = self.design_params.get("carrier_trapezoidal_support_hole_socket_head_dia")
+        self.carrier_trapezoidal_support_hole_wrench_size           = self.design_params.get("carrier_trapezoidal_support_hole_wrench_size")
+        self.carrier_bearing_step_width                             = self.design_params.get("carrier_bearing_step_width")
 
         # --- Sun & Main Bearings ---
-        self.sun_hub_dia              = self.design_params.get("sun_hub_dia", 37)
-        self.sun_central_bolt_dia     = self.design_params.get("sun_central_bolt_dia", 5)
-        self.sun_central_bolt_socket_head_dia = self.design_params.get("sun_central_bolt_socket_head_dia", 8.5)
-        self.sun_shaft_bearing_ID     = self.design_params.get("sun_shaft_bearing_ID", 8)
-        self.sun_shaft_bearing_OD     = self.design_params.get("sun_shaft_bearing_OD", 16)
-        self.sun_shaft_bearing_width  = self.design_params.get("sun_shaft_bearing_width", 5)
+        self.sun_hub_dia              = self.design_params.get("sun_hub_dia")
+        self.sun_central_bolt_dia     = self.design_params.get("sun_central_bolt_dia")
+        self.sun_central_bolt_socket_head_dia = self.design_params.get("sun_central_bolt_socket_head_dia")
+        self.sun_shaft_bearing_ID     = self.design_params.get("sun_shaft_bearing_ID")
+        self.sun_shaft_bearing_OD     = self.design_params.get("sun_shaft_bearing_OD")
+        self.sun_shaft_bearing_width  = self.design_params.get("sun_shaft_bearing_width")
 
-        ##-------bearing mount thickness ------ ##
-        self.bearing_mount_thickness = self.design_params.get("bearing_mount_thickness",2)
+        # #-------bearing mount thickness ------ ##
+        self.bearing_mount_thickness = self.design_params.get("bearing_mount_thickness")
 
         #------------------------------------------------------
         # Dependent gear variables
@@ -826,6 +670,7 @@ class singleStagePlanetaryActuator:
             f'"stator_bottom_step_height_"= {self.stator_bottom_step_height_}\n',
             f'"stator_upper_step_height"= {self.stator_upper_step_height}\n',
             f'"stator_side_step_OD"= {self.stator_side_step_OD}\n',
+            f'"stator_side_step_ID"= {self.stator_side_step_ID}\n',
             f'"stator_mounting_holes_dia"= {self.stator_mounting_holes_dia}\n',
             f'"stator_hole_bolt_socket_head_dia"= {self.stator_hole_bolt_socket_head_dia}\n',
             f'"Rotor_height"= {self.Rotor_height}\n',
@@ -1154,7 +999,7 @@ class singleStagePlanetaryActuator:
         ring_ID      = Nr * module
         ringFwUsedMM = ringFwMM + clearance_planet
 
-# Pull the dynamically calculated bearing sizes from self (MATCHING YOUR SCREENSHOT)
+        # Pull the dynamically calculated bearing sizes from self (MATCHING YOUR SCREENSHOT)
         bearing_ID     = self.bearing_ID 
         bearing_OD     = self.bearing_OD 
         bearing_height = self.bearing_height    
@@ -1389,7 +1234,7 @@ class singleStagePlanetaryActuator:
         ring_ID      = Nr * module
         ringFwUsedMM = ringFwMM + clearance_planet
 
-# Pull the dynamically calculated bearing sizes from self (MATCHING YOUR SCREENSHOT)
+        # Pull the dynamically calculated bearing sizes from self (MATCHING YOUR SCREENSHOT)
         bearing_ID     = self.bearing_ID 
         bearing_OD     = self.bearing_OD 
         bearing_height = self.bearing_height    
@@ -1579,7 +1424,7 @@ class singleStagePlanetaryActuator:
                                 (self.planet_shaft_step_offset * 2) + 
                                 self.carrier_PCD + 
                                 (self.standard_clearance_1_5mm * 2))
-            condition_1_passes = (required_diameter <= self.motor.Stator_ID)
+            condition_1_passes = (required_diameter <= self.motor.stator_ID)
             
             # --- CONSTRAINT 2: Sun gear must fit inside the secondary carrier bearing ---
             sun_gear_dia = self.Ns * self.module
