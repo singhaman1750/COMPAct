@@ -5020,10 +5020,10 @@ class wolfromPlanetaryActuator:
 
         self.sun_hub_dia = self.motor_output_hole_PCD + self.motor_output_hole_dia + self.standard_clearance_1_5mm * 2
 
-        self.fw_s_used = self.fw_p_s + self.fw_p_b + self.clearance_planet + self.sec_carrier_thickness + self.standard_clearance_1_5mm - self.carrier_small_ring_inner_bearing_flap +  self.standard_clearance_1_5mm
+        self.fw_s_used = self.fw_p_s + self.fw_p_b + self.clearance_planet + self.sec_carrier_thickness + self.standard_clearance_1_5mm 
 
         # --- Bearing ---
-        IdrequiredMM = self.module * (self.Ns + self.Np_b) + self.bearingIDClearanceMM
+        IdrequiredMM = self.module * (self.Nr_s) + 2*self.module + 2*self.small_ring_case_thickness
         Bearings            = bearings_discrete(IdrequiredMM)
         self.bearing_ID     = Bearings.getBearingIDMM()
         self.bearing_OD     = Bearings.getBearingODMM()
@@ -6269,7 +6269,7 @@ class wolfromPlanetaryActuator:
         sec_carrier_thickness        = self.sec_carrier_thickness       
         sun_coupler_hub_thickness    = self.sun_coupler_hub_thickness   
         # sun_shaft_bearing_OD       = self.sun_shaft_bearing_OD        
-        # carrier_bearing_step_width = self.carrier_bearing_step_width  
+        carrier_bearing_step_width = self.carrier_bearing_step_width  
         planet_shaft_dia             = self.planet_shaft_dia            
         sun_shaft_bearing_ID         = self.sun_shaft_bearing_ID        
         sun_shaft_bearing_width      = self.sun_shaft_bearing_width     
@@ -6284,6 +6284,7 @@ class wolfromPlanetaryActuator:
         small_ring_output_wall_thickness = self.small_ring_output_wall_thickness # 5
         gearbox_casing_thickness         = self.gearbox_casing_thickness # 4
         small_ring_gear_casing_thickness = self.small_ring_gear_casing_thickness # 4
+        small_ring_case_thickness        = self.small_ring_case_thickness # 4
         bearingIDClearanceMM             = self.bearingIDClearanceMM
 
         # To be written in Motor JSON files
@@ -6293,7 +6294,7 @@ class wolfromPlanetaryActuator:
         #-------------------------------
         # Bearings: Bearing1 & Bearing2
         #-------------------------------
-        IdRequiredMM      = module1 * (Ns + Np1) + bearingIDClearanceMM 
+        IdRequiredMM      = module2 * (Nr1) + 2*module2 + 2*small_ring_case_thickness
                                                                                
         Bearing           = bearings_discrete(IdRequiredMM)
 
@@ -6325,12 +6326,12 @@ class wolfromPlanetaryActuator:
         # wpg_carrier
         #-------------------------------------------------------
         carrier_OD     = ((Ns + Np1) * module1 + planet_pin_socket_head_dia + standard_clearance_1_5mm * 2)
-        carrier_ID     = carrier_small_ring_inner_bearing_OD
+        carrier_ID     = sun_shaft_bearing_OD - standard_clearance_1_5mm * 2
         carrier_height = carrier_thickness
 
-        carrier_bearing_mount_ID     = carrier_small_ring_inner_bearing_OD
-        carrier_bearing_mount_OD     = standard_clearance_1_5mm * (8/3) + carrier_small_ring_inner_bearing_OD
-        carrier_bearing_mount_height = carrier_small_ring_inner_bearing_height - carrier_thickness + standard_clearance_1_5mm
+        carrier_bearing_mount_ID     = carrier_small_ring_inner_bearing_ID
+        carrier_bearing_mount_OD     = carrier_ID
+        carrier_bearing_mount_height = carrier_small_ring_inner_bearing_height + carrier_bearing_step_width
 
         carrier_shaft_OD     = planet_shaft_dia
         carrier_shaft_height = planet1FwMM  + planet2FwMM + clearance_planet * 2
