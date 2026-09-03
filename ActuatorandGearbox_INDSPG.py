@@ -138,9 +138,13 @@ class inrunnerdoubleStagePlanetaryGearbox:
         return (self.Stage1.meshingConstraint() and self.Stage2.meshingConstraint())
 
     def noPlanetInterferenceConstraint(self):
+        # print("Stage 1 Planet Interference Constraint: ", self.noPlanetInterferenceConstraintStg1())
+        # print("Stage 2 Planet Interference Constraint: ", self.noPlanetInterferenceConstraintStg2())
         return (self.noPlanetInterferenceConstraintStg1() and self.noPlanetInterferenceConstraintStg2())
+        
+        
 
-    def noPlanetInterferenceConstraintStg1(self):
+    def noPlanetInterferenceConstraintStg1(self):    
         Ns1        = self.Stage1.Ns
         Np1        = self.Stage1.Np
         Nr1        = self.Stage1.Nr
@@ -417,7 +421,7 @@ class inrunnerdoubleStageActuator:
         
         # Carrier and final assembly dimensions
         self.carrier_PCD1 = (self.Np1 + self.Ns1) * self.module1
-        self.fw_s1_used = self.fw_p_1_fix + self.clearance_planet + self.sec_carrier_thickness1 + self.standard_clearance_1_5mm
+        self.fw_s1_used = self.fw_p_1_fix + self.clearance_planet + self.sec_carrier_thickness1 + self.standard_clearance_1_5mm*2
         #self.case_dist1 = self.sec_carrier_thickness1 + self.clearance_planet + self.sun_coupler_hub_thickness1 - self.case_mounting_surface_height
         self.sun_hub_dia1 = self.rotor_ID - 2 * (self.standard_clearance_1_5mm + 2)
 
@@ -467,13 +471,15 @@ class inrunnerdoubleStageActuator:
         
         # Stg1:
         # "fw_r"+"clearance_planet" + "bearing_height"+"clearance_planet" + "case_dist" + "bearing_retainer_thickness"
-        self.gearbox_width_Stg1 = (  self.fw_r1
+        self.gearbox_width_Stg1 = ( self.standard_clearance_1_5mm
+                                   + self.a1_sun_bottom_casing_bearing_height*0.5
+                                   + 2                                                # metal rotor thickness
+                                   + self.sun_coupler_hub_thickness1
+                                   + self.fw_s1_used
                                    + self.clearance_planet
                                    + self.carrier_bearing_step_width
-                                   + self.sun_coupler_hub_thickness1
-                                   + 2
-                                   + self.bearing1_height*1.5
-                                   + self.standard_clearance_1_5mm )
+                                   + self.bearing1_height
+                                    )
         # Motor:
         # "motor_height" + "case_mounting_surface_height" + "standard_clearance_1_5mm" + "base_plate_thickness" 
         # self.motor_case_width = (  self.motor_height
@@ -616,7 +622,10 @@ class inrunnerdoubleStageActuator:
         ## --------------------------------------------------------------------
         
         self.ring_OD2 = self.Nr2 * self.module2 + self.ring_radial_thickness * 2
-        self.fw_s2_used = self.fw_p2 + self.clearance_planet + self.sec_carrier_thickness2 + self.standard_clearance_1_5mm + self.loose_clearance_3DP
+        if (self.carrier_PCD2- self.planet_shaft_dia2- self.planet_shaft_step_offset2- self.standard_clearance_1_5mm*2 ) > (self.bearing1_OD - self.standard_clearance_1_5mm*2):
+            self.fw_s2_used = self.fw_p2 + self.clearance_planet + self.sec_carrier_thickness2 + self.standard_clearance_1_5mm + self.loose_clearance_3DP - self.standard_clearance_1_5mm
+        else:
+            self.fw_s2_used = self.fw_r2 + self.clearance_planet + self.sec_carrier_thickness2 + self.standard_clearance_1_5mm + self.loose_clearance_3DP
         #self.bearing_mount_thickness2 = (self.output_mounting_hole_dia2 * 2) if ((self.bearing2_OD + self.output_mounting_hole_dia2 * 4) > (self.Nr2 * self.module2 + 2 * self.h_b2)) else (((self.Nr2 * self.module2 + 2 * self.h_b2 - (self.bearing2_OD + self.output_mounting_hole_dia2 * 4)) / 2) + self.output_mounting_hole_dia2 * 2 + self.standard_clearance_1_5mm)
         #self.output_mounting_PCD2 = self.bearing2_OD + self.bearing_mount_thickness2
         #self.case_dist2 = self.sec_carrier_thickness2 + self.clearance_planet + self.standard_clearance_1_5mm - self.bearing_retainer_thickness2
@@ -1585,7 +1594,7 @@ class inrunnerdoubleStageActuator:
                 
         bottom_casing_plate_VOL = np.pi * (self.stator_casing_thickness) * ((self.stator_OD/2+self.stator_casing_thickness)**2) * 1e-9 + np.pi * (standard_clearance_1_5mm) * ((self.stator_OD/2+self.stator_casing_thickness)**2 - (self.stator_OD/2+self.stator_casing_thickness-2.5)**2)* 1e-9
         #bottom_casing_step_height_VOL = np.pi * (self.stator_bottom_step_height_-self.standard_clearance_1_5mm) * ((50/2)**2) * 1e-9 + np.pi * (standard_clearance_1_5mm) * ((self.rotor_support_bearing_ID/2+standard_clearance_1_5mm*2)**2)*1e-9
-        bottom_casing_bearing_support_VOL = np.pi * (self.a1_sun_bottom_casing_bearing_height - (self.stator_casing_thickness - self.standard_clearance_1_5mm))* ((self.a1_sun_bottom_casing_bearing_OD/2+standard_clearance_1_5mm*2)**2) * 1e-9
+        bottom_casing_bearing_support_VOL = np.pi * (self.a1_sun_bottom_casing_bearing_height - (self.stator_casing_thickness - self.standard_clearance_1_5mm))* ((self.a1_sun_bottom_casing_bearing_OD/2+standard_clearance_1_5mm*3)**2) * 1e-9
         bottom_casing_hole_VOL = np.pi * (self.a1_sun_bottom_casing_bearing_height - (self.stator_casing_thickness - self.standard_clearance_1_5mm)+self.stator_casing_thickness)*((self.a1_sun_bottom_casing_bearing_OD/2)**2)*1e-9
 
         bottom_casing_vol = bottom_casing_plate_VOL+bottom_casing_bearing_support_VOL - bottom_casing_hole_VOL + 4*np.pi*2*((9/2)**2-(5.5/2)**2)*1e-9
@@ -1639,9 +1648,9 @@ class inrunnerdoubleStageActuator:
         r_carrier_outer     = (bearing_ID / 2) / 1000
         r_carrier_trapezoid = ((bearing_ID
                                 - (self.Ns1 * self.module1 + 2 * self.carrier_trapezoidal_support_sun_offset1))
-                               / 4) / 1000
+                               / 2) / 1000
         
-        fw_carrier = self.fw_p1 / 1000
+        fw_carrier = (self.fw_p1 - self.clearance_planet*4) / 1000
 
         # Volume sub-components
         vol_carrier_disk      = math.pi * (bearing_height / 1000) * r_carrier_outer     ** 2
@@ -1656,13 +1665,21 @@ class inrunnerdoubleStageActuator:
 
         sun2_shaft_dia    = sun_shaft_bearing_ID
         sun2_shaft_height = sun_shaft_bearing_width + 2 * standard_clearance_1_5mm
+        sun2_step_height    = bearing_retainer_thickness + self.sec_carrier_thickness2 - standard_clearance_1_5mm 
 
-        fw_s2_used        = planet2FwMM + clearance_planet + sec_carrier_thickness + standard_clearance_1_5mm + self.loose_clearance_3DP
+        max_sun2_step_dia = self.bearing1_ID
+        sun2_step_dia       = self.carrier_PCD2-(self.planet_shaft_dia2 + self.planet_shaft_step_offset * 2)-self.standard_clearance_1_5mm*4
+
+        actual_sun2_step_dia = max_sun2_step_dia if sun2_step_dia > max_sun2_step_dia else sun2_step_dia
+
+
+        fw_s2_used        = self.fw_s2_used
 
         sun2_gear_volume  = np.pi * ((Dia2SunMM * 0.5) ** 2-(self.sun_central_bolt_dia2*0.5)**2) * fw_s2_used * 1e-9
         sun2_shaft_volume = np.pi * ((sun2_shaft_dia*0.5) ** 2) * sun2_shaft_height * 1e-9
+        sun2_step_volume  = np.pi * ((actual_sun2_step_dia*0.5) ** 2-(Dia2SunMM*0.5)**2) * sun2_step_height * 1e-9
 
-        sun2_volume       = sun2_gear_volume + sun2_shaft_volume
+        sun2_volume       = sun2_gear_volume + sun2_shaft_volume + sun2_step_volume
         sun2_mass         = sun2_volume * density_3DP_material
 
         carrier_mass = carrier_volume * density_3DP_material
@@ -1677,7 +1694,7 @@ class inrunnerdoubleStageActuator:
         sun_shaft_dia    = sun_shaft_bearing_ID
         sun_shaft_height = sun_shaft_bearing_width + 2 * standard_clearance_1_5mm
 
-        fw_s_used        = planetFwMM + clearance_planet + sec_carrier_thickness + standard_clearance_1_5mm
+        fw_s_used        = self.fw_s1_used
 
         sun_hub_volume   = np.pi * ((sun_hub_dia*0.5) ** 2) * sun_coupler_hub_thickness * 1e-9
         sun_gear_volume  = np.pi * ((DiaSunMM * 0.5) ** 2) * fw_s_used * 1e-9
@@ -1690,7 +1707,7 @@ class inrunnerdoubleStageActuator:
         # Mass: dspg_planet
         #--------------------------------------
         planet_volume = (np.pi * ((DiaPlanetMM*0.5)**2 - (planet_bore*0.5)**2) * planetFwMM) * 1e-9
-        planet_mass   = planet_volume * density_3DP_material
+        planet_mass   = planet_volume * density_3DP_material * numPlanet
 
         #--------------------------------------
         # Mass: dspg_sec_carrier
@@ -1698,25 +1715,25 @@ class inrunnerdoubleStageActuator:
         sec_carrier_OD = bearing_ID
         sec_carrier_ID = (DiaSunMM + DiaPlanetMM) - planet_shaft_dia - 2 * standard_clearance_1_5mm
 
-        sec_carrier_volume = (np.pi * ((sec_carrier_OD*0.5)**2 - (sec_carrier_ID*0.5)**2) * sec_carrier_thickness) * 1e-9
+        sec_carrier_volume = (np.pi * ((sec_carrier_OD*0.5)**2 - (sec_carrier_ID*0.5)**2) * (self.planet_pin_bolt_dia1+self.standard_clearance_1_5mm)) * 1e-9
         sec_carrier_mass   = sec_carrier_volume * density_3DP_material
 
         #--------------------------------------
         # Mass: dspg_sun_shaft_bearing
         #--------------------------------------
-        sun_shaft_bearing_mass       = 4 * 0.001 # kg
+        sun_shaft_bearing_mass       = 0.001 # kg
 
         #--------------------------------------
         # Mass: dspg_planet_bearing
         #--------------------------------------
-        planet_bearing_mass          = 1 * 0.001 # kg
-        planet_bearing_num           = numPlanet * 2
+        planet_bearing_mass          = 1 * 0.003 # kg
+        planet_bearing_num           = numPlanet 
         planet_bearing_combined_mass = planet_bearing_mass * planet_bearing_num
 
         #--------------------------------------
         # Mass: dspg_planet_bearing
         #--------------------------------------
-        bearing_mass = BearingMassKG # kg
+        bearing_mass = BearingMassKG + planet_bearing_combined_mass + sun_shaft_bearing_mass + 0.031 # kg
 
         #--------------------------------------
         # Mass: dspg_bearing_retainer
@@ -1744,21 +1761,20 @@ class inrunnerdoubleStageActuator:
         #----------------------------------------
         # Total Actuator Mass
         #----------------------------------------
-        Actuator_mass = (self.motorMassKG 
-                        + self.Motor_case_mass_stg1 
-                        + self.ring_gear_mass_stg1
-                        #+ self.gearbox_casing_mass_stg1 
-                        + self.carrier_mass_stg1 
-                        + self.sun_mass_stg1 
-                        + self.sec_carrier_mass_stg1 
-                        + self.planet_mass_stg1 * numPlanet 
-                        + self.planet_bearing_combined_mass_stg1 
-                        + self.sun_shaft_bearing_mass_stg1 
-                        + self.bearing_mass_stg1 
-                        #+ self.bearing_retainer_mass_stg1
-        )
+        Actuator_mass_stg1   = (self.motorMassKG 
+                            + self.Motor_case_mass_stg1 
+                            + self.ring_gear_mass_stg1
+                            #+ self.gearbox_casing_mass_stg1 
+                            + self.carrier_mass_stg1 
+                            + self.sun_mass_stg1 
+                            + self.sec_carrier_mass_stg1 
+                            + self.planet_mass_stg1 
+                            + self.bearing_mass_stg1 
+                            #+ self.bearing_retainer_mass_stg1
+                            + 0.011
+            )
         
-        return Actuator_mass
+        return Actuator_mass_stg1
 
     def getMassKG_3DP_stg2(self):
         module1    = self.inrunnerdoubleStagePlanetaryGearbox.Stage1.module
@@ -1827,7 +1843,8 @@ class inrunnerdoubleStageActuator:
         case_mounting_surface_height    = self.case_mounting_surface_height
         standard_clearance_1_5mm        = self.standard_clearance_1_5mm    
         #base_plate_thickness            = self.base_plate_thickness        
-        #Motor_case_thickness            = self.Motor_case_thickness        
+        #Motor_case_thickness            = self.Motor_case_thickness
+        coupler_hub_thickness1          = self.sun_coupler_hub_thickness1       
         clearance_planet                = self.clearance_planet            
         #output_mounting_hole_dia        = self.output_mounting_hole_dia2    
         sec_carrier_thickness           = self.sec_carrier_thickness2       
@@ -1860,15 +1877,35 @@ class inrunnerdoubleStageActuator:
         bearing_height = WidthBearingMM    
         bearing_mass   = BearingMassKG      
 
-        ring_gear_casing_support_OD = (self.rotor_OD+self.stator_casing_thickness*2+standard_clearance_1_5mm*4)
-        bearing_support_OD = bearing_OD + (self.a2_bearing_retainer_nut_wrench_size + standard_clearance_1_5mm)*2
+        ring_gear_casing_support_OD = (self.stator_OD+self.stator_casing_thickness*2)
+        ring_gear_casing_support_ID = ring_ID + standard_clearance_1_5mm*2
+        bearing_support_OD = bearing_OD + (self.a2_bearing_retainer_nut_wrench_size + standard_clearance_1_5mm * 2 ) * 2
 
-        ring_gear_volume = np.pi * ((ring_OD*0.5)**2 - (ring_ID*0.5)**2) * (ringFwUsedMM+standard_clearance_1_5mm) * 1e-9
-        ring_gear_casing_support_volume = np.pi * (((ring_gear_casing_support_OD)*0.5)**2 - (ring_OD*0.5)**2) * self.stator_casing_thickness * 1e-9
-        ring_bearing_step_volume = np.pi * ((bearing_support_OD*0.5)**2 - (ring_OD*0.5)**2) * (standard_clearance_1_5mm) * 1e-9
-        ring_gear_bearing_support_volume = np.pi * ((bearing_support_OD*0.5)**2 - (bearing_OD*0.5)**2) * (bearing_height+standard_clearance_1_5mm) * 1e-9
+        ring_gear_casing_support_height =(  self.a1_sun_bottom_casing_bearing_height / 2
+                                            + 2
+                                            + coupler_hub_thickness1
+                                            + self.fw_s1_used
+                                            + self.clearance_planet
+                                            + self.carrier_bearing_step_width
+                                            + self.bearing1_height
+                                            + self.fw_s2_used
+                                            - self.fw_p2
+                                            - self.stator_height
+                                            - 3 * self.stator_casing_thickness
+                                            - self.stator_mounting_hole_wrench_thickness
+                                            - self.loose_clearance_3DP )
+                                                                                                                                        
 
-        total_ring_gear_volume = ring_gear_volume + ring_gear_casing_support_volume + ring_bearing_step_volume + ring_gear_bearing_support_volume
+        ring_gear_volume = np.pi * ((ring_OD*0.5)**2 - (ring_ID*0.5)**2) * (self.fw_r2 + standard_clearance_1_5mm) * 1e-9
+        ring_casing_step_volume = np.pi * (((ring_gear_casing_support_ID + self.stator_casing_thickness *2 )*0.5)**2 - (ring_gear_casing_support_ID*0.5)**2) * (ring_gear_casing_support_height) * 1e-9
+        ring_gear_casing_support_volume = np.pi * (((ring_gear_casing_support_OD)*0.5)**2 - (ring_gear_casing_support_ID*0.5)**2) * (self.stator_casing_thickness+self.stator_mounting_hole_wrench_thickness) * 1e-9
+        ring_bearing_step_volume = np.pi * ((bearing_support_OD*0.5)**2 - (ring_ID*0.5)**2) * (standard_clearance_1_5mm) * 1e-9
+        ring_gear_bearing_support_volume = np.pi * ((bearing_support_OD*0.5)**2 - (self.bearing2_OD*0.5)**2) * (self.bearing2_height+standard_clearance_1_5mm) * 1e-9
+        ring_gear_chamfer_volume = np.pi * (((ring_OD+self.standard_bearing_insertion_chamfer*8)*0.5)**2 - ((ring_OD)*0.5)**2) * (self.standard_bearing_insertion_chamfer*4) * 1e-9
+        ring_gear_casing_support_vol = np.pi * (((self.stator_casing_hole_allen_socket_head_dia+standard_clearance_1_5mm*2)*0.5)**2 - (self.stator_casing_hole_dia*0.5)**2) * (self.stator_casing_thickness+self.stator_mounting_hole_wrench_thickness) * 1e-9
+        ring_bearing_step_VOL = np.pi * ( bearing_OD - standard_clearance_1_5mm ) * (standard_clearance_1_5mm)**2 * 1e-9
+
+        total_ring_gear_volume = ring_gear_volume + ring_gear_casing_support_volume + ring_bearing_step_volume + ring_gear_bearing_support_volume + ring_gear_casing_support_vol*2 + ring_casing_step_volume
         ring_gear_mass = total_ring_gear_volume * density_3DP_material
 
 
@@ -1883,16 +1920,17 @@ class inrunnerdoubleStageActuator:
        
         r_carrier_outer     = (bearing_ID / 2) / 1000
         r_carrier_trapezoid = ((bearing_ID
-                                - (Ns * module + 2 * self.carrier_trapezoidal_support_sun_offset2))
-                                / 4) / 1000
+                                - (self.carrier_PCD2-(self.planet_shaft_dia2 + self.planet_shaft_step_offset * 2)-self.standard_clearance_1_5mm*2))
+                                / 3) / 1000
         
-        fw_carrier = self.fw_p2 / 1000                       #TODO : check if this is correct or not
+        fw_carrier = (self.fw_p2 ) / 1000                       #TODO : check if this is correct or not
 
         # Volume sub-components
         vol_carrier_disk      = np.pi * (bearing_height / 1000) * r_carrier_outer     ** 2
         vol_carrier_trapezoid = np.pi * fw_carrier * r_carrier_trapezoid ** 2
+        vol_removed_sun_bearing = np.pi * (sun_shaft_bearing_OD / 2 / 1000) ** 2 * (bearing_height - clearance_planet*2) / 1000
 
-        vol_carrier_net = vol_carrier_disk + 3 * vol_carrier_trapezoid   # 3 trapezoidal arms
+        vol_carrier_net = vol_carrier_disk + 3 * vol_carrier_trapezoid #- vol_removed_sun_bearing  # 3 trapezoidal arms
 
         carrier_mass = vol_carrier_net * density_3DP_material
 
@@ -1900,7 +1938,7 @@ class inrunnerdoubleStageActuator:
         # Mass: dspg_planet
         #--------------------------------------
         planet_volume = (np.pi * ((DiaPlanetMM*0.5)**2 - (planet_bore*0.5)**2) * planetFwMM) * 1e-9
-        planet_mass   = planet_volume * density_3DP_material
+        planet_mass   = planet_volume * density_3DP_material * numPlanet
 
         #--------------------------------------
         # Mass: dspg_sec_carrier
@@ -1927,17 +1965,17 @@ class inrunnerdoubleStageActuator:
         #--------------------------------------
         # Mass: dspg_bearing
         #--------------------------------------
-        bearing_mass = BearingMassKG # kg
+        bearing_mass = BearingMassKG + planet_bearing_combined_mass + sun_shaft_bearing_mass # kg
 
         #--------------------------------------
         # Mass: dspg_bearing_retainer
         #--------------------------------------
-       # bearing_retainer_OD = bearing_holding_structure_OD
-      #  bearing_retainer_ID = bearing_OD - standard_clearance_1_5mm * 2
+        bearing_retainer_OD = bearing_OD + (self.a2_bearing_retainer_nut_wrench_size + standard_clearance_1_5mm * 2) * 2
+        bearing_retainer_ID = bearing_OD - standard_clearance_1_5mm * 2
 
-      #  bearing_retainer_volume = (np.pi * ((bearing_retainer_OD * 0.5)**2 - (bearing_retainer_ID * 0.5)**2) * bearing_retainer_thickness) * 1e-9
+        bearing_retainer_volume = (np.pi * ((bearing_retainer_OD * 0.5)**2 - (bearing_retainer_ID * 0.5)**2) * self.bearing_retainer_thickness) * 1e-9
 
-      #  bearing_retainer_mass   = bearing_retainer_volume * density_3DP_material
+        bearing_retainer_mass   = bearing_retainer_volume * density_3DP_material
 
        # self.gearbox_casing_mass_stg2          = gearbox_casing_mass
         self.ring_gear_mass_stg2                 = ring_gear_mass
@@ -1947,22 +1985,23 @@ class inrunnerdoubleStageActuator:
         self.planet_bearing_combined_mass_stg2 = planet_bearing_combined_mass
         self.sun_shaft_bearing_mass_stg2       = sun_shaft_bearing_mass
         self.bearing_mass_stg2                 = bearing_mass
-        #self.bearing_retainer_mass_stg2        = bearing_retainer_mass
+        self.bearing_retainer_mass_stg2        = bearing_retainer_mass
+
+        self.ring_gear_casing_support_height = ring_gear_casing_support_height
+        
 
         #----------------------------------------
         # Total Actuator Mass
         #----------------------------------------
-        Actuator_mass = (self.ring_gear_mass_stg2
+        Actuator_mass_stg2 = (self.ring_gear_mass_stg2
                        + self.carrier_mass_stg2 
                        + self.sec_carrier_mass_stg2 
-                       + self.planet_mass_stg2 * numPlanet 
-                       + self.planet_bearing_combined_mass_stg2 
-                       + self.sun_shaft_bearing_mass_stg2 
+                       + self.planet_mass_stg2 
                        + self.bearing_mass_stg2 
-                      # + self.bearing_retainer_mass_stg2)
-        )
+                       + self.bearing_retainer_mass_stg2)
         
-        return Actuator_mass
+        
+        return Actuator_mass_stg2
         
     def getMassKG_3DP(self):
         totalMass = self.getMassKG_3DP_stg1() + self.getMassKG_3DP_stg2()
@@ -1970,25 +2009,31 @@ class inrunnerdoubleStageActuator:
         return totalMass
 
     def print_mass_of_parts_3DP(self):
-        print("motorMassKG :", 1000 * self.motorMassKG )
-        print("Motor_case_mass_stg1 :", 1000 * self.Motor_case_mass_stg1 )
-        print("gearbox_casing_mass_stg1 :", 1000 * self.gearbox_casing_mass_stg1 )
-        print("carrier_mass_stg1 :", 1000 * self.carrier_mass_stg1 )
-        print("sun_mass_stg1 :", 1000 * self.sun_mass_stg1 )
-        print("sec_carrier_mass_stg1 :", 1000 * self.sec_carrier_mass_stg1 )
-        print("planet_mass_stg1 :", 1000 * self.planet_mass_stg1)
-        print("planet_bearing_combined_mass_stg1 :", 1000 * self.planet_bearing_combined_mass_stg1 )
-        print("sun_shaft_bearing_mass_stg1 :", 1000 * self.sun_shaft_bearing_mass_stg1 )
-        print("bearing_mass_stg1 :", 1000 * self.bearing_mass_stg1 )
-        print("bearing_retainer_mass_stg1 :", 1000 * self.bearing_retainer_mass_stg1)
-        print("gearbox_casing_mass_stg2 :", 1000 * self.gearbox_casing_mass_stg2 )
-        print("carrier_mass_stg2 :", 1000 * self.carrier_mass_stg2 )
-        print("sec_carrier_mass_stg2 :", 1000 * self.sec_carrier_mass_stg2 )
-        print("planet_mass_stg2 :", 1000 * self.planet_mass_stg2)
-        print("planet_bearing_combined_mass_stg2 :", 1000 * self.planet_bearing_combined_mass_stg2 )
-        print("sun_shaft_bearing_mass_stg2 :", 1000 * self.sun_shaft_bearing_mass_stg2 )
-        print("bearing_mass_stg2 :", 1000 * self.bearing_mass_stg2 )
-        print("bearing_retainer_mass_stg2 :", 1000 * self.bearing_retainer_mass_stg2)
+        print("motorMassKG :", self.motorMassKG )
+        print("Motor_case_mass_stg1 :", self.Motor_case_mass_stg1 )
+        print("ring_gear_mass_stg1 :", self.ring_gear_mass_stg1 )
+        #print("gearbox_casing_mass_stg1 :", 1000 * self.gearbox_casing_mass_stg1 )
+        print("carrier_mass_stg1 :", self.carrier_mass_stg1 )
+        print("sun_mass_stg1 :", self.sun_mass_stg1 )
+        print("sec_carrier_mass_stg1 :", self.sec_carrier_mass_stg1 )
+        print("planet_mass_stg1 :", self.planet_mass_stg1)
+        #print("planet_bearing_combined_mass_stg1 :", 1000 * self.planet_bearing_combined_mass_stg1 )
+       # print("sun_shaft_bearing_mass_stg1 :", 1000 * self.sun_shaft_bearing_mass_stg1 )
+        print("bearing_mass_stg1 :", self.bearing_mass_stg1 )
+       # print("bearing_retainer_mass_stg1 :", 1000 * self.bearing_retainer_mass_stg1)
+       # print("gearbox_casing_mass_stg2 :", 1000 * self.gearbox_casing_mass_stg2 )
+        print("carrier_mass_stg2 :", self.carrier_mass_stg2 )
+        print("ring_gear_mass_stg2 :", self.ring_gear_mass_stg2 )
+        print("sec_carrier_mass_stg2 :", self.sec_carrier_mass_stg2 )
+        print("planet_mass_stg2 :", self.planet_mass_stg2)
+        #print("planet_bearing_combined_mass_stg2 :", 1000 * self.planet_bearing_combined_mass_stg2 )
+        #print("sun_shaft_bearing_mass_stg2 :", 1000 * self.sun_shaft_bearing_mass_stg2 )
+        print("bearing_mass_stg2 :", self.bearing_mass_stg2 )
+        print("bearing_retainer_mass_stg2 :", self.bearing_retainer_mass_stg2)
+        print("stage 1 mass :", self.getMassKG_3DP_stg1())
+        print("stage 2 mass :", self.getMassKG_3DP_stg2())  
+        print("Total Mass without motor and bearings :", (self.getMassKG_3DP() - self.motorMassKG - self.bearing_mass_stg1 - self.bearing_mass_stg2))
+        print("ring_gear_casing_support_height :", self.ring_gear_casing_support_height)
 
 
 #========================================================================
@@ -2247,6 +2292,11 @@ class optimizationDoubleStageActuator:
                 print("\n")
                 print("Running Time (sec)")
                 print(totalTime) 
+
+            #individial part mass of the actuator
+
+            opt_actuator.print_mass_of_parts_3DP()   
+
 
         sys.stdout = sys.__stdout__
 

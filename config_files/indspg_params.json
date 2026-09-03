@@ -1,9 +1,9 @@
 {   
     "indspg_design_parameters":{
-        "sCarrierExtrusionDiaMM_Stg1"       : 12,
-        "sCarrierExtrusionClearanceMM_Stg1" : 2,
-        "sCarrierExtrusionDiaMM_Stg2"       : 12,
-        "sCarrierExtrusionClearanceMM_Stg2" : 2,
+        "sCarrierExtrusionDiaMM_Stg1"       : 6,
+        "sCarrierExtrusionClearanceMM_Stg1" : 0.5,
+        "sCarrierExtrusionDiaMM_Stg2"       : 6,
+        "sCarrierExtrusionClearanceMM_Stg2" : 0.5,
         "Ring1RadialWidthMM"                : 5,
         "Ring2RadialWidthMM"                : 4,
         "planetMinDistanceMM"               : 5,
@@ -47,11 +47,11 @@
         "MAX_GB_DIA_MULT_FACTOR"           : 1
     },
     "indspg_design_parameters_3DP":{
-        "sCarrierExtrusionDiaMM_Stg1"                             : 12,
-        "sCarrierExtrusionClearanceMM_Stg1"                       : 2,
-        "sCarrierExtrusionDiaMM_Stg2"                             : 12,
+        "sCarrierExtrusionDiaMM_Stg1"                             : 6,
+        "sCarrierExtrusionClearanceMM_Stg1"                       : 1,
+        "sCarrierExtrusionDiaMM_Stg2"                             : 8,
         "sCarrierExtrusionClearanceMM_Stg2"                       : 2,
-        "ring_radial_thickness"                                   : 5,
+        "ring_radial_thickness"                                   : 4,
         "planetMinDistanceMM"                                     : 5,
         "clearance_planet"                                        : 1.5,
         "standard_clearance_1_5mm"                                : 1.5,
