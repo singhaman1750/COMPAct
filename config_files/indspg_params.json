@@ -43,7 +43,7 @@
         "NUM_PLANET_STAGE2_MIN"            : 3, 
         "NUM_PLANET_STAGE2_MAX"            : 3, 
         "NUM_TEETH_SUN_MIN"                : 18, 
-        "NUM_TEETH_PLANET_MIN"             : 24,
+        "NUM_TEETH_PLANET_MIN"             : 23,
         "MAX_GB_DIA_MULT_FACTOR"           : 1
     },
     "indspg_design_parameters_3DP":{
@@ -103,8 +103,8 @@
         "carrier_bearing_step_width2"                             : 1.5,
         "sun_shaft_bearing_OD2"                                   : 16,
         "sun_shaft_bearing_width2"                                : 5,
-        "planet_bearing_OD2"                                      : 12,
-        "planet_bearing_width2"                                   : 3.5,
+        "planet_bearing_OD2"                                      : 15,
+        "planet_bearing_width2"                                   : 5,
         "planet_bore2"                                            : 10,
         "sun_shaft_bearing_ID2"                                   : 8,
         "bearing_retainer_thickness2"                             : 2,

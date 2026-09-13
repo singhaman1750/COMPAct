@@ -46,7 +46,7 @@ class inrunnerdoubleStagePlanetaryGearbox:
         }
 
         self.densityGears     = densityGears
-        self.densityStructure = densityStructure
+        self.density_PLA = densityStructure
         # self.fwSun1MM          = fwSun1MM
         # self.fwSun2MM          = fwSun2MM
         # self.fwRing1MM         = fwRing1MM
@@ -68,7 +68,7 @@ class inrunnerdoubleStagePlanetaryGearbox:
                                                   fwRingMM                  = fwRing1MM,  
                                                   maxGearAllowableStressMPa = maxGearAllowableStressMPa, 
                                                   densityGears              = self.densityGears,
-                                                  densityStructure          = self.densityStructure)
+                                                  densityStructure          = self.density_PLA)
                 
         # Stage-2
         self.Stage2 = singleStagePlanetaryGearbox(design_params             = indspg_stg2_parameters,
@@ -83,7 +83,7 @@ class inrunnerdoubleStagePlanetaryGearbox:
                                                   fwRingMM                  = fwRing2MM,  
                                                   maxGearAllowableStressMPa = maxGearAllowableStressMPa, 
                                                   densityGears              = self.densityGears,
-                                                  densityStructure          = self.densityStructure)
+                                                  densityStructure          = self.density_PLA)
         
         self.maxGearAllowableStressMPa = maxGearAllowableStressMPa
 
@@ -281,10 +281,10 @@ class inrunnerdoubleStageActuator:
         self.a2_bearing_retainer_wrench_height = self.design_params["a2_bearing_retainer_wrench_height"]
         self.bearing_retainer_thickness = self.design_params["bearing_retainer_thickness"]
 
-        self.a1_sun_bottom_casing_bearing_ID = self.design_params["a1_sun_bottom_casing_bearing_ID"]
-        self.a1_sun_bottom_casing_bearing_OD = self.design_params["a1_sun_bottom_casing_bearing_OD"]
-        self.a1_sun_bottom_casing_bearing_height = self.design_params["a1_sun_bottom_casing_bearing_height"]
-        self.a1_sun_bottom_casing_bearing_massKg = self.design_params["a1_sun_bottom_casing_bearing_massKg"]
+        # self.a1_sun_bottom_casing_bearing_ID = self.design_params["a1_sun_bottom_casing_bearing_ID"]
+        # self.a1_sun_bottom_casing_bearing_OD = self.design_params["a1_sun_bottom_casing_bearing_OD"]
+        # self.a1_sun_bottom_casing_bearing_height = self.design_params["a1_sun_bottom_casing_bearing_height"]
+        # self.a1_sun_bottom_casing_bearing_massKg = self.design_params["a1_sun_bottom_casing_bearing_massKg"]
 
 
 
@@ -331,11 +331,13 @@ class inrunnerdoubleStageActuator:
         self.stator_casing_hole_allen_socket_head_dia = self.design_params["stator_casing_hole_allen_socket_head_dia"]
         self.stator_mounting_holes_head_socket_dia = self.design_params["stator_mounitng_holes_head_socket_dia"]
 
-        self.rotor_mount_hole_PCD = self.design_params["rotor_mount_hole_PCD"]
+        # self.rotor_mount_hole_PCD = self.design_params["rotor_mount_hole_PCD"]
+       
         self.rotor_mount_hole_dia = self.design_params["rotor_mount_hole_dia"]
         self.rotor_mount_hole_num = self.design_params["rotor_mount_hole_num"]
         self.rotor_csk_head_upper_dia = self.design_params["Rotor_csk_head_upper_dia"]
         self.rotor_csk_head_height = self.design_params["Rotor_csk_head_height"]
+        self.rotor_mount_hole_PCD = self.rotor_ID - self.rotor_csk_head_upper_dia - 2*2 - self.standard_clearance_1_5mm # 2.5
 
         #motor_output_hole_bolt = nuts_and_bolts_dimensions(bolt_dia = self.motor_output_hole_dia, bolt_type="CSK")
 
@@ -388,13 +390,21 @@ class inrunnerdoubleStageActuator:
         ## Stage 1 - Component and Casing Calculations
         ## --------------------------------------------------------------------
         
-        # Bearing calculations
-        # req_bearing1_ID = self.module1 * (self.Ns1 + self.Np1) + self.bearingIDClearanceMM   #TODO: check for bearing selection once all done , THIS IS FIX VALUE
-        # Bearing1 = bearings_discrete(req_bearing1_ID)
-        # self.bearing1_ID = Bearing1.getBearingIDMM()
-        # self.bearing1_OD = Bearing1.getBearingODMM()
-        # self.bearing1_height = Bearing1.getBearingWidthMM()
-
+        # a1_sun_bottom_casing Bearing calculations
+        if self.rotor_height == 19:
+            req_bearing_ID = self.rotor_ID - self.standard_clearance_1_5mm  #TODO: check for bearing selection once all done , THIS IS FIX VALUE
+            Bearing_bottom_casing = bearings_discrete(req_bearing_ID)
+            self.a1_sun_bottom_casing_bearing_ID = Bearing_bottom_casing.getBearingIDMM()
+            self.a1_sun_bottom_casing_bearing_OD = Bearing_bottom_casing.getBearingODMM()
+            self.a1_sun_bottom_casing_bearing_height = Bearing_bottom_casing.getBearingWidthMM()
+            self.a1_sun_bottom_casing_bearing_massKg = Bearing_bottom_casing.getBearingMassKG()
+        
+        else:
+            self.a1_sun_bottom_casing_bearing_ID = self.design_params["a1_sun_bottom_casing_bearing_ID"]
+            self.a1_sun_bottom_casing_bearing_OD = self.design_params["a1_sun_bottom_casing_bearing_OD"]
+            self.a1_sun_bottom_casing_bearing_height = self.design_params["a1_sun_bottom_casing_bearing_height"]
+            self.a1_sun_bottom_casing_bearing_massKg = self.design_params["a1_sun_bottom_casing_bearing_massKg"]
+            
         self.bearing1_ID = 38.1                                                                #TODO: if possible extract it from bearing selection once all done , THIS IS FIX VALUE
         self.bearing1_OD = 47.625
         self.bearing1_height = 4.763
@@ -421,7 +431,12 @@ class inrunnerdoubleStageActuator:
         
         # Carrier and final assembly dimensions
         self.carrier_PCD1 = (self.Np1 + self.Ns1) * self.module1
-        self.fw_s1_used = self.fw_p_1_fix + self.clearance_planet + self.sec_carrier_thickness1 + self.standard_clearance_1_5mm*2
+        if self.rotor_height == 19:
+            self.fw_s1_used = self.fw_p_1_fix + self.clearance_planet + self.sec_carrier_thickness1 + self.standard_clearance_1_5mm*2 + self.standard_clearance_1_5mm *0.5
+            
+        else:
+            self.fw_s1_used = self.fw_p_1_fix + self.clearance_planet + self.sec_carrier_thickness1 + self.standard_clearance_1_5mm*2
+
         #self.case_dist1 = self.sec_carrier_thickness1 + self.clearance_planet + self.sun_coupler_hub_thickness1 - self.case_mounting_surface_height
         self.sun_hub_dia1 = self.rotor_ID - 2 * (self.standard_clearance_1_5mm + 2)
 
@@ -543,10 +558,10 @@ class inrunnerdoubleStageActuator:
         self.a2_bearing_retainer_wrench_height = self.design_params["a2_bearing_retainer_wrench_height"]
         self.bearing_retainer_thickness = self.design_params["bearing_retainer_thickness"]
 
-        self.a1_sun_bottom_casing_bearing_ID = self.design_params["a1_sun_bottom_casing_bearing_ID"]
-        self.a1_sun_bottom_casing_bearing_OD = self.design_params["a1_sun_bottom_casing_bearing_OD"]
-        self.a1_sun_bottom_casing_bearing_height = self.design_params["a1_sun_bottom_casing_bearing_height"]
-        self.a1_sun_bottom_casing_bearing_massKg = self.design_params["a1_sun_bottom_casing_bearing_massKg"]
+        # self.a1_sun_bottom_casing_bearing_ID = self.design_params["a1_sun_bottom_casing_bearing_ID"]
+        # self.a1_sun_bottom_casing_bearing_OD = self.design_params["a1_sun_bottom_casing_bearing_OD"]
+        # self.a1_sun_bottom_casing_bearing_height = self.design_params["a1_sun_bottom_casing_bearing_height"]
+        # self.a1_sun_bottom_casing_bearing_massKg = self.design_params["a1_sun_bottom_casing_bearing_massKg"]
 
         self.stator_mounting_hole_wrench_dia = self.design_params["stator_mounting_hole_wrench_dia"]
         self.stator_mounting_hole_wrench_thickness = self.design_params["stator_mounting_hole_wrench_thickness"]
@@ -1512,7 +1527,8 @@ class inrunnerdoubleStageActuator:
         #------------------------------------
         # density of materials
         #------------------------------------
-        density_3DP_material = self.inrunnerdoubleStagePlanetaryGearbox.densityGears
+        density_3DP_material = self.inrunnerdoubleStagePlanetaryGearbox.density_PLA
+        density_aluminum = self.inrunnerdoubleStagePlanetaryGearbox.densityGears
 
         #------------------------------------
         # Face Width
@@ -1703,6 +1719,15 @@ class inrunnerdoubleStageActuator:
         sun_volume       = sun_hub_volume + sun_gear_volume + sun_shaft_volume
         sun_mass         = sun_volume * density_3DP_material
 
+        #----------------------------------
+        # Mass: metal rotor coupling
+        #----------------------------------
+        rotor_coupler_OD = self.rotor_ID
+        rotor_coupler_ID = self.rotor_ID - 2
+        rotor_coupler_height = stator_casing_thickness+ self.stator_wire_bottom_height-standard_clearance_1_5mm- self.a1_sun_bottom_casing_bearing_height/2 + standard_clearance_1_5mm*2 + self.sun_coupler_hub_thickness1 + standard_clearance_1_5mm*5
+
+        rotor_coupler_volume = (np.pi * ((rotor_coupler_OD*0.5)**2 - (rotor_coupler_ID*0.5)**2) * rotor_coupler_height) * 1e-9 + (np.pi * ((rotor_coupler_ID*0.5)**2) * 2) * 1e-9
+        rotor_coupler_mass   = rotor_coupler_volume * density_aluminum
         #--------------------------------------
         # Mass: dspg_planet
         #--------------------------------------
@@ -1733,7 +1758,7 @@ class inrunnerdoubleStageActuator:
         #--------------------------------------
         # Mass: dspg_planet_bearing
         #--------------------------------------
-        bearing_mass = BearingMassKG + planet_bearing_combined_mass + sun_shaft_bearing_mass + 0.031 # kg
+        bearing_mass = self.Bearing_mass_stg1_KG  + planet_bearing_combined_mass + sun_shaft_bearing_mass + self.a1_sun_bottom_casing_bearing_massKg # kg
 
         #--------------------------------------
         # Mass: dspg_bearing_retainer
@@ -1751,6 +1776,7 @@ class inrunnerdoubleStageActuator:
         #self.gearbox_casing_mass_stg1          = gearbox_casing_mass
         self.carrier_mass_stg1                 = carrier_stg1_mass
         self.sun_mass_stg1                     = sun_mass
+        self.rotor_coupler_mass_stg1            = rotor_coupler_mass
         self.sec_carrier_mass_stg1             = sec_carrier_mass
         self.planet_mass_stg1                  = planet_mass
         self.planet_bearing_combined_mass_stg1 = planet_bearing_combined_mass
@@ -1770,8 +1796,9 @@ class inrunnerdoubleStageActuator:
                             + self.sec_carrier_mass_stg1 
                             + self.planet_mass_stg1 
                             + self.bearing_mass_stg1 
+                            + self.rotor_coupler_mass_stg1
                             #+ self.bearing_retainer_mass_stg1
-                            + 0.011
+                            
             )
         
         return Actuator_mass_stg1
@@ -1896,16 +1923,16 @@ class inrunnerdoubleStageActuator:
                                             - self.loose_clearance_3DP )
                                                                                                                                         
 
-        ring_gear_volume = np.pi * ((ring_OD*0.5)**2 - (ring_ID*0.5)**2) * (self.fw_r2 + standard_clearance_1_5mm) * 1e-9
+        ring_gear_volume = np.pi * ((ring_OD*0.5)**2 - (ring_ID*0.5)**2) * (self.fw_r2) * 1e-9
         ring_casing_step_volume = np.pi * (((ring_gear_casing_support_ID + self.stator_casing_thickness *2 )*0.5)**2 - (ring_gear_casing_support_ID*0.5)**2) * (ring_gear_casing_support_height) * 1e-9
-        ring_gear_casing_support_volume = np.pi * (((ring_gear_casing_support_OD)*0.5)**2 - (ring_gear_casing_support_ID*0.5)**2) * (self.stator_casing_thickness+self.stator_mounting_hole_wrench_thickness) * 1e-9
+        ring_gear_casing_support_volume = np.pi * (((ring_gear_casing_support_OD)*0.5)**2 - (ring_gear_casing_support_ID*0.5)**2) * (self.stator_casing_thickness+self.stator_mounting_hole_wrench_thickness ) * 1e-9
         ring_bearing_step_volume = np.pi * ((bearing_support_OD*0.5)**2 - (ring_ID*0.5)**2) * (standard_clearance_1_5mm) * 1e-9
         ring_gear_bearing_support_volume = np.pi * ((bearing_support_OD*0.5)**2 - (self.bearing2_OD*0.5)**2) * (self.bearing2_height+standard_clearance_1_5mm) * 1e-9
         ring_gear_chamfer_volume = np.pi * (((ring_OD+self.standard_bearing_insertion_chamfer*8)*0.5)**2 - ((ring_OD)*0.5)**2) * (self.standard_bearing_insertion_chamfer*4) * 1e-9
         ring_gear_casing_support_vol = np.pi * (((self.stator_casing_hole_allen_socket_head_dia+standard_clearance_1_5mm*2)*0.5)**2 - (self.stator_casing_hole_dia*0.5)**2) * (self.stator_casing_thickness+self.stator_mounting_hole_wrench_thickness) * 1e-9
         ring_bearing_step_VOL = np.pi * ( bearing_OD - standard_clearance_1_5mm ) * (standard_clearance_1_5mm)**2 * 1e-9
 
-        total_ring_gear_volume = ring_gear_volume + ring_gear_casing_support_volume + ring_bearing_step_volume + ring_gear_bearing_support_volume + ring_gear_casing_support_vol*2 + ring_casing_step_volume
+        total_ring_gear_volume = ring_gear_volume + ring_gear_casing_support_volume + ring_bearing_step_volume + ring_gear_bearing_support_volume + ring_casing_step_volume 
         ring_gear_mass = total_ring_gear_volume * density_3DP_material
 
 
@@ -1923,7 +1950,7 @@ class inrunnerdoubleStageActuator:
                                 - (self.carrier_PCD2-(self.planet_shaft_dia2 + self.planet_shaft_step_offset * 2)-self.standard_clearance_1_5mm*2))
                                 / 3) / 1000
         
-        fw_carrier = (self.fw_p2 ) / 1000                       #TODO : check if this is correct or not
+        fw_carrier = (self.fw_p2) / 1000                       #TODO : check if this is correct or not
 
         # Volume sub-components
         vol_carrier_disk      = np.pi * (bearing_height / 1000) * r_carrier_outer     ** 2
@@ -2295,7 +2322,7 @@ class optimizationDoubleStageActuator:
 
             #individial part mass of the actuator
 
-            opt_actuator.print_mass_of_parts_3DP()   
+           # opt_actuator.print_mass_of_parts_3DP()   
 
 
         sys.stdout = sys.__stdout__

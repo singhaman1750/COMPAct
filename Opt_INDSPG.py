@@ -33,6 +33,7 @@ with open(indspg_params_path, "r") as indspg_params_file:
 #---------------------------------------------------
 # Transferring relevant data to individual variables
 #---------------------------------------------------
+motor_data          = config_data["Motors"]
 material_properties = config_data["Material_properties"]
 
 Gear_standard_parameters = config_data["Gear_standard_parameters"]
@@ -41,11 +42,11 @@ MIT_params               = config_data["MIT_params"]
 
 Steel    = material_properties["Steel"]
 Aluminum = material_properties["Aluminum"]
-PLA      = material_properties["PLA"]
+pla     = material_properties["PLA"]
 
 indspg_design_params       = indspg_params["indspg_design_parameters_3DP"]
 indspg_optimization_params = indspg_params["indspg_optimization_parameters"]
-MotorRI100 = Motor()
+
 
 #motor_driver_data = config_data["Motor_drivers"]
 
@@ -59,15 +60,94 @@ MotorRI100 = Motor()
 #--------------------------------------------------------
 # Motors
 #--------------------------------------------------------
+# RI100
 
-#--------------------------------------------------------
+Motor_RI100_rotor_OD                     = motor_data["MotorRI100"]["rotor_OD"]
+Motor_RI100_stator_ID                    = motor_data["MotorRI100"]["stator_ID"]
+Motor_RI100_rotor_height                 = motor_data["MotorRI100"]["rotor_height"]
+Motor_RI100_rotor_ID                     = motor_data["MotorRI100"]["rotor_ID"]
+Motor_RI100_stator_height                = motor_data["MotorRI100"]["stator_height"]
+Motor_RI100_stator_OD                    = motor_data["MotorRI100"]["stator_OD"]
+Motor_RI100_stator_hole_dia              = motor_data["MotorRI100"]["stator_hole_dia"]
+Motor_RI100_stator_wire_top_height       = motor_data["MotorRI100"]["stator_wire_top_height"]
+Motor_RI100_stator_mid_height            = motor_data["MotorRI100"]["stator_mid_height"]
+Motor_RI100_stator_wire_bottom_height    = motor_data["MotorRI100"]["stator_wire_bottom_height"]
+Motor_RI100_stator_wire_OD              = motor_data["MotorRI100"]["stator_wire_OD"]
+Motor_RI100_stator_wire_ID              = motor_data["MotorRI100"]["stator_wire_ID"]
+Motor_RI100_maxMotorAngVelRPM           = motor_data["MotorRI100"]["maxMotorAngVelRPM"]
+Motor_RI100_maxMotorTorque              = motor_data["MotorRI100"]["maxMotorTorque"]
+Motor_RI100_maxMotorPower               = motor_data["MotorRI100"]["maxMotorPower"]
+Motor_RI100_motorMass                   = motor_data["MotorRI100"]["motorMass"]
+
+# RI_80
+
+Motor_RI80_rotor_OD                     = motor_data["MotorRI80"]["rotor_OD"]
+Motor_RI80_stator_ID                    = motor_data["MotorRI80"]["stator_ID"]
+Motor_RI80_rotor_height                 = motor_data["MotorRI80"]["rotor_height"]
+Motor_RI80_rotor_ID                     = motor_data["MotorRI80"]["rotor_ID"]
+Motor_RI80_stator_height                = motor_data["MotorRI80"]["stator_height"]
+Motor_RI80_stator_OD                    = motor_data["MotorRI80"]["stator_OD"]
+Motor_RI80_stator_hole_dia              = motor_data["MotorRI80"]["stator_hole_dia"]
+Motor_RI80_stator_wire_top_height       = motor_data["MotorRI80"]["stator_wire_top_height"]
+Motor_RI80_stator_mid_height            = motor_data["MotorRI80"]["stator_mid_height"]
+Motor_RI80_stator_wire_bottom_height    = motor_data["MotorRI80"]["stator_wire_bottom_height"]
+Motor_RI80_stator_wire_OD              = motor_data["MotorRI80"]["stator_wire_OD"]
+Motor_RI80_stator_wire_ID              = motor_data["MotorRI80"]["stator_wire_ID"]
+Motor_RI80_maxMotorAngVelRPM           = motor_data["MotorRI80"]["maxMotorAngVelRPM"]
+Motor_RI80_maxMotorTorque              = motor_data["MotorRI80"]["maxMotorTorque"]
+Motor_RI80_maxMotorPower               = motor_data["MotorRI80"]["maxMotorPower"]
+Motor_RI80_motorMass                   = motor_data["MotorRI80"]["motorMass"]
+
+
+#MOTOR RI100
+
+MotorRI100 = Motor( rotor_OD                     = Motor_RI100_rotor_OD,
+                    stator_ID                    = Motor_RI100_stator_ID,
+                    rotor_height                 = Motor_RI100_rotor_height,
+                    rotor_ID                     = Motor_RI100_rotor_ID,
+                    stator_height                = Motor_RI100_stator_height,
+                    stator_OD                    = Motor_RI100_stator_OD,
+                    stator_hole_dia              = Motor_RI100_stator_hole_dia,
+                    stator_wire_top_height       = Motor_RI100_stator_wire_top_height,
+                    stator_mid_height            = Motor_RI100_stator_mid_height,
+                    stator_wire_bottom_height    = Motor_RI100_stator_wire_bottom_height,
+                    stator_wire_OD              = Motor_RI100_stator_wire_OD,
+                    stator_wire_ID              = Motor_RI100_stator_wire_ID,
+                    maxMotorAngVelRPM           = Motor_RI100_maxMotorAngVelRPM,
+                    maxMotorTorque              = Motor_RI100_maxMotorTorque,
+                    maxMotorPower               = Motor_RI100_maxMotorPower,
+                    motorMass                   = Motor_RI100_motorMass
+                )
+
+#MOTOR RI80
+
+MotorRI80 = Motor( rotor_OD                     = Motor_RI80_rotor_OD,
+                    stator_ID                    = Motor_RI80_stator_ID, 
+                    rotor_height                 = Motor_RI80_rotor_height,
+                    rotor_ID                     = Motor_RI80_rotor_ID,
+                    stator_height                = Motor_RI80_stator_height,
+                    stator_OD                    = Motor_RI80_stator_OD,
+                    stator_hole_dia              = Motor_RI80_stator_hole_dia,
+                    stator_wire_top_height       = Motor_RI80_stator_wire_top_height,
+                    stator_mid_height            = Motor_RI80_stator_mid_height,
+                    stator_wire_bottom_height    = Motor_RI80_stator_wire_bottom_height,
+                    stator_wire_OD              = Motor_RI80_stator_wire_OD,
+                    stator_wire_ID              = Motor_RI80_stator_wire_ID,
+                    maxMotorAngVelRPM           = Motor_RI80_maxMotorAngVelRPM,
+                    maxMotorTorque              = Motor_RI80_maxMotorTorque,
+                    maxMotorPower               = Motor_RI80_maxMotorPower,
+                    motorMass                   = Motor_RI80_motorMass
+                )   
+
+
+#------------------------------------------------------
 # Gearbox 
 #--------------------------------------------------------
 inrunnerdoubleStagePlanetaryGearboxInstance = inrunnerdoubleStagePlanetaryGearbox(design_parameters         = indspg_design_params,
                                                                   gear_standard_parameters  = Gear_standard_parameters,
-                                                                  densityGears              = PLA["density"],
-                                                                  densityStructure          = PLA["density"],
-                                                                  maxGearAllowableStressMPa = PLA["maxAllowableStressMPa"])
+                                                                  densityGears              = Aluminum["density"],
+                                                                  densityStructure          = pla["density"],
+                                                                  maxGearAllowableStressMPa = pla["maxAllowableStressMPa"])
                                                                   
 #-----------------------------------------------------
 # Actuator
@@ -75,47 +155,29 @@ inrunnerdoubleStagePlanetaryGearboxInstance = inrunnerdoubleStagePlanetaryGearbo
 
 maxGBDia_multFactor = indspg_optimization_params["MAX_GB_DIA_MULT_FACTOR"]
 
-# # Internal Gearbox Packaging Limits
-# maxGearboxDiameter_RI80  = (
-#     maxGBDia_multFactor
-#     * Motor.getStatorODMM()
-# )
-# # --- NEW: Define Stage 1 specific limit ---
-# maxGearboxDiameter_Stg1_RI80 = Motor.getRotorIDMM() - indspg_design_params["standard_clearance_1_5mm"]*2
-
 
 maxGearboxDiameter_RI100 = (
     maxGBDia_multFactor
     * ( MotorRI100.getStator_wire_OD() - indspg_design_params["ring2RadialWidthMM"]*2 )
 )
 
-
 # --- NEW: Define Stage 1 specific limit ---
 maxGearboxDiameter_Stg1_RI100 = (MotorRI100.getRotorIDMM() - indspg_design_params["standard_clearance_1_5mm"]*4)
 
+maxGearboxDiameter_RI80 = (
+    maxGBDia_multFactor
+    * ( MotorRI80.getStator_wire_OD() - indspg_design_params["ring2RadialWidthMM"]*2 )
+)
 
+# --- NEW: Define Stage 1 specific limit ---
+maxGearboxDiameter_Stg1_RI80 = (MotorRI80.getRotorIDMM() - indspg_design_params["standard_clearance_1_5mm"]*5)
 
-#-----------------------------------------------------
-# RI80 Actuator
-#-----------------------------------------------------
-
-# Actuator_RI80 = inrunnerdoubleStageActuator(
-#     design_parameters        = indspg_design_params,
-#     motor                    = MotorRI80,
-#     inrunnerdoubleStagePlanetaryGearbox=inrunnerdoubleStagePlanetaryGearboxInstance,
-#     FOS                      = MIT_params["FOS"],
-#     serviceFactor            = MIT_params["serviceFactor"],
-
-#     maxGearboxDiameter       = maxGearboxDiameter_RI80,
-#     maxGearboxDiameter_Stg1  = maxGearboxDiameter_Stg1_RI80,
-
-#     stressAnalysisMethodName = "MIT"
-# )
 
 
 #-----------------------------------------------------
-# RI100 Actuator
+# RI 100 & RI 80 Actuator Instances
 #-----------------------------------------------------
+
 
 Actuator_RI100 = inrunnerdoubleStageActuator(
     design_parameters        = indspg_design_params,
@@ -130,6 +192,18 @@ Actuator_RI100 = inrunnerdoubleStageActuator(
     stressAnalysisMethodName = "MIT"
 )
 
+Actuator_RI80 = inrunnerdoubleStageActuator(
+    design_parameters        = indspg_design_params,
+    motor                    = MotorRI80,
+    inrunnerdoubleStagePlanetaryGearbox=inrunnerdoubleStagePlanetaryGearboxInstance,
+
+    FOS                      = MIT_params["FOS"],
+    serviceFactor            = MIT_params["serviceFactor"],
+
+    maxGearboxDiameter       = maxGearboxDiameter_RI80,
+    maxGearboxDiameter_Stg1  = maxGearboxDiameter_Stg1_RI80,
+    stressAnalysisMethodName = "MIT"
+)
 
 
 # Optimization
@@ -174,25 +248,25 @@ Optimizer_RI100     = optimizationDoubleStageActuator(design_parameters        =
                                                             GEAR_RATIO_STEP          = GEAR_RATIO_STEP       
                                                         )
 
-# Optimizer_RI80    = optimizationDoubleStageActuator(design_parameters        = indspg_design_params,
-#                                                             gear_standard_parameters = Gear_standard_parameters,
-#                                                             K_Mass                   = K_Mass                ,
-#                                                             K_Eff                    = K_Eff                 ,
-#                                                             K_Width                  = K_Width               ,
-#                                                             MODULE_STAGE1_MIN        = MODULE_STAGE1_MIN     ,
-#                                                             MODULE_STAGE1_MAX        = MODULE_STAGE1_MAX     ,
-#                                                             MODULE_STAGE2_MIN        = MODULE_STAGE2_MIN     ,
-#                                                             MODULE_STAGE2_MAX        = MODULE_STAGE2_MAX     ,
-#                                                             NUM_PLANET_STAGE1_MIN    = NUM_PLANET_STAGE1_MIN ,
-#                                                             NUM_PLANET_STAGE1_MAX    = NUM_PLANET_STAGE1_MAX ,
-#                                                             NUM_PLANET_STAGE2_MIN    = NUM_PLANET_STAGE2_MIN ,
-#                                                             NUM_PLANET_STAGE2_MAX    = NUM_PLANET_STAGE2_MAX ,
-#                                                             NUM_TEETH_SUN_MIN        = NUM_TEETH_SUN_MIN     ,
-#                                                             NUM_TEETH_PLANET_MIN     = NUM_TEETH_PLANET_MIN  ,
-#                                                             GEAR_RATIO_MIN           = GEAR_RATIO_MIN        ,
-#                                                             GEAR_RATIO_MAX           = GEAR_RATIO_MAX        ,
-#                                                             GEAR_RATIO_STEP          = GEAR_RATIO_STEP       )
-
+Optimizer_RI80    = optimizationDoubleStageActuator(design_parameters        = indspg_design_params,
+                                                            gear_standard_parameters = Gear_standard_parameters,
+                                                            K_Mass                   = K_Mass                ,
+                                                            K_Eff                    = K_Eff                 ,
+                                                            K_Width                  = K_Width               ,
+                                                            MODULE_STAGE1_MIN        = MODULE_STAGE1_MIN     ,
+                                                            MODULE_STAGE1_MAX        = MODULE_STAGE1_MAX     ,
+                                                            MODULE_STAGE2_MIN        = MODULE_STAGE2_MIN     ,
+                                                            MODULE_STAGE2_MAX        = MODULE_STAGE2_MAX     ,
+                                                            NUM_PLANET_STAGE1_MIN    = NUM_PLANET_STAGE1_MIN ,
+                                                            NUM_PLANET_STAGE1_MAX    = NUM_PLANET_STAGE1_MAX ,
+                                                            NUM_PLANET_STAGE2_MIN    = NUM_PLANET_STAGE2_MIN ,
+                                                            NUM_PLANET_STAGE2_MAX    = NUM_PLANET_STAGE2_MAX ,
+                                                            NUM_TEETH_SUN_MIN        = NUM_TEETH_SUN_MIN     ,
+                                                            NUM_TEETH_PLANET_MIN     = NUM_TEETH_PLANET_MIN  ,
+                                                            GEAR_RATIO_MIN           = GEAR_RATIO_MIN        ,
+                                                            GEAR_RATIO_MAX           = GEAR_RATIO_MAX        ,
+                                                            GEAR_RATIO_STEP          = GEAR_RATIO_STEP       
+                                                        )
 
 
 
@@ -210,15 +284,15 @@ def run(motor_name, gear_ratio):
             gearRatioReq=gear_ratio
         )
 
-    # elif motor_name == "RI80":
-    #     return Optimizer_RI80.optimizeActuator(
-    #         Actuator_RI80,
-    #         UsePSCasVariable=0,
-    #         log=0,
-    #         csv=1,
-    #         printOptParams=1,
-    #         gearRatioReq=gear_ratio
-    #     )
+    elif motor_name == "RI80":
+        return Optimizer_RI80.optimizeActuator(
+            Actuator_RI80,
+            UsePSCasVariable=0,
+            log=0,
+            csv=1,
+            printOptParams=1,
+            gearRatioReq=gear_ratio
+        )
 
     else:
         raise ValueError(f"Unsupported motor: {motor_name}")
