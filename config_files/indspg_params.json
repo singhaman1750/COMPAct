@@ -35,21 +35,21 @@
         "GEAR_RATIO_MAX"                   : 45, 
         "GEAR_RATIO_STEP"                  : 1,
         "MODULE_STAGE1_MIN"                : 0.5, 
-        "MODULE_STAGE1_MAX"                : 0.5, 
+        "MODULE_STAGE1_MAX"                : 1, 
         "MODULE_STAGE2_MIN"                : 0.6, 
         "MODULE_STAGE2_MAX"                : 1.2, 
         "NUM_PLANET_STAGE1_MIN"            : 3, 
-        "NUM_PLANET_STAGE1_MAX"            : 3, 
+        "NUM_PLANET_STAGE1_MAX"            : 5, 
         "NUM_PLANET_STAGE2_MIN"            : 3, 
-        "NUM_PLANET_STAGE2_MAX"            : 3, 
-        "NUM_TEETH_SUN_MIN"                : 18, 
-        "NUM_TEETH_PLANET_MIN"             : 23,
+        "NUM_PLANET_STAGE2_MAX"            : 7, 
+        "NUM_TEETH_SUN_MIN"                : 19, 
+        "NUM_TEETH_PLANET_MIN"             : 24,
         "MAX_GB_DIA_MULT_FACTOR"           : 1
     },
     "indspg_design_parameters_3DP":{
         "sCarrierExtrusionDiaMM_Stg1"                             : 6,
         "sCarrierExtrusionClearanceMM_Stg1"                       : 1,
-        "sCarrierExtrusionDiaMM_Stg2"                             : 8,
+        "sCarrierExtrusionDiaMM_Stg2"                             : 5,
         "sCarrierExtrusionClearanceMM_Stg2"                       : 2,
         "ring_radial_thickness"                                   : 4,
         "planetMinDistanceMM"                                     : 5,
@@ -147,6 +147,11 @@
         "a2_output_mounting_nut_wrench_size"                     : 5.5 ,
         "stator_mounting_hole_wrench_dia"                        : 5.5 ,
         "stator_mounting_hole_wrench_thickness"                  : 2.5,
+        "needle_bearing_planet_stg1_ID"                               : 6,
+        "needle_bearing_planet_stg1_OD"                               : 9,  
+        "needle_bearing_planet_stg1_height"                           : 9,
+
+        "rotor_metal_part_thickness"                                      : 2,
 
 
         "fw_p_1_fix"                                             : 9

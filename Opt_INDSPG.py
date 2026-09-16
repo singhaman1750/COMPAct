@@ -170,7 +170,7 @@ maxGearboxDiameter_RI80 = (
 )
 
 # --- NEW: Define Stage 1 specific limit ---
-maxGearboxDiameter_Stg1_RI80 = (MotorRI80.getRotorIDMM() - indspg_design_params["standard_clearance_1_5mm"]*5)
+maxGearboxDiameter_Stg1_RI80 = (MotorRI80.getRotorIDMM() - indspg_design_params["standard_clearance_1_5mm"]*4)
 
 
 

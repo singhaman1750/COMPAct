@@ -91,7 +91,9 @@ class inrunnerdoubleStagePlanetaryGearbox:
         self.sCarrierExtrusionDiaMM_Stg1       = design_parameters["sCarrierExtrusionDiaMM_Stg1"]       # 12
         self.sCarrierExtrusionClearanceMM_Stg1 = design_parameters["sCarrierExtrusionClearanceMM_Stg1"] # 2
         self.sCarrierExtrusionDiaMM_Stg2       = design_parameters["sCarrierExtrusionDiaMM_Stg2"]       # 12
-        self.sCarrierExtrusionClearanceMM_Stg2 = design_parameters["sCarrierExtrusionClearanceMM_Stg2"] # 2        
+        self.sCarrierExtrusionClearanceMM_Stg2 = design_parameters["sCarrierExtrusionClearanceMM_Stg2"] # 2   
+        self.planet_bearing_OD_Stg2            = design_parameters["planet_bearing_OD2"] 
+        self.standard_clearance                = design_parameters["standard_clearance_1_5mm"]           # 15  # for min planet_id constraint of stg2     
         
     def getEfficiency(self):
         return self.Stage1.getEfficiency() * self.Stage2.getEfficiency()
@@ -167,6 +169,9 @@ class inrunnerdoubleStagePlanetaryGearbox:
         Rp2                         = module2 * Np2 / 2
         sCarrierExtrusionRadiusMM_Stg2  = self.sCarrierExtrusionDiaMM_Stg2 * 0.5
         return 2 * (Rs2  + Rp2) * np.sin(np.pi/(2*numPlanet2)) - Rp2 - sCarrierExtrusionRadiusMM_Stg2 >= self.sCarrierExtrusionClearanceMM_Stg2
+
+    def additionalConstraints(self):
+        return self.Stage2.Np * self.Stage2.module >= ( self.planet_bearing_OD_Stg2 + self.standard_clearance*2 )
 
 #-------------------------------------------------------------------------
 # Inrunner Double Stage Actuator class
@@ -281,6 +286,12 @@ class inrunnerdoubleStageActuator:
         self.a2_bearing_retainer_wrench_height = self.design_params["a2_bearing_retainer_wrench_height"]
         self.bearing_retainer_thickness = self.design_params["bearing_retainer_thickness"]
 
+        self.needle_bearing_planet_stg1_ID = self.design_params["needle_bearing_planet_stg1_ID"]
+        self.needle_bearing_planet_stg1_OD = self.design_params["needle_bearing_planet_stg1_OD"]
+        self.needle_bearing_planet_stg1_height = self.design_params["needle_bearing_planet_stg1_height"]
+
+        self.rotor_metal_part_thickness = self.design_params["rotor_metal_part_thickness"]
+
         # self.a1_sun_bottom_casing_bearing_ID = self.design_params["a1_sun_bottom_casing_bearing_ID"]
         # self.a1_sun_bottom_casing_bearing_OD = self.design_params["a1_sun_bottom_casing_bearing_OD"]
         # self.a1_sun_bottom_casing_bearing_height = self.design_params["a1_sun_bottom_casing_bearing_height"]
@@ -326,6 +337,7 @@ class inrunnerdoubleStageActuator:
         self.stator_wire_OD            = self.motor.stator_wire_OD
         #self.stator_mid_height         = self.motor.stator_mid_height
         self.stator_hole_num           = self.motor.stator_hole_num
+
 
         self.stator_casing_hole_dia  = self.design_params["stator_casing_hole_dia"]
         self.stator_casing_hole_allen_socket_head_dia = self.design_params["stator_casing_hole_allen_socket_head_dia"]
@@ -962,6 +974,10 @@ class inrunnerdoubleStageActuator:
         f'"Rotor_csk_head_height" = {self.rotor_csk_head_height}\n',
         f'"stator_mounting_hole_wrench_dia" = {self.stator_mounting_hole_wrench_dia}\n',
         f'"stator_mounting_hole_wrench_thickness" = {self.stator_mounting_hole_wrench_thickness}\n'
+        f'"needle_bearing_planet_stg1_ID" = {self.needle_bearing_planet_stg1_ID}\n',
+        f'"needle_bearing_planet_stg1_OD" = {self.needle_bearing_planet_stg1_OD}\n',
+        f'"needle_bearing_planet_stg1_height" = {self.needle_bearing_planet_stg1_height}\n',
+        f'"rotor_metal_part_thickness" = {self.rotor_metal_part_thickness}\n'
     ]
 
     def genEquationFile(self, motor_name="NO_MOTOR", gearRatioLL=0.0, gearRatioUL=0.0):
@@ -1722,11 +1738,12 @@ class inrunnerdoubleStageActuator:
         #----------------------------------
         # Mass: metal rotor coupling
         #----------------------------------
+        rotor_coupler_thickness = self.rotor_metal_part_thickness
         rotor_coupler_OD = self.rotor_ID
-        rotor_coupler_ID = self.rotor_ID - 2
+        rotor_coupler_ID = self.rotor_ID - rotor_coupler_thickness 
         rotor_coupler_height = stator_casing_thickness+ self.stator_wire_bottom_height-standard_clearance_1_5mm- self.a1_sun_bottom_casing_bearing_height/2 + standard_clearance_1_5mm*2 + self.sun_coupler_hub_thickness1 + standard_clearance_1_5mm*5
 
-        rotor_coupler_volume = (np.pi * ((rotor_coupler_OD*0.5)**2 - (rotor_coupler_ID*0.5)**2) * rotor_coupler_height) * 1e-9 + (np.pi * ((rotor_coupler_ID*0.5)**2) * 2) * 1e-9
+        rotor_coupler_volume = (np.pi * ((rotor_coupler_OD*0.5)**2 - (rotor_coupler_ID*0.5)**2) * rotor_coupler_height) * 1e-9 + (np.pi * ((rotor_coupler_ID*0.5)**2) * rotor_coupler_thickness) * 1e-9
         rotor_coupler_mass   = rotor_coupler_volume * density_aluminum
         #--------------------------------------
         # Mass: dspg_planet
@@ -2221,6 +2238,7 @@ class optimizationDoubleStageActuator:
                                                         #print("Before Constraints", cntrIterBeforeCons)
                                                         if (Actuator.inrunnerdoubleStagePlanetaryGearbox.geometricConstraint() and 
                                                             Actuator.inrunnerdoubleStagePlanetaryGearbox.meshingConstraint()   and
+                                                            Actuator.inrunnerdoubleStagePlanetaryGearbox.additionalConstraints() and
                                                             Actuator.inrunnerdoubleStagePlanetaryGearbox.noPlanetInterferenceConstraint()       
                                                             ):
                                                             self.totalFeasibleGearboxes += 1
@@ -2322,7 +2340,7 @@ class optimizationDoubleStageActuator:
 
             #individial part mass of the actuator
 
-           # opt_actuator.print_mass_of_parts_3DP()   
+            opt_actuator.print_mass_of_parts_3DP()   
 
 
         sys.stdout = sys.__stdout__
