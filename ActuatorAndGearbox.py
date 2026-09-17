@@ -5018,7 +5018,7 @@ class wolfromPlanetaryActuator:
         self.alpha_s = ( self.dp_s ** 2 - self.db_s ** 2 )**0.5 / self.db_s * 180 / np.pi - self.pressure_angle_deg
         self.beta_s = ( 360 / ( 4 * self.Ns ) - self.alpha_s ) * 2
 
-        self.sun_hub_dia = self.motor_output_hole_PCD + self.motor_output_hole_dia + self.standard_clearance_1_5mm * 2
+        self.sun_hub_dia = self.motor_output_hole_PCD + self.motor_output_hole_CSK_OD + self.standard_clearance_1_5mm * 2
 
         self.fw_s_used = self.fw_p_s + self.fw_p_b + self.clearance_planet + self.sec_carrier_thickness + self.standard_clearance_1_5mm 
 
@@ -5040,7 +5040,7 @@ class wolfromPlanetaryActuator:
         self.output_mounting_PCD = self.bearing_OD + self.bearing_mount_thickness
         self.Motor_case_ID = self.motor_OD + self.clearance_motor_and_case * 2
 
-        self.gear_casing_big_ring_to_bearing_dist = self.fw_p_s + self.clearance_planet + self.carrier_thickness + self.standard_clearance_1_5mm*2/3 + self.small_ring_case_thickness - self.standard_clearance_1_5mm # last - is because of change in flap position
+        self.gear_casing_big_ring_to_bearing_dist = self.fw_p_s + self.clearance_planet + self.carrier_thickness + self.carrier_bearing_step_width + self.carrier_small_ring_inner_bearing_height - self.bearing_height - self.carrier_bearing_step_width
 
         # --- Carrier ---
         self.carrier_PCD = ( self.Np_b + self.Ns ) * self.module
@@ -6268,7 +6268,7 @@ class wolfromPlanetaryActuator:
         output_mounting_hole_dia     = self.output_mounting_hole_dia    
         sec_carrier_thickness        = self.sec_carrier_thickness       
         sun_coupler_hub_thickness    = self.sun_coupler_hub_thickness   
-        # sun_shaft_bearing_OD       = self.sun_shaft_bearing_OD        
+        sun_shaft_bearing_OD       = self.sun_shaft_bearing_OD        
         carrier_bearing_step_width = self.carrier_bearing_step_width  
         planet_shaft_dia             = self.planet_shaft_dia            
         sun_shaft_bearing_ID         = self.sun_shaft_bearing_ID        
@@ -6294,7 +6294,7 @@ class wolfromPlanetaryActuator:
         #-------------------------------
         # Bearings: Bearing1 & Bearing2
         #-------------------------------
-        IdRequiredMM      = module2 * (Nr1) + 2*module2 + 2*small_ring_case_thickness
+        IdRequiredMM      = module2 * (Nr2) + 2*module2 + 2*small_ring_case_thickness
                                                                                
         Bearing           = bearings_discrete(IdRequiredMM)
 
@@ -6335,7 +6335,7 @@ class wolfromPlanetaryActuator:
 
         carrier_shaft_OD     = planet_shaft_dia
         carrier_shaft_height = planet1FwMM  + planet2FwMM + clearance_planet * 2
-        carrier_shaft_num    = numPlanet * 2 + numPlanet # assuming support triangle weighs twice as much as shaft
+        carrier_shaft_num    = numPlanet * 2 #+ numPlanet # assuming support triangle weighs twice as much as shaft
 
         carrier_volume = (np.pi * (((carrier_OD*0.5)**2) - ((carrier_ID)*0.5)**2) * carrier_height
                         + np.pi * (((carrier_bearing_mount_OD*0.5)**2) - ((carrier_bearing_mount_ID)*0.5)**2) * carrier_bearing_mount_height  
@@ -6374,7 +6374,7 @@ class wolfromPlanetaryActuator:
         # 3. Ring gear-1
         # 4. Case mounting structure
         #-------------------------------------------------------
-        ring1_ID     = Nr1 * module2
+        ring1_ID     = Nr1 * module1
         ringFwUsedMM = ring1FwMM
 
         # --- Bearing holding structure --- 
@@ -6388,25 +6388,26 @@ class wolfromPlanetaryActuator:
 
         bearing_holding_structure_ID     = bearing_OD
         bearing_holding_structure_OD     = bearing_OD + bearing_mount_thickness * 2
-        bearing_holding_structure_height = bearing_height + standard_clearance_1_5mm
+        bearing_holding_structure_height = bearing_height + standard_clearance_1_5mm + gearbox_casing_thickness/2
 
         bearing_holding_structure_volume = np.pi * (((bearing_holding_structure_OD*0.5)**2) - 
                                                     ((bearing_holding_structure_ID*0.5)**2)) * bearing_holding_structure_height * 1e-9
-        # --- Spacer wall for ring-2 --- 
-        spacer_wall_for_ring2_ID     = ((Nr2 * module2 + 2 * ring2_radial_thickness) + standard_clearance_1_5mm * 2)
-        spacer_wall_for_ring2_OD     = spacer_wall_for_ring2_ID + gearbox_casing_thickness * 2
-        spacer_wall_for_ring2_height = gear_casing_big_ring_to_bearing_dist
-
-        spacer_wall_for_ring2_volume = np.pi * (((spacer_wall_for_ring2_OD*0.5)**2) - 
-                                                ((spacer_wall_for_ring2_ID*0.5)**2)) * spacer_wall_for_ring2_height * 1e-9
-
+        
         # --- Ring gear-1 --- 
         ring_gear1_ID     = (Nr1 * module1)
-        ring_gear1_OD     = ring_gear1_ID + ring1_radial_thickness * 2
+        ring_gear1_OD     = bearing_ID + standard_clearance_1_5mm * 4
         ring_gear1_height = ring1FwMM
 
         ring_gear1_volume = np.pi * (((ring_gear1_OD*0.5)**2) - 
                                      ((ring_gear1_ID*0.5)**2)) * ring_gear1_height * 1e-9
+
+        # --- Spacer wall for ring-2 --- 
+        spacer_wall_for_ring2_ID     = ring_gear1_OD
+        spacer_wall_for_ring2_OD     = spacer_wall_for_ring2_ID + gearbox_casing_thickness * 2
+        spacer_wall_for_ring2_height = gear_casing_big_ring_to_bearing_dist + ring1FwMM + clearance_planet
+
+        spacer_wall_for_ring2_volume = np.pi * (((spacer_wall_for_ring2_OD*0.5)**2) - 
+                                                ((spacer_wall_for_ring2_ID*0.5)**2)) * spacer_wall_for_ring2_height * 1e-9
 
         # --- Case mounting structure --- 
         case_dist = (sec_carrier_thickness 
@@ -6414,24 +6415,17 @@ class wolfromPlanetaryActuator:
                      + sun_coupler_hub_thickness 
                      - case_mounting_surface_height)
 
-        case_mounting_structure_ID     = Motor_case_OD - Motor_case_OD_base_to_chamfer * 2
-        case_mounting_structure_OD     = Motor_case_OD
-        case_mounting_structure_height = case_dist
+        case_mounting_structure_ID     = self.motor_case_OD_base - 2*self.Motor_case_OD_base_to_chamfer
+        case_mounting_structure_OD     = self.Motor_case_OD_max
+        case_mounting_structure_height = case_dist  
 
         case_mounting_structure_volume  = np.pi * (((case_mounting_structure_OD*0.5)**2) - 
                                                     ((case_mounting_structure_ID*0.5)**2)) * case_mounting_structure_height * 1e-9
-
-
-        large_fillet_ID     = ring1_OD
-        large_fillet_OD     = Motor_case_OD
-        large_fillet_height = ring1FwMM/2
-        large_fillet_volume = 0.5 * (np.pi * (((large_fillet_OD*0.5)**2) - ((large_fillet_ID)*0.5)**2) * large_fillet_height) * 1e-9
-
-
+        
         gearbox_casing_mass = (bearing_holding_structure_volume
                                + spacer_wall_for_ring2_volume
                                + case_mounting_structure_volume 
-                               + large_fillet_volume
+                               #+ large_fillet_volume
                                + ring_gear1_volume) * density_3DP_material
 
         #-------------------------------------------------------
@@ -6462,89 +6456,30 @@ class wolfromPlanetaryActuator:
         sec_carrier_volume = (np.pi * ((sec_carrier_OD*0.5)**2 - (sec_carrier_ID*0.5)**2) * sec_carrier_thickness) * 1e-9
         sec_carrier_mass   = sec_carrier_volume * density_3DP_material
 
-        #-------------------------------------------------------
-        # wpg_small_ring_bearing_shaft
-        #-------------------------------------------------------
-        small_ring_bearing_shaft_dia = carrier_small_ring_inner_bearing_ID
-        small_ring_bearing_shaft_height = (bearing_height 
-                                         + carrier_thickness
-                                         + carrier_small_ring_inner_bearing_flap)
-        
-        small_ring_bearing_shaft_volume = (np.pi 
-                                        * (small_ring_bearing_shaft_dia * 0.5)**2 
-                                        *  small_ring_bearing_shaft_height) * 1e-9
-        
-        small_ring_bearing_shaft_mass = small_ring_bearing_shaft_volume * density_3DP_material
 
         #-------------------------------------------------------
         # wpg_small_ring
         # ---
-        # 1. Ring gear2
-        # 2. ring2bearing_spacer_cone_shell
-        # 3. ring2bearing_spacer_disc
-        # 4. bearing_holding_structure
-        # 5. output_wall
-        # 6. sun_shaft_bearing_holding_structure
         #-------------------------------------------------------
 
-        # --- Ring gear2 ---
-        ring_gear2_ID     = (Nr2 * module2)
-        ring_gear2_OD     = ring_gear2_ID + ring2_radial_thickness * 2
-        ring_gear2_height = ring2FwMM
+        small_ring_OD     = module2 * (Nr2) + 2*module2 + 2*small_ring_case_thickness
+        small_ring_ID     = module2 * (Nr2) 
+        small_ring_height = ring2FwMM + carrier_thickness + carrier_bearing_step_width + clearance_planet
 
-        ring_gear2_volume = np.pi * (((ring_gear2_OD*0.5)**2) - 
-                                     ((ring_gear2_ID*0.5)**2)) * ring_gear2_height * 1e-9
-
-        # --- ring2bearing_spacer_cone_shell ---
-        ring2bearing_spacer_cone_shell_base   = small_ring_gear_casing_thickness
-        ring2bearing_spacer_cone_shell_height = carrier_thickness + standard_clearance_1_5mm + clearance_planet
-        ring2bearing_spacer_cone_shell_radius = ((ring_gear2_OD + carrier_OD) / 2) /2
+        small_ring_bearing_structure_OD = small_ring_OD
+        small_ring_bearing_structure_ID = carrier_small_ring_inner_bearing_OD
+        small_ring_bearing_structure_height = carrier_small_ring_inner_bearing_height + carrier_bearing_step_width
         
-        ring2bearing_spacer_cone_shell_volume = (2 * np.pi * ring2bearing_spacer_cone_shell_radius
-                                                 * ring2bearing_spacer_cone_shell_height
-                                                 * ring2bearing_spacer_cone_shell_base) * 1e-9
+        output_bearing_structure_OD = bearing_ID
+        output_bearing_structure_ID = small_ring_OD
+        output_bearing_structure_height = bearing_height + carrier_bearing_step_width
 
-        # --- ring2bearing_spacer_disc ---
-        ring2bearing_spacer_disc_ID     = bearing_ID - 2 * small_ring_gear_casing_thickness
-        ring2bearing_spacer_disc_OD     = carrier_OD + small_ring_gear_casing_thickness * 2
-        ring2bearing_spacer_disc_height = small_ring_gear_casing_thickness
-        
-        ring2bearing_spacer_disc_volume = np.pi * (((ring2bearing_spacer_disc_OD*0.5)**2) - 
-                                                   ((ring2bearing_spacer_disc_ID*0.5)**2)) * ring2bearing_spacer_disc_height * 1e-9
+        small_ring_volume = (np.pi * (((small_ring_OD*0.5)**2) - ((small_ring_ID)*0.5)**2) * small_ring_height
+                            + np.pi * (((small_ring_bearing_structure_OD*0.5)**2)- ((small_ring_bearing_structure_ID*0.5)**2)) * small_ring_bearing_structure_height 
+                            + np.pi * (((output_bearing_structure_OD*0.5)**2) - ((output_bearing_structure_ID*0.5)**2)) * output_bearing_structure_height
+                            ) * 1e-9
 
-        # --- bearing_holding_structure ---
-        bearing_holding_structure_OD     = bearing_ID
-        bearing_holding_structure_ID     = bearing_ID - 2 * small_ring_gear_casing_thickness
-        bearing_holding_structure_height = bearing_height + standard_clearance_1_5mm * (2/3)
-
-        bearing_holding_structure_volume = np.pi * (((bearing_holding_structure_OD*0.5)**2) - 
-                                                   ((bearing_holding_structure_ID*0.5)**2)) * bearing_holding_structure_height * 1e-9
-
-        # --- output_wall ---
-        output_wall_dia    = bearing_ID - 2 * small_ring_gear_casing_thickness
-        output_wall_height = small_ring_output_wall_thickness
-        output_wall_volume = np.pi * (output_wall_dia / 2)**2 * output_wall_height * 1e-9
-
-        # --- sun_shaft_bearing_holding_structure ---
-        # truncated hollow cone Volume = 0.5 * Hollow cylinder volume. 
-        # 45deg chamfer (height = width)
-        sun_shaft_bearing_holding_structure_ID     = carrier_small_ring_inner_bearing_ID
-        sun_shaft_bearing_holding_structure_height = (bearing_height + carrier_thickness - carrier_small_ring_inner_bearing_height)
-        sun_shaft_bearing_holding_structure_OD     = (sun_shaft_bearing_holding_structure_ID 
-                                                      + sun_shaft_bearing_holding_structure_height * 2)
-        
-        sun_shaft_bearing_holding_structure_volume = (0.5 
-                                                      * np.pi 
-                                                      * (((sun_shaft_bearing_holding_structure_OD*0.5)**2) - 
-                                                         ((sun_shaft_bearing_holding_structure_ID*0.5)**2)) 
-                                                      * sun_shaft_bearing_holding_structure_height * 1e-9)
-
-        small_ring_mass = (ring_gear2_volume 
-                         + ring2bearing_spacer_cone_shell_volume 
-                         + ring2bearing_spacer_disc_volume
-                         + bearing_holding_structure_volume
-                         + output_wall_volume
-                         + sun_shaft_bearing_holding_structure_volume) * density_3DP_material
+        small_ring_mass = small_ring_volume * density_3DP_material
 
         #-------------------------------------------------------
         # wpg_sun_shaft_bearing
@@ -6554,7 +6489,7 @@ class wolfromPlanetaryActuator:
         #-------------------------------------------------------
         # wpg_sun
         #-------------------------------------------------------
-        sun_hub_dia = motor_output_hole_PCD + motor_output_hole_dia + standard_clearance_1_5mm * 4
+        sun_hub_dia = motor_output_hole_PCD + self.motor_output_hole_CSK_OD + standard_clearance_1_5mm * 2
 
         sun_shaft_dia    = sun_shaft_bearing_ID
         sun_shaft_height = sun_shaft_bearing_width + 2 * standard_clearance_1_5mm
@@ -6582,10 +6517,17 @@ class wolfromPlanetaryActuator:
                         planet_bearing_combined_mass +
                         planet_mass * numPlanet +
                         sec_carrier_mass +
-                        small_ring_bearing_shaft_mass +
                         small_ring_mass +
                         sun_shaft_bearing_mass +
                         sun_mass)
+        
+        Actuator_mass_without_bearing = (carrier_mass + 
+                                        gearbox_casing_mass +
+                                        Motor_case_mass + 
+                                        planet_mass * numPlanet +
+                                        sec_carrier_mass +
+                                        small_ring_mass +
+                                        sun_mass)
 
         self.carrier_small_ring_inner_bearing_mass = carrier_small_ring_inner_bearing_mass
         self.carrier_mass                          = carrier_mass
@@ -6596,10 +6538,12 @@ class wolfromPlanetaryActuator:
         self.planet_bearing_combined_mass          = planet_bearing_combined_mass
         self.planet_mass                           = planet_mass
         self.sec_carrier_mass                      = sec_carrier_mass
-        self.small_ring_bearing_shaft_mass         = small_ring_bearing_shaft_mass
         self.small_ring_mass                       = small_ring_mass
         self.sun_shaft_bearing_mass                = sun_shaft_bearing_mass
         self.sun_mass                              = sun_mass
+        self.Actuator_mass_without_bearing           = Actuator_mass_without_bearing
+        self.Actuator_mass                           = Actuator_mass
+        
 
         return Actuator_mass
 
@@ -6613,10 +6557,11 @@ class wolfromPlanetaryActuator:
         print("planet_bearing_combined_mass :", 1000 * self.planet_bearing_combined_mass)         
         print("planet_mass :", 1000 * self.planet_mass)                          
         print("sec_carrier_mass :", 1000 * self.sec_carrier_mass)                     
-        print("small_ring_bearing_shaft_mass :", 1000 * self.small_ring_bearing_shaft_mass)        
         print("small_ring_mass :", 1000 * self.small_ring_mass)                      
         print("sun_shaft_bearing_mass :", 1000 * self.sun_shaft_bearing_mass)               
-        print("sun_mass :", 1000 * self.sun_mass)                             
+        print("sun_mass :", 1000 * self.sun_mass) 
+        print("Actuator_mass_without_bearing :", 1000 * self.Actuator_mass_without_bearing)
+        print("Actuator_mass :", 1000 * self.Actuator_mass) 
 
 #-------------------------------------------------------------------------
 # Double Stage Actuator class
@@ -10401,7 +10346,8 @@ class optimizationWolfromPlanetaryActuator:
                     Actuator.wolfromPlanetaryGearbox.setModuleBig(Actuator.wolfromPlanetaryGearbox.moduleBig + 0.100)
                     Actuator.wolfromPlanetaryGearbox.setModuleBig(round(Actuator.wolfromPlanetaryGearbox.moduleBig, 1)) # Round Off
                 if (opt_done == 1):
-                    self.printOptimizationResults(opt_actuator, log, csv)  
+                    self.printOptimizationResults(opt_actuator, log, csv)
+                    opt_actuator.print_mass_of_parts_3DP()  
                 self.gearRatioIter += self.GEAR_RATIO_STEP
     
                 if log:
