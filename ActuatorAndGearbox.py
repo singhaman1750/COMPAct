@@ -5049,8 +5049,8 @@ class wolfromPlanetaryActuator:
         self.actuator_width = (  self.fw_r_b
                                + self.clearance_planet
                                + self.gear_casing_big_ring_to_bearing_dist
+                               + self.carrier_bearing_step_width
                                + self.bearing_height
-                               + self.standard_clearance_1_5mm
                                + self.case_dist
                                + self.bearing_retainer_thickness
                                + self.motor_height
