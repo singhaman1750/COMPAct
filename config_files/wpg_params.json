@@ -89,7 +89,7 @@
 
         "ring_radial_thickness"                                  : 5,
         "gear_casing_thickness"                                  : 4,
-        "carrier_thickness"                                      : 4,
+        "carrier_thickness"                                      : 6,
         "sec_carrier_thickness"                                  : 5,
         "carrier_trapezoidal_support_sun_offset"                 : 5,
         "carrier_trapezoidal_support_hole_PCD_offset_bearing_ID" : 4,
