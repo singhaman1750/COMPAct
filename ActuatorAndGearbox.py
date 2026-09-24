@@ -5018,7 +5018,10 @@ class wolfromPlanetaryActuator:
         self.alpha_s = ( self.dp_s ** 2 - self.db_s ** 2 )**0.5 / self.db_s * 180 / np.pi - self.pressure_angle_deg
         self.beta_s = ( 360 / ( 4 * self.Ns ) - self.alpha_s ) * 2
 
-        self.sun_hub_dia = self.motor_output_hole_PCD + self.motor_output_hole_CSK_OD + self.standard_clearance_1_5mm * 2
+        if self.motor_output_hole_PCD + self.motor_output_hole_CSK_OD + self.standard_clearance_1_5mm * 2 > self.module * self.Ns + 2*self.module:
+            self.sun_hub_dia = self.motor_output_hole_PCD + self.motor_output_hole_CSK_OD + self.standard_clearance_1_5mm * 2
+        else:
+            self.sun_hub_dia = self.module * self.Ns + 2*self.module
 
         self.fw_s_used = self.fw_p_s + self.fw_p_b + self.clearance_planet + self.sec_carrier_thickness + self.standard_clearance_1_5mm 
 
@@ -5032,13 +5035,16 @@ class wolfromPlanetaryActuator:
         # --- Motor & Gearbox casing ---
         self.case_dist = self.sec_carrier_thickness + self.clearance_planet + self.sun_coupler_hub_thickness - self.case_mounting_surface_height
         self.case_mounting_hole_shift = self.case_mounting_hole_dia / 2 - 0.5
-        self.clearance_motor_and_case = (5 if ((self.Ns + self.Np_b * 2) * self.module) < self.motor_OD else (((self.Ns + self.Np_b * 2) * self.module - self.motor_OD) * 0.5 + 5) )
-        self.motor_case_OD_base = self.motor_OD + self.clearance_motor_and_case * 2 + self.Motor_case_thickness * 2
+        self.clearance_motor_and_case = 5
+        #self.clearance_motor_and_case = (5 if ((self.Ns + self.Np_b * 2) * self.module) < self.motor_OD else (((self.Ns + self.Np_b * 2) * self.module - self.motor_OD) * 0.5 + 5) )
+        #self.motor_case_OD_base = self.motor_OD + self.clearance_motor_and_case * 2 + self.Motor_case_thickness * 2
+        self.motor_case_OD_base = self.maxGearboxDiameter + 2*self.ring_radial_thickness + self.clearance_motor_and_case * 2 + self.Motor_case_thickness * 2
         self.case_mounting_PCD = self.motor_case_OD_base + self.case_mounting_hole_shift * 2
         self.Motor_case_OD_max = self.case_mounting_PCD + self.case_mounting_hole_allen_socket_dia + self.clearance_case_mount_holes_shell_thickness * 2
         self.bearing_mount_thickness = (self.output_mounting_hole_dia * 2 if (self.bearing_OD + self.output_mounting_hole_dia * 4) > (self.Nr_s * self.module + 2 * self.h_b) else ((self.Nr_s * self.module + 2 * self.h_b - (self.bearing_OD + self.output_mounting_hole_dia * 4)) / 2) + self.output_mounting_hole_dia * 2 + self.standard_clearance_1_5mm)
         self.output_mounting_PCD = self.bearing_OD + self.bearing_mount_thickness
-        self.Motor_case_ID = self.motor_OD + self.clearance_motor_and_case * 2
+        #self.Motor_case_ID = self.motor_OD + self.clearance_motor_and_case * 2
+        self.Motor_case_ID = self.maxGearboxDiameter + self.clearance_motor_and_case * 2 + 2*self.ring_radial_thickness
 
         self.gear_casing_big_ring_to_bearing_dist = self.fw_p_s + self.clearance_planet + self.carrier_thickness + self.carrier_bearing_step_width + self.carrier_small_ring_inner_bearing_height - self.bearing_height - self.carrier_bearing_step_width
 
@@ -6489,7 +6495,7 @@ class wolfromPlanetaryActuator:
         #-------------------------------------------------------
         # wpg_sun
         #-------------------------------------------------------
-        sun_hub_dia = motor_output_hole_PCD + self.motor_output_hole_CSK_OD + standard_clearance_1_5mm * 2
+        sun_hub_dia = self.sun_hub_dia
 
         sun_shaft_dia    = sun_shaft_bearing_ID
         sun_shaft_height = sun_shaft_bearing_width + 2 * standard_clearance_1_5mm
