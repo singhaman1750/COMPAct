@@ -1,0 +1,86 @@
+{   
+    "Gear_standard_parameters":{
+        "coefficientOfFriction": 0.3,
+        "pressureAngleDEG": 20
+    },
+    "Lewis_params": {
+        "FOS": 1.2,
+        "serviceFactor": 2.0
+    },
+    "MIT_params": {
+        "FOS": 1.2,
+        "serviceFactor": 1.5
+    },
+    "Material_properties":{
+        "Steel": {
+            "density": 1245.6,
+            "maxAllowableStressMPa": 70
+        },
+        "Aluminum": {
+            "density": 2700
+        },
+        "PLA": {
+            "density": 1240,
+            "maxAllowableStressMPa": 70
+        }
+    },
+    "Motors": {
+        "MotorRI100": {
+            "Kv"                         : 105,
+            "maxContinuousCurrent"       : 38.6,
+            "ratedVoltage"               : 48,
+            "rotor_OD"                   :55.6,
+            "stator_ID"                    : 57,
+            "rotor_height"                 : 15,
+            "rotor_ID"                     : 45,
+            "stator_height"                : 24.5,
+            "stator_OD"                    : 104,
+            "stator_hole_dia"              : 3,
+            "stator_wire_top_height"       : 7,
+            "stator_mid_height"            : 13,
+            "stator_wire_bottom_height"    : 4.5,
+            "stator_wire_OD"               : 101,
+            "stator_hole_num"              : 4,
+            "stator_wire_ID"               : 58,
+            "maxMotorAngVelRPM"            : 2825,  
+            "maxMotorTorque"               : 4.95,   
+            "maxMotorPower"                : 1430,
+            "motorMass"                    : 0.5
+        },
+        "MotorRI80": {
+            "Kv"                         : 75,
+            "maxContinuousCurrent"       : 9.4,
+            "ratedVoltage"               : 48,
+            "rotor_OD"                   :50,
+            "stator_ID"                    : 51,
+            "rotor_height"                 : 19,
+            "rotor_ID"                     : 40.5,
+            "stator_height"                : 26.5,
+            "stator_OD"                    : 85,
+            "stator_hole_dia"              : 3,
+            "stator_wire_top_height"       : 6.5,
+            "stator_mid_height"            : 16,
+            "stator_wire_bottom_height"    : 4,
+            "stator_wire_OD"               : 82,
+            "stator_hole_num"              : 4,
+            "stator_wire_ID"               : 52.5,
+            "maxMotorAngVelRPM"            : 2960,  
+            "maxMotorTorque"               : 4.1,   
+            "maxMotorPower"                : 1270.88,
+            "motorMass"                    : 0.411
+        }
+    },
+    
+    "Design_parameters":{
+        "Internal_designs": {
+            "ringRadialWidthMM": 2.5,
+            "ringHousingWidthMM": 2.0
+        }
+    },
+    "Cost_gain_parameters":{
+        "K_Mass": 1,
+        "K_Eff": -2,
+        "K_Width": 0.2
+    }
+}
+

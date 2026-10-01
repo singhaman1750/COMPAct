@@ -148,6 +148,11 @@ https://cad.onshape.com/documents/e0cb8ed6bb2b36cfcadffcf4/w/a5de456488f59701ab1
 https://cad.onshape.com/documents/1cec852caa1080765682d3d0/w/9b7913f319aab1fd6ef5de45/e/f9d06c56e5c97df7f6c68aa9?renderMode=0&uiState=6a4e2d38c2bd25dd666223f5 
 ```
 
+👉 **[Open INDSPG in Onshape](https://cad.onshape.com/documents/082ad023b75b2274bed0f04d/w/29fd6b162304a5c614568daf/e/f5c1a1cba8355822de1c14c1?renderMode=0&uiState=6aaa9fc1dca6951f9bcace74)** 
+```
+https://cad.onshape.com/documents/082ad023b75b2274bed0f04d/w/29fd6b162304a5c614568daf/e/f5c1a1cba8355822de1c14c1?renderMode=0&uiState=6aaa9fc1dca6951f9bcace74
+```
+
 To get your own editable copy:
 1. Open the link above — you will see the model in view-only mode
 2. Click the **Onshape logo / menu icon** in the top-left corner

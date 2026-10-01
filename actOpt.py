@@ -12,6 +12,7 @@ GEARBOX_DISPATCH = {
     "incpg_independent": "Opt_INCPG_independent",
     "isspg_inside": "Opt_ISSPG_inside",
     "isspg_compact": "Opt_ISSPG_compact",
+    "indspg": "Opt_INDSPG",
 }
 
 def main(motor, gearbox_type, gear_ratio=0):
@@ -144,6 +145,30 @@ def main(motor, gearbox_type, gear_ratio=0):
         print("---")
         print("Gear Ratio(GR):", opt_parameters[0],": 1")
         print("-------------------------------")
+
+    elif(gearbox_type=="indspg"):
+        print("-------------------------------")
+        print("Optimal Parameters:")
+        print("Number of teeth: Sun1(Ns1):", opt_parameters[3], ", Planet1(Np1):", opt_parameters[4], ", Ring1(R1):", opt_parameters[5], "Sun2(Ns2):", opt_parameters[6], ", Planet2(Np2):", opt_parameters[7], ", Ring2(Nr2):", opt_parameters[8],
+                ", Module1(m1):", opt_parameters[9], ", Module2(m2):", opt_parameters[10], ", NumPlanet1(n_p1):", opt_parameters[1], "NumPlanet2(n_p2):", opt_parameters[2])
+        print("---")
+        print("Gear Ratio(GR):", opt_parameters[0],": 1")
+        print("-------------------------------")
+# --- NEW MASS BREAKDOWN BLOCK ---
+        # if len(opt_parameters) > 10:
+        #     print("---")
+        #     print("Mass Breakdown (kg):")
+        #     print("  Sun Gear      :", round(opt_parameters[10], 4))
+        #     print("  Planets       :", round(opt_parameters[11], 4))
+        #     print("  Ring Gear     :", round(opt_parameters[12], 4))
+        #     print("  Main Carrier  :", round(opt_parameters[13], 4))
+        #     print("  Sec. Carrier  :", round(opt_parameters[14], 4))
+        #     print("  Motor Casing  :", round(opt_parameters[15], 4))
+        #     print("total_sum_except_motor_and_baering :" ,round(opt_parameters[16],4))
+        #     print("  Bearings      :", round(opt_parameters[9], 4))
+        #     print("---")
+        #     print("Total Gearbox   :", round(opt_parameters[8], 3), "kg")
+        #     print("-------------------------------")
 
     elif(gearbox_type=="incpg_dependent"):
         print("-------------------------------")
