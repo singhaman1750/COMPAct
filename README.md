@@ -152,9 +152,9 @@ https://cad.onshape.com/documents/1cec852caa1080765682d3d0/w/9b7913f319aab1fd6ef
 https://cad.onshape.com/documents/a5e4d1f2afed2d53000ac6c5/w/fa005d0cbd6ffa3820332b7d/e/64e86c89d3ac5b23fd7711ba?renderMode=0&uiState=6abdf521224826f406f22e25
 ```
 
-👉 **[Open INWPG_Independent in Onshape](https://cad.onshape.com/documents/a5e4d1f2afed2d53000ac6c5/w/fa005d0cbd6ffa3820332b7d/e/64e86c89d3ac5b23fd7711ba?renderMode=0&uiState=6abdf521224826f406f22e25)**
+👉 **[Open INWPG_Independent in Onshape](https://cad.onshape.com/documents/a5ebf8aa022054aedcbab90e/w/226eaf19e9c48cb8a6efbe49/e/e7a9e7fa0a60f50822757623?renderMode=0&uiState=6abdf8eba830cf066b5e0314)**
 ```
-https://cad.onshape.com/documents/a5e4d1f2afed2d53000ac6c5/w/fa005d0cbd6ffa3820332b7d/e/64e86c89d3ac5b23fd7711ba?renderMode=0&uiState=6abdf521224826f406f22e25
+https://cad.onshape.com/documents/a5ebf8aa022054aedcbab90e/w/226eaf19e9c48cb8a6efbe49/e/e7a9e7fa0a60f50822757623?renderMode=0&uiState=6abdf8eba830cf066b5e0314
 ```
 
 To get your own editable copy:
