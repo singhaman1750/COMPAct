@@ -147,6 +147,15 @@ https://cad.onshape.com/documents/e0cb8ed6bb2b36cfcadffcf4/w/a5de456488f59701ab1
 ```
 https://cad.onshape.com/documents/1cec852caa1080765682d3d0/w/9b7913f319aab1fd6ef5de45/e/f9d06c56e5c97df7f6c68aa9?renderMode=0&uiState=6a4e2d38c2bd25dd666223f5 
 ```
+👉 **[Open INWPG_Dependent in Onshape](https://cad.onshape.com/documents/a5e4d1f2afed2d53000ac6c5/w/fa005d0cbd6ffa3820332b7d/e/64e86c89d3ac5b23fd7711ba?renderMode=0&uiState=6abdf521224826f406f22e25)**
+```
+https://cad.onshape.com/documents/a5e4d1f2afed2d53000ac6c5/w/fa005d0cbd6ffa3820332b7d/e/64e86c89d3ac5b23fd7711ba?renderMode=0&uiState=6abdf521224826f406f22e25
+```
+
+👉 **[Open INWPG_Independent in Onshape](https://cad.onshape.com/documents/a5ebf8aa022054aedcbab90e/w/226eaf19e9c48cb8a6efbe49/e/e7a9e7fa0a60f50822757623?renderMode=0&uiState=6abdf8eba830cf066b5e0314)**
+```
+https://cad.onshape.com/documents/a5ebf8aa022054aedcbab90e/w/226eaf19e9c48cb8a6efbe49/e/e7a9e7fa0a60f50822757623?renderMode=0&uiState=6abdf8eba830cf066b5e0314
+```
 
 To get your own editable copy:
 1. Open the link above — you will see the model in view-only mode
