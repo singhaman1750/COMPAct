@@ -13,11 +13,11 @@
     },
     "Material_properties": {
         "Steel": {
-            "density": 1240.06,
-            "maxAllowableStressMPa": 70
+            "density": 7850,
+            "maxAllowableStressMPa": 400
         },
         "Aluminum": {
-            "density": 1240.06
+            "density": 2700
         },
         "PLA": {
             "density": 1240.06,
@@ -45,6 +45,31 @@
             "Rotor_height": 15.0,
             "Rotor_OD": 55.6,
             "Rotor_ID": 45.0,
+            "rotor_mount_hole_dia": 4.0,
+            "rotor_mount_hole_CSK_OD": 8.0,
+            "rotor_mount_hole_CSK_head_hight": 3.0
+        },
+
+         "RI80": {
+            "Kv": 75,
+            "maxContinuousCurrent": 9.4,
+            "ratedVoltage": 48,
+            "power": 1270.88,
+            "massKG": 0.411,
+            "Stator_ID": 51,
+            "Stator_OD": 85,
+            "stator_height": 26.5,
+            "stator_bottom_step_height_": 4,
+            "stator_mid_height" : 16,
+            "stator_upper_step_height": 6.5,
+            "stator_side_step_OD": 82,
+            "stator_side_step_ID": 52.5,
+            "stator_mounting_holes_dia": 3.0,
+            "stator_hole_bolt_socket_head_dia": 7.5,
+            "stator_hole_num" : 4,
+            "Rotor_height": 19,
+            "Rotor_OD": 50,
+            "Rotor_ID": 40.5,
             "rotor_mount_hole_dia": 4.0,
             "rotor_mount_hole_CSK_OD": 8.0,
             "rotor_mount_hole_CSK_head_hight": 3.0
