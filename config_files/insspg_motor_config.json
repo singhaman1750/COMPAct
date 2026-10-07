@@ -50,7 +50,7 @@
             "rotor_mount_hole_CSK_head_hight": 3.0
         },
 
-         "RI80": {
+        "RI80": {
             "Kv": 75,
             "maxContinuousCurrent": 9.4,
             "ratedVoltage": 48,

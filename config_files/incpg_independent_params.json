@@ -39,13 +39,20 @@
         "rotor_hub_sun_hole_dia"                             : 4,
         "rotor_hub_sun_hole_num"                             : 4,
 
-        "rotor_top_bearing_ID"                               : 40,
-        "rotor_top_bearing_OD"                               : 50,
-        "rotor_top_bearing_width"                            : 6,
+        "rotor_top_bearing_ID_RI100"                         : 40,
+        "rotor_top_bearing_OD_RI100"                         : 50,
+        "rotor_top_bearing_width_RI100"                      : 6,
 
-        "rotor_bottom_bearing_ID"                            : 30,
-        "rotor_bottom_bearing_OD"                            : 42,
-        "rotor_bottom_bearing_width"                         : 7,
+        "rotor_bottom_bearing_ID_RI100"                      : 30,
+        "rotor_bottom_bearing_OD_RI100"                      : 42,
+        "rotor_bottom_bearing_width_RI100"                   : 7,
+
+        "rotor_top_bearing_ID_RI80"                         : 35,
+        "rotor_top_bearing_OD_RI80"                         : 47,
+        "rotor_top_bearing_width_RI80"                      : 7,
+        "rotor_bottom_bearing_ID_RI80"                      : 25,
+        "rotor_bottom_bearing_OD_RI80"                      : 37,
+        "rotor_bottom_bearing_width_RI80"                   : 7,
 
         "planet_pin_bolt_dia"                                : 5,
         "planet_shaft_step_offset"                           : 1,

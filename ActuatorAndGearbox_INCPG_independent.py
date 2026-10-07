@@ -552,6 +552,7 @@ class inrunnerCompoundPlanetaryActuator:
         self.MaxMotorTorque          = self.motor.maxMotorTorque          # U12_maxTorque          # Nm
         self.MaxMotorAngVelRPM       = self.motor.maxMotorAngVelRPM       # U12_maxAngVelRPM       # RPM
         self.MaxMotorAngVelRadPerSec = self.motor.maxMotorAngVelRadPerSec # U12_maxAngVelRadPerSec # radians/sec
+        self.motor_name                = self.motor.motorName
 
         #============================================
         # Actuator Design Parameters
@@ -681,13 +682,22 @@ class inrunnerCompoundPlanetaryActuator:
         self.rotor_hub_sun_hole_dia  = self.design_params["rotor_hub_sun_hole_dia"]        
         self.rotor_hub_sun_hole_num = self.design_params["rotor_hub_sun_hole_num"]
 
-        self.rotor_top_bearing_ID  = self.design_params["rotor_top_bearing_ID"]
-        self.rotor_top_bearing_OD  = self.design_params["rotor_top_bearing_OD"]
-        self.rotor_top_bearing_width = self.design_params["rotor_top_bearing_width"]
+        if self.motor_name == "RI100":
+            self.rotor_top_bearing_ID  = self.design_params["rotor_top_bearing_ID_RI100"]
+            self.rotor_top_bearing_OD  = self.design_params["rotor_top_bearing_OD_RI100"]
+            self.rotor_top_bearing_width = self.design_params["rotor_top_bearing_width_RI100"]
 
-        self.rotor_bottom_bearing_ID  = self.design_params["rotor_bottom_bearing_ID"]
-        self.rotor_bottom_bearing_OD  = self.design_params["rotor_bottom_bearing_OD"]
-        self.rotor_bottom_bearing_width = self.design_params["rotor_bottom_bearing_width"]
+            self.rotor_bottom_bearing_ID  = self.design_params["rotor_bottom_bearing_ID_RI100"]
+            self.rotor_bottom_bearing_OD  = self.design_params["rotor_bottom_bearing_OD_RI100"]
+            self.rotor_bottom_bearing_width = self.design_params["rotor_bottom_bearing_width_RI100"]
+        elif self.motor_name == "RI80":
+            self.rotor_top_bearing_ID  = self.design_params["rotor_top_bearing_ID_RI80"]
+            self.rotor_top_bearing_OD  = self.design_params["rotor_top_bearing_OD_RI80"]
+            self.rotor_top_bearing_width = self.design_params["rotor_top_bearing_width_RI80"]
+
+            self.rotor_bottom_bearing_ID  = self.design_params["rotor_bottom_bearing_ID_RI80"]
+            self.rotor_bottom_bearing_OD  = self.design_params["rotor_bottom_bearing_OD_RI80"]
+            self.rotor_bottom_bearing_width = self.design_params["rotor_bottom_bearing_width_RI80"]
 
         # --- Planet pin and bearing ---
         self.planet_pin_bolt_dia      = self.design_params["planet_pin_bolt_dia"] # 5 
@@ -802,7 +812,7 @@ class inrunnerCompoundPlanetaryActuator:
         self.rotor_hub_sun_hole_CSK_OD          = rotor_hub_sun_bolt.bolt_head_dia   
         self.rotor_hub_sun_hole_CSK_head_height = rotor_hub_sun_bolt.bolt_head_height
 
-        self.sun_hub_dia = self.rotor_top_bearing_ID - 2*self.rotor_hub_thickness - 2*self.standard_clearance_1_5mm
+        self.sun_hub_dia = self.rotor_top_bearing_ID - 2*self.rotor_hub_thickness 
 
         #----------------------- Bearings------------------------------------
         OutputIDrequiredMM = self.module * (self.Ns + self.Np_b) + self.bearingIDClearanceMM

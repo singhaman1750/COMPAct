@@ -867,10 +867,13 @@ class inrunnerWolfromPlanetaryActuator:
         Np1       = self.inrunnerWolfromPlanetaryGearbox.NpBig
         Np2       = self.inrunnerWolfromPlanetaryGearbox.NpSmall
 
-        if self.design_params["min_rotor_top_bearing_ID"] < module * Ns + 2*self.standard_clearance_1_5mm:
-            RotorTopBearingIDrequiredMM   = module * Ns + 2*self.standard_clearance_1_5mm
+        if self.motor.motorName == "RI100":
+            if self.design_params["min_rotor_top_bearing_ID"] < module * Ns + 2*self.standard_clearance_1_5mm:
+                RotorTopBearingIDrequiredMM   = module * Ns + 2*self.standard_clearance_1_5mm
+            else:
+                RotorTopBearingIDrequiredMM   = self.design_params["min_rotor_top_bearing_ID"]
         else:
-            RotorTopBearingIDrequiredMM   = self.design_params["min_rotor_top_bearing_ID"]
+            RotorTopBearingIDrequiredMM   = module * Ns + 2*self.standard_clearance_1_5mm
 
         RotorTopBearings              = bearings_discrete(RotorTopBearingIDrequiredMM)
         self.rotor_top_bearing_ID     = RotorTopBearings.getBearingIDMM()
@@ -1095,7 +1098,7 @@ class inrunnerWolfromPlanetaryActuator:
         self.rotor_hub_sun_hole_CSK_OD          = rotor_hub_sun_bolt.bolt_head_dia   
         self.rotor_hub_sun_hole_CSK_head_height = rotor_hub_sun_bolt.bolt_head_height
 
-        self.sun_hub_dia = self.rotor_ID - 2*self.rotor_hub_thickness - 2*self.standard_clearance_1_5mm
+        self.sun_hub_dia = self.rotor_ID - 2*self.rotor_hub_thickness 
 
         #----------------------- Bearings------------------------------------
         OutputIDrequiredMM         = self.module * (self.Nr_s) + 2*self.module + 2*self.small_ring_radial_width 
@@ -1105,10 +1108,13 @@ class inrunnerWolfromPlanetaryActuator:
         self.output_bearing_width  = OutputBearings.getBearingWidthMM()
 
         #problem if ID is 28 (need to remove that bearing in the table)
-        if self.design_params["min_rotor_top_bearing_ID"] < self.module * self.Ns + 2*self.standard_clearance_1_5mm:
-            RotorTopBearingIDrequiredMM   = self.module * self.Ns + 2*self.standard_clearance_1_5mm
+        if self.motor.motorName == "RI100":
+            if self.design_params["min_rotor_top_bearing_ID"] < self.module * self.Ns + 2*self.standard_clearance_1_5mm:
+                RotorTopBearingIDrequiredMM   = self.module * self.Ns + 2*self.standard_clearance_1_5mm
+            else:
+                RotorTopBearingIDrequiredMM   = self.design_params["min_rotor_top_bearing_ID"]
         else:
-            RotorTopBearingIDrequiredMM   = self.design_params["min_rotor_top_bearing_ID"]
+            RotorTopBearingIDrequiredMM   = self.module * self.Ns + 2*self.standard_clearance_1_5mm
 
         RotorTopBearings              = bearings_discrete(RotorTopBearingIDrequiredMM)
         self.rotor_top_bearing_ID     = RotorTopBearings.getBearingIDMM()

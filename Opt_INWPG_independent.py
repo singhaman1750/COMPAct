@@ -103,6 +103,52 @@ MotorRI100  = motor(rotor_OD                   = MotorRI100_rotor_OD,
                   motorMass                    = MotorRI100_mass,
                   motorName                    = "RI100")
 
+
+#Motor RI80
+MotorRI80_Kv                   = motor_data["RI80"]["Kv"]                   # rpm/V
+MotorRI80_maxContinuousCurrent = motor_data["RI80"]["maxContinuousCurrent"] # A
+
+MotorRI80_maxTorque                  = MotorRI80_maxContinuousCurrent / (MotorRI80_Kv * 2 * np.pi / 60)
+MotorRI80_power                      = motor_data["RI80"]["power"]                 # W 
+
+MotorRI80_ratedVoltage               = motor_data["RI80"]["ratedVoltage"]   
+MotorRI80_maxMotorAngVelRPM          = MotorRI80_Kv * MotorRI80_ratedVoltage # RPM 
+MotorRI80_mass                       = motor_data["RI80"]["massKG"]                  # kg 
+
+MotorRI80_rotor_OD                  = motor_data["RI80"]["Rotor_OD"]
+MotorRI80_stator_ID                 = motor_data["RI80"]["Stator_ID"]
+MotorRI80_rotor_height              = motor_data["RI80"]["Rotor_height"]
+MotorRI80_rotor_ID                  = motor_data["RI80"]["Rotor_ID"]
+MotorRI80_stator_height             = motor_data["RI80"]["stator_height"]
+MotorRI80_stator_OD                 = motor_data["RI80"]["Stator_OD"]
+MotorRI80_stator_hole_dia           = motor_data["RI80"]["stator_mounting_holes_dia"]
+MotorRI80_stator_wire_top_height    = motor_data["RI80"]["stator_upper_step_height"]
+MotorRI80_stator_mid_height         = motor_data["RI80"]["stator_mid_height"]
+MotorRI80_stator_wire_bottom_height = motor_data["RI80"]["stator_bottom_step_height_"]
+MotorRI80_stator_wire_OD            = motor_data["RI80"]["stator_side_step_OD"]
+MotorRI80_stator_hole_num           = motor_data["RI80"]["stator_hole_num"]
+MotorRI80_stator_wire_ID            = motor_data["RI80"]["stator_side_step_ID"]
+
+# Motor-RI80
+MotorRI80  = motor(rotor_OD                   = MotorRI80_rotor_OD,
+                  stator_ID                    = MotorRI80_stator_ID,
+                  rotor_height                 = MotorRI80_rotor_height,
+                  rotor_ID                     = MotorRI80_rotor_ID,
+                  stator_height                = MotorRI80_stator_height,
+                  stator_OD                    = MotorRI80_stator_OD,
+                  stator_hole_dia              = MotorRI80_stator_hole_dia,
+                  stator_wire_top_height       = MotorRI80_stator_wire_top_height,
+                  stator_mid_height            = MotorRI80_stator_mid_height,
+                  stator_wire_bottom_height    = MotorRI80_stator_wire_bottom_height,
+                  stator_wire_OD               = MotorRI80_stator_wire_OD,          
+                  stator_hole_num              = MotorRI80_stator_hole_num,     
+                  stator_wire_ID               = MotorRI80_stator_wire_ID,      
+                  maxMotorAngVelRPM            = MotorRI80_maxMotorAngVelRPM,
+                  maxMotorTorque               = MotorRI80_maxTorque,
+                  maxMotorPower                = MotorRI80_power,
+                  motorMass                    = MotorRI80_mass,
+                  motorName                    = "RI80")
+
 #-------------------------------------------------------
 # Gearbox 
 #-------------------------------------------------------
@@ -118,7 +164,8 @@ inrunnerWolfromPlanetaryGearboxInstance = inrunnerWolfromPlanetaryGearbox(design
 #-----------------------------------------------------
 maxGBDia_multFactor           = inwpg_optimization_params["MAX_GB_DIA_MULT_FACTOR"] # 1
 
-maxGearboxDiameter_RI100      = maxGBDia_multFactor * MotorRI100.motorDiaMM       
+maxGearboxDiameter_RI100      = maxGBDia_multFactor * MotorRI100.motorDiaMM 
+maxGearboxDiameter_RI80      = maxGBDia_multFactor * MotorRI80.motorDiaMM       
 
 # RI100-Actuator
 Actuator_RI100 = inrunnerWolfromPlanetaryActuator(design_parameters        = inwpg_design_params,
@@ -129,7 +176,16 @@ Actuator_RI100 = inrunnerWolfromPlanetaryActuator(design_parameters        = inw
                                                    serviceFactor            = MIT_params["serviceFactor"], 
                                                    maxGearboxDiameter       = maxGearboxDiameter_RI100,
                                                    stressAnalysisMethodName = "MIT")
-
+                                                
+# RI80-Actuator
+Actuator_RI80 = inrunnerWolfromPlanetaryActuator(design_parameters        = inwpg_design_params,
+                                                   motor                    = MotorRI80,  
+                                                   motor_driver_params      = Motor_Driver_OdrivePro_params,
+                                                   inrunnerWolfromPlanetaryGearbox = inrunnerWolfromPlanetaryGearboxInstance, 
+                                                   FOS                      = MIT_params["FOS"], 
+                                                   serviceFactor            = MIT_params["serviceFactor"], 
+                                                   maxGearboxDiameter       = maxGearboxDiameter_RI80,
+                                                   stressAnalysisMethodName = "MIT")
 #-----------------------------------------------------
 # Optimization
 #-----------------------------------------------------
@@ -171,6 +227,24 @@ Optimizer_RI100     = optimizationInrunnerWolfromPlanetaryActuator(design_parame
                                                         GEAR_RATIO_MAX             = GEAR_RATIO_MAX            ,
                                                         GEAR_RATIO_STEP            = GEAR_RATIO_STEP           )
 
+Optimizer_RI80     = optimizationInrunnerWolfromPlanetaryActuator(design_parameters          = inwpg_design_params         ,
+                                                        gear_standard_parameters   = Gear_standard_parameters  ,
+                                                        K_Mass                     = K_Mass                    ,
+                                                        K_Eff                      = K_Eff                     ,
+                                                        K_Width                    = K_Width                   ,
+                                                        MODULE_BIG_MIN             = MODULE_BIG_MIN            ,
+                                                        MODULE_BIG_MAX             = MODULE_BIG_MAX            ,
+                                                        MODULE_SMALL_MIN           = MODULE_SMALL_MIN          ,
+                                                        MODULE_SMALL_MAX           = MODULE_SMALL_MAX          ,
+                                                        NUM_PLANET_MIN             = NUM_PLANET_MIN            ,
+                                                        NUM_PLANET_MAX             = NUM_PLANET_MAX            ,
+                                                        NUM_TEETH_SUN_MIN          = NUM_TEETH_SUN_MIN         ,
+                                                        NUM_TEETH_PLANET_BIG_MIN   = NUM_TEETH_PLANET_BIG_MIN  ,
+                                                        NUM_TEETH_PLANET_SMALL_MIN = NUM_TEETH_PLANET_SMALL_MIN,
+                                                        GEAR_RATIO_MIN             = GEAR_RATIO_MIN            ,
+                                                        GEAR_RATIO_MAX             = GEAR_RATIO_MAX            ,
+                                                        GEAR_RATIO_STEP            = GEAR_RATIO_STEP           )
+
 #=============================================================
 # run function to select the gearbox_type
 #=============================================================
@@ -178,6 +252,15 @@ def run(motor_name, gear_ratio):
     if motor_name == "RI100":
         return Optimizer_RI100.optimizeActuator(
             Actuator_RI100,
+            UsePSCasVariable=0,
+            log=0,
+            csv=1,
+            printOptParams=1,
+            gearRatioReq=gear_ratio
+        )
+    elif motor_name == "RI80":
+        return Optimizer_RI80.optimizeActuator(
+            Actuator_RI80,
             UsePSCasVariable=0,
             log=0,
             csv=1,
