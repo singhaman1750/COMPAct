@@ -342,7 +342,7 @@ class motor_framed_outrunner:
 
 
 # -------------------------------------------------------------------------
-# Frameless Outrunner motor (from ActuatorandGearbox_ICPG.py / ActuatorAndGearbox_ISSPG_inside.py / ActuatorAndGearbox_ISSPG_compact.py)
+# Frameless Outrunner motor (from ActuatorandGearbox_ICPG.py / ActuatorAndGearbox_ISSPG_inside.py / ActuatorAndGearbox_ISSPG_compact.py / ActuatorAndGearbox_IDSPG.py)
 # -------------------------------------------------------------------------
 class motor_frameless_outrunner:
     """
@@ -557,6 +557,7 @@ class motor_frameless_inrunner:
     def getRotorIDMM(self):      return self.rotor_ID
     def getStatorODMM(self):     return self.stator_OD
     def getStatorIDMM(self):     return self.stator_ID
+    def getStator_wire_OD(self): return self.stator_wire_OD
     def getStatorHeightMM(self): return self.stator_height
     def getRotorODMM(self):      return self.rotor_OD
     def getRotorHeightMM(self):  return self.rotor_height

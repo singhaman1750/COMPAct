@@ -1,7 +1,9 @@
 import re
+import sys
 
 def parse_variable_file(filepath):
     variables = []
+    seen_names = set()
 
     NUMBER_VARS = {
         "pattern_num_bulge",
