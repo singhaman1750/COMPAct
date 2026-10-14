@@ -12,7 +12,7 @@ GEARBOX_DISPATCH = {
     "incpg_independent": "Opt_INCPG_independent",
     "isspg_inside": "Opt_ISSPG_inside",
     "isspg_compact": "Opt_ISSPG_compact",
-    "idspg": "Opt_IDSPG"
+    "idspg": "Opt_IDSPG",
 }
 
 def main(motor, gearbox_type, gear_ratio=0):

@@ -45,8 +45,7 @@ def parse_variable_file(filepath):
         "bearing_retainer_hole_num",
         "stator_mounting_hole_num",
         "a2_bearing_retainer_hole_num",
-        "rotor_mount_hole_num",
-        "stator_mounting_hole_num"
+        "rotor_mount_hole_num"
     }
 
     def _is_angle_variable(value: str) -> bool:
