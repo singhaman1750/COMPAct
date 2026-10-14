@@ -46,6 +46,7 @@ class bearings_discrete:
                [50, 65, 7, 0.050],
                [55, 72, 9, 0.081],
                [60, 78, 10, 0.103],
+               [63.5, 76.2, 6.35, 0.07],
                [65, 85, 10, 0.128],
                [70, 90, 10, 0.134],
                [75, 95, 10, 0.149],
@@ -357,30 +358,32 @@ class motor_frameless_outrunner:
     """
 
     def __init__(self,
-                 maxMotorAngVelRPM               = 2640,  # RPM
+                 maxMotorAngVelRPM               = 2550,  # RPM
                  maxMotorTorque                  = 20 / (55 * 2*np.pi/60),  # Nm
-                 maxMotorPower                   = 4560,  # W
-                 motorMass                       = 0.352, # KG
+                 maxMotorPower                   = 838,  # W                      #TODO : check if this is correct  
+                 motorMass                       = 0.71, # KG
                  # ── Stator ──────────────────────────────────────────────
-                 stator_OD                       = 81,
-                 stator_ID                       = 55,
-                 stator_height                   = 23.8,
-                 stator_hole_PCD                 = 63,
+                 stator_OD                       = 100,
+                 stator_ID                       = 74,
+                 stator_height                   = 31.5,
+                 stator_hole_PCD                 = 82.5,
                  motor_stator_extrusion_dia      = 88,
                  motor_stator_extrusion_depth    = 2,
                  # ── Rotor ───────────────────────────────────────────────
-                 motor_OD                        = 92.6,
-                 rotor_ID                        = 82.6,
-                 rotor_height                    = 21.6,
-                 motor_rotor_base_ID             = 51,
-                 motor_rotor_base_thickness      = 2.6,
+                 motor_OD                        = 113.5,
+                 rotor_ID                        = 101.8,
+                 rotor_height                    = 33.45,
+                 motor_rotor_base_ID             = 60,
+                 motor_rotor_base_thickness      = 3.2,
                  rotorCSKHeadUpperDiaMM          = 8,
                  rotorCSKHeadHeightMM            = 2.3,
-                 motor_rotor_hole_PCD            = 62,
+                 motor_rotor_hole_PCD            = 74,
                  motor_rotor_hole_dia            = 4,
                  stator_top_rotor_top_offset  = 2.75,
                  stator_hole_dia              = 3,
+                 stator_hole_num              = 3,       # wrong
                  motor_rotor_hole_num         = 6,
+                 stator_mounitng_holes_head_socket_dia = 4.5,
                  # ── Overall envelope ────────────────────────────────────
                  motor_height                    = 36.2,
                  motorName                       = "RO100"):
@@ -427,7 +430,9 @@ class motor_frameless_outrunner:
         self.motor_rotor_hole_num = motor_rotor_hole_num
         self.stator_top_rotor_top_offset = stator_top_rotor_top_offset
         self.stator_hole_dia = stator_hole_dia
+        self.stator_hole_num = stator_hole_num
         self.rotorCSKHeadHeightMM = rotorCSKHeadHeightMM
+        self.stator_mounitng_holes_head_socket_dia = stator_mounitng_holes_head_socket_dia
 
 
     # ── Getters ────────────────────────────────────────────────────────────
