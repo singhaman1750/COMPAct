@@ -739,6 +739,7 @@ class internalsingleStagePlanetaryActuator:
         self.sun2_bearing_ID     = sun2bearing.getBearingIDMM()
         self.sun2_bearing_OD     = sun2bearing.getBearingODMM()
         self.sun2_bearing_width  = sun2bearing.getBearingWidthMM()
+        self.sun2_bearing_mass_selected = sun2bearing.getBearingMassKG()   # mass of this same bearing
 
         #--- Input Bearing Dimension ---
         self.input_bearing_ID    = self.design_params["input_bearing_ID"]
@@ -1602,9 +1603,9 @@ class internalsingleStagePlanetaryActuator:
         #--------------------------------------
         # Mass: sspg_sun2_bearing
         #--------------------------------------
-        Sun2BearingIdrequiredMM  = self.sun2_bearing_ID
-        sun2bearing              = bearings_discrete(Sun2BearingIdrequiredMM)
-        self.sun2_bearing_mass     = sun2bearing.getBearingMassKG()
+        # Use the bearing chosen in setVariables() (looked up by OD). Looking it up again by ID
+        # would use the other bearing table and can return a different bearing (ISSUES.md bug 1).
+        self.sun2_bearing_mass     = self.sun2_bearing_mass_selected
         sun2_bearing_mass = self.sun2_bearing_mass # kg
 
         self.Motor_case_mass              = Motor_case_mass
