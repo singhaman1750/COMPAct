@@ -6,7 +6,7 @@ import sys
 import time
 
 from CommonComponents import material, bearings_discrete, nuts_and_bolts_dimensions, motor_driver, motor_frameless_inrunner as motor
-from CommonComponents import restores_stdout
+from CommonComponents import restores_stdout, bearing_mass_kg
 
 class inrunnerCompoundPlanetaryGearbox:
     def __init__(self,
@@ -699,6 +699,10 @@ class inrunnerCompoundPlanetaryActuator:
             self.rotor_bottom_bearing_ID  = self.design_params["rotor_bottom_bearing_ID_RI80"]
             self.rotor_bottom_bearing_OD  = self.design_params["rotor_bottom_bearing_OD_RI80"]
             self.rotor_bottom_bearing_width = self.design_params["rotor_bottom_bearing_width_RI80"]
+
+        # Masses of the rotor bearings chosen above, for whichever motor is in use
+        self.rotor_top_bearing_mass_selected    = bearing_mass_kg(self.rotor_top_bearing_ID, self.rotor_top_bearing_OD, self.rotor_top_bearing_width)
+        self.rotor_bottom_bearing_mass_selected = bearing_mass_kg(self.rotor_bottom_bearing_ID, self.rotor_bottom_bearing_OD, self.rotor_bottom_bearing_width)
 
         # --- Planet pin and bearing ---
         self.planet_pin_bolt_dia      = self.design_params["planet_pin_bolt_dia"] # 5 
@@ -2052,12 +2056,12 @@ class inrunnerCompoundPlanetaryActuator:
         #--------------------------------------
         # Mass: incpg_rotor_top_bearing
         #--------------------------------------
-        rotor_top_shaft_bearing_mass =  0.023 # kg
+        rotor_top_shaft_bearing_mass =  self.rotor_top_bearing_mass_selected # kg
 
         #--------------------------------------
         # Mass: incpg_rotor_bottom_bearing
         #--------------------------------------
-        rotor_bottom_shaft_bearing_mass = 0.024 # kg
+        rotor_bottom_shaft_bearing_mass = self.rotor_bottom_bearing_mass_selected # kg
 
         #--------------------------------------
         # Mass: incpg_sun_shaft_bearing
