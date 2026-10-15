@@ -20,5 +20,8 @@
   97,
   0.9,
   0.8
- ]
+ ],
+ "results_files": {
+  "results_BruteForce_MN8014/DSPG_BRUTEFORCE_MIT_MN8014.csv": "Motor Parameters:\nmaxMotorAngVelRPM, maxMotorAngVelRadPerSec, maxMotorTorque, maxMotorPower, motorMass, motorDia, motorLength\n4800 , 502.6548245743669 , 4.965634224467134 , 2423 , 0.392 , 87.8 , 31.5\n \nGear strength and size parameters:\nFOS, serviceFactor, stressAnalysisMethodName, maxGearBoxDia, maxGearAllowableStressMPa\n1.2 , 1.5 , MIT , 77.8 , 70\n \nOptimization Parameters:\nK_mass, K_Eff, MODULE_STAGE1_MIN, MODULE_STAGE1_MAX, MODULE_STAGE2_MIN, MODULE_STAGE2_MAX, NUM_PLANET_STAGE1_MIN, NUM_PLANET_STAGE1_MAX, NUM_PLANET_STAGE2_MIN, NUM_PLANET_STAGE2_MAX, NUM_TEETH_SUN_MIN, NUM_TEETH_PLANET_MIN, GEAR_RATIO_MIN, GEAR_RATIO_MAX, GEAR_RATIO_STEP\n1 , -2 , 0.5 , 1.2 , 0.5 , 1.2 , 3 , 7 , 3 , 7 , 18 , 28 , 4 , 45 , 1\n \niter, gearRatio, module1, module2, Ns1, Np1, Nr1, numPlanet1, Ns2, Np2, Nr2, numPlanet2, fwSun1MM, fwPlanet1MM, fwRing1MM, fwSun2MM, fwPlanet2MM, fwRing2MM, mass, eff, peakTorque, Cost, Torque_Density, Outer_Bearing_mass_stg1, Outer_Bearing_mass_stg2, Actuator_width\n44 , 19.76068376068376 , 0.9 , 0.8 , 18 , 33 , 84 , 3 , 39 , 29 , 97 , 4 , 11.124 , 11.124 , 11.124 , 21.307 , 21.307 , 21.307 , 1.222 , 0.9 , 98.124 , 6.147789478036451 , 80.29787234042553 , 0.103 , 0.128 , 115.9312855553222\n\n\n"
+ }
 }

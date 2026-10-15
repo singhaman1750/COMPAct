@@ -2,9 +2,11 @@
 Golden-output regression check for the gearbox optimisers.
 
 Records, for every gearbox type in actOpt.GEARBOX_DISPATCH and every motor its
-Opt_*.run() supports, the optimiser's returned parameters plus the CAD equation
-files the run writes. A later `check` re-runs the same cases and reports any
-difference, so refactors can be verified to leave results unchanged.
+Opt_*.run() supports, the optimiser's returned parameters, the CAD equation
+files the run writes, and the results CSVs it writes (total mass, efficiency,
+cost, per-part mass breakdown; run-time lines removed). A later `check` re-runs
+the same cases and reports any difference, so refactors can be verified to
+leave results unchanged.
 
 Usage (from the repo root):
     python tests/golden/golden.py record            # (re)write all baselines
@@ -109,6 +111,8 @@ def case_id(case):
 
 
 def run_case(case):
+    # Each case runs in its own temporary working directory, so the results/
+    # CSVs it writes are captured there and never touch the repo's results/.
     with tempfile.TemporaryDirectory() as tmp:
         out_path = Path(tmp) / "result.json"
         proc = subprocess.run(
@@ -121,7 +125,7 @@ def run_case(case):
                 gearbox_group(case["gb_type"]),
                 str(out_path),
             ],
-            cwd=REPO_ROOT,
+            cwd=tmp,
             capture_output=True,
             text=True,
         )
@@ -196,7 +200,70 @@ def describe_differences(expected, actual):
             changed = sum(1 for e, a in zip(exp_lines, act_lines) if e != a)
             changed += abs(len(exp_lines) - len(act_lines))
             diffs.append(f"CAD file changed: {path} ({changed} lines differ)")
+    exp_results = expected.get("results_files", {})
+    act_results = actual.get("results_files", {})
+    for path in sorted(exp_results.keys() | act_results.keys()):
+        if path not in act_results:
+            diffs.append(f"results file no longer written: {path}")
+        elif path not in exp_results:
+            diffs.append(f"new results file written: {path}")
+        elif exp_results[path] != act_results[path]:
+            diffs.append(f"results file changed: {path}")
+            diffs.extend("    " + d for d in describe_value_changes(exp_results[path], act_results[path]))
     return diffs
+
+
+_NAME = re.compile(r"^[A-Za-z_]")
+
+
+def named_values(text):
+    """Pull 'name: value' lines and header/row tables out of a results CSV."""
+    lines = [line.strip() for line in text.splitlines()]
+    values = {}
+
+    def put(name, value):
+        key, n = name, 2
+        while key in values:
+            key, n = f"{name}#{n}", n + 1
+        values[key] = value
+
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        pair = re.match(r"^([A-Za-z_][\w .()/-]*?)\s*:\s*(\S.*)$", line)
+        if pair and "," not in line:
+            put(pair.group(1).strip(), pair.group(2).strip())
+            i += 1
+            continue
+        header = [h.strip() for h in line.split(",")]
+        if "," in line and all(_NAME.match(h) for h in header if h):
+            j = i + 1
+            while j < len(lines) and "," in lines[j] and not _NAME.match(lines[j]):
+                row = [v.strip() for v in lines[j].split(",")]
+                for k, value in enumerate(row):
+                    name = header[k] if k < len(header) and header[k] else f"{header[-1] or 'column'}+{k}"
+                    if value:
+                        put(name, value)
+                j += 1
+            if j > i + 1:
+                i = j
+                continue
+        i += 1
+    return values
+
+
+def describe_value_changes(expected_text, actual_text, limit=25):
+    expected, actual = named_values(expected_text), named_values(actual_text)
+    changes = [
+        f"{key}: {expected.get(key, '(missing)')} -> {actual.get(key, '(missing)')}"
+        for key in list(expected) + [k for k in actual if k not in expected]
+        if expected.get(key) != actual.get(key)
+    ]
+    if not changes:
+        changes = ["(text differs, but no named value changed)"]
+    if len(changes) > limit:
+        changes = changes[:limit] + [f"... and {len(changes) - limit} more"]
+    return changes
 
 
 def select_cases(args):

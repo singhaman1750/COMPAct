@@ -14,5 +14,8 @@
   54,
   132,
   0.6
- ]
+ ],
+ "results_files": {
+  "results_BruteForce_MAD_M6C12/SSPG_BRUTEFORCE_MIT_MAD_M6C12.csv": "Motor Parameters:\nmaxMotorAngVelRPM, maxMotorAngVelRadPerSec, maxMotorTorque, maxMotorPower, motorMass, motorDia, motorLength\n7200 , 753.9822368615503 , 2.304563575970645 , 1725 , 0.257 , 72 , 27\n \nGear strength and size parameters:\nFOS, serviceFactor, stressAnalysisMethodName, maxGearBoxDia, maxGearAllowableStressMPa\n1.2 , 1.5 , MIT , 80.0 , 70\n \nOptimization Parameters:\nK_mass, K_Eff, K_Width, MODULE_MIN, MODULE_MAX, NUM_PLANET_MIN, NUM_PLANET_MAX, NUM_TEETH_SUN_MIN, NUM_TEETH_PLANET_MIN, GEAR_RATIO_MIN, GEAR_RATIO_MAX, GEAR_RATIO_STEP\n1 , -2 , 0.2 , 0.5 , 1.2 , 3 , 7 , 18 , 28 , 4.0 , 15 , 0.1\n \niter, gearRatio, module, Ns, Np, Nr, numPlanet, fwSunMM, fwPlanetMM, fwRingMM, mass, eff, peakTorque, Cost, Torque_Density, Outer_Bearing_mass, Actuator_width\n4 , 6.5 , 0.6 , 24 , 54 , 132 , 3 , 7.608 , 8.0 , 8.0 , 0.612 , 0.957 , 14.98 , 0.29873360022152906 , 24.477124183006538 , 0.103 , 66.0\n\n\n"
+ }
 }

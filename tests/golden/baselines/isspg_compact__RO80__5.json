@@ -13,5 +13,8 @@
   34,
   91,
   0.5
- ]
+ ],
+ "results_files": {
+  "results_BruteForce_RO80/ISSPG_BRUTEFORCE_MIT_RO80.csv": "Motor Parameters:\nmaxMotorAngVelRPM, maxMotorAngVelRadPerSec, maxMotorTorque, maxMotorPower, motorMass, motorDia, motorLength\n5040 , 527.7875658030853 , 1.3 , 686.1238355440108 , 0.265 , 92.6 , 26.4\n \nGear strength and size parameters:\nFOS, serviceFactor, stressAnalysisMethodName, maxGearBoxDia, maxGearAllowableStressMPa\n1.2 , 1.5 , MIT , 55 , 70\n \nOptimization Parameters:\nK_mass, K_Eff, K_Width, MODULE_MIN, MODULE_MAX, NUM_PLANET_MIN, NUM_PLANET_MAX, NUM_TEETH_SUN_MIN, NUM_TEETH_PLANET_MIN, GEAR_RATIO_MIN, GEAR_RATIO_MAX, GEAR_RATIO_STEP\n1 , -2 , 0.2 , 0.5 , 1.2 , 3 , 7 , 18 , 28 , 4.0 , 15 , 0.1\n \niter, gearRatio, module, Ns, Np, Nr, numPlanet, fwSunMM, fwPlanetMM, fwRingMM, mass, eff, peakTorque, Cost, Torque_Density, Outer_Bearing_mass, Actuator_width\n1 , 4.956521739130435 , 0.5 , 23 , 34 , 91 , 3 , 6.725 , 8.0 , 8.0 , 0.572 , 0.949 , 6.443 , 0.7089616600708717 , 11.263986013986015 , 0.023 , 50.4\n\n\n"
+ }
 }

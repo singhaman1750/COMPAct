@@ -17,5 +17,8 @@
   108,
   0.6,
   0.6
- ]
+ ],
+ "results_files": {
+  "results_BruteForce_RI100/INWPG_BRUTEFORCE_MIT_RI100.csv": "Motor Parameters:\nmaxMotorAngVelRPM, maxMotorAngVelRadPerSec, maxMotorTorque, maxMotorPower, motorMass, motorDia, motorLength\n5040 , 527.7875658030853 , 1.2368612720284438 , 521 , 0.5 , 104.0 , 24.5\n \nGear strength and size parameters:\nFOS, serviceFactor, stressAnalysisMethodName, maxGearBoxDia, maxGearAllowableStressMPa\n1.2 , 1.5 , MIT , 72.8 , 70\n \nOptimization Parameters:\nK_mass, K_Eff, MODULE_BIG_MIN, MODULE_BIG_MAX, MODULE_SMALL_MIN, MODULE_SMALL_MAX, NUM_PLANET_MIN, NUM_PLANET_MAX, NUM_TEETH_SUN_MIN, NUM_TEETH_PLANET_BIG_MIN, NUM_TEETH_PLANET_SMALL_MIN, GEAR_RATIO_MIN, GEAR_RATIO_MAX, GEAR_RATIO_STEP\n1 , -2 , 0.5 , 1.2 , 0.5 , 1.2 , 3 , 7 , 18 , 18 , 18 , 4 , 60 , 1\n \niter, gearRatio, moduleBig, moduleSmall, Ns, NpBig, NpSmall, NrBig, NrSmall, numPlanet, fwSunMM, fwPlanetBigMM, fwPanetSmallMM, fwRingBigMM, fwRingSmallMM,  mass, eff, peakTorque, Cost, Torque_Density, Outer_Bearing_mass, Actuator_width\n8 , 20.0 , 0.6 , 0.6 , 54 , 30 , 24 , 114 , 108 , 6 , 0.749 , 6.805 , 8.138 , 6.805 , 8.138 , 1.174 , 0.759 , 24.737 , 2.6439483335463714 , 21.071 , 0.149 , 67.44251583527932\nmotor_case_mass:  83.67092071599077\nrotor_top_bearing_holder_mass:  57.812913370760114\ngearbox_casing_mass:  139.57988803600196\nsmall_ring_mass:  53.08281885731832\ncarrier_mass:  41.19032661114596\nsun_mass:  38.26653504493175\nsec_carrier_mass:  13.425890729427254\nplanet_mass:  2.6696527673399597\nrotor_hub_mass:  25.029147210966222\ncarrier_ring_bearing_mass:  5.0\nplanet_bearing_combined_mass:  12.0\nsun_shaft_bearing_mass:  4.0\noutput_bearing_mass:  149.0\nbearing_retainer_mass:  8.011061266653973\nrotor_top_bearing_mass:  23.0\nrotor_bottom_bearing_mass:  5.0\nMotor mass: 500.0\nActuator_mass_without_bearing: 476.08741844723613\nActuator_mass: 1174.0874184472361\n---------------------------------------------------\n"
+ }
 }

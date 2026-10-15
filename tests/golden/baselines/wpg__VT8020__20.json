@@ -17,5 +17,8 @@
   126,
   0.5,
   0.5
- ]
+ ],
+ "results_files": {
+  "results_BruteForce_VT8020/WPG_BRUTEFORCE_MIT_VT8020.csv": "Motor Parameters:\nmaxMotorAngVelRPM, maxMotorAngVelRadPerSec, maxMotorTorque, maxMotorPower, motorMass, motorDia, motorLength\n4800 , 502.6548245743669 , 3.819718634205488 , 1900 , 0.713 , 89.4 , 45.5\n \nGear strength and size parameters:\nFOS, serviceFactor, stressAnalysisMethodName, maxGearBoxDia, maxGearAllowableStressMPa\n1.2 , 1.5 , MIT , 79.4 , 70\n \nOptimization Parameters:\nK_mass, K_Eff, MODULE_BIG_MIN, MODULE_BIG_MAX, MODULE_SMALL_MIN, MODULE_SMALL_MAX, NUM_PLANET_MIN, NUM_PLANET_MAX, NUM_TEETH_SUN_MIN, NUM_TEETH_PLANET_BIG_MIN, NUM_TEETH_PLANET_SMALL_MIN, GEAR_RATIO_MIN, GEAR_RATIO_MAX, GEAR_RATIO_STEP\n1 , -2 , 0.5 , 1.2 , 0.5 , 1.2 , 3 , 7 , 18 , 28 , 28 , 4 , 60 , 1\n \niter, gearRatio, moduleBig, moduleSmall, Ns, NpBig, NpSmall, NrBig, NrSmall, numPlanet, fwSunMM, fwPlanetBigMM, fwPanetSmallMM, fwRingBigMM, fwRingSmallMM,  mass, eff, peakTorque, Cost, Torque_Density, Outer_Bearing_mass, Actuator_width\n8 , 20.0 , 0.5 , 0.5 , 63 , 35 , 28 , 133 , 126 , 7 , 2.37 , 21.327 , 25.357 , 21.327 , 25.357 , 1.455 , 0.787 , 76.394 , 9.217435482481248 , 52.504 , 0.149 , 129.18430434027576\ncarrier_small_ring_inner_bearing_mass : 17.0\ncarrier_mass : 62.342095161377806\ngearbox_casing_mass : 186.7307481998877\nbearing_mass : 149.0\nMotor_case_mass : 93.82213307304055\nmotor_mass : 713.0\nplanet_bearing_combined_mass : 14.0\nplanet_mass : 6.708306378501573\nsec_carrier_mass : 11.780972450961723\nsmall_ring_mass : 80.67540854397443\nsun_shaft_bearing_mass : 1.0\nsun_mass : 78.73358975659202\nActuator_mass_without_bearing : 561.0430918353453\nActuator_mass : 1455.0430918353452\n"
+ }
 }

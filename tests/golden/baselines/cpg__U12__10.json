@@ -16,5 +16,8 @@
   96,
   0.9,
   0.9
- ]
+ ],
+ "results_files": {
+  "results_BruteForce_U12/CPG_BRUTEFORCE_MIT_U12.csv": "Motor Parameters:\nmaxMotorAngVelRPM, maxMotorAngVelRadPerSec, maxMotorTorque, maxMotorPower, motorMass, motorDia, motorLength\n5760 , 603.1857894892403 , 7.559859796865029 , 4560 , 0.778 , 106.8 , 47.6\n \nGear strength and size parameters:\nFOS, serviceFactor, stressAnalysisMethodName, maxGearBoxDia, maxGearAllowableStressMPa\n1.2 , 1.5 , MIT , 106.8 , 70\n \nOptimization Parameters:\nK_mass, K_Eff, MODULE_BIG_MIN, MODULE_BIG_MAX, MODULE_SMALL_MIN, MODULE_SMALL_MAX, NUM_PLANET_MIN, NUM_PLANET_MAX, NUM_TEETH_SUN_MIN, NUM_TEETH_PLANET_BIG_MIN, NUM_TEETH_PLANET_SMALL_MIN, GEAR_RATIO_MIN, GEAR_RATIO_MAX, GEAR_RATIO_STEP\n1 , -2 , 0.5 , 1.2 , 0.5 , 1.2 , 3 , 7 , 18 , 28 , 28 , 4.0 , 20.0 , 1.0\n \niter, gearRatio, moduleBig, moduleSmall, Ns, NpBig, NpSmall, Nr, numPlanet, fwSunMM, fwPlanetBigMM, fwPanetSmallMM, fwRingMM, mass, eff, peakTorque, Cost, Torque_Density, Outer_Bearing_mass, Actuator_width\n45 , 10.011494252873565 , 0.9 , 0.9 , 18 , 49 , 29 , 96 , 3 , 16.541 , 16.541 , 20.861 , 20.861 , 1.501 , 0.936 , 75.685 , 7.22464829275064 , 50.423 , 0.149 , 117.50188367909232\n\n\n"
+ }
 }
