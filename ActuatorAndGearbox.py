@@ -10289,7 +10289,7 @@ class optimizationWolfromPlanetaryActuator:
                                                 self.totalFeasibleGearboxes += 1
                                                 # Fiter for the Gear Ratio
                                                 if (Actuator.wolfromPlanetaryGearbox.gearRatio() >= self.gearRatioIter and 
-                                                    Actuator.wolfromPlanetaryGearbox.gearRatio() <= (self.gearRatioIter + 1)):
+                                                    Actuator.wolfromPlanetaryGearbox.gearRatio() <= (self.gearRatioIter + self.GEAR_RATIO_STEP)):
                                                     self.totalGearboxesWithReqGR += 1
                                                     
                                                     # Cost Calculation
@@ -10448,7 +10448,7 @@ class optimizationWolfromPlanetaryActuator:
                                                 self.totalFeasibleGearboxes += 1
                                                 # Fiter for the Gear Ratio
                                                 if (Actuator.wolfromPlanetaryGearbox.gearRatio() >= self.gearRatioIter and 
-                                                    Actuator.wolfromPlanetaryGearbox.gearRatio() <= (self.gearRatioIter + 1)):
+                                                    Actuator.wolfromPlanetaryGearbox.gearRatio() <= (self.gearRatioIter + self.GEAR_RATIO_STEP)):
                                                     
                                                     self.totalGearboxesWithReqGR += 1
                                                     
@@ -10856,7 +10856,7 @@ class optimizationDoubleStagePlanetaryActuator:
                                                             self.totalFeasibleGearboxes += 1
                                                             # Fiter for the Gear Ratio
                                                             if (Actuator.doubleStagePlanetaryGearbox.gearRatio() >= self.gearRatioIter and 
-                                                                Actuator.doubleStagePlanetaryGearbox.gearRatio() <= (self.gearRatioIter + 1)):
+                                                                Actuator.doubleStagePlanetaryGearbox.gearRatio() <= (self.gearRatioIter + self.GEAR_RATIO_STEP)):
 
                                                                 self.totalGearboxesWithReqGR += 1
 

@@ -2318,7 +2318,7 @@ class optimizationinternalDoubleStagePlanetaryActuator:
                                                             self.totalFeasibleGearboxes += 1
                                                             # Fiter for the Gear Ratio
                                                             if (Actuator.internaldoubleStagePlanetaryGearbox.gearRatio() >= self.gearRatioIter and 
-                                                                Actuator.internaldoubleStagePlanetaryGearbox.gearRatio() <= (self.gearRatioIter + 1)):
+                                                                Actuator.internaldoubleStagePlanetaryGearbox.gearRatio() <= (self.gearRatioIter + self.GEAR_RATIO_STEP)):
 
                                                                 self.totalGearboxesWithReqGR += 1
 

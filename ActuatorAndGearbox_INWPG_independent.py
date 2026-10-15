@@ -2865,7 +2865,7 @@ class optimizationInrunnerWolfromPlanetaryActuator:
                                                 self.totalFeasibleGearboxes += 1
                                                 # Fiter for the Gear Ratio
                                                 if (Actuator.inrunnerWolfromPlanetaryGearbox.gearRatio() >= self.gearRatioIter and 
-                                                    Actuator.inrunnerWolfromPlanetaryGearbox.gearRatio() <= (self.gearRatioIter + 1)):
+                                                    Actuator.inrunnerWolfromPlanetaryGearbox.gearRatio() <= (self.gearRatioIter + self.GEAR_RATIO_STEP)):
                                                     self.totalGearboxesWithReqGR += 1
                                                     
                                                     # Cost Calculation
@@ -3025,7 +3025,7 @@ class optimizationInrunnerWolfromPlanetaryActuator:
                                                 self.totalFeasibleGearboxes += 1
                                                 # Fiter for the Gear Ratio
                                                 if (Actuator.inrunnerWolfromPlanetaryGearbox.gearRatio() >= self.gearRatioIter and 
-                                                    Actuator.inrunnerWolfromPlanetaryGearbox.gearRatio() <= (self.gearRatioIter + 1)):
+                                                    Actuator.inrunnerWolfromPlanetaryGearbox.gearRatio() <= (self.gearRatioIter + self.GEAR_RATIO_STEP)):
                                                     
                                                     self.totalGearboxesWithReqGR += 1
                                                     
