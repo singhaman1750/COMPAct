@@ -1,4 +1,23 @@
+import functools
+import sys
+
 import numpy as np
+
+# -------------------------------------------------------------------------
+# restores_stdout
+# -------------------------------------------------------------------------
+# The optimisers redirect sys.stdout to their CSV/log file. This decorator
+# puts the previous stream back when the method returns or raises, so a
+# crash mid-run doesn't leave all later output going into a closed file.
+def restores_stdout(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        previous_stdout = sys.stdout
+        try:
+            return func(*args, **kwargs)
+        finally:
+            sys.stdout = previous_stdout
+    return wrapper
 
 # -------------------------------------------------------------------------
 # class material

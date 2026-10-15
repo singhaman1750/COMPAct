@@ -8,6 +8,7 @@ import numpy as np
 from ActuatorAndGearbox import singleStagePlanetaryGearbox
 
 from CommonComponents import material, bearings_discrete, nuts_and_bolts_dimensions, motor_frameless_inrunner as motor
+from CommonComponents import restores_stdout
 
 
 # ╔══════════════════════════════════════════════════════════════════════════╗
@@ -2137,6 +2138,7 @@ class optimizationDoubleStageActuator:
 
         self.gearRatioReq            = 0
 
+    @restores_stdout
     def optimizeActuator(self, Actuator=inrunnerdoubleStageActuator, UsePSCasVariable=0, log=1, csv=0, gearRatioReq = 0, printOptParams = 1):
         self.UsePSCasVariable = UsePSCasVariable
         totalTime = 0

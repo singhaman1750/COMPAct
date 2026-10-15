@@ -5,6 +5,7 @@ import sys
 import time
 
 from CommonComponents import material, bearings_discrete, nuts_and_bolts_dimensions, motor_driver, motor_framed_outrunner as motor
+from CommonComponents import restores_stdout
 
 
 class bearings_continuous:
@@ -9298,6 +9299,7 @@ class optimizationSingleStageActuator:
             # print(iter,",", gearRatio,",",module,",", Ns,",", Np,",", Nr,",", numPlanet,",",  fwSunMM,",", fwPlanetMM,",", fwRingMM,",",Opt_PSC_sun,",", Opt_PSC_planet,",", Opt_PSC_ring,",", Opt_CD_SP, ",", Opt_CD_PR,",", mass,",", eff,",", peakTorque,",", Cost, ",", Torque_Density, ",", Outer_Bearing_mass, ",", Actuator_width)
             print(iter,",", gearRatio,",",module,",", Ns,",", Np,",", Nr,",", numPlanet,",",  fwSunMM,",", fwPlanetMM,",", fwRingMM,",", mass,",", eff,",", peakTorque,",", Cost, ",", Torque_Density, ",", Outer_Bearing_mass, ",", Actuator_width)
 
+    @restores_stdout
     def optimizeActuator(self, Actuator=singleStagePlanetaryActuator, UsePSCasVariable = 1, log = 0, csv = 1, gearRatioReq = 0, printOptParams = 1):
         self.UsePSCasVariable = UsePSCasVariable
         totalTime = 0
@@ -9780,6 +9782,7 @@ class optimizationCompoundPlanetaryActuator:
             Actuator_width = Actuator.actuator_width
             print(iter, ",", gearRatio, ",", moduleBig, ",", moduleSmall, ",", Ns, ",", NpBig, ",", NpSmall, ",", Nr, ",", numPlanet, ",", fwSunMM, ",", fwPlanetBigMM, ",", fwPlanetSmallMM, ",", fwRingMM, ",", mass, ",", eff, ",", peakTorque, ",", Cost, ",", Torque_Density, ",", Outer_Bearing_mass, ",", Actuator_width)
 
+    @restores_stdout
     def optimizeActuator(self, Actuator=compoundPlanetaryActuator, UsePSCasVariable = 0, log=1, csv=0, printOptParams=1, gearRatioReq = 0):   
         self.UsePSCasVariable = UsePSCasVariable
         totalTime = 0
@@ -10186,6 +10189,7 @@ class optimizationWolfromPlanetaryActuator:
 
         self.gearRatioReq = 0
 
+    @restores_stdout
     def optimizeActuator(self, Actuator = wolfromPlanetaryActuator, UsePSCasVariable = 1, log = 0, csv = 1, printOptParams=1, gearRatioReq = 0):
         startTime = time.time()
         self.UsePSCasVariable = UsePSCasVariable
@@ -10750,6 +10754,7 @@ class optimizationDoubleStagePlanetaryActuator:
 
         self.gearRatioReq            = 0
 
+    @restores_stdout
     def optimizeActuator(self, Actuator=doubleStagePlanetaryActuator, UsePSCasVariable=0, log=1, csv=0, gearRatioReq = 0, printOptParams = 1):
         self.UsePSCasVariable = UsePSCasVariable
         totalTime = 0

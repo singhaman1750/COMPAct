@@ -6,6 +6,7 @@ import sys
 import time
 
 from CommonComponents import material, bearings_discrete, nuts_and_bolts_dimensions, motor_driver, motor_frameless_inrunner as motor
+from CommonComponents import restores_stdout
 
 class inrunnerWolfromPlanetaryGearbox:
     def __init__(self,
@@ -2760,6 +2761,7 @@ class optimizationInrunnerWolfromPlanetaryActuator:
 
         self.gearRatioReq = 0
 
+    @restores_stdout
     def optimizeActuator(self, Actuator = inrunnerWolfromPlanetaryActuator, UsePSCasVariable = 1, log = 0, csv = 1, printOptParams=1, gearRatioReq = 0):
         startTime = time.time()
         self.UsePSCasVariable = UsePSCasVariable

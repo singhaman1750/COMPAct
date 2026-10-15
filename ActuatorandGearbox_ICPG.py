@@ -7,6 +7,7 @@ import math
 
 
 from CommonComponents import material, bearings_discrete, nuts_and_bolts_dimensions, motor_frameless_outrunner as motor
+from CommonComponents import restores_stdout
 
 
 # ╔══════════════════════════════════════════════════════════════════════════╗
@@ -1498,6 +1499,7 @@ class optimizationInternalCompoundPlanetaryActuator:
                   Cost, ",", Torque_Density, ",", Outer_Bearing_mass, ",", Actuator_width)
 
     # ── Public entry point ─────────────────────────────────────────────────
+    @restores_stdout
     def optimizeActuator(self, Actuator=internalcompoundPlanetaryActuator,
                          UsePSCasVariable=0, log=1, csv=0, printOptParams=1, gearRatioReq=0):
         self.UsePSCasVariable = UsePSCasVariable

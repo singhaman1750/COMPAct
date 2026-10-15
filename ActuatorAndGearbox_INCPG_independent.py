@@ -6,6 +6,7 @@ import sys
 import time
 
 from CommonComponents import material, bearings_discrete, nuts_and_bolts_dimensions, motor_driver, motor_frameless_inrunner as motor
+from CommonComponents import restores_stdout
 
 class inrunnerCompoundPlanetaryGearbox:
     def __init__(self,
@@ -2325,6 +2326,7 @@ class optimizationInrunnerCompoundPlanetaryActuator:
             Actuator_width = Actuator.actuator_width            
             print(iter, ",", gearRatio, ",", moduleBig, ",", moduleSmall, ",", Ns, ",", NpBig, ",", NpSmall, ",", Nr, ",", numPlanet, ",", fwSunMM, ",", fwPlanetBigMM, ",", fwPlanetSmallMM, ",", fwRingMM, ",", mass, ",", eff, ",", peakTorque, ",", Cost, ",", Torque_Density, ",", Output_bearing_mass, ",", Actuator_width)
  
+    @restores_stdout
     def optimizeActuator(self, Actuator=inrunnerCompoundPlanetaryActuator, UsePSCasVariable = 0, log=1, csv=0, printOptParams=1, gearRatioReq = 0):   
         self.UsePSCasVariable = UsePSCasVariable
         totalTime = 0

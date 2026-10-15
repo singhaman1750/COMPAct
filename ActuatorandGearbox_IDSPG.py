@@ -5,6 +5,7 @@ import sys
 import time
 
 from CommonComponents import material, bearings_discrete, nuts_and_bolts_dimensions, motor_driver, motor_frameless_outrunner as motor
+from CommonComponents import restores_stdout
 
 # Import the base gearbox geometry class from single-stage planetry gearbox file
 from ActuatorAndGearbox import singleStagePlanetaryGearbox
@@ -2212,6 +2213,7 @@ class optimizationinternalDoubleStagePlanetaryActuator:
 
         self.gearRatioReq            = 0
 
+    @restores_stdout
     def optimizeActuator(self, Actuator=internaldoubleStagePlanetaryActuator, UsePSCasVariable=0, log=1, csv=0, gearRatioReq = 0, printOptParams = 1):
         self.UsePSCasVariable = UsePSCasVariable
         totalTime = 0

@@ -6,6 +6,7 @@ import sys
 import time
 
 from CommonComponents import bearings_discrete, nuts_and_bolts_dimensions, motor_driver, motor_frameless_outrunner as motor
+from CommonComponents import restores_stdout
 
 class internalsingleStagePlanetaryGearbox:
     def __init__(self, 
@@ -1829,6 +1830,7 @@ class optimizationInternalSingleStageActuator:
             # print(iter,",", gearRatio,",",module,",", Ns,",", Np,",", Nr,",", numPlanet,",",  fwSunMM,",", fwPlanetMM,",", fwRingMM,",",Opt_PSC_sun,",", Opt_PSC_planet,",", Opt_PSC_ring,",", Opt_CD_SP, ",", Opt_CD_PR,",", mass,",", eff,",", peakTorque,",", Cost, ",", Torque_Density, ",", Outer_Bearing_mass, ",", Actuator_width)
             print(iter,",", gearRatio,",",module,",", Ns,",", Np,",", Nr,",", numPlanet,",",  fwSunMM,",", fwPlanetMM,",", fwRingMM,",", mass,",", eff,",", peakTorque,",", Cost, ",", Torque_Density, ",", Outer_Bearing_mass, ",", Actuator_width)
 
+    @restores_stdout
     def optimizeActuator(self, Actuator=internalsingleStagePlanetaryActuator, UsePSCasVariable = 1, log = 0, csv = 1, gearRatioReq = 0, printOptParams = 1):
         self.UsePSCasVariable = UsePSCasVariable
         totalTime = 0
