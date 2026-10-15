@@ -5,6 +5,7 @@ import sys
 import time
 
 from CommonComponents import material, bearings_discrete, nuts_and_bolts_dimensions, motor_driver, motor_framed_outrunner as motor
+from CommonComponents import restores_stdout
 
 
 class bearings_continuous:
@@ -2267,6 +2268,7 @@ class singleStagePlanetaryActuator:
     def genEquationFile(self, motor_name="NO_MOTOR", gearRatioLL = 0.0, gearRatioUL = 0.0):
         self.setVariables()
         file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'SSPG', 'Equation_Files', motor_name, f'sspg_equations_{gearRatioLL}_{gearRatioUL}.txt')
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, 'w') as eqFile:
             eqFile.writelines([
                 # ---------------- Optimization Variables ----------------
@@ -2402,6 +2404,7 @@ class singleStagePlanetaryActuator:
                 f'"loose_clearance_3DP" = {self.loose_clearance_3DP}\n'                
             ])
         file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'SSPG', 'Equation_Files', motor_name, f'sspg_equations_{gearRatioLL}_{gearRatioUL}_onshape.txt')
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, 'w') as eqFile:
             eqFile.writelines([
                 # ---------------- Optimization Variables ----------------
@@ -3645,6 +3648,7 @@ class compoundPlanetaryActuator:
         # writing values into text file imported which is imported into solidworks
         self.setVariables()
         file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'CPG', 'Equation_Files', motor_name, f'cpg_equations_{gearRatioLL}_{gearRatioUL}.txt')
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, 'w') as eqFile:
             l = [
                     f'"Ns"= {self.Ns}\n',
@@ -3772,6 +3776,7 @@ class compoundPlanetaryActuator:
         eqFile.close()
         
         file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'CPG', 'Equation_Files', motor_name, f'cpg_equations_{gearRatioLL}_{gearRatioUL}_onshape.txt')
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, 'w') as eqFile:
             l = [
                     f'"Ns"= {self.Ns}\n',
@@ -5068,6 +5073,7 @@ class wolfromPlanetaryActuator:
         # writing values into text file imported which is imported into solidworks
         self.setVariables()
         file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'WPG', 'Equation_Files', motor_name, f'wpg_equations_{gearRatioLL}_{gearRatioUL}.txt')
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         # print("File Path: ",file_path)
         with open(file_path, 'w') as eqFile:
             l = [
@@ -5219,6 +5225,7 @@ class wolfromPlanetaryActuator:
             eqFile.writelines(l)
 
         file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'WPG', 'Equation_Files', motor_name, f'wpg_equations_{gearRatioLL}_{gearRatioUL}_onshape.txt')
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         # print("File Path: ",file_path)
         with open(file_path, 'w') as eqFile:
             l = [
@@ -6968,6 +6975,7 @@ class doubleStagePlanetaryActuator:
     def genEquationFile(self, motor_name="NO_MOTOR", gearRatioLL = 0.0, gearRatioUL = 0.0):
        self.setVariables()
        file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'DSPG', 'Equation_Files', motor_name, f'dspg_equations_{gearRatioLL}_{gearRatioUL}_stg1.txt')
+       os.makedirs(os.path.dirname(file_path), exist_ok=True)
        with open(file_path, 'w') as file1:
         lines = [
                 f'"Ns" = {self.Ns1}\n',
@@ -7104,6 +7112,7 @@ class doubleStagePlanetaryActuator:
        file1.close()
        # file_path = os.path.join(os.path.dirname(__file__),'DSPG', 'dspg_equations_stg2.txt')
        file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'DSPG', 'Equation_Files', motor_name, f'dspg_equations_{gearRatioLL}_{gearRatioUL}_stg2.txt')
+       os.makedirs(os.path.dirname(file_path), exist_ok=True)
        with open(file_path, 'w') as file2:
         lines = [
             f'"Ns" = {self.Ns2}\n',
@@ -7239,6 +7248,7 @@ class doubleStagePlanetaryActuator:
        file2.close()
 
        file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'DSPG', 'Equation_Files', motor_name, f'dspg_equations_{gearRatioLL}_{gearRatioUL}_onshape.txt')
+       os.makedirs(os.path.dirname(file_path), exist_ok=True)
        with open(file_path, 'w') as file1:
         lines = [
                 f'"a1_Ns" = {self.Ns1}\n',
@@ -9298,8 +9308,11 @@ class optimizationSingleStageActuator:
             # print(iter,",", gearRatio,",",module,",", Ns,",", Np,",", Nr,",", numPlanet,",",  fwSunMM,",", fwPlanetMM,",", fwRingMM,",",Opt_PSC_sun,",", Opt_PSC_planet,",", Opt_PSC_ring,",", Opt_CD_SP, ",", Opt_CD_PR,",", mass,",", eff,",", peakTorque,",", Cost, ",", Torque_Density, ",", Outer_Bearing_mass, ",", Actuator_width)
             print(iter,",", gearRatio,",",module,",", Ns,",", Np,",", Nr,",", numPlanet,",",  fwSunMM,",", fwPlanetMM,",", fwRingMM,",", mass,",", eff,",", peakTorque,",", Cost, ",", Torque_Density, ",", Outer_Bearing_mass, ",", Actuator_width)
 
-    def optimizeActuator(self, Actuator=singleStagePlanetaryActuator, UsePSCasVariable = 1, log = 0, csv = 1, gearRatioReq = 0, printOptParams = 1):
+    @restores_stdout
+    def optimizeActuator(self, Actuator=singleStagePlanetaryActuator, UsePSCasVariable = 0, log = 0, csv = 1, gearRatioReq = 0, printOptParams = 1):
         self.UsePSCasVariable = UsePSCasVariable
+        if UsePSCasVariable:
+            raise NotImplementedError("UsePSCasVariable=1 is not available: the continuous PSC optimiser (optimal_continuous_PSC_*) is not implemented. Use UsePSCasVariable=0.")
         totalTime = 0
         opt_parameters = None # [Gear Ratio, numPlanet, Ns, Np, Nr, Module]
         self.gearRatioReq = gearRatioReq
@@ -9336,6 +9349,7 @@ class optimizationSingleStageActuator:
         elif log:
             fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/SSPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}.txt"
             
+        os.makedirs(os.path.dirname(fileName), exist_ok=True)
         with open(fileName, "w") as file1:
             sys.stdout = file1
             if (printOptParams):
@@ -9478,6 +9492,7 @@ class optimizationSingleStageActuator:
             elif log:
                 fileName = f"./results/results_bilevel_{Actuator.motor.motorName}/SSPG_BILEVEL_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}.txt"
             
+            os.makedirs(os.path.dirname(fileName), exist_ok=True)
             with open(fileName, "w") as file1:
                 sys.stdout = file1
                 self.printOptimizationParameters(Actuator, log, csv)
@@ -9652,7 +9667,7 @@ class optimizationCompoundPlanetaryActuator:
         self.cntrIterBeforeCons      = 0
         self.iter                    = 1
         self.gearRatioIter           = GEAR_RATIO_MIN
-        self.UsePSCasVariable        = 1 # Default Yes
+        self.UsePSCasVariable        = 0 # Default Yes
 
         self.gear_standard_parameters = gear_standard_parameters
         self.design_parameters        = design_parameters
@@ -9778,8 +9793,11 @@ class optimizationCompoundPlanetaryActuator:
             Actuator_width = Actuator.actuator_width
             print(iter, ",", gearRatio, ",", moduleBig, ",", moduleSmall, ",", Ns, ",", NpBig, ",", NpSmall, ",", Nr, ",", numPlanet, ",", fwSunMM, ",", fwPlanetBigMM, ",", fwPlanetSmallMM, ",", fwRingMM, ",", mass, ",", eff, ",", peakTorque, ",", Cost, ",", Torque_Density, ",", Outer_Bearing_mass, ",", Actuator_width)
 
+    @restores_stdout
     def optimizeActuator(self, Actuator=compoundPlanetaryActuator, UsePSCasVariable = 0, log=1, csv=0, printOptParams=1, gearRatioReq = 0):   
         self.UsePSCasVariable = UsePSCasVariable
+        if UsePSCasVariable:
+            raise NotImplementedError("UsePSCasVariable=1 is not available: the continuous PSC optimiser (optimal_continuous_PSC_*) is not implemented. Use UsePSCasVariable=0.")
         totalTime = 0
         self.gearRatioReq = gearRatioReq
         opt_parameters = None
@@ -9816,6 +9834,7 @@ class optimizationCompoundPlanetaryActuator:
         elif log:
             fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/CPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}_LOG.txt"
         
+        os.makedirs(os.path.dirname(fileName), exist_ok=True)
         with open(fileName, "w") as file1:
             sys.stdout = file1
             if (printOptParams):
@@ -9980,6 +9999,7 @@ class optimizationCompoundPlanetaryActuator:
         elif log:
             fileName = f"./results/results_bilevel_{Actuator.motor.motorName}/CPG_BILEVEL_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}_LOG.txt"
         
+        os.makedirs(os.path.dirname(fileName), exist_ok=True)
         with open(fileName, "w") as file1:
             sys.stdout = file1
             self.printOptimizationParameters(Actuator, log, csv)
@@ -10176,15 +10196,18 @@ class optimizationWolfromPlanetaryActuator:
         self.cntrIterBeforeCons       = 0
         self.iter                     = 0
         self.gearRatioIter            = self.GEAR_RATIO_MIN
-        self.UsePSCasVariable         = 1
+        self.UsePSCasVariable         = 0
         self.design_parameters        = design_parameters
         self.gear_standard_parameters = gear_standard_parameters
 
         self.gearRatioReq = 0
 
-    def optimizeActuator(self, Actuator = wolfromPlanetaryActuator, UsePSCasVariable = 1, log = 0, csv = 1, printOptParams=1, gearRatioReq = 0):
+    @restores_stdout
+    def optimizeActuator(self, Actuator = wolfromPlanetaryActuator, UsePSCasVariable = 0, log = 0, csv = 1, printOptParams=1, gearRatioReq = 0):
         startTime = time.time()
         self.UsePSCasVariable = UsePSCasVariable
+        if UsePSCasVariable:
+            raise NotImplementedError("UsePSCasVariable=1 is not available: the continuous PSC optimiser (optimal_continuous_PSC_*) is not implemented. Use UsePSCasVariable=0.")
         self.gearRatioReq = gearRatioReq
         opt_parameters = None
         if UsePSCasVariable == 0:
@@ -10225,6 +10248,7 @@ class optimizationWolfromPlanetaryActuator:
         elif log:
             fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/WPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}_LOG.txt"
             
+        os.makedirs(os.path.dirname(fileName), exist_ok=True)
         with open(fileName, "w") as wolfromLogFile:
             sys.stdout = wolfromLogFile
             if (printOptParams):
@@ -10284,7 +10308,7 @@ class optimizationWolfromPlanetaryActuator:
                                                 self.totalFeasibleGearboxes += 1
                                                 # Fiter for the Gear Ratio
                                                 if (Actuator.wolfromPlanetaryGearbox.gearRatio() >= self.gearRatioIter and 
-                                                    Actuator.wolfromPlanetaryGearbox.gearRatio() <= (self.gearRatioIter + 1)):
+                                                    Actuator.wolfromPlanetaryGearbox.gearRatio() <= (self.gearRatioIter + self.GEAR_RATIO_STEP)):
                                                     self.totalGearboxesWithReqGR += 1
                                                     
                                                     # Cost Calculation
@@ -10390,6 +10414,7 @@ class optimizationWolfromPlanetaryActuator:
         elif log:
             fileName = f"./results/results_bilevel_{Actuator.motor.motorName}/WPG_BILEVEL_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}_LOG.txt"
         
+        os.makedirs(os.path.dirname(fileName), exist_ok=True)
         with open(fileName, "w") as wolfromLogFile:
             sys.stdout = wolfromLogFile
             self.printOptimizationParameters(Actuator, log, csv)
@@ -10442,7 +10467,7 @@ class optimizationWolfromPlanetaryActuator:
                                                 self.totalFeasibleGearboxes += 1
                                                 # Fiter for the Gear Ratio
                                                 if (Actuator.wolfromPlanetaryGearbox.gearRatio() >= self.gearRatioIter and 
-                                                    Actuator.wolfromPlanetaryGearbox.gearRatio() <= (self.gearRatioIter + 1)):
+                                                    Actuator.wolfromPlanetaryGearbox.gearRatio() <= (self.gearRatioIter + self.GEAR_RATIO_STEP)):
                                                     
                                                     self.totalGearboxesWithReqGR += 1
                                                     
@@ -10737,15 +10762,18 @@ class optimizationDoubleStagePlanetaryActuator:
         self.cntrIterBeforeCons      = 0
         self.iter                    = 0
         self.gearRatioIter           = self.GEAR_RATIO_MIN 
-        self.UsePSCasVariable        = 1 # Default   
+        self.UsePSCasVariable        = 0 # Default   
 
         self.gear_standard_parameters = gear_standard_parameters
         self.design_parameters        = design_parameters
 
         self.gearRatioReq            = 0
 
+    @restores_stdout
     def optimizeActuator(self, Actuator=doubleStagePlanetaryActuator, UsePSCasVariable=0, log=1, csv=0, gearRatioReq = 0, printOptParams = 1):
         self.UsePSCasVariable = UsePSCasVariable
+        if UsePSCasVariable:
+            raise NotImplementedError("UsePSCasVariable=1 is not available: the continuous PSC optimiser (optimal_continuous_PSC_*) is not implemented. Use UsePSCasVariable=0.")
         totalTime = 0
         self.gearRatioReq = gearRatioReq
         opt_parameters = None
@@ -10782,6 +10810,7 @@ class optimizationDoubleStagePlanetaryActuator:
         elif log:
             fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/DSPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}_LOG.txt"
         
+        os.makedirs(os.path.dirname(fileName), exist_ok=True)
         with open(fileName, "w") as DSPGLogFile:
             sys.stdout = DSPGLogFile
             if(printOptParams):
@@ -10849,7 +10878,7 @@ class optimizationDoubleStagePlanetaryActuator:
                                                             self.totalFeasibleGearboxes += 1
                                                             # Fiter for the Gear Ratio
                                                             if (Actuator.doubleStagePlanetaryGearbox.gearRatio() >= self.gearRatioIter and 
-                                                                Actuator.doubleStagePlanetaryGearbox.gearRatio() <= (self.gearRatioIter + 1)):
+                                                                Actuator.doubleStagePlanetaryGearbox.gearRatio() <= (self.gearRatioIter + self.GEAR_RATIO_STEP)):
 
                                                                 self.totalGearboxesWithReqGR += 1
 
@@ -10970,6 +10999,7 @@ class optimizationDoubleStagePlanetaryActuator:
         elif log:
             fileName = f"./results/results_bilevel_{Actuator.motor.motorName}/DSPG_BILEVEL_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}_LOG.txt"
         
+        os.makedirs(os.path.dirname(fileName), exist_ok=True)
         with open(fileName, "w") as dspgLogFile:
             sys.stdout = dspgLogFile
             self.printOptimizationParameters(Actuator, log, csv)

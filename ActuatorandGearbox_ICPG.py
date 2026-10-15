@@ -7,6 +7,7 @@ import math
 
 
 from CommonComponents import material, bearings_discrete, nuts_and_bolts_dimensions, motor_frameless_outrunner as motor
+from CommonComponents import restores_stdout
 
 
 # ╔══════════════════════════════════════════════════════════════════════════╗
@@ -1368,7 +1369,7 @@ class optimizationInternalCompoundPlanetaryActuator:
         self.cntrIterBeforeCons      = 0
         self.iter                    = 1
         self.gearRatioIter           = GEAR_RATIO_MIN
-        self.UsePSCasVariable        = 1
+        self.UsePSCasVariable        = 0
 
         self.gear_standard_parameters = gear_standard_parameters
         self.design_parameters        = design_parameters
@@ -1498,9 +1499,12 @@ class optimizationInternalCompoundPlanetaryActuator:
                   Cost, ",", Torque_Density, ",", Outer_Bearing_mass, ",", Actuator_width)
 
     # ── Public entry point ─────────────────────────────────────────────────
+    @restores_stdout
     def optimizeActuator(self, Actuator=internalcompoundPlanetaryActuator,
                          UsePSCasVariable=0, log=1, csv=0, printOptParams=1, gearRatioReq=0):
         self.UsePSCasVariable = UsePSCasVariable
+        if UsePSCasVariable:
+            raise NotImplementedError("UsePSCasVariable=1 is not available: the continuous PSC optimiser (optimal_continuous_PSC_*) is not implemented. Use UsePSCasVariable=0.")
         self.gearRatioReq     = gearRatioReq
         opt_parameters        = None
 
@@ -1685,6 +1689,7 @@ class optimizationInternalCompoundPlanetaryActuator:
                     if csv else
                     f"CPG_BILEVEL_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}_LOG.txt")
 
+        os.makedirs(os.path.dirname(fileName), exist_ok=True)
         with open(fileName, "w") as file1:
             sys.stdout = file1
             self.printOptimizationParameters(Actuator, log, csv)

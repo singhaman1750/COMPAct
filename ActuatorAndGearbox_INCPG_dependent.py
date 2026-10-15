@@ -6,6 +6,7 @@ import sys
 import time
 
 from CommonComponents import material, bearings_discrete, nuts_and_bolts_dimensions, motor_driver, motor_frameless_inrunner as motor
+from CommonComponents import restores_stdout
 
 class inrunnerCompoundPlanetaryGearbox:
     def __init__(self,
@@ -882,6 +883,7 @@ class inrunnerCompoundPlanetaryActuator:
         # writing values into text file imported which is imported into solidworks
         self.setVariables()
         file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'INCPG', 'Equation_Files', motor_name, f'incpg_equations_{gearRatioLL}_{gearRatioUL}.txt')
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, 'w') as eqFile:
             l = [
                     f'"Ns"= {self.Ns}\n',
@@ -1023,6 +1025,7 @@ class inrunnerCompoundPlanetaryActuator:
         eqFile.close()
         
         file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'INCPG', 'Equation_Files', motor_name, f'incpg_equations_{gearRatioLL}_{gearRatioUL}_onshape.txt')
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, 'w') as eqFile:
             l = [
                     f'"Ns"= {self.Ns}\n',
@@ -2187,7 +2190,7 @@ class optimizationInrunnerCompoundPlanetaryActuator:
         self.cntrIterBeforeCons      = 0
         self.iter                    = 1
         self.gearRatioIter           = GEAR_RATIO_MIN
-        self.UsePSCasVariable        = 1 # Default Yes
+        self.UsePSCasVariable        = 0 # Default Yes
 
         self.gear_standard_parameters = gear_standard_parameters
         self.design_parameters        = design_parameters
@@ -2313,8 +2316,11 @@ class optimizationInrunnerCompoundPlanetaryActuator:
             Actuator_width = Actuator.actuator_width
             print(iter, ",", gearRatio, ",", moduleBig, ",", moduleSmall, ",", Ns, ",", NpBig, ",", NpSmall, ",", Nr, ",", numPlanet, ",", fwSunMM, ",", fwPlanetBigMM, ",", fwPlanetSmallMM, ",", fwRingMM, ",", mass, ",", eff, ",", peakTorque, ",", Cost, ",", Torque_Density, ",", Output_bearing_mass, ",", Actuator_width)
 
+    @restores_stdout
     def optimizeActuator(self, Actuator=inrunnerCompoundPlanetaryActuator, UsePSCasVariable = 0, log=1, csv=0, printOptParams=1, gearRatioReq = 0):   
         self.UsePSCasVariable = UsePSCasVariable
+        if UsePSCasVariable:
+            raise NotImplementedError("UsePSCasVariable=1 is not available: the continuous PSC optimiser (optimal_continuous_PSC_*) is not implemented. Use UsePSCasVariable=0.")
         totalTime = 0
         self.gearRatioReq = gearRatioReq
         opt_parameters = None
@@ -2351,6 +2357,7 @@ class optimizationInrunnerCompoundPlanetaryActuator:
         elif log:
             fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/INCPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}_LOG.txt"
         
+        os.makedirs(os.path.dirname(fileName), exist_ok=True)
         with open(fileName, "w") as file1:
             sys.stdout = file1
             if (printOptParams):
@@ -2522,6 +2529,7 @@ class optimizationInrunnerCompoundPlanetaryActuator:
         elif log:
             fileName = f"./results/results_bilevel_{Actuator.motor.motorName}/INCPG_BILEVEL_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}_LOG.txt"
         
+        os.makedirs(os.path.dirname(fileName), exist_ok=True)
         with open(fileName, "w") as file1:
             sys.stdout = file1
             self.printOptimizationParameters(Actuator, log, csv)

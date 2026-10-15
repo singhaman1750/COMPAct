@@ -8,6 +8,7 @@ import numpy as np
 from ActuatorAndGearbox import singleStagePlanetaryGearbox
 
 from CommonComponents import material, bearings_discrete, nuts_and_bolts_dimensions, motor_frameless_inrunner as motor
+from CommonComponents import restores_stdout
 
 
 # ╔══════════════════════════════════════════════════════════════════════════╗
@@ -2130,15 +2131,18 @@ class optimizationDoubleStageActuator:
         self.cntrIterBeforeCons      = 0
         self.iter                    = 0
         self.gearRatioIter           = self.GEAR_RATIO_MIN 
-        self.UsePSCasVariable        = 1 # Default   
+        self.UsePSCasVariable        = 0 # Default   
 
         self.gear_standard_parameters = gear_standard_parameters
         self.design_parameters        = design_parameters
 
         self.gearRatioReq            = 0
 
+    @restores_stdout
     def optimizeActuator(self, Actuator=inrunnerdoubleStageActuator, UsePSCasVariable=0, log=1, csv=0, gearRatioReq = 0, printOptParams = 1):
         self.UsePSCasVariable = UsePSCasVariable
+        if UsePSCasVariable:
+            raise NotImplementedError("UsePSCasVariable=1 is not available: the continuous PSC optimiser (optimal_continuous_PSC_*) is not implemented. Use UsePSCasVariable=0.")
         totalTime = 0
         self.gearRatioReq = gearRatioReq
         opt_parameters = None
@@ -2175,6 +2179,7 @@ class optimizationDoubleStageActuator:
         elif log:
             fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/INDSPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}_LOG.txt"
         
+        os.makedirs(os.path.dirname(fileName), exist_ok=True)
         with open(fileName, "w") as DSPGLogFile:
             sys.stdout = DSPGLogFile
             if(printOptParams):
@@ -2244,7 +2249,7 @@ class optimizationDoubleStageActuator:
                                                             self.totalFeasibleGearboxes += 1
                                                             # Fiter for the Gear Ratio
                                                             if (Actuator.inrunnerdoubleStagePlanetaryGearbox.gearRatio() >= self.gearRatioIter and 
-                                                                Actuator.inrunnerdoubleStagePlanetaryGearbox.gearRatio() <= (self.gearRatioIter + 1)):
+                                                                Actuator.inrunnerdoubleStagePlanetaryGearbox.gearRatio() <= (self.gearRatioIter + self.GEAR_RATIO_STEP)):
 
                                                                 self.totalGearboxesWithReqGR += 1
 
@@ -2370,6 +2375,7 @@ class optimizationDoubleStageActuator:
         elif log:
             fileName = f"./results/results_bilevel_{Actuator.motor.motorName}/INDSPG_BILEVEL_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}_LOG.txt"
         
+        os.makedirs(os.path.dirname(fileName), exist_ok=True)
         with open(fileName, "w") as dspgLogFile:
             sys.stdout = dspgLogFile
             self.printOptimizationParameters(Actuator, log, csv)

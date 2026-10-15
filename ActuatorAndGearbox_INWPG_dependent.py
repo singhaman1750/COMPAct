@@ -6,6 +6,7 @@ import sys
 import time
 
 from CommonComponents import material, bearings_discrete, nuts_and_bolts_dimensions, motor_driver, motor_frameless_inrunner as motor
+from CommonComponents import restores_stdout
 
 class inrunnerWolfromPlanetaryGearbox:
     def __init__(self,
@@ -1174,6 +1175,7 @@ class inrunnerWolfromPlanetaryActuator:
         # writing values into text file imported which is imported into solidworks
         self.setVariables()
         file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'INWPG', 'Equation_Files', motor_name, f'inwpg_equations_{gearRatioLL}_{gearRatioUL}.txt')
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, 'w') as eqFile:
             l = [
                     f'"Ns"= {self.Ns}\n',
@@ -1327,6 +1329,7 @@ class inrunnerWolfromPlanetaryActuator:
         eqFile.close()
         
         file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'INWPG', 'Equation_Files', motor_name, f'inwpg_equations_{gearRatioLL}_{gearRatioUL}_onshape.txt')
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, 'w') as eqFile:
             l = [
                     f'"Ns"= {self.Ns}\n',
@@ -2760,15 +2763,18 @@ class optimizationInrunnerWolfromPlanetaryActuator:
         self.cntrIterBeforeCons       = 0
         self.iter                     = 0
         self.gearRatioIter            = self.GEAR_RATIO_MIN
-        self.UsePSCasVariable         = 1
+        self.UsePSCasVariable         = 0
         self.design_parameters        = design_parameters
         self.gear_standard_parameters = gear_standard_parameters
 
         self.gearRatioReq = 0
 
-    def optimizeActuator(self, Actuator = inrunnerWolfromPlanetaryActuator, UsePSCasVariable = 1, log = 0, csv = 1, printOptParams=1, gearRatioReq = 0):
+    @restores_stdout
+    def optimizeActuator(self, Actuator = inrunnerWolfromPlanetaryActuator, UsePSCasVariable = 0, log = 0, csv = 1, printOptParams=1, gearRatioReq = 0):
         startTime = time.time()
         self.UsePSCasVariable = UsePSCasVariable
+        if UsePSCasVariable:
+            raise NotImplementedError("UsePSCasVariable=1 is not available: the continuous PSC optimiser (optimal_continuous_PSC_*) is not implemented. Use UsePSCasVariable=0.")
         self.gearRatioReq = gearRatioReq
         opt_parameters = None
         if UsePSCasVariable == 0:
@@ -2809,6 +2815,7 @@ class optimizationInrunnerWolfromPlanetaryActuator:
         elif log:
             fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/INWPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}_LOG.txt"
             
+        os.makedirs(os.path.dirname(fileName), exist_ok=True)
         with open(fileName, "w") as wolfromLogFile:
             sys.stdout = wolfromLogFile
             if (printOptParams):
@@ -2872,7 +2879,7 @@ class optimizationInrunnerWolfromPlanetaryActuator:
                                                 self.totalFeasibleGearboxes += 1
                                                 # Fiter for the Gear Ratio
                                                 if (Actuator.inrunnerWolfromPlanetaryGearbox.gearRatio() >= self.gearRatioIter and 
-                                                    Actuator.inrunnerWolfromPlanetaryGearbox.gearRatio() <= (self.gearRatioIter + 1)):
+                                                    Actuator.inrunnerWolfromPlanetaryGearbox.gearRatio() <= (self.gearRatioIter + self.GEAR_RATIO_STEP)):
                                                     self.totalGearboxesWithReqGR += 1
                                                     
                                                     # Cost Calculation
@@ -2979,6 +2986,7 @@ class optimizationInrunnerWolfromPlanetaryActuator:
         elif log:
             fileName = f"./results/results_bilevel_{Actuator.motor.motorName}/WPG_BILEVEL_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}_LOG.txt"
         
+        os.makedirs(os.path.dirname(fileName), exist_ok=True)
         with open(fileName, "w") as wolfromLogFile:
             sys.stdout = wolfromLogFile
             self.printOptimizationParameters(Actuator, log, csv)
@@ -3031,7 +3039,7 @@ class optimizationInrunnerWolfromPlanetaryActuator:
                                                 self.totalFeasibleGearboxes += 1
                                                 # Fiter for the Gear Ratio
                                                 if (Actuator.inrunnerWolfromPlanetaryGearbox.gearRatio() >= self.gearRatioIter and 
-                                                    Actuator.inrunnerWolfromPlanetaryGearbox.gearRatio() <= (self.gearRatioIter + 1)):
+                                                    Actuator.inrunnerWolfromPlanetaryGearbox.gearRatio() <= (self.gearRatioIter + self.GEAR_RATIO_STEP)):
                                                     
                                                     self.totalGearboxesWithReqGR += 1
                                                     

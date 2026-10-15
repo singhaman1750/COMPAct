@@ -116,7 +116,9 @@ MotorRI100 = Motor( rotor_OD                     = Motor_RI100_rotor_OD,
                     maxMotorAngVelRPM           = Motor_RI100_maxMotorAngVelRPM,
                     maxMotorTorque              = Motor_RI100_maxMotorTorque,
                     maxMotorPower               = Motor_RI100_maxMotorPower,
-                    motorMass                   = Motor_RI100_motorMass
+                    motorMass                   = Motor_RI100_motorMass,
+                    stator_hole_num             = motor_data["MotorRI100"]["stator_hole_num"],
+                    motorName                   = "RI100"
                 )
 
 #MOTOR RI80
@@ -136,7 +138,9 @@ MotorRI80 = Motor( rotor_OD                     = Motor_RI80_rotor_OD,
                     maxMotorAngVelRPM           = Motor_RI80_maxMotorAngVelRPM,
                     maxMotorTorque              = Motor_RI80_maxMotorTorque,
                     maxMotorPower               = Motor_RI80_maxMotorPower,
-                    motorMass                   = Motor_RI80_motorMass
+                    motorMass                   = Motor_RI80_motorMass,
+                    stator_hole_num             = motor_data["MotorRI80"]["stator_hole_num"],
+                    motorName                   = "RI80"
                 )   
 
 
