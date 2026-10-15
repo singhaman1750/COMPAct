@@ -2268,6 +2268,7 @@ class singleStagePlanetaryActuator:
     def genEquationFile(self, motor_name="NO_MOTOR", gearRatioLL = 0.0, gearRatioUL = 0.0):
         self.setVariables()
         file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'SSPG', 'Equation_Files', motor_name, f'sspg_equations_{gearRatioLL}_{gearRatioUL}.txt')
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, 'w') as eqFile:
             eqFile.writelines([
                 # ---------------- Optimization Variables ----------------
@@ -2403,6 +2404,7 @@ class singleStagePlanetaryActuator:
                 f'"loose_clearance_3DP" = {self.loose_clearance_3DP}\n'                
             ])
         file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'SSPG', 'Equation_Files', motor_name, f'sspg_equations_{gearRatioLL}_{gearRatioUL}_onshape.txt')
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, 'w') as eqFile:
             eqFile.writelines([
                 # ---------------- Optimization Variables ----------------
@@ -3646,6 +3648,7 @@ class compoundPlanetaryActuator:
         # writing values into text file imported which is imported into solidworks
         self.setVariables()
         file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'CPG', 'Equation_Files', motor_name, f'cpg_equations_{gearRatioLL}_{gearRatioUL}.txt')
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, 'w') as eqFile:
             l = [
                     f'"Ns"= {self.Ns}\n',
@@ -3773,6 +3776,7 @@ class compoundPlanetaryActuator:
         eqFile.close()
         
         file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'CPG', 'Equation_Files', motor_name, f'cpg_equations_{gearRatioLL}_{gearRatioUL}_onshape.txt')
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, 'w') as eqFile:
             l = [
                     f'"Ns"= {self.Ns}\n',
@@ -5069,6 +5073,7 @@ class wolfromPlanetaryActuator:
         # writing values into text file imported which is imported into solidworks
         self.setVariables()
         file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'WPG', 'Equation_Files', motor_name, f'wpg_equations_{gearRatioLL}_{gearRatioUL}.txt')
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         # print("File Path: ",file_path)
         with open(file_path, 'w') as eqFile:
             l = [
@@ -5220,6 +5225,7 @@ class wolfromPlanetaryActuator:
             eqFile.writelines(l)
 
         file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'WPG', 'Equation_Files', motor_name, f'wpg_equations_{gearRatioLL}_{gearRatioUL}_onshape.txt')
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         # print("File Path: ",file_path)
         with open(file_path, 'w') as eqFile:
             l = [
@@ -6969,6 +6975,7 @@ class doubleStagePlanetaryActuator:
     def genEquationFile(self, motor_name="NO_MOTOR", gearRatioLL = 0.0, gearRatioUL = 0.0):
        self.setVariables()
        file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'DSPG', 'Equation_Files', motor_name, f'dspg_equations_{gearRatioLL}_{gearRatioUL}_stg1.txt')
+       os.makedirs(os.path.dirname(file_path), exist_ok=True)
        with open(file_path, 'w') as file1:
         lines = [
                 f'"Ns" = {self.Ns1}\n',
@@ -7105,6 +7112,7 @@ class doubleStagePlanetaryActuator:
        file1.close()
        # file_path = os.path.join(os.path.dirname(__file__),'DSPG', 'dspg_equations_stg2.txt')
        file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'DSPG', 'Equation_Files', motor_name, f'dspg_equations_{gearRatioLL}_{gearRatioUL}_stg2.txt')
+       os.makedirs(os.path.dirname(file_path), exist_ok=True)
        with open(file_path, 'w') as file2:
         lines = [
             f'"Ns" = {self.Ns2}\n',
@@ -7240,6 +7248,7 @@ class doubleStagePlanetaryActuator:
        file2.close()
 
        file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'DSPG', 'Equation_Files', motor_name, f'dspg_equations_{gearRatioLL}_{gearRatioUL}_onshape.txt')
+       os.makedirs(os.path.dirname(file_path), exist_ok=True)
        with open(file_path, 'w') as file1:
         lines = [
                 f'"a1_Ns" = {self.Ns1}\n',

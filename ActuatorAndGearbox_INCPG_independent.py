@@ -877,6 +877,7 @@ class inrunnerCompoundPlanetaryActuator:
         # writing values into text file imported which is imported into solidworks
         self.setVariables()
         file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'INCPG', 'Equation_Files', motor_name, f'incpg_equations_{gearRatioLL}_{gearRatioUL}.txt')
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, 'w') as eqFile:
             l = [
                     f'"Ns"= {self.Ns}\n',
@@ -1019,6 +1020,7 @@ class inrunnerCompoundPlanetaryActuator:
         eqFile.close()
         
         file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'INCPG', 'Equation_Files', motor_name, f'incpg_equations_{gearRatioLL}_{gearRatioUL}_onshape.txt')
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, 'w') as eqFile:
             l = [
                     f'"Ns"= {self.Ns}\n',
