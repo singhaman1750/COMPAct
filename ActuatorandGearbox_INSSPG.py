@@ -1749,7 +1749,7 @@ class optimizationSingleStageActuator:
                                     Actuator.planetaryGearbox.setNumPlanet(Actuator.planetaryGearbox.numPlanet + 1)
                             Actuator.planetaryGearbox.setNp(Actuator.planetaryGearbox.Np + 1)
                         Actuator.planetaryGearbox.setNs(Actuator.planetaryGearbox.Ns + 1)
-                    Actuator.planetaryGearbox.setModule(Actuator.planetaryGearbox.module + 0.100)
+                    Actuator.planetaryGearbox.setModule(round(Actuator.planetaryGearbox.module + 0.100, 1))
                 if (opt_done == 1):
                     self.printOptimizationResults(opt_actuator, log, csv)
                 self.gearRatioIter += self.GEAR_RATIO_STEP
@@ -1887,7 +1887,7 @@ class optimizationSingleStageActuator:
                                         Actuator.planetaryGearbox.setNumPlanet(Actuator.planetaryGearbox.numPlanet + 1)
                                 Actuator.planetaryGearbox.setNp(Actuator.planetaryGearbox.Np + 1)
                         Actuator.planetaryGearbox.setNs(Actuator.planetaryGearbox.Ns + 1)
-                    Actuator.planetaryGearbox.setModule(Actuator.planetaryGearbox.module + 0.100)
+                    Actuator.planetaryGearbox.setModule(round(Actuator.planetaryGearbox.module + 0.100, 1))
                 if (opt_done == 1):
                     try:
                         self.sspgOpt = optimal_continuous_PSC_sspg(GEAR_RATIO_MIN = opt_parameters[0],
