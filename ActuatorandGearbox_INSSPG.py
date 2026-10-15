@@ -463,7 +463,7 @@ class singleStagePlanetaryActuator:
 #-------for type 1 rotor suport bearing
         self.bearingIDClearanceMM = self.design_params.get("bearingIDClearanceMM")
         IdrequiredMM_R_S              = (self.Rotor_ID - 4)
-        Bearings                  = bearings_discrete(id,IdrequiredMM_R_S)
+        Bearings                  = bearings_discrete(idRequiredMM=0, odRequiredMM=IdrequiredMM_R_S)
         
         self.bearing_ID_R_S           = Bearings.getBearingIDMM()
         self.bearing_OD_R_S           = Bearings.getBearingODMM()
@@ -477,7 +477,7 @@ class singleStagePlanetaryActuator:
 #------for type 1 rotor upper support bearing
         self.bearingIDClearanceMM = self.design_params.get("bearingIDClearanceMM")
         IdrequiredMM_R_U_S              = (self.Stator_ID - self.standard_clearance_1_5mm*5)
-        Bearings                  = bearings_discrete(id,IdrequiredMM_R_U_S)
+        Bearings                  = bearings_discrete(idRequiredMM=0, odRequiredMM=IdrequiredMM_R_U_S)
         
         self.bearing_ID_R_U_S           = Bearings.getBearingIDMM()
         self.bearing_OD_R_U_S           = Bearings.getBearingODMM()
@@ -1313,7 +1313,7 @@ class singleStagePlanetaryActuator:
         
         ##------sun and planet bearing mass ---------##
 
-        sun_shaft_bearing_mass       = 4 * 0.001 + 0.022 + 0.026 # mass of both rotor support bearing added
+        sun_shaft_bearing_mass       = 4 * 0.001 + self.bearing_mass_R_S + self.bearing_mass_R_U_S # sun shaft bearing + both rotor support bearings chosen in setVariables()
         planet_bearing_mass          = 1 * 0.001 
         planet_bearing_num           = numPlanet * 2
         planet_bearing_combined_mass = planet_bearing_mass * planet_bearing_num

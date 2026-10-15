@@ -14,8 +14,8 @@
   54,
   132,
   0.6,
-  0.9699287996307059,
-  0.161,
+  0.9689287996307059,
+  0.16,
   0.013416103336433116,
   0.007400080466994777,
   0.09155440838019765,
@@ -26,7 +26,7 @@
   0.006622797756217949
  ],
  "results_files": {
-  "results_BruteForce_RI100/SSPG_BRUTEFORCE_MIT_RI100_insspg_type_1.csv": "iter, gearRatio, module, Ns, Np, Nr, numPlanet, fwSunMM, fwPlanetMM, fwRingMM, mass, eff, peakTorque, Cost, Torque_Density, Outer_Bearing_mass, Actuator_width\n2,6.5,0.6,24,54,132,3,4.083,8.0,8.0,0.97,0.957,8.04,0.6564143277786046,8.288659793814432,0.161,0\n\n",
+  "results_BruteForce_RI100/SSPG_BRUTEFORCE_MIT_RI100_insspg_type_1.csv": "iter, gearRatio, module, Ns, Np, Nr, numPlanet, fwSunMM, fwPlanetMM, fwRingMM, mass, eff, peakTorque, Cost, Torque_Density, Outer_Bearing_mass, Actuator_width\n2,6.5,0.6,24,54,132,3,4.083,8.0,8.0,0.969,0.957,8.04,0.6554143277786046,8.297213622291022,0.16,0\n\n",
   "results_BruteForce_RI100/SSPG_BRUTEFORCE_MIT_RI100_insspg_type_1_Motor_Params.csv": "Motor Parameters:\nmaxMotorAngVelRPM,maxMotorAngVelRadPerSec,maxMotorTorque,maxMotorPower,motorMass,motorDia,motorLength\n5040,527.7875658030853,1.2368612720284438,521,0.5,104.0,24.5\n\nGear strength and size parameters:\nFOS,serviceFactor,stressAnalysisMethodName,maxGearBoxDia,maxGearAllowableStressMPa\n1.2,1.5,MIT,95.1,70\n\nOptimization Parameters:\nK_mass, K_Eff, K_Width, MODULE_MIN, MODULE_MAX, NUM_PLANET_MIN, NUM_PLANET_MAX, NUM_TEETH_SUN_MIN, NUM_TEETH_PLANET_MIN, GEAR_RATIO_MIN, GEAR_RATIO_MAX, GEAR_RATIO_STEP\n1,-2,0.2,0.5,1.2,3,7,18,28,4.0,15,0.1\n"
  }
 }
