@@ -28,12 +28,12 @@ with open(incpg_params_path, "r") as incpg_independent_params_file:
     incpg_params = json.load(incpg_independent_params_file)
 
 with open(incpg_motor_config_path, "r") as incpg_motor_config_file:
-    inwcg_motor_config = json.load(incpg_motor_config_file)
+    incpg_motor_config = json.load(incpg_motor_config_file)
 
 #---------------------------------------------------
 # Transferring relevant data to individual variables
 #---------------------------------------------------
-motor_data          = inwcg_motor_config["Motors"]
+motor_data          = incpg_motor_config["Motors"]
 material_properties = config_data["Material_properties"]
 
 Gear_standard_parameters = config_data["Gear_standard_parameters"]
