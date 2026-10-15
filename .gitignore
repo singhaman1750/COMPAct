@@ -4,4 +4,11 @@ __pycache__/
 *.pyo
 .env
 
-results/**/*.csv
+# Optimiser output (CSV results); regenerate by running actOpt.py
+results/
+
+# Local environments and tool caches
+venv/
+.venv/
+.pytest_cache/
+.ruff_cache/
