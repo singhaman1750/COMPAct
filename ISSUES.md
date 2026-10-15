@@ -87,6 +87,40 @@ Audited how each of the 10 `Opt_*.py` files actually sources its motor values. O
 
 **Estimated total (working together, interactively):** ~2.5 to 3.5 hours, likely spread across more than one sitting given the schema-design decision in step 1.
 
+### Material modes — 3D-printed and metal
+
+Every gearbox should run in one of two modes:
+
+| Mode | Gears (density and allowable stress) | Structure |
+|---|---|---|
+| 3D-printed (default) | PLA | PLA |
+| Metal | Steel — 7850 kg/m³, 400 MPa | Aluminium — 2700 kg/m³ |
+
+Today every gearbox is effectively 3D-printed only (all `Opt_*.py` pass PLA for gears, structure
+and strength), except INDSPG, which mixes them — see Phase 1 fix 2.1. The `Steel` entries in
+`indspg_motor_config.json`, `idspg_motor_config.json` and `motor_config.json` hold PLA values
+(1245.6 kg/m³, 70 MPa) and must be corrected before metal mode can work.
+
+**Decided:**
+- Chosen with a command-line option: `python actOpt.py ... --material 3dp|metal`, default `3dp`
+  so existing commands are unchanged.
+- All 15 gearbox types, one at a time (INDSPG first), with the golden check after each.
+- Parts that are metal in both modes use aluminium explicitly — e.g. the INDSPG rotor coupler
+  ("metal rotor coupling", `ActuatorandGearbox_INDSPG.py:1740-1748`) is always aluminium.
+- In metal mode the ring gear is weighed as **steel** for now (see the first follow-up task).
+- Metal mode uses the **same part shapes and thicknesses** as the 3D-printed version for now (see
+  the second follow-up task).
+
+**Follow-up tasks (not part of the first version):**
+1. **Split the ring gear into teeth and housing.** In the gearboxes where the ring gear is part of
+   the outer housing, its mass currently includes the housing around it. In metal mode the teeth
+   should be steel and the housing aluminium, so each mass function must compute the two volumes
+   separately. Until then, the whole ring part is weighed as steel in metal mode, which
+   overestimates the mass.
+2. **Separate thicknesses and clearances for metal mode.** Metal parts don't need the 3D-printing
+   clearances (e.g. `loose_clearance_3DP`) and can be thinner than printed ones. Metal mode needs
+   its own design settings per gearbox; until then it reuses the 3D-printed shapes.
+
 ## Bugs
 
 ### 1. `bearings_discrete` — OD table vs ID table content differ
