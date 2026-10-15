@@ -1,0 +1,271 @@
+"""
+Golden-output regression check for the gearbox optimisers.
+
+Records, for every gearbox type in actOpt.GEARBOX_DISPATCH and every motor its
+Opt_*.run() supports, the optimiser's returned parameters plus the CAD equation
+files the run writes. A later `check` re-runs the same cases and reports any
+difference, so refactors can be verified to leave results unchanged.
+
+Usage (from the repo root):
+    python tests/golden/golden.py record            # (re)write all baselines
+    python tests/golden/golden.py check             # compare against baselines
+    python tests/golden/golden.py check --only idspg insspg_type_1
+    python tests/golden/golden.py list              # show the cases
+
+A baseline captures *current* behaviour, including known bugs and crashes.
+When a commit is meant to change results, re-record only the affected cases
+in that same commit and say so in the commit message.
+"""
+
+import argparse
+import ast
+import json
+import math
+import os
+import re
+import subprocess
+import sys
+import tempfile
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+BASELINE_DIR = Path(__file__).resolve().parent / "baselines"
+RUN_CASE = Path(__file__).resolve().parent / "_run_case.py"
+
+# One ratio per family, inside each family's usual range, so that every case
+# finds a feasible design (a baseline of "no solution" catches very little).
+GEAR_RATIOS_BY_GROUP = {
+    "SSPG": [6.5], "ISSPG": [6.5], "INSSPG": [6.5],
+    "CPG": [10], "ICPG": [10], "INCPG": [10],
+    "DSPG": [20], "IDSPG": [20], "INDSPG": [20],
+    "WPG": [20], "INWPG": [20],
+}
+# Smaller motors only reach low ratios. ISSPG with RO60 finds no design at
+# any ratio from 4 to 30, so it stays at the family ratio as a crash check.
+GEAR_RATIO_OVERRIDES = {
+    ("isspg_inside", "RO80"): [5],
+    ("isspg_compact", "RO80"): [5],
+    ("insspg_type_2", "RI80"): [5],
+    ("icpg", "RO80"): [8],
+}
+FLOAT_REL_TOL = 1e-9
+
+# Variants that write into the same CADs/<GROUP>/ folder share a group and
+# must not run at the same time.
+_VARIANT_SUFFIX = re.compile(r"_(type_\d+|dependent|independent|inside|compact)$")
+
+
+def gearbox_group(gb_type):
+    return _VARIANT_SUFFIX.sub("", gb_type).upper()
+
+
+def load_dispatch():
+    tree = ast.parse((REPO_ROOT / "actOpt.py").read_text(encoding="utf-8"))
+    for node in tree.body:
+        if isinstance(node, ast.Assign) and any(
+            isinstance(t, ast.Name) and t.id == "GEARBOX_DISPATCH" for t in node.targets
+        ):
+            return ast.literal_eval(node.value)
+    raise RuntimeError("GEARBOX_DISPATCH not found in actOpt.py")
+
+
+def supported_motors(module_name):
+    """Motor names compared against the first argument of run(), ignoring comments."""
+    source = (REPO_ROOT / f"{module_name}.py").read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    run_fn = next(
+        n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "run"
+    )
+    motor_arg = run_fn.args.args[0].arg
+    motors = []
+    for node in ast.walk(run_fn):
+        if (
+            isinstance(node, ast.Compare)
+            and isinstance(node.left, ast.Name)
+            and node.left.id == motor_arg
+            and len(node.comparators) == 1
+            and isinstance(node.comparators[0], ast.Constant)
+        ):
+            name = node.comparators[0].value
+            if name not in motors:
+                motors.append(name)
+    return motors
+
+
+def all_cases(gear_ratios=None):
+    cases = []
+    for gb_type, module_name in load_dispatch().items():
+        family_ratios = GEAR_RATIOS_BY_GROUP[gearbox_group(gb_type)]
+        for motor in supported_motors(module_name):
+            ratios = gear_ratios or GEAR_RATIO_OVERRIDES.get((gb_type, motor), family_ratios)
+            for gr in ratios:
+                cases.append({"gb_type": gb_type, "motor": motor, "gear_ratio": gr})
+    return cases
+
+
+def case_id(case):
+    return f"{case['gb_type']}__{case['motor']}__{case['gear_ratio']}"
+
+
+def run_case(case):
+    with tempfile.TemporaryDirectory() as tmp:
+        out_path = Path(tmp) / "result.json"
+        proc = subprocess.run(
+            [
+                sys.executable,
+                str(RUN_CASE),
+                case["gb_type"],
+                case["motor"],
+                str(case["gear_ratio"]),
+                gearbox_group(case["gb_type"]),
+                str(out_path),
+            ],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+        )
+        if not out_path.exists():
+            raise RuntimeError(
+                f"{case_id(case)}: runner produced no result\n{proc.stderr[-2000:]}"
+            )
+        return json.loads(out_path.read_text(encoding="utf-8"))
+
+
+def run_cases(cases, workers):
+    """Run cases in parallel, but cases in the same group one after another."""
+    groups = {}
+    for case in cases:
+        groups.setdefault(gearbox_group(case["gb_type"]), []).append(case)
+
+    def run_group(group_cases):
+        results = []
+        for case in group_cases:
+            print(f"  running {case_id(case)}", flush=True)
+            results.append((case, run_case(case)))
+        return results
+
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        for group_results in pool.map(run_group, groups.values()):
+            yield from group_results
+
+
+def values_match(expected, actual):
+    if isinstance(expected, float) and isinstance(actual, float):
+        if math.isnan(expected) and math.isnan(actual):
+            return True
+        return math.isclose(expected, actual, rel_tol=FLOAT_REL_TOL, abs_tol=0.0)
+    if isinstance(expected, list) and isinstance(actual, list):
+        return len(expected) == len(actual) and all(
+            values_match(e, a) for e, a in zip(expected, actual)
+        )
+    if isinstance(expected, dict) and isinstance(actual, dict):
+        return expected.keys() == actual.keys() and all(
+            values_match(expected[k], actual[k]) for k in expected
+        )
+    return expected == actual
+
+
+def describe_differences(expected, actual):
+    diffs = []
+    if expected.get("error") != actual.get("error"):
+        diffs.append(f"error: {expected.get('error')!r} -> {actual.get('error')!r}")
+    exp_params = expected.get("opt_parameters")
+    act_params = actual.get("opt_parameters")
+    if not values_match(exp_params, act_params):
+        if isinstance(exp_params, list) and isinstance(act_params, list):
+            if len(exp_params) != len(act_params):
+                diffs.append(
+                    f"opt_parameters length {len(exp_params)} -> {len(act_params)}"
+                )
+            for i, (e, a) in enumerate(zip(exp_params, act_params)):
+                if not values_match(e, a):
+                    diffs.append(f"opt_parameters[{i}]: {e!r} -> {a!r}")
+        else:
+            diffs.append(f"opt_parameters: {exp_params!r} -> {act_params!r}")
+    exp_files = expected.get("cad_files", {})
+    act_files = actual.get("cad_files", {})
+    for path in sorted(exp_files.keys() | act_files.keys()):
+        if path not in act_files:
+            diffs.append(f"CAD file no longer written: {path}")
+        elif path not in exp_files:
+            diffs.append(f"new CAD file written: {path}")
+        elif exp_files[path] != act_files[path]:
+            exp_lines = exp_files[path].splitlines()
+            act_lines = act_files[path].splitlines()
+            changed = sum(1 for e, a in zip(exp_lines, act_lines) if e != a)
+            changed += abs(len(exp_lines) - len(act_lines))
+            diffs.append(f"CAD file changed: {path} ({changed} lines differ)")
+    return diffs
+
+
+def select_cases(args):
+    cases = all_cases(args.gear_ratios)
+    if args.only:
+        cases = [c for c in cases if c["gb_type"] in args.only]
+        unknown = set(args.only) - {c["gb_type"] for c in cases}
+        if unknown:
+            sys.exit(f"unknown gearbox type(s): {', '.join(sorted(unknown))}")
+    return cases
+
+
+def cmd_list(args):
+    for case in select_cases(args):
+        print(f"{case_id(case):45} group={gearbox_group(case['gb_type'])}")
+
+
+def cmd_record(args):
+    cases = select_cases(args)
+    BASELINE_DIR.mkdir(parents=True, exist_ok=True)
+    print(f"Recording {len(cases)} cases")
+    for case, result in run_cases(cases, args.workers):
+        path = BASELINE_DIR / f"{case_id(case)}.json"
+        path.write_text(json.dumps(result, indent=1, sort_keys=True) + "\n", encoding="utf-8")
+        if result.get("error"):
+            status = "ERROR " + result["error"]
+        elif result.get("opt_parameters") is None:
+            status = "no feasible design"
+        else:
+            status = "ok"
+        print(f"  recorded {case_id(case)}: {status}")
+
+
+def cmd_check(args):
+    cases = select_cases(args)
+    missing = [c for c in cases if not (BASELINE_DIR / f"{case_id(c)}.json").exists()]
+    if missing:
+        sys.exit("no baseline for: " + ", ".join(case_id(c) for c in missing))
+    print(f"Checking {len(cases)} cases")
+    failures = {}
+    for case, result in run_cases(cases, args.workers):
+        expected = json.loads(
+            (BASELINE_DIR / f"{case_id(case)}.json").read_text(encoding="utf-8")
+        )
+        diffs = describe_differences(expected, result)
+        if diffs:
+            failures[case_id(case)] = diffs
+    if failures:
+        print(f"\n{len(failures)} of {len(cases)} cases differ from the baseline:")
+        for cid, diffs in sorted(failures.items()):
+            print(f"- {cid}")
+            for d in diffs:
+                print(f"    {d}")
+        sys.exit(1)
+    print(f"\nAll {len(cases)} cases match the baseline.")
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
+    parser.add_argument("command", choices=["list", "record", "check"])
+    parser.add_argument("--only", nargs="+", metavar="GB_TYPE", help="limit to these gearbox types")
+    parser.add_argument(
+        "--gear-ratios", nargs="+", type=float, metavar="GR",
+        help="override the per-family ratios in GEAR_RATIOS_BY_GROUP",
+    )
+    parser.add_argument("--workers", type=int, default=min(12, os.cpu_count() or 1))
+    args = parser.parse_args()
+    {"list": cmd_list, "record": cmd_record, "check": cmd_check}[args.command](args)
+
+
+if __name__ == "__main__":
+    main()
