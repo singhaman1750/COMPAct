@@ -2175,6 +2175,7 @@ class optimizationDoubleStageActuator:
         elif log:
             fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/INDSPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}_LOG.txt"
         
+        os.makedirs(os.path.dirname(fileName), exist_ok=True)
         with open(fileName, "w") as DSPGLogFile:
             sys.stdout = DSPGLogFile
             if(printOptParams):
@@ -2370,6 +2371,7 @@ class optimizationDoubleStageActuator:
         elif log:
             fileName = f"./results/results_bilevel_{Actuator.motor.motorName}/INDSPG_BILEVEL_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}_LOG.txt"
         
+        os.makedirs(os.path.dirname(fileName), exist_ok=True)
         with open(fileName, "w") as dspgLogFile:
             sys.stdout = dspgLogFile
             self.printOptimizationParameters(Actuator, log, csv)

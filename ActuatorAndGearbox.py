@@ -9336,6 +9336,7 @@ class optimizationSingleStageActuator:
         elif log:
             fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/SSPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}.txt"
             
+        os.makedirs(os.path.dirname(fileName), exist_ok=True)
         with open(fileName, "w") as file1:
             sys.stdout = file1
             if (printOptParams):
@@ -9478,6 +9479,7 @@ class optimizationSingleStageActuator:
             elif log:
                 fileName = f"./results/results_bilevel_{Actuator.motor.motorName}/SSPG_BILEVEL_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}.txt"
             
+            os.makedirs(os.path.dirname(fileName), exist_ok=True)
             with open(fileName, "w") as file1:
                 sys.stdout = file1
                 self.printOptimizationParameters(Actuator, log, csv)
@@ -9816,6 +9818,7 @@ class optimizationCompoundPlanetaryActuator:
         elif log:
             fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/CPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}_LOG.txt"
         
+        os.makedirs(os.path.dirname(fileName), exist_ok=True)
         with open(fileName, "w") as file1:
             sys.stdout = file1
             if (printOptParams):
@@ -9980,6 +9983,7 @@ class optimizationCompoundPlanetaryActuator:
         elif log:
             fileName = f"./results/results_bilevel_{Actuator.motor.motorName}/CPG_BILEVEL_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}_LOG.txt"
         
+        os.makedirs(os.path.dirname(fileName), exist_ok=True)
         with open(fileName, "w") as file1:
             sys.stdout = file1
             self.printOptimizationParameters(Actuator, log, csv)
@@ -10225,6 +10229,7 @@ class optimizationWolfromPlanetaryActuator:
         elif log:
             fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/WPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}_LOG.txt"
             
+        os.makedirs(os.path.dirname(fileName), exist_ok=True)
         with open(fileName, "w") as wolfromLogFile:
             sys.stdout = wolfromLogFile
             if (printOptParams):
@@ -10390,6 +10395,7 @@ class optimizationWolfromPlanetaryActuator:
         elif log:
             fileName = f"./results/results_bilevel_{Actuator.motor.motorName}/WPG_BILEVEL_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}_LOG.txt"
         
+        os.makedirs(os.path.dirname(fileName), exist_ok=True)
         with open(fileName, "w") as wolfromLogFile:
             sys.stdout = wolfromLogFile
             self.printOptimizationParameters(Actuator, log, csv)
@@ -10782,6 +10788,7 @@ class optimizationDoubleStagePlanetaryActuator:
         elif log:
             fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/DSPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}_LOG.txt"
         
+        os.makedirs(os.path.dirname(fileName), exist_ok=True)
         with open(fileName, "w") as DSPGLogFile:
             sys.stdout = DSPGLogFile
             if(printOptParams):
@@ -10970,6 +10977,7 @@ class optimizationDoubleStagePlanetaryActuator:
         elif log:
             fileName = f"./results/results_bilevel_{Actuator.motor.motorName}/DSPG_BILEVEL_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}_LOG.txt"
         
+        os.makedirs(os.path.dirname(fileName), exist_ok=True)
         with open(fileName, "w") as dspgLogFile:
             sys.stdout = dspgLogFile
             self.printOptimizationParameters(Actuator, log, csv)

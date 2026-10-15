@@ -1881,6 +1881,7 @@ class optimizationInternalSingleStageActuator:
         elif log:
             fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/ISSPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}.txt"
             
+        os.makedirs(os.path.dirname(fileName), exist_ok=True)
         with open(fileName, "w") as file1:
             sys.stdout = file1
             if (printOptParams):
@@ -2030,6 +2031,7 @@ class optimizationInternalSingleStageActuator:
             elif log:
                 fileName = f"./results/results_bilevel_{Actuator.motor.motorName}/SSPG_BILEVEL_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}.txt"
             
+            os.makedirs(os.path.dirname(fileName), exist_ok=True)
             with open(fileName, "w") as file1:
                 sys.stdout = file1
                 self.printOptimizationParameters(Actuator, log, csv)

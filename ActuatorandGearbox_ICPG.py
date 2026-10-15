@@ -1685,6 +1685,7 @@ class optimizationInternalCompoundPlanetaryActuator:
                     if csv else
                     f"CPG_BILEVEL_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}_LOG.txt")
 
+        os.makedirs(os.path.dirname(fileName), exist_ok=True)
         with open(fileName, "w") as file1:
             sys.stdout = file1
             self.printOptimizationParameters(Actuator, log, csv)

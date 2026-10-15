@@ -2809,6 +2809,7 @@ class optimizationInrunnerWolfromPlanetaryActuator:
         elif log:
             fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/INWPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}_LOG.txt"
             
+        os.makedirs(os.path.dirname(fileName), exist_ok=True)
         with open(fileName, "w") as wolfromLogFile:
             sys.stdout = wolfromLogFile
             if (printOptParams):
@@ -2979,6 +2980,7 @@ class optimizationInrunnerWolfromPlanetaryActuator:
         elif log:
             fileName = f"./results/results_bilevel_{Actuator.motor.motorName}/WPG_BILEVEL_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}_LOG.txt"
         
+        os.makedirs(os.path.dirname(fileName), exist_ok=True)
         with open(fileName, "w") as wolfromLogFile:
             sys.stdout = wolfromLogFile
             self.printOptimizationParameters(Actuator, log, csv)
