@@ -333,36 +333,37 @@ select them in `setVariables()` (or read them from the config) and weigh them wi
 bearing and the planet bearings into the stage's bearing total, and then adds them again on
 their own when summing the stage:
 
-| | Stage 1 — `getMassKG_3DP_stg1()` (line 1654) | Stage 2 — `getMassKG_3DP_stg2()` (line 1927) |
+| | Stage 1 — `getMassKG_3DP_stg1()` (line 1654) | Stage 2 — `getMassKG_3DP_stg2()` (line 1928) |
 |---|---|---|
-| Sun-shaft bearing, 4 g | line 1873 | line 2087 |
-| Planet bearings, 1 g × 2 per planet | lines 1878–1880 | lines 2092–2094 |
-| Both included in `bearing_mass` | line 1885 | line 2100 |
-| Stage total adds them **again** | lines 1920–1921 | lines 2130–2131 |
-| …plus `bearing_mass` (which already holds them) | line 1922 | line 2132 |
+| Sun-shaft bearing, 4 g | line 1873 | line 2088 |
+| Planet bearings, 1 g × 2 per planet | lines 1878–1880 | lines 2093–2095 |
+| Both included in `bearing_mass` | line 1885 | line 2101 |
+| Stage total adds them **again** | lines 1921–1922 | lines 2132–2133 |
+| …plus `bearing_mass` (which already holds them) | line 1923 | line 2134 |
 
 ```python
 # stage 1
 bearing_mass = BearingMassKG + sun_shaft_bearing_mass + planet_bearing_combined_mass + 2*0.006   # line 1885
 ...
 Actuator_mass = (self.motorMassKG + ...
-                + self.planet_bearing_combined_mass_stg1    # line 1920 <- counted a 2nd time
-                + self.sun_shaft_bearing_mass_stg1          # line 1921 <- counted a 2nd time
-                + self.bearing_mass_stg1                    # line 1922 <- already contains both
+                + self.planet_bearing_combined_mass_stg1    # line 1921 <- counted a 2nd time
+                + self.sun_shaft_bearing_mass_stg1          # line 1922 <- counted a 2nd time
+                + self.bearing_mass_stg1                    # line 1923 <- already contains both
                 + ...)
 ```
-`getMassKG_3DP()` (line 2137) adds the two stages.
+`getMassKG_3DP()` (line 2139) adds the two stages.
+Each stage total has a `#TODO` comment pointing here (lines 1913 and 2127).
 
 Practical effect: each stage is 4 g + 2 g per planet too heavy. For the golden case
 `idspg` RO100 at gear ratio 20 (4 planets in each stage) that is 12 g per stage, **24 g** in
 total (reported mass 1.560 kg). Because the error grows with the number of planets, it also
 penalises extra planets, so the optimiser may prefer fewer planets than the real mass justifies.
 
-**Reproduce:** read the two stage functions — the values at lines 1873/1880 and 2087/2094 are
-summed into `bearing_mass` (lines 1885, 2100) and then added again at lines 1920–1921 and
-2130–2131.
+**Reproduce:** read the two stage functions — the values at lines 1873/1880 and 2088/2095 are
+summed into `bearing_mass` (lines 1885, 2101) and then added again at lines 1921–1922 and
+2132–2131.
 
-**Probable fix:** delete the duplicate lines 1920–1921 and 2130–2131, so `bearing_mass_stg1` /
+**Probable fix:** delete the duplicate lines 1921–1922 and 2132–2133, so `bearing_mass_stg1` /
 `bearing_mass_stg2` remain "all bearings in this stage" and each bearing is counted once.
 Only `idspg` results change (about −24 g for RO100 at ratio 20; possibly more planets chosen);
 re-record its golden baselines with before/after numbers and check against the IDSPG Onshape
