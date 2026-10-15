@@ -25,6 +25,7 @@ class inrunnerdoubleStagePlanetaryGearbox:
                  module1    = 0.8, module2    = 0.8, 
                  densityGears = 7850.0,
                  densityStructure = 2710.0,
+                 densityRotor = 2700.0,
                  fwSun1MM = 5.0, fwRing1MM = 5.0, fwPlanet1MM = 5.0,
                  fwSun2MM = 5.0, fwRing2MM = 15.0, fwPlanet2MM = 5.0,
                  maxGearAllowableStressMPa = 400) :
@@ -46,8 +47,9 @@ class inrunnerdoubleStagePlanetaryGearbox:
             "planetMinDistanceMM"          : design_parameters["planetMinDistanceMM"]
         }
 
-        self.densityGears     = densityGears
-        self.density_PLA = densityStructure
+        self.densityGears      = densityGears
+        self.densityStructure  = densityStructure
+        self.densityRotor      = densityRotor        # rotor coupler: the only metal part, even in the 3D-printed build
         # self.fwSun1MM          = fwSun1MM
         # self.fwSun2MM          = fwSun2MM
         # self.fwRing1MM         = fwRing1MM
@@ -69,7 +71,7 @@ class inrunnerdoubleStagePlanetaryGearbox:
                                                   fwRingMM                  = fwRing1MM,  
                                                   maxGearAllowableStressMPa = maxGearAllowableStressMPa, 
                                                   densityGears              = self.densityGears,
-                                                  densityStructure          = self.density_PLA)
+                                                  densityStructure          = self.densityStructure)
                 
         # Stage-2
         self.Stage2 = singleStagePlanetaryGearbox(design_params             = indspg_stg2_parameters,
@@ -84,7 +86,7 @@ class inrunnerdoubleStagePlanetaryGearbox:
                                                   fwRingMM                  = fwRing2MM,  
                                                   maxGearAllowableStressMPa = maxGearAllowableStressMPa, 
                                                   densityGears              = self.densityGears,
-                                                  densityStructure          = self.density_PLA)
+                                                  densityStructure          = self.densityStructure)
         
         self.maxGearAllowableStressMPa = maxGearAllowableStressMPa
 
@@ -1544,8 +1546,8 @@ class inrunnerdoubleStageActuator:
         #------------------------------------
         # density of materials
         #------------------------------------
-        density_3DP_material = self.inrunnerdoubleStagePlanetaryGearbox.density_PLA
-        density_aluminum = self.inrunnerdoubleStagePlanetaryGearbox.densityGears
+        density_3DP_material = self.inrunnerdoubleStagePlanetaryGearbox.densityStructure
+        density_aluminum = self.inrunnerdoubleStagePlanetaryGearbox.densityRotor
 
         #------------------------------------
         # Face Width
@@ -1836,7 +1838,7 @@ class inrunnerdoubleStageActuator:
         #------------------------------------
         # density of materials
         #------------------------------------
-        density_3DP_material = self.inrunnerdoubleStagePlanetaryGearbox.densityGears
+        density_3DP_material = self.inrunnerdoubleStagePlanetaryGearbox.densityStructure
 
         #------------------------------------
         # Face Width
@@ -2294,6 +2296,7 @@ class optimizationDoubleStageActuator:
                                                                                                                        module2                   = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.module, # mm
                                                                                                                        densityGears              = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.densityGears,
                                                                                                                        densityStructure          = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.densityStructure, 
+                                                                                                                       densityRotor              = Actuator.inrunnerdoubleStagePlanetaryGearbox.densityRotor,
                                                                                                                        fwSun1MM                  = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.fwSunMM, # mm
                                                                                                                        fwPlanet1MM               = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.fwPlanetMM, # mm
                                                                                                                        fwRing1MM                 = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.fwRingMM, # mm
@@ -2477,6 +2480,7 @@ class optimizationDoubleStageActuator:
                                                                                                                        module2                   = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.module, # mm
                                                                                                                        densityGears              = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.densityGears,
                                                                                                                        densityStructure          = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.densityStructure, 
+                                                                                                                       densityRotor              = Actuator.inrunnerdoubleStagePlanetaryGearbox.densityRotor,
                                                                                                                        fwSun1MM                  = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.fwSunMM, # mm
                                                                                                                        fwPlanet1MM               = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.fwPlanetMM, # mm
                                                                                                                        fwRing1MM                 = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.fwRingMM, # mm

@@ -149,8 +149,9 @@ MotorRI80 = Motor( rotor_OD                     = Motor_RI80_rotor_OD,
 #--------------------------------------------------------
 inrunnerdoubleStagePlanetaryGearboxInstance = inrunnerdoubleStagePlanetaryGearbox(design_parameters         = indspg_design_params,
                                                                   gear_standard_parameters  = Gear_standard_parameters,
-                                                                  densityGears              = Aluminum["density"],
+                                                                  densityGears              = pla["density"],
                                                                   densityStructure          = pla["density"],
+                                                                  densityRotor              = Aluminum["density"],
                                                                   maxGearAllowableStressMPa = pla["maxAllowableStressMPa"])
                                                                   
 #-----------------------------------------------------
