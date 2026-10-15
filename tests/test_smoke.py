@@ -8,6 +8,7 @@ import json
 import re
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -37,6 +38,21 @@ def test_each_gearbox_type_has_one_print_block():
 def test_optimiser_module_imports(module_name):
     module = importlib.import_module(module_name)
     assert callable(getattr(module, "run", None))
+
+
+@pytest.mark.parametrize("module_name", sorted(set(DISPATCH.values())))
+def test_psc_mode_fails_clearly(module_name):
+    module = importlib.import_module(module_name)
+    optimizer_classes = {
+        v if isinstance(v, type) else type(v)
+        for v in vars(module).values()
+        if hasattr(v, "optimizeActuator")
+    }
+    assert optimizer_classes, f"no optimizer class found in {module_name}"
+    for cls in optimizer_classes:
+        # The guard runs before any other attribute is used, so a bare object works as self.
+        with pytest.raises(NotImplementedError, match="UsePSCasVariable=1 is not available"):
+            cls.optimizeActuator(SimpleNamespace(), UsePSCasVariable=1)
 
 
 @pytest.mark.parametrize("module_name", sorted(set(DISPATCH.values())))

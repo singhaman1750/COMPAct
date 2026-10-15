@@ -1852,8 +1852,10 @@ class optimizationInternalSingleStageActuator:
             print(iter,",", gearRatio,",",module,",", Ns,",", Np,",", Nr,",", numPlanet,",",  fwSunMM,",", fwPlanetMM,",", fwRingMM,",", mass,",", eff,",", peakTorque,",", Cost, ",", Torque_Density, ",", Outer_Bearing_mass, ",", Actuator_width)
 
     @restores_stdout
-    def optimizeActuator(self, Actuator=internalsingleStagePlanetaryActuator, UsePSCasVariable = 1, log = 0, csv = 1, gearRatioReq = 0, printOptParams = 1):
+    def optimizeActuator(self, Actuator=internalsingleStagePlanetaryActuator, UsePSCasVariable = 0, log = 0, csv = 1, gearRatioReq = 0, printOptParams = 1):
         self.UsePSCasVariable = UsePSCasVariable
+        if UsePSCasVariable:
+            raise NotImplementedError("UsePSCasVariable=1 is not available: the continuous PSC optimiser (optimal_continuous_PSC_*) is not implemented. Use UsePSCasVariable=0.")
         totalTime = 0
         opt_parameters = None # [Gear Ratio, numPlanet, Ns, Np, Nr, Module]
         self.gearRatioReq = gearRatioReq

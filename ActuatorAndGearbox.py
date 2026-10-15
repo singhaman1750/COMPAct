@@ -9309,8 +9309,10 @@ class optimizationSingleStageActuator:
             print(iter,",", gearRatio,",",module,",", Ns,",", Np,",", Nr,",", numPlanet,",",  fwSunMM,",", fwPlanetMM,",", fwRingMM,",", mass,",", eff,",", peakTorque,",", Cost, ",", Torque_Density, ",", Outer_Bearing_mass, ",", Actuator_width)
 
     @restores_stdout
-    def optimizeActuator(self, Actuator=singleStagePlanetaryActuator, UsePSCasVariable = 1, log = 0, csv = 1, gearRatioReq = 0, printOptParams = 1):
+    def optimizeActuator(self, Actuator=singleStagePlanetaryActuator, UsePSCasVariable = 0, log = 0, csv = 1, gearRatioReq = 0, printOptParams = 1):
         self.UsePSCasVariable = UsePSCasVariable
+        if UsePSCasVariable:
+            raise NotImplementedError("UsePSCasVariable=1 is not available: the continuous PSC optimiser (optimal_continuous_PSC_*) is not implemented. Use UsePSCasVariable=0.")
         totalTime = 0
         opt_parameters = None # [Gear Ratio, numPlanet, Ns, Np, Nr, Module]
         self.gearRatioReq = gearRatioReq
@@ -9665,7 +9667,7 @@ class optimizationCompoundPlanetaryActuator:
         self.cntrIterBeforeCons      = 0
         self.iter                    = 1
         self.gearRatioIter           = GEAR_RATIO_MIN
-        self.UsePSCasVariable        = 1 # Default Yes
+        self.UsePSCasVariable        = 0 # Default Yes
 
         self.gear_standard_parameters = gear_standard_parameters
         self.design_parameters        = design_parameters
@@ -9794,6 +9796,8 @@ class optimizationCompoundPlanetaryActuator:
     @restores_stdout
     def optimizeActuator(self, Actuator=compoundPlanetaryActuator, UsePSCasVariable = 0, log=1, csv=0, printOptParams=1, gearRatioReq = 0):   
         self.UsePSCasVariable = UsePSCasVariable
+        if UsePSCasVariable:
+            raise NotImplementedError("UsePSCasVariable=1 is not available: the continuous PSC optimiser (optimal_continuous_PSC_*) is not implemented. Use UsePSCasVariable=0.")
         totalTime = 0
         self.gearRatioReq = gearRatioReq
         opt_parameters = None
@@ -10192,16 +10196,18 @@ class optimizationWolfromPlanetaryActuator:
         self.cntrIterBeforeCons       = 0
         self.iter                     = 0
         self.gearRatioIter            = self.GEAR_RATIO_MIN
-        self.UsePSCasVariable         = 1
+        self.UsePSCasVariable         = 0
         self.design_parameters        = design_parameters
         self.gear_standard_parameters = gear_standard_parameters
 
         self.gearRatioReq = 0
 
     @restores_stdout
-    def optimizeActuator(self, Actuator = wolfromPlanetaryActuator, UsePSCasVariable = 1, log = 0, csv = 1, printOptParams=1, gearRatioReq = 0):
+    def optimizeActuator(self, Actuator = wolfromPlanetaryActuator, UsePSCasVariable = 0, log = 0, csv = 1, printOptParams=1, gearRatioReq = 0):
         startTime = time.time()
         self.UsePSCasVariable = UsePSCasVariable
+        if UsePSCasVariable:
+            raise NotImplementedError("UsePSCasVariable=1 is not available: the continuous PSC optimiser (optimal_continuous_PSC_*) is not implemented. Use UsePSCasVariable=0.")
         self.gearRatioReq = gearRatioReq
         opt_parameters = None
         if UsePSCasVariable == 0:
@@ -10756,7 +10762,7 @@ class optimizationDoubleStagePlanetaryActuator:
         self.cntrIterBeforeCons      = 0
         self.iter                    = 0
         self.gearRatioIter           = self.GEAR_RATIO_MIN 
-        self.UsePSCasVariable        = 1 # Default   
+        self.UsePSCasVariable        = 0 # Default   
 
         self.gear_standard_parameters = gear_standard_parameters
         self.design_parameters        = design_parameters
@@ -10766,6 +10772,8 @@ class optimizationDoubleStagePlanetaryActuator:
     @restores_stdout
     def optimizeActuator(self, Actuator=doubleStagePlanetaryActuator, UsePSCasVariable=0, log=1, csv=0, gearRatioReq = 0, printOptParams = 1):
         self.UsePSCasVariable = UsePSCasVariable
+        if UsePSCasVariable:
+            raise NotImplementedError("UsePSCasVariable=1 is not available: the continuous PSC optimiser (optimal_continuous_PSC_*) is not implemented. Use UsePSCasVariable=0.")
         totalTime = 0
         self.gearRatioReq = gearRatioReq
         opt_parameters = None

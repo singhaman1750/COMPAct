@@ -2206,7 +2206,7 @@ class optimizationinternalDoubleStagePlanetaryActuator:
         self.cntrIterBeforeCons      = 0
         self.iter                    = 0
         self.gearRatioIter           = self.GEAR_RATIO_MIN 
-        self.UsePSCasVariable        = 1 # Default   
+        self.UsePSCasVariable        = 0 # Default   
 
         self.gear_standard_parameters = gear_standard_parameters
         self.design_parameters        = design_parameters
@@ -2216,6 +2216,8 @@ class optimizationinternalDoubleStagePlanetaryActuator:
     @restores_stdout
     def optimizeActuator(self, Actuator=internaldoubleStagePlanetaryActuator, UsePSCasVariable=0, log=1, csv=0, gearRatioReq = 0, printOptParams = 1):
         self.UsePSCasVariable = UsePSCasVariable
+        if UsePSCasVariable:
+            raise NotImplementedError("UsePSCasVariable=1 is not available: the continuous PSC optimiser (optimal_continuous_PSC_*) is not implemented. Use UsePSCasVariable=0.")
         totalTime = 0
         self.gearRatioReq = gearRatioReq
         opt_parameters = None

@@ -1591,6 +1591,8 @@ class optimizationSingleStageActuator:
     @restores_stdout
     def optimizeActuator(self, Actuator=singleStagePlanetaryActuator, UsePSCasVariable=0, log=0, csv=1, gearRatioReq=0, printOptParams=1):
         self.UsePSCasVariable = UsePSCasVariable
+        if UsePSCasVariable:
+            raise NotImplementedError("UsePSCasVariable=1 is not available: the continuous PSC optimiser (optimal_continuous_PSC_*) is not implemented. Use UsePSCasVariable=0.")
         totalTime = 0
         opt_parameters = None 
         self.gearRatioReq = gearRatioReq

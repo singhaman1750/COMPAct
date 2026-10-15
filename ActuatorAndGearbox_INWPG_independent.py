@@ -2757,16 +2757,18 @@ class optimizationInrunnerWolfromPlanetaryActuator:
         self.cntrIterBeforeCons       = 0
         self.iter                     = 0
         self.gearRatioIter            = self.GEAR_RATIO_MIN
-        self.UsePSCasVariable         = 1
+        self.UsePSCasVariable         = 0
         self.design_parameters        = design_parameters
         self.gear_standard_parameters = gear_standard_parameters
 
         self.gearRatioReq = 0
 
     @restores_stdout
-    def optimizeActuator(self, Actuator = inrunnerWolfromPlanetaryActuator, UsePSCasVariable = 1, log = 0, csv = 1, printOptParams=1, gearRatioReq = 0):
+    def optimizeActuator(self, Actuator = inrunnerWolfromPlanetaryActuator, UsePSCasVariable = 0, log = 0, csv = 1, printOptParams=1, gearRatioReq = 0):
         startTime = time.time()
         self.UsePSCasVariable = UsePSCasVariable
+        if UsePSCasVariable:
+            raise NotImplementedError("UsePSCasVariable=1 is not available: the continuous PSC optimiser (optimal_continuous_PSC_*) is not implemented. Use UsePSCasVariable=0.")
         self.gearRatioReq = gearRatioReq
         opt_parameters = None
         if UsePSCasVariable == 0:
