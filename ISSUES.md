@@ -151,3 +151,29 @@ construction in each file's `genEquationFile_editCADdirectly()` (currently at
 `ActuatorAndGearbox_ISSPG_inside.py:818` and `ActuatorAndGearbox_ISSPG_compact.py:811`).
 
 **Status:** open — not yet fixed.
+
+### 3. IDSPG has no CAD model or Onshape link
+
+**Description:** `idspg` is a supported gearbox type (`actOpt.py` → `Opt_IDSPG.py`, motor
+`RO100`) and the optimiser writes `CADs/IDSPG/idspg_equations.txt` and
+`CADs/IDSPG/idspg_equations_onshape.txt`, but there is no CAD model to load them into:
+- `README.md` has no "Open IDSPG in Onshape" link (every other type with an `_onshape`
+  equations file has one), and does not mention IDSPG at all.
+- `CADs/IDSPG/` holds only the generated equation files — no SolidWorks assembly and no
+  link.
+- It was never committed: the `dev-IDSPG` branch (commits `651ec36`, `e555672`, `0da3c4a`)
+  added only the optimiser, configs and equation file.
+
+Practical effect: IDSPG results cannot be visualised or checked in CAD, so mass and
+geometry changes to IDSPG can't be verified.
+
+**Probable fix:** the IDSPG designer shares the Onshape document; add it to the README's
+Onshape link list in the same format as INDSPG. (Unconfirmed lead:
+`Onshape_extension/read_values.py:7` points to an Onshape document, `694cff33…`, that is
+not in the README.)
+
+**Blocks:** the IDSPG double-counted bearing mass fix
+(`ActuatorandGearbox_IDSPG.py:1920-1921, 2130-2131`) and the other result-changing fixes,
+which are on hold until their CAD models can be checked.
+
+**Status:** open — link requested from the IDSPG designer.
