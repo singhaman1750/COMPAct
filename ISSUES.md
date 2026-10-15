@@ -211,4 +211,5 @@ not in the README.)
 (`ActuatorandGearbox_IDSPG.py:1920-1921, 2130-2131`) and the other result-changing fixes,
 which are on hold until their CAD models can be checked.
 
-**Status:** open — link requested from the IDSPG designer.
+**Status:** resolved — Mahiraj Seervi added the Onshape link to the README (`513373b`,
+2026-10-15). The IDSPG bearing-mass fix is unblocked.
