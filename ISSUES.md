@@ -207,9 +207,8 @@ Onshape link list in the same format as INDSPG. (Unconfirmed lead:
 `Onshape_extension/read_values.py:7` points to an Onshape document, `694cff33…`, that is
 not in the README.)
 
-**Blocks:** the IDSPG double-counted bearing mass fix
-(`ActuatorandGearbox_IDSPG.py:1920-1921, 2130-2131`) and the other result-changing fixes,
-which are on hold until their CAD models can be checked.
+**Blocks:** the IDSPG double-counted bearing mass fix (bug 7) and the other result-changing
+fixes, which are on hold until their CAD models can be checked.
 
 **Status:** resolved — Mahiraj Seervi added the Onshape link to the README (`513373b`,
 2026-10-15). The IDSPG bearing-mass fix is unblocked.
@@ -327,3 +326,53 @@ select them in `setVariables()` (or read them from the config) and weigh them wi
 `insspg_type_2` baselines.
 
 **Status:** open — question for mahi07-06.
+
+### 7. IDSPG — sun-shaft and planet bearings counted twice in each stage
+
+**Description:** in `ActuatorandGearbox_IDSPG.py`, each stage's mass function adds the sun-shaft
+bearing and the planet bearings into the stage's bearing total, and then adds them again on
+their own when summing the stage:
+
+| | Stage 1 — `getMassKG_3DP_stg1()` (line 1654) | Stage 2 — `getMassKG_3DP_stg2()` (line 1927) |
+|---|---|---|
+| Sun-shaft bearing, 4 g | line 1873 | line 2087 |
+| Planet bearings, 1 g × 2 per planet | lines 1878–1880 | lines 2092–2094 |
+| Both included in `bearing_mass` | line 1885 | line 2100 |
+| Stage total adds them **again** | lines 1920–1921 | lines 2130–2131 |
+| …plus `bearing_mass` (which already holds them) | line 1922 | line 2132 |
+
+```python
+# stage 1
+bearing_mass = BearingMassKG + sun_shaft_bearing_mass + planet_bearing_combined_mass + 2*0.006   # line 1885
+...
+Actuator_mass = (self.motorMassKG + ...
+                + self.planet_bearing_combined_mass_stg1    # line 1920 <- counted a 2nd time
+                + self.sun_shaft_bearing_mass_stg1          # line 1921 <- counted a 2nd time
+                + self.bearing_mass_stg1                    # line 1922 <- already contains both
+                + ...)
+```
+`getMassKG_3DP()` (line 2137) adds the two stages.
+
+Practical effect: each stage is 4 g + 2 g per planet too heavy. For the golden case
+`idspg` RO100 at gear ratio 20 (4 planets in each stage) that is 12 g per stage, **24 g** in
+total (reported mass 1.560 kg). Because the error grows with the number of planets, it also
+penalises extra planets, so the optimiser may prefer fewer planets than the real mass justifies.
+
+**Reproduce:** read the two stage functions — the values at lines 1873/1880 and 2087/2094 are
+summed into `bearing_mass` (lines 1885, 2100) and then added again at lines 1920–1921 and
+2130–2131.
+
+**Probable fix:** delete the duplicate lines 1920–1921 and 2130–2131, so `bearing_mass_stg1` /
+`bearing_mass_stg2` remain "all bearings in this stage" and each bearing is counted once.
+Only `idspg` results change (about −24 g for RO100 at ratio 20; possibly more planets chosen);
+re-record its golden baselines with before/after numbers and check against the IDSPG Onshape
+model.
+
+Related, not part of this fix:
+- line 1885 also adds an unexplained `2*0.006` (12 g) to stage 1 only, with no comment and no
+  stage-2 equivalent — question for the IDSPG author;
+- the sun-shaft (4 g) and planet (1 g) bearing masses are fixed numbers that don't follow the
+  bearing actually chosen.
+
+**Status:** open — planned as Phase 1 fix 2.2; unblocked now that the IDSPG Onshape link is in
+the README (bug 3).
