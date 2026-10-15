@@ -462,7 +462,8 @@ class singleStagePlanetaryActuator:
         # self.rotor_upper_support_bearing_height = self.design_params.get("rotor_upper_support_bearing_height")
 #-------for type 1 rotor suport bearing
         self.bearingIDClearanceMM = self.design_params.get("bearingIDClearanceMM")
-        IdrequiredMM_R_S              = (self.Rotor_ID - 4)
+        #TODO: this is the most OD the bearing may have, but bearings_discrete(odRequiredMM=...) returns the first bearing with OD >= it, i.e. a bearing larger than the space. See ISSUES.md bug 5.
+        IdrequiredMM_R_S          = (self.Rotor_ID - 4)
         Bearings                  = bearings_discrete(idRequiredMM=0, odRequiredMM=IdrequiredMM_R_S)
         
         self.bearing_ID_R_S           = Bearings.getBearingIDMM()
@@ -476,6 +477,7 @@ class singleStagePlanetaryActuator:
 
 #------for type 1 rotor upper support bearing
         self.bearingIDClearanceMM = self.design_params.get("bearingIDClearanceMM")
+        #TODO: this is the most OD the bearing may have, but bearings_discrete(odRequiredMM=...) returns the first bearing with OD >= it, i.e. a bearing larger than the space. See ISSUES.md bug 5.
         IdrequiredMM_R_U_S              = (self.Stator_ID - self.standard_clearance_1_5mm*5)
         Bearings                  = bearings_discrete(idRequiredMM=0, odRequiredMM=IdrequiredMM_R_U_S)
         
@@ -1081,6 +1083,7 @@ class singleStagePlanetaryActuator:
         
         ##------sun and planet bearing mass ---------##
 
+        #TODO: typed-in rotor support bearing masses (6.6 g + 7.9 g); which bearings type 2 uses is unknown. See ISSUES.md bug 6.
         sun_shaft_bearing_mass       = 4 * 0.001 + 0.0066 + 0.0079 # mass of both rotor support bearing added
         planet_bearing_mass          = 1 * 0.001 
         planet_bearing_num           = numPlanet * 2

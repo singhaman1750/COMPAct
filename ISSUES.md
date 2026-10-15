@@ -183,7 +183,7 @@ python actOpt.py RO100 isspg_compact 6.5
 `CADs/ISSPG/isspg_inside_equations_onshape.txt` and
 `CADs/ISSPG/isspg_compact_equations_onshape.txt` — a one-line change to the `file_path`
 construction in each file's `genEquationFile_editCADdirectly()` (currently at
-`ActuatorAndGearbox_ISSPG_inside.py:818` and `ActuatorAndGearbox_ISSPG_compact.py:811`).
+`ActuatorAndGearbox_ISSPG_inside.py:826` and `ActuatorAndGearbox_ISSPG_compact.py:821`).
 
 **Status:** open — not yet fixed.
 
@@ -218,14 +218,14 @@ which are on hold until their CAD models can be checked.
 
 **Description:** in `ActuatorandGearbox_INSSPG.py`, `_getMassKG_3DP_type2()` computes the ring-gear
 mass twice, and the second, older calculation always wins:
-1. **New calculation (lines 1138–1169):** compares the bearing with the ring gear
+1. **New calculation (lines 1141–1172):** compares the bearing with the ring gear
    (`bearing_OD - 2×clearance` vs `Nr × module + loose clearance`) and picks one of two ring
    shapes. Each counts 5 volumes — top mount, bearing step, ring gear, bottom part, and the
    support below the bearing — and includes the 3D-printing clearances. Sets `ring_mass` at
-   line 1156 or 1169.
-2. **Old calculation (lines 1173–1179):** one simple shape with 4 volumes (no support below the
+   line 1159 or 1172.
+2. **Old calculation (lines 1176–1182):** one simple shape with 4 volumes (no support below the
    bearing, most clearances left out). Runs unconditionally right after, and sets `ring_mass`
-   again at line 1179.
+   again at line 1182.
 
 Practical effect: the new ring-mass model is computed and then discarded. INSSPG type 2's ring
 mass, total mass and optimisation result all use the old simple formula.
@@ -235,7 +235,7 @@ mass, total mass and optimisation result all use the old simple formula.
   — the "old" block.
 - `bc84c74` (2026-07-01 21:52): type 2 added as a copy of type 1. The new conditional ring
   calculation was added to **both** types; in type 1 the old formula was commented out
-  (lines 1404–1410), in type 2 it was left active.
+  (lines 1407–1413), in type 2 it was left active.
 - Nothing in either ring section has changed since; `3a1a6b8` (2026-07-02, "changed mass
   function of ring gear for type 2") changed the middle casing and the sun-gear limit, not
   the ring block.
@@ -243,13 +243,87 @@ mass, total mass and optimisation result all use the old simple formula.
 So the active old block in type 2 is very likely an oversight from copying type 1.
 
 **Reproduce:** read `_getMassKG_3DP_type2()` — `ring_mass` is assigned inside the
-`if left_side > right_side:` / `else:` branches (lines 1156, 1169) and then unconditionally
-at line 1179, with nothing using the first value in between. Compare `_getMassKG_3DP_type1()`,
-where the same old block (lines 1404–1410) is commented out.
+`if left_side > right_side:` / `else:` branches (lines 1159, 1172) and then unconditionally
+at line 1182, with nothing using the first value in between. Compare `_getMassKG_3DP_type1()`,
+where the same old block (lines 1407–1413) is commented out.
 
-**Probable fix:** delete the old block (lines 1172–1179) so type 2 uses the new calculation,
+**Probable fix:** delete the old block (lines 1175–1182) so type 2 uses the new calculation,
 as type 1 does. Only `insspg_type_2` results change (ring mass and total mass; possibly the
 chosen design); re-record its golden baselines in the same commit and list the before/after
 numbers. Check the result against the INSSPG type 2 Onshape model.
 
 **Status:** open — planned as Phase 1 fix 2.3; heads-up to mahi07-06 before applying.
+
+### 5. Bearing lookup by OD picks a bearing larger than the space for it
+
+**Description:** three places size a bearing from the space available for its outer diameter,
+so the value is a **maximum** OD. They look it up with
+`bearings_discrete(idRequiredMM=0, odRequiredMM=...)`, which returns the **first bearing whose
+OD is at least** that value — a bearing slightly larger than the space:
+
+| File | Lines | Bearing | Space (max OD) |
+|---|---|---|---|
+| `ActuatorandGearbox_INSSPG.py` | 466–467 | rotor support | `Rotor_ID - 4` |
+| `ActuatorandGearbox_INSSPG.py` | 481–482 | rotor upper support | `Stator_ID - 1.5 * 5` |
+| `ActuatorAndGearbox_ISSPG_compact.py` | 738–739 | sun-2 | `motor_rotor_base_ID` |
+
+Each place has a `#TODO` comment pointing here (INSSPG lines 465 and 480, ISSPG compact
+line 737). In INSSPG the variables are named `IdrequiredMM_R_S` / `IdrequiredMM_R_U_S` even
+though they hold an OD limit.
+
+What is selected today:
+
+| Gearbox / motor | Bearing | Max OD | Selected | Over by |
+|---|---|---|---|---|
+| INSSPG RI100 | rotor support | 41 mm | 30×42×7 | 1 mm |
+| INSSPG RI100 | rotor upper support | 49.5 mm | 40×50×6 | 0.5 mm |
+| INSSPG RI80 | rotor support | 36.5 mm | 25×37×7 | 0.5 mm |
+| INSSPG RI80 | rotor upper support | 43.5 mm | 35×47×7 | 3.5 mm |
+| ISSPG compact RO100 | sun-2 | 60 mm | 50×62×6 | 2 mm |
+| ISSPG compact RO80 | sun-2 | 51 mm | 40×52×7 | 1 mm |
+
+Practical effect: the chosen bearings eat into (or exceed) the clearance the code meant to
+leave, and the CAD geometry and bearing masses are based on them.
+
+**Reproduce:**
+```python
+from CommonComponents import bearings_discrete
+b = bearings_discrete(idRequiredMM=0, odRequiredMM=41)   # INSSPG RI100 rotor support: Rotor_ID 45 - 4
+print(b.getBearingIDMM(), b.getBearingODMM(), b.getBearingWidthMM())
+# 30 42 7  -> OD 42 > 41
+```
+
+**Probable fix:** add a lookup that returns the **largest bearing whose OD fits** (OD ≤ the
+limit) and use it at these three places; rename the INSSPG variables to `OdLimitMM_R_S` /
+`OdLimitMM_R_U_S`. This changes the chosen bearings, and so the CAD geometry and mass, for
+INSSPG (both types) and ISSPG compact — first confirm in the Onshape models whether the
+selected bearings really don't fit, or whether the `- 4` / `- 1.5 * 5` clearances were meant to
+allow for this. Related to bug 1 (the ID and OD lookups use different tables).
+
+**Status:** open — needs the INSSPG and ISSPG designers to check in Onshape.
+
+### 6. INSSPG type 2 — which rotor support bearings it uses is unknown
+
+**Description:** `_getMassKG_3DP_type2()` in `ActuatorandGearbox_INSSPG.py` weighs the two rotor
+support bearings with typed-in masses (line 1087, `#TODO` at line 1086):
+```python
+sun_shaft_bearing_mass = 4 * 0.001 + 0.0066 + 0.0079 # mass of both rotor support bearing added
+```
+6.6 g and 7.9 g fit much smaller bearings than the ones `setVariables()` selects (lines
+465–488), which are labelled "for type 1" and weigh 47–48 g together. The code doesn't say which
+bearings type 2 uses:
+- the bearing selection in `setVariables()` is labelled type 1 only;
+- type 2's casing code that would refer to them is commented out (e.g. line 1094,
+  `#upper_casing_cy_1_ID = self.rotor_upper_support_bearing_ID`);
+- `config_files/insspg_params.json` (lines 93–98) has fixed RI100 sizes (30×42×7 and 40×50×6),
+  but the code reading them is commented out (`ActuatorandGearbox_INSSPG.py` lines 457–462).
+
+Type 1 now uses the masses of its selected bearings (line 1319); type 2 still uses the typed-in
+values for both RI100 and RI80.
+
+**Probable fix:** the INSSPG designer confirms which bearings type 2 uses (per motor); then
+select them in `setVariables()` (or read them from the config) and weigh them with
+`CommonComponents.bearing_mass_kg(id, od, width)`, as INCPG does. Re-record the
+`insspg_type_2` baselines.
+
+**Status:** open — question for mahi07-06.

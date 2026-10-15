@@ -734,6 +734,7 @@ class internalsingleStagePlanetaryActuator:
         self.output_bearing_width  = outputbearing.getBearingWidthMM()
 
         # --- sun2 Bearing Dimensions ---
+        #TODO: this is the most OD the bearing may have, but bearings_discrete(odRequiredMM=...) returns the first bearing with OD >= it, i.e. a bearing larger than the space. See ISSUES.md bug 5.
         Sun2BearingODrequiredMM  = self.motor_rotor_base_ID
         sun2bearing              = bearings_discrete(0,Sun2BearingODrequiredMM)
         self.sun2_bearing_ID     = sun2bearing.getBearingIDMM()
