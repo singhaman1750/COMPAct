@@ -213,3 +213,43 @@ which are on hold until their CAD models can be checked.
 
 **Status:** resolved — Mahiraj Seervi added the Onshape link to the README (`513373b`,
 2026-10-15). The IDSPG bearing-mass fix is unblocked.
+
+### 4. INSSPG type 2 — old ring-gear mass formula overwrites the new one
+
+**Description:** in `ActuatorandGearbox_INSSPG.py`, `_getMassKG_3DP_type2()` computes the ring-gear
+mass twice, and the second, older calculation always wins:
+1. **New calculation (lines 1138–1169):** compares the bearing with the ring gear
+   (`bearing_OD - 2×clearance` vs `Nr × module + loose clearance`) and picks one of two ring
+   shapes. Each counts 5 volumes — top mount, bearing step, ring gear, bottom part, and the
+   support below the bearing — and includes the 3D-printing clearances. Sets `ring_mass` at
+   line 1156 or 1169.
+2. **Old calculation (lines 1173–1179):** one simple shape with 4 volumes (no support below the
+   bearing, most clearances left out). Runs unconditionally right after, and sets `ring_mass`
+   again at line 1179.
+
+Practical effect: the new ring-mass model is computed and then discarded. INSSPG type 2's ring
+mass, total mass and optimisation result all use the old simple formula.
+
+**History** (all mahi07-06):
+- `91a178d` (2026-07-01 12:03): first INSSPG version, type 1 only, with one simple ring formula
+  — the "old" block.
+- `bc84c74` (2026-07-01 21:52): type 2 added as a copy of type 1. The new conditional ring
+  calculation was added to **both** types; in type 1 the old formula was commented out
+  (lines 1404–1410), in type 2 it was left active.
+- Nothing in either ring section has changed since; `3a1a6b8` (2026-07-02, "changed mass
+  function of ring gear for type 2") changed the middle casing and the sun-gear limit, not
+  the ring block.
+
+So the active old block in type 2 is very likely an oversight from copying type 1.
+
+**Reproduce:** read `_getMassKG_3DP_type2()` — `ring_mass` is assigned inside the
+`if left_side > right_side:` / `else:` branches (lines 1156, 1169) and then unconditionally
+at line 1179, with nothing using the first value in between. Compare `_getMassKG_3DP_type1()`,
+where the same old block (lines 1404–1410) is commented out.
+
+**Probable fix:** delete the old block (lines 1172–1179) so type 2 uses the new calculation,
+as type 1 does. Only `insspg_type_2` results change (ring mass and total mass; possibly the
+chosen design); re-record its golden baselines in the same commit and list the before/after
+numbers. Check the result against the INSSPG type 2 Onshape model.
+
+**Status:** open — planned as Phase 1 fix 2.3; heads-up to mahi07-06 before applying.
