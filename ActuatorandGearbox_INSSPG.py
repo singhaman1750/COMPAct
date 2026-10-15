@@ -1614,7 +1614,7 @@ class optimizationSingleStageActuator:
             log, csv = 0, 1
 
         # Generates routing matching user's VS Code screenshot: "results/results_BruteForce_{motor_name}/"
-        output_dir = os.path.join(os.path.dirname(__file__), 'results', f'results_BruteForce_{Actuator.motor.motorName}')
+        output_dir = os.path.join('results', f'results_BruteForce_{Actuator.motor.motorName}')   # relative to the working directory, like the other gearboxes
         os.makedirs(output_dir, exist_ok=True)
         
         if csv:
