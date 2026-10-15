@@ -814,9 +814,16 @@ class internalsingleStagePlanetaryActuator:
                                + self.motor_case_height
                                )
     
-    def genEquationFile_editCADdirectly(self):
+    def genEquationFile(self, motor_name="NO_MOTOR", gearRatioLL = 0.0, gearRatioUL = 0.0):
+        # Per-gear-ratio file for a full sweep (gearRatioReq == 0), same layout as the other gearboxes
+        file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'ISSPG', 'Equation_Files', motor_name, f'isspg_equations_{gearRatioLL}_{gearRatioUL}_onshape.txt')
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        self.genEquationFile_editCADdirectly(file_path=file_path)
+
+    def genEquationFile_editCADdirectly(self, file_path=None):
         self.setVariables()
-        file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'ISSPG', 'isspg_equations_onshape.txt')
+        if file_path is None:
+            file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'ISSPG', 'isspg_equations_onshape.txt')
         with open(file_path, 'w') as eqFile:
             eqFile.writelines([
                 f'"Ns"= {self.Ns}\n',
