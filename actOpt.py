@@ -80,7 +80,7 @@ def main(motor, gearbox_type, gear_ratio=0):
             print("total_sum_except_motor_and_baering :" ,round(opt_parameters[16],4))
             print("  Bearings      :", round(opt_parameters[9], 4))
             print("---")
-            print("Total Gearbox   :", round(opt_parameters[8], 3), "kg")
+            print("Total Actuator (motor + gearbox):", round(opt_parameters[8], 3), "kg")
         print("-------------------------------")
 
     elif(gearbox_type=="insspg_type_1"):
@@ -104,7 +104,7 @@ def main(motor, gearbox_type, gear_ratio=0):
             print("total_sum_except_motor_and_baering :" ,round(opt_parameters[14],4))
             print("  Bearings      :", round(opt_parameters[7], 4))
             print("---")
-            print("Total Gearbox   :", round(opt_parameters[6], 3), "kg")
+            print("Total Actuator (motor + gearbox):", round(opt_parameters[6], 3), "kg")
         print("-------------------------------")
 
     elif(gearbox_type=="insspg_type_2"):
@@ -128,7 +128,7 @@ def main(motor, gearbox_type, gear_ratio=0):
                 print("total_sum_except_motor_and_baering :" ,round(opt_parameters[14],4))
                 print("  Bearings      :", round(opt_parameters[7], 4))
                 print("---")
-                print("Total Gearbox   :", round(opt_parameters[6], 3), "kg")
+                print("Total Actuator (motor + gearbox):", round(opt_parameters[6], 3), "kg")
             print("-------------------------------")
 
     elif(gearbox_type=="wpg"):
