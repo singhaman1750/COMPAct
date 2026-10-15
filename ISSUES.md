@@ -105,8 +105,9 @@ and strength), except INDSPG, which mixes them — see Phase 1 fix 2.1. The `Ste
 - Chosen with a command-line option: `python actOpt.py ... --material 3dp|metal`, default `3dp`
   so existing commands are unchanged.
 - All 15 gearbox types, one at a time (INDSPG first), with the golden check after each.
-- Parts that are metal in both modes use aluminium explicitly — e.g. the INDSPG rotor coupler
-  ("metal rotor coupling", `ActuatorandGearbox_INDSPG.py:1740-1748`) is always aluminium.
+- The rotor coupler is the only metal part in the 3D-printed build, and is aluminium in both
+  modes. It has its own density setting (`densityRotor` in INDSPG,
+  `ActuatorandGearbox_INDSPG.py:1740-1748`), separate from the gear and structure densities.
 - In metal mode the ring gear is weighed as **steel** for now (see the first follow-up task).
 - Metal mode uses the **same part shapes and thicknesses** as the 3D-printed version for now (see
   the second follow-up task).
