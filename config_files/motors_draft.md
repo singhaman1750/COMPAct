@@ -91,6 +91,14 @@ torque @ current @ voltage:
 - MN8012 KV100: 12S / 351 g / 87.8 × 29 / 40 A / 4.06 Nm @ 40.0 A @ 46.8 V
 - MN8014 KV100: 12S / 392 g / 87.8 × 31.5 / 52 A / 4.79 Nm @ 51.9 A @ 46.7 V — matches the code's `MN8014`
 - MN8017 KV120: 12S / 453 g / 87.8 × 34.5 / 68.6 A / 5.80 Nm @ 68.6 A @ 46.4 V
+
+  **Mounting and wire slot for the MN80 series** (MN8012, MN8014, MN8017), user 2026-10-16:
+  mounting is the same as the U8 series — stator mount 4 × M4 @ PCD 36; rotor mount
+  4 × M4 @ PCD 23 (alternative 4 × M3 @ PCD 20). Wire slot 38 mm from centre, length 10 mm,
+  radius 4.4 mm (measured 4 + 0.4). The code's current `MN8014` slot (40 / 10 / 2.5) differs.
+  The other MN models (MN5006, MN5008, MN6007 II, MN7005, MN1005 V2) have no mounting or slot
+  data yet.
+
 - MN1005 V2 KV90: 12S / 282 g / 107 × 23 / 32 A / 3.40 Nm @ 30.8 A @ 47.3 V
   → **peak torque 3.54 Nm** (estimate: measured Kt 3.40 / 30.76 = 0.1105 Nm/A × 32 A peak)
 
