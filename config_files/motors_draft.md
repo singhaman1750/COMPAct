@@ -75,6 +75,11 @@ measured torque @ current @ voltage:
   if one becomes available.
 - U12 II: 60 / 22–25S / 803 g / 106.8 × 47.6 / 41 A / 7.4 Nm @ 40.4 A @ 99.7 V
   → **peak torque 7.51 Nm** (estimate: measured Kt 7.40 / 40.4 = 0.1832 Nm/A × 41 A peak)
+  Mounting (from the T-Motor drawing, dimensioned): stator mount 4 × M5 @ PCD 40; rotor mount
+  4 × M4 @ PCD 23 (primary), alternative 4 × M3 @ PCD 20. Body Ø106.8 × 47.6 ✓.
+  Wire slot: **pending** — the drawing shows a rounded-corner rectangular cable-exit block on the rim,
+  dimensioned 12.8 mm (probably radial depth), ≈ 10.7 mm along the circumference (measured, ± 1),
+  centre ≈ 51.4 mm from the motor centre (± 1.5). Doesn't fit the CAD's rounded-slot shape directly.
 
 **T-Motor U10 Plus** (test reports U.000014–16) — 88.6 × 40 mm, 500 g excl. cables, 36N40P,
 15 mm shaft; torque from the test table where received:
