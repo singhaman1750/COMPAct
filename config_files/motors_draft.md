@@ -182,7 +182,21 @@ sheets, not yet received:
 - M6C10 EEE: KV 150/200/250/300, 72 × 31.4, same mounts as M6C12
 - M6C08 EEE: KV 130/180/260/320, 72 × 29.4, same mounts
 - M6C06 EEE: KV 140/220/320, 72 × 27.4, same mounts
-- M6C06 EEE V3: KV 160/320, 72.1 × 22.4, motor mount D32 M4×4, prop D12/18/20 M3×4
+- **M6C06 EEE V3 — complete** (product page images: specs, drawing, test tables; user 2026-10-17).
+  Shared: Ø72.1 × 22.4 mm, 14 pole pairs, 4 mm shaft, 60 mm 16 AWG leads. Stator mount 4 × M4 @ PCD 32;
+  rotor mount 4 × M3 @ PCD 18 (primary), alternatives 4 × M3 @ PCD 12 and @ PCD 20.
+  Wire slot (**estimate from the drawing**, low–medium confidence — radial cable-exit block on the rim
+  at 3 o'clock, opening ≈ 7.5 mm, inner edge ≈ 26–27 mm, rim 36.05 mm; following the U12 II values):
+  32 mm from centre, length 7 mm, radius 4.15 mm (3.75 + 0.4).
+  - KV160: 12S; max current 22.43 A; **peak torque 1.483 Nm measured** (100 % throttle, 22×6.6 prop,
+    47.92 V, 22.43 A, 5443 rpm; all columns consistent); Kt 0.0661 (+11 % vs Kv-based); no-load
+    ≈ 7680 rpm (estimate: KV × 48 V); max power 1075 W; 163 mΩ; no-load current 0.5 A @ 30 V;
+    mass 157 g (with cable).
+  - KV320: 6S; max current 43.15 A; **peak torque 1.414 Nm measured** (100 % throttle, 22×6.6 prop,
+    23.52 V, 43.15 A, 5230 rpm; all columns consistent); Kt 0.0328 (+10 % vs Kv-based); no-load
+    ≈ 7680 rpm (estimate: KV × 24 V); max power 1014 W; 40 mΩ; no-load current 1.0 A @ 20 V;
+    mass 160 g (with cable).
+  Note: MAD's max current is a 10–30 s short-term limit (MAD note), shorter than T-Motor's 180 s rating.
 - 1005 EEE: KV90, 12S, 279 g, 107 × 22.5, motor D32 M4×4, prop D20 M3×4 + D23 M4×4
 - 7005 EEE: KV115 (12S) / KV230 (6S), 186 g (196 g extended), 79 × 21.8, motor D32 M4×4, prop D20 M3×4 + D23 M4×4
 - 8118 EEE V1.0: KV100, 620 g, 88.6 × 41, motor D30 + D50 M3×4 and D32 M4×4, prop D23 M4×4
