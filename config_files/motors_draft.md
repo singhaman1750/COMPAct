@@ -9,6 +9,8 @@ motor's values are complete and confirmed, they move into `motors.json`.
   setting so they can be switched to rated torque / rated speed.
 - **Torque source, in order of preference:** measured test torque at max current → manufacturer
   Kt × peak current → Kv-based estimate (9.55 / KV × current, marked as an estimate).
+  When the test current differs from the datasheet peak current by more than 1 %, the peak
+  torque is the measured Kt (test torque ÷ test current) × peak current, marked as an estimate.
 - **No-load speed:** datasheet value if given; otherwise KV × operating voltage, marked as an
   estimate.
 - **Wire slot:** measured size, with `loose_clearance_3DP` (0.8 mm) built into the stored values
@@ -64,6 +66,7 @@ measured torque @ current @ voltage:
   the others 15 mm — the shaft size isn't used by the code.
 - U10 II: 100 / 12S / 415 g / 98.6 × 33.1 / 32.4 A / 3.59 Nm @ 32.4 A @ 48 V
 - U12 II: 60 / 22–25S / 803 g / 106.8 × 47.6 / 41 A / 7.4 Nm @ 40.4 A @ 99.7 V
+  → **peak torque 7.51 Nm** (estimate: measured Kt 7.40 / 40.4 = 0.1832 Nm/A × 41 A peak)
 
 **T-Motor U10 Plus** (test reports U.000014–16) — 88.6 × 40 mm, 500 g excl. cables, 36N40P,
 15 mm shaft; torque table not yet received:
@@ -74,16 +77,22 @@ measured torque @ current @ voltage:
 **T-Motor MN series** (store pages) — KV / voltage / mass / Ø × H / peak current / measured
 torque @ current @ voltage:
 - MN5006 KV300: 4–6S / 108 g / 55.6 × 30 / 20 A / 0.50 Nm @ 15.4 A @ 23.2 V (below peak)
+  → **peak torque 0.65 Nm** (estimate: measured Kt 0.50 / 15.41 = 0.0324 Nm/A × 20 A peak)
 - MN5006 KV450: 4–6S / 106 g / 55.6 × 30 / 26 A / 0.55 Nm @ 24.8 A @ 15.0 V
+  → **peak torque 0.58 Nm** (estimate: measured Kt 0.55 / 24.82 = 0.0222 Nm/A × 26 A peak)
 - MN5008 KV170: 6–12S / 128 g / 55.6 × 32 / 15 A / 0.87 Nm @ 14.6 A @ 46.9 V
+  → **peak torque 0.89 Nm** (estimate: measured Kt 0.87 / 14.63 = 0.0595 Nm/A × 15 A peak)
 - MN6007 II KV160: 12S / 159 g / 67.2 × 26.1 / 23.7 A / 1.49 Nm @ 23.8 A @ 47.3 V
 - MN6007 II KV320: 6S / 161 g / 67.2 × 26.1 / 44.2 A / 1.37 Nm @ 44.2 A @ 23.6 V
 - MN7005 KV115: 6–12S / 188 g / 79 × 21 / 15 A / 1.32 Nm @ 14.1 A @ 48 V
+  → **peak torque 1.41 Nm** (estimate: measured Kt 1.32 / 14.07 = 0.0938 Nm/A × 15 A peak)
 - MN7005 KV230: 6S / 188 g / 79 × 21 / 28 A / 1.28 Nm @ 29.2 A @ 24 V
+  → **peak torque 1.23 Nm** (estimate: measured Kt 1.28 / 29.15 = 0.0439 Nm/A × 28 A peak)
 - MN8012 KV100: 12S / 351 g / 87.8 × 29 / 40 A / 4.06 Nm @ 40.0 A @ 46.8 V
 - MN8014 KV100: 12S / 392 g / 87.8 × 31.5 / 52 A / 4.79 Nm @ 51.9 A @ 46.7 V — matches the code's `MN8014`
 - MN8017 KV120: 12S / 453 g / 87.8 × 34.5 / 68.6 A / 5.80 Nm @ 68.6 A @ 46.4 V
 - MN1005 V2 KV90: 12S / 282 g / 107 × 23 / 32 A / 3.40 Nm @ 30.8 A @ 47.3 V
+  → **peak torque 3.54 Nm** (estimate: measured Kt 3.40 / 30.76 = 0.1105 Nm/A × 32 A peak)
 
 **Vector Technics** (product pages) — KV / voltage / mass / Ø × L / max continuous current /
 stated Kt / motor mount / prop mount. Stated Kt is 17–38 % above the Kv-based value; no test
