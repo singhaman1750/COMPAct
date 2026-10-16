@@ -80,6 +80,10 @@ measured torque @ current @ voltage:
   → **peak torque 3.59 Nm** (estimate: measured Kt 3.636 / 36.5 = 0.0996 Nm/A × 36 A peak);
   no-load ≈ 4800 rpm (estimate: KV × 48 V)
 - KV170: 6–12S, 60 A, 2000 W, 21 mΩ, 511 g incl. cables
+  Test (100 % throttle, 24 V): 3.536 N·m @ 63.66 A, 1527.84 W, 9456 g (speed column reads
+  9098 rpm, impossible for KV170 at 24 V — the same problem as KV100; not used)
+  → **peak torque 3.33 Nm** (estimate: measured Kt 3.536 / 63.66 = 0.0555 Nm/A × 60 A peak);
+  no-load ≈ 4080 rpm (estimate: KV × 24 V)
 
 **T-Motor MN series** (store pages) — KV / voltage / mass / Ø × H / peak current / measured
 torque @ current @ voltage:
