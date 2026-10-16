@@ -52,8 +52,10 @@ which ones to include.
 measured torque @ current @ voltage:
 - U8 Lite L: 110 / 12S / 282 g / 87.1 × 28.05 / 45.8 A / 3.87 Nm @ 45.8 A @ 47 V
 - U8 II: 85 / 12S / 277 g / 87.1 × 29.1 / 19.1 A / 1.80 Nm @ 16.5 A @ 48 V
+  → **peak torque 2.08 Nm** (estimate: measured Kt 1.80 / 16.5 = 0.109 Nm/A × 19.1 A peak)
 - U8 II Lite: 100 / 12S / 253 g / 87.3 × 26.05 / 31 A / 2.81 Nm @ 31.1 A @ 47 V
 - U8 II PRO: 100 / 12S / 287 g / 87.3 × 29.55 / 31 A / test table identical to U8 II Lite — not trusted
+  → **peak torque 2.96 Nm** (estimate: Kv-based Kt 9.55 / 100 = 0.0955 Nm/A × 31 A peak)
 
   **Mounting and wire slot for all five U8 versions** (U8 Lite, U8 Lite L, U8 II, U8 II Lite,
   U8 II PRO) are the same as U8 Lite (user, 2026-10-16): stator mount 4 × M4 @ PCD 36;
