@@ -115,9 +115,8 @@ torque @ current @ voltage:
   **Mounting and wire slot for both MN5006 variants** (KV300, KV450; same Ø55.6 × 30 body):
   stator mount 4 × M3 @ PCD 25 (user, 2026-10-17); rotor mount 4 × M3 @ PCD 12 and 4 × M3 @ PCD 18
   (user; drawing shows 8-M3 on Ø12 / Ø18 — primary pattern to confirm, Ø18 suggested).
-  Wire slot (**measured from the drawing, approximate**; scale 4.86 px/mm from the Ø55.6 outline):
-  ≈ 14.3 mm from centre (± 0.5), length ≈ 5.4 mm centre-to-centre (± 1; ≈ 9.3 end to end),
-  radius ≈ 1.95 mm (± 0.5; upper edge drawn as a thick band) → stored 2.35 mm (+ 0.4).
+  Wire slot (user, 2026-10-17): 14.5 mm from centre, length 6 mm, radius 2.9 mm (given 2.5 + 0.4).
+  (Drawing estimate was 14.3 / 5.4 / 1.95.)
 
 - MN5008 KV170: 6–12S / 128 g / 55.6 × 32 / 15 A / 0.87 Nm @ 14.6 A @ 46.9 V
   → **peak torque 0.89 Nm** (estimate: measured Kt 0.87 / 14.63 = 0.0595 Nm/A × 15 A peak)
