@@ -54,6 +54,12 @@ measured torque @ current @ voltage:
 - U8 II: 85 / 12S / 277 g / 87.1 × 29.1 / 19.1 A / 1.80 Nm @ 16.5 A @ 48 V
 - U8 II Lite: 100 / 12S / 253 g / 87.3 × 26.05 / 31 A / 2.81 Nm @ 31.1 A @ 47 V
 - U8 II PRO: 100 / 12S / 287 g / 87.3 × 29.55 / 31 A / test table identical to U8 II Lite — not trusted
+
+  **Mounting and wire slot for all five U8 versions** (U8 Lite, U8 Lite L, U8 II, U8 II Lite,
+  U8 II PRO) are the same as U8 Lite (user, 2026-10-16): stator mount 4 × M4 @ PCD 36;
+  rotor mount 4 × M4 @ PCD 23 (alternative 4 × M3 @ PCD 20); wire slot 32 mm from centre,
+  length 5.5 mm, radius 2.9 mm (2.5 + 0.4). Note: U8 II Lite and U8 II PRO have a 12 mm shaft,
+  the others 15 mm — the shaft size isn't used by the code.
 - U10 II: 100 / 12S / 415 g / 98.6 × 33.1 / 32.4 A / 3.59 Nm @ 32.4 A @ 48 V
 - U12 II: 60 / 22–25S / 803 g / 106.8 × 47.6 / 41 A / 7.4 Nm @ 40.4 A @ 99.7 V
 
