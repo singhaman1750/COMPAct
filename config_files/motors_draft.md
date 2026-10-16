@@ -67,6 +67,12 @@ measured torque @ current @ voltage:
   length 5.5 mm, radius 2.9 mm (2.5 + 0.4). Note: U8 II Lite and U8 II PRO have a 12 mm shaft,
   the others 15 mm — the shaft size isn't used by the code.
 - U10 II: 100 / 12S / 415 g / 98.6 × 33.1 / 32.4 A / 3.59 Nm @ 32.4 A @ 48 V
+  Mounting (from the T-Motor drawing, dimensioned): stator mount 4 × M5 @ PCD 40; rotor mount
+  4 × M4 @ PCD 23 (primary), alternative 4 × M3 @ PCD 20.
+  Wire slot (**measured from the drawing, approximate** — slot not dimensioned; scale 2.85 px/mm from
+  the Ø98.6 outline): ≈ 45 mm from centre (± 1), length ≈ 9 mm centre-to-centre (± 1.5; ≈ 13.5 end
+  to end), radius ≈ 2.25 mm (± 0.5) → stored 2.65 mm (+ 0.4). Replace with a calliper measurement
+  if one becomes available.
 - U12 II: 60 / 22–25S / 803 g / 106.8 × 47.6 / 41 A / 7.4 Nm @ 40.4 A @ 99.7 V
   → **peak torque 7.51 Nm** (estimate: measured Kt 7.40 / 40.4 = 0.1832 Nm/A × 41 A peak)
 
