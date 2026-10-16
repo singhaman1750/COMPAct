@@ -136,6 +136,14 @@ torque @ current @ voltage:
   → **peak torque 1.41 Nm** (estimate: measured Kt 1.32 / 14.07 = 0.0938 Nm/A × 15 A peak)
 - MN7005 KV230: 6S / 188 g / 79 × 21 / 28 A / 1.28 Nm @ 29.2 A @ 24 V
   → **peak torque 1.23 Nm** (estimate: measured Kt 1.28 / 29.15 = 0.0439 Nm/A × 28 A peak)
+
+  **Mounting and wire slot for both MN7005 variants** (KV115, KV230; same Ø79 × 21.8 body),
+  user-approved 2026-10-17: stator mount 4 × M4 @ PCD 32 (drawing); rotor mount 4 × M4 @ PCD 23
+  (primary), alternative 4 × M3 @ PCD 20 (drawing: Ø4 holes on Ø23, Ø3 holes on Ø20).
+  Wire slot (**estimate** — not on the drawing; from a perspective photo and the other MN motors):
+  ≈ 28 mm from centre (± 4), length ≈ 6 mm centre-to-centre (± 2), radius 2.9 mm (estimated 2.5 + 0.4).
+  Replace with a calliper measurement if possible.
+
 - MN8012 KV100: 12S / 351 g / 87.8 × 29 / 40 A / 4.06 Nm @ 40.0 A @ 46.8 V
 - MN8014 KV100: 12S / 392 g / 87.8 × 31.5 / 52 A / 4.79 Nm @ 51.9 A @ 46.7 V — matches the code's `MN8014`
 - MN8017 KV120: 12S / 453 g / 87.8 × 34.5 / 68.6 A / 5.80 Nm @ 68.6 A @ 46.4 V
