@@ -75,6 +75,10 @@ measured torque @ current @ voltage:
   → **peak torque 4.31 Nm** (estimate: measured Kt 4.102 / 31.4 = 0.1306 Nm/A × 33 A peak);
   no-load ≈ 4480 rpm (estimate: KV × 56 V)
 - KV100: 6–12S, 36 A, 1700 W, 60 mΩ, 508 g incl. cables — matches the code's `U10`
+  Test (100 % throttle, 48 V): 3.636 N·m @ 36.5 A, 1751.86 W, 9960 g (speed column reads
+  11 814 rpm, which is impossible for KV100 at 48 V — likely a typo; not used)
+  → **peak torque 3.59 Nm** (estimate: measured Kt 3.636 / 36.5 = 0.0996 Nm/A × 36 A peak);
+  no-load ≈ 4800 rpm (estimate: KV × 48 V)
 - KV170: 6–12S, 60 A, 2000 W, 21 mΩ, 511 g incl. cables
 
 **T-Motor MN series** (store pages) — KV / voltage / mass / Ø × H / peak current / measured
