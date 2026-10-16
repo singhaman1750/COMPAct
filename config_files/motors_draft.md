@@ -120,6 +120,9 @@ torque @ current @ voltage:
 
 - MN5008 KV170: 6–12S / 128 g / 55.6 × 32 / 15 A / 0.87 Nm @ 14.6 A @ 46.9 V
   → **peak torque 0.89 Nm** (estimate: measured Kt 0.87 / 14.63 = 0.0595 Nm/A × 15 A peak)
+  Mounting and wire slot: same as MN5006 (user, 2026-10-17) — stator mount 4 × M3 @ PCD 25;
+  rotor mount 4 × M3 @ PCD 18 (primary), alternative 4 × M3 @ PCD 12; wire slot 14.5 mm from centre,
+  length 6 mm, radius 2.9 mm.
 - MN6007 II KV160: 12S / 159 g / 67.2 × 26.1 / 23.7 A / 1.49 Nm @ 23.8 A @ 47.3 V
 - MN6007 II KV320: 6S / 161 g / 67.2 × 26.1 / 44.2 A / 1.37 Nm @ 44.2 A @ 23.6 V
 - MN7005 KV115: 6–12S / 188 g / 79 × 21 / 15 A / 1.32 Nm @ 14.1 A @ 48 V
