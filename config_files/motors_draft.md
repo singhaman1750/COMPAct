@@ -11,6 +11,8 @@ motor's values are complete and confirmed, they move into `motors.json`.
   Kt × peak current → Kv-based estimate (9.55 / KV × current, marked as an estimate).
   When the test current differs from the datasheet peak current by more than 1 %, the peak
   torque is the measured Kt (test torque ÷ test current) × peak current, marked as an estimate.
+  If the test table has several propellers, use the highest-current 100 % row whose columns pass
+  the checks (power = voltage × current; efficiency = thrust ÷ power; speed below KV × voltage).
 - **No-load speed:** datasheet value if given; otherwise KV × operating voltage, marked as an
   estimate.
 - **Wire slot:** measured size, with `loose_clearance_3DP` (0.8 mm) built into the stored values
@@ -80,7 +82,7 @@ measured torque @ current @ voltage:
   → **peak torque 3.59 Nm** (estimate: measured Kt 3.636 / 36.5 = 0.0996 Nm/A × 36 A peak);
   no-load ≈ 4800 rpm (estimate: KV × 48 V)
 - KV170: 6–12S, 60 A, 2000 W, 21 mΩ, 511 g incl. cables
-  Test A (100 % throttle, 24 V): 3.342 N·m @ 58.9 A, 3307 rpm, 1413.6 W, 9517 g — all columns
+  Test A (100 % throttle, 24 V, other propeller): 3.342 N·m @ 58.9 A, 3307 rpm, 1413.6 W, 9517 g — all columns
   consistent (82 % motor efficiency). **Used.**
   → **peak torque 3.40 Nm** (estimate: measured Kt 3.342 / 58.9 = 0.0567 Nm/A × 60 A peak);
   no-load ≈ 4080 rpm (estimate: KV × 24 V)
