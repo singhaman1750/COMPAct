@@ -72,6 +72,9 @@ measured torque @ current @ voltage:
 
 **T-Motor U10 Plus** (test reports U.000014–16) — 88.6 × 40 mm, 500 g excl. cables, 36N40P,
 15 mm shaft; torque from the test table where received:
+Mounting for all three variants (user, 2026-10-16): stator mount 4 × M4 @ PCD 32; rotor mount
+4 × M4 @ PCD 21 and 4 × M3 @ PCD 23 (to confirm not swapped — U8 has M4 on the larger circle;
+and which is primary). Code's current `U10`: stator 4 × 4 @ 32 ✓, rotor 4 × 4 @ 23. Wire slot: pending.
 - KV80: 6–14S, 33 A, 1500 W, 95 mΩ, 514 g incl. cables
   Test (100 % throttle, 56 V): 4.102 N·m @ 31.4 A, 3604 rpm, 1758.4 W, 11 550 g
   → **peak torque 4.31 Nm** (estimate: measured Kt 4.102 / 31.4 = 0.1306 Nm/A × 33 A peak);
