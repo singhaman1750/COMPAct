@@ -125,6 +125,13 @@ torque @ current @ voltage:
   length 6 mm, radius 2.9 mm.
 - MN6007 II KV160: 12S / 159 g / 67.2 × 26.1 / 23.7 A / 1.49 Nm @ 23.8 A @ 47.3 V
 - MN6007 II KV320: 6S / 161 g / 67.2 × 26.1 / 44.2 A / 1.37 Nm @ 44.2 A @ 23.6 V
+
+  **Mounting and wire slot for both MN6007 II variants** (KV160, KV320; same Ø67.2 × 26.1 body),
+  from the T-Motor drawing (confirmed by user, 2026-10-17): stator mount 4 × M4 @ PCD 32; rotor
+  mount 4 × M3 @ PCD 18 (primary), alternatives 4 × M3 @ PCD 12 and 4 × M3 @ PCD 20 (drawn as 12-M3).
+  Wire slot (measured from the drawing, scale 3.55 px/mm; confirmed by user): 24.6 mm from centre,
+  length 6.3 mm centre-to-centre (10.1 end to end), radius 2.3 mm (measured 1.9 + 0.4).
+
 - MN7005 KV115: 6–12S / 188 g / 79 × 21 / 15 A / 1.32 Nm @ 14.1 A @ 48 V
   → **peak torque 1.41 Nm** (estimate: measured Kt 1.32 / 14.07 = 0.0938 Nm/A × 15 A peak)
 - MN7005 KV230: 6S / 188 g / 79 × 21 / 28 A / 1.28 Nm @ 29.2 A @ 24 V
