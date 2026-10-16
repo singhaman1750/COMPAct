@@ -157,6 +157,12 @@ torque @ current @ voltage:
 
 - MN1005 V2 KV90: 12S / 282 g / 107 × 23 / 32 A / 3.40 Nm @ 30.8 A @ 47.3 V
   → **peak torque 3.54 Nm** (estimate: measured Kt 3.40 / 30.76 = 0.1105 Nm/A × 32 A peak)
+  Mounting (from the T-Motor drawing, dimensioned; user-approved 2026-10-17): stator mount
+  4 × M4 @ PCD 32; rotor mount 4 × M4 @ PCD 23 (primary), alternative 4 × M3 @ PCD 20.
+  Body Ø107 × 23 ✓ (Ø38 centre boss, Ø50 / Ø78.4 steps — not mounting patterns).
+  Wire slot (**measured from the drawing, low confidence** — faint lines, 2.25 px/mm): ≈ 36 mm from
+  centre (± 2), length ≈ 8 mm centre-to-centre (± 3), radius 2.4 mm (measured ≈ 2 + 0.4, ± 0.7).
+  Leads are enamelled wire, so a small slot is plausible. Replace with a measurement if possible.
 
 **Vector Technics** (product pages) — KV / voltage / mass / Ø × L / max continuous current /
 stated Kt / motor mount / prop mount. Stated Kt is 17–38 % above the Kv-based value; no test
