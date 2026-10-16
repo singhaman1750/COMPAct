@@ -69,8 +69,11 @@ measured torque @ current @ voltage:
   → **peak torque 7.51 Nm** (estimate: measured Kt 7.40 / 40.4 = 0.1832 Nm/A × 41 A peak)
 
 **T-Motor U10 Plus** (test reports U.000014–16) — 88.6 × 40 mm, 500 g excl. cables, 36N40P,
-15 mm shaft; torque table not yet received:
+15 mm shaft; torque from the test table where received:
 - KV80: 6–14S, 33 A, 1500 W, 95 mΩ, 514 g incl. cables
+  Test (100 % throttle, 56 V): 4.102 N·m @ 31.4 A, 3604 rpm, 1758.4 W, 11 550 g
+  → **peak torque 4.31 Nm** (estimate: measured Kt 4.102 / 31.4 = 0.1306 Nm/A × 33 A peak);
+  no-load ≈ 4480 rpm (estimate: KV × 56 V)
 - KV100: 6–12S, 36 A, 1700 W, 60 mΩ, 508 g incl. cables — matches the code's `U10`
 - KV170: 6–12S, 60 A, 2000 W, 21 mΩ, 511 g incl. cables
 
