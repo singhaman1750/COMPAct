@@ -11,8 +11,10 @@ motor's values are complete and confirmed, they move into `motors.json`.
   Kt × peak current → Kv-based estimate (9.55 / KV × current, marked as an estimate).
   When the test current differs from the datasheet peak current by more than 1 %, the peak
   torque is the measured Kt (test torque ÷ test current) × peak current, marked as an estimate.
-  If the test table has several propellers, use the highest-current 100 % row whose columns pass
-  the checks (power = voltage × current; efficiency = thrust ÷ power; speed below KV × voltage).
+  If the test table has several propellers, use the **highest measured torque** among the 100 % rows
+  whose columns pass the checks (power = voltage × current; efficiency = thrust ÷ power; speed below
+  KV × voltage) — this is the manufacturer's stated max torque when given (decided 2026-10-17).
+  Scale to the peak current only if no valid test reached the peak current (within 1 %).
 - **No-load speed:** datasheet value if given; otherwise KV × operating voltage, marked as an
   estimate.
 - **Wire slot:** measured size, with `loose_clearance_3DP` (0.8 mm) built into the stored values
@@ -177,8 +179,27 @@ tables:
 
 **MAD Components EEE** (product pages) — electrical data and torque are only in images/test
 sheets, not yet received:
-- M6C12 EEE V3: KV 150/170/280/400, 72 × 33.4, motor mount D25 M3×4 + D32 M4×4, prop D12/18/22 M3×4
-  — the code's `MAD_M6C12` has height 27 mm (matches M6C06 EEE, 72 × 27.4)
+- **M6C12 EEE — complete, all four KV variants** (product page images, read 2026-10-17: spec tables,
+  drawing, test tables). Shared: body Ø72 × 27 mm (the 33.4 mm on the page = 27 body + 6.4 shaft;
+  the code's 27 mm is correct), 14 pole pairs, 6 mm shaft, 60 mm 16 AWG leads.
+  Stator mount 4 × M4 @ PCD 32 (primary, as in the code), alternative 4 × M3 @ PCD 25.
+  Rotor mount 4 × M3 @ PCD 18 (primary, by analogy with the other motors — the code uses PCD 22;
+  to confirm), alternatives 4 × M3 @ PCD 12 and @ PCD 22.
+  Wire slot (user choice: at the point where the wires emerge; from the drawing, 3.65 px/mm): the three
+  leads emerge ≈ 14 mm from centre and run radially across the stator face to the rim as a ≈ 7 mm
+  bundle → slot 16 mm from centre, length 4 mm, radius 3.9 mm (3.5 + 0.4). The CAD slot can't model
+  the full radial channel. Code's current `MAD_M6C12` slot: 26 / 10 / 2.5.
+  Masses are taken as with cable (as for M6C06 V3). Max currents are 10–30 s limits (MAD notes).
+  - KV150: 12S; 36.2 A; **peak torque 2.64 Nm measured** (24×7.2 prop, 47.6 V, 35.14 A, 4982 rpm; =
+    stated max torque; the highest-current test, HAVOC 22×7.0 at 36.18 A, gave 2.52 Nm); Kt 0.0751
+    (+18 % vs Kv-based); no-load ≈ 7200 rpm (KV × 48); 1725 W; 90 mΩ; 0.67 A @ 20 V; 257 g.
+    Matches the code's `MAD_M6C12` (257 g, 36.2 A, 1725 W); code torque 2.31 Nm (Kv-based) → 2.64.
+  - KV170: 12S; 51.5 A; **peak torque 3.03 Nm measured** (24×7.2, 47.75 V, 51.53 A, 5309 rpm); Kt 0.0588
+    (+5 %); no-load ≈ 8160 rpm (KV × 48); 2460 W; 77 mΩ; 0.89 A @ 20 V; 255 g.
+  - KV280: 6S; 58.4 A; **peak torque 2.11 Nm measured** (24×7.2, 23.36 V, 58.44 A, 4566 rpm); Kt 0.0362
+    (+6 %); no-load ≈ 6720 rpm (KV × 24); 1365 W; 31 mΩ; 1.53 A @ 20 V; 256 g.
+  - KV400: 6S; 75.7 A; **peak torque 1.71 Nm measured** (20×6.0, 23.33 V, 75.74 A, 7082 rpm); Kt 0.0226
+    (−5 %); no-load ≈ 9600 rpm (KV × 24); 1766 W; 17 mΩ; 2.5 A @ 20 V; 268 g.
 - M6C10 EEE: KV 150/200/250/300, 72 × 31.4, same mounts as M6C12
 - M6C08 EEE: KV 130/180/260/320, 72 × 29.4, same mounts
 - M6C06 EEE: KV 140/220/320, 72 × 27.4, same mounts
