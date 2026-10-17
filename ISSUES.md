@@ -441,9 +441,9 @@ models place their sun-gear countersinks the same way.
 
 **Status:** open — CAD fix for the SSPG model's designer.
 
-### CAD 2. WPG (new model), IDSPG and both ISSPG models — shared as view-only, so users cannot copy them
+### CAD 2. Six Onshape models are shared view-only, so users cannot copy them
 
-**Description:** four Onshape documents linked in the README (Step 3, Option B) are shared
+**Description:** six Onshape documents linked in the README (Step 3, Option B) are shared
 **view-only**. A user can open them but cannot make a copy ("Copy workspace" is not available), so
 they cannot get their own Variable Studio URL and cannot use them with `actOpt.py --onshape` or
 `set_values.py`:
@@ -451,6 +451,8 @@ they cannot get their own Variable Studio URL and cannot use them with `actOpt.p
 - **IDSPG** — "Open IDSPG in Onshape", `documents/bfc847aa97321639994fa267/...`
 - **ISSPG OutBearing** (`isspg_compact`) — "Open ISSPG OutBearing in Onshape", `documents/bf5f13d9187efab731a95ba7/...`
 - **ISSPG InBearing** (`isspg_inside`) — "Open ISSPG InBearing in Onshape", `documents/9fa91e98fe82c4e544284d41/...`
+- **INCPG Dependent** (`incpg_dependent`) — "Open INCPG Dependent in Onshape", `documents/3e794c46f172f3b02cfa18e7/...`
+- **INCPG Independent** (`incpg_independent`) — "Open INCPG Independent in Onshape", `documents/2519b08c3c51bbdac1923e25/...`
 
 For WPG, the old model linked under Step 6 ("Open WPG in Onshape (old)",
 `documents/ad699ddbc25bac5c32e33135/...`) is a different document and does not match the current
@@ -462,4 +464,4 @@ the other gearbox models are shared. Then check that "Copy workspace" works from
 account.
 
 **Status:** open — for the owners of these Onshape documents. Until then, leave `wpg`, `idspg`,
-`isspg_inside` and `isspg_compact` empty in `Onshape_extension/onshape_models.json`.
+`isspg_inside`, `isspg_compact`, `incpg_dependent` and `incpg_independent` empty in `Onshape_extension/onshape_models.json`.
