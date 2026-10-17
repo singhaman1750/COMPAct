@@ -22,8 +22,16 @@ motor's values are complete and confirmed, they move into `motors.json`.
   measured. The distance from centre is a position and gets no clearance.
 - **Hole diameter:** stored as the screw size (M4 → 4).
 
-Open conventions: operating voltage (manufacturer test voltage vs nominal), mass with or without
-cables, which pattern to use when several are listed.
+- **System (decided 2026-10-17):** 48 V supply (12S); moteus driver, 120 A. Check that the driver's
+  maximum input covers a fully charged 12S pack (50.4 V).
+- **KV choice (decided 2026-10-17):** one KV variant per motor model — the variant rated for 12S
+  (48 V) with the highest peak torque whose peak current is within 120 A. Variants rated only up to
+  6S can't run on 48 V.
+  Chosen so far: M6C12 EEE → KV170; M6C06 EEE V3 → KV160. Ruled out by voltage: MN5006 (both KVs,
+  4–6S), MN6007 II KV320 (6S), MN7005 KV230 (6S), M6C12 KV280/KV400 (6S), M6C06 V3 KV320 (6S).
+
+Open conventions: operating voltage for no-load speed (48 V system voltage vs manufacturer test
+voltage), mass with or without cables (currently with), which pattern to use when several are listed.
 
 ## Framed outrunner motors
 
