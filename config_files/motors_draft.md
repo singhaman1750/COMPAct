@@ -44,7 +44,6 @@ M6C06 EEE V3 KV160, M6C12 EEE KV170, M6C10 EEE KV150, M6C08 EEE KV180, M6C06 EEE
 VT 8008 SL KV90, VT 8015 SL KV100, VT 10005 SL KV90, VT 8020 PRO KV120 (28 framed).
 Ruled out by voltage: MAD 5005 EEE (all KVs, 4–6S), VT 4006 SL, VT 6008 SL, VT 8008 SL KV230 (6S).
 Frameless (5): RI100, RI80, RO100, RO80, RO60.
-Still missing: wire slots for VT 8008 SL and VT 8015 SL (user to give).
 
 ## Framed outrunner motors
 
@@ -195,7 +194,8 @@ rows; the rule uses 100 % rows. Rotor primary M4 @ 23 as for T-Motor U8/U10. Hei
 stubs.
 - **8008 SL — chosen KV90.** Body Ø88.4 × 26 mm. Stator mount 4 × M3 @ PCD 30; rotor mount 4 × M4 @
   PCD 23 (primary), alt. 4 × M3 @ PCD 20. Dual 619/8-2Z bearings, 36S42P.
-  **Wire slot: missing** — not shown on the drawing; user to give later.
+  Wire slot (not shown on the drawing; user chose the 10005 SL values, 2026-10-17): 34 mm from centre,
+  length 13 mm, radius 3.9 mm — an estimate.
   - **KV90 (chosen)**: 12S; max continuous 20 A (180 s); **peak torque 2.63 Nm measured** (TM 30×10.5,
     48.7 V, 26.6 A, 2984 rpm); Kt measured 0.099 / Kv-based 0.106 / stated 0.139; no-load ≈ 4320 rpm
     (KV × 48); 966 W (180 s); 0.22 Ω; 0.17 mH; Io 2 A @ 48 V; 210 g ± 5.
@@ -204,7 +204,8 @@ stubs.
   - KV230: 6S, ruled out (2.32 Nm @ 60.7 A at 22 V, reference only).
 - **8015 SL — KV100.** Body Ø88.4 × 34 mm. Stator mount 4 × M4 @ PCD 36; rotor mount 4 × M4 @ PCD 23
   (primary), alt. 4 × M3 @ PCD 20. Dual 689 bearings, 36S42P.
-  **Wire slot: missing** — not shown on the drawing; user to give later.
+  Wire slot (not shown on the drawing; user chose the 10005 SL values, 2026-10-17): 34 mm from centre,
+  length 13 mm, radius 3.9 mm — an estimate.
   KV100: 12S; 40 A (180 s); **peak torque 5.33 Nm measured** (VT 3010, 47.2 V, 57.8 A, 3648 rpm);
   Kt measured 0.092 / Kv-based 0.0955 / stated 0.1245; no-load ≈ 4800 rpm (KV × 48); 1495 W (180 s);
   0.07 Ω; 0.069 mH; Io 1.64 A @ 48 V; 420 g ± 5.
