@@ -1,4 +1,6 @@
 import functools
+import json
+import os
 import sys
 
 import numpy as np
@@ -617,3 +619,49 @@ class motor_frameless_inrunner:
         print(f"  stator_wire_OD      = {self.stator_wire_OD} mm")
         print(f"  stator_hole_num       = {self.stator_hole_num}")
         print(f"  stator_wire_ID      = {self.stator_wire_ID} mm")
+
+
+# -------------------------------------------------------------------------
+# load_motor — build a motor object from config_files/motors.json
+# -------------------------------------------------------------------------
+MOTORS_JSON = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config_files", "motors.json")
+
+MOTOR_CLASSES = {
+    "framed_outrunner":    motor_framed_outrunner,
+    "frameless_outrunner": motor_frameless_outrunner,
+    "frameless_inrunner":  motor_frameless_inrunner,
+}
+
+
+def load_motor(name, rating=None, path=MOTORS_JSON):
+    """Return the motor object for `name` from motors.json.
+
+    rating "peak" sizes the gears with peak torque and uses the no-load speed;
+    "rated" uses rated torque and rated speed. Default: the file's "rating".
+    """
+    with open(path, "r") as motors_file:
+        motors_data = json.load(motors_file)
+    motors = motors_data["motors"]
+    if name not in motors:
+        raise ValueError(f"Unknown motor {name!r}. Known motors: {', '.join(sorted(motors))}")
+
+    entry      = motors[name]
+    electrical = entry["electrical"]
+    rating     = rating or motors_data["rating"]
+    if rating == "peak":
+        torque, speed_rpm = electrical["peak_torque_Nm"], electrical["no_load_speed_rpm"]
+    elif rating == "rated":
+        if "rated_torque_Nm" not in electrical or "rated_speed_rpm" not in electrical:
+            raise ValueError(f"Motor {name!r} has no rated torque/speed in motors.json")
+        torque, speed_rpm = electrical["rated_torque_Nm"], electrical["rated_speed_rpm"]
+    else:
+        raise ValueError(f"rating must be 'peak' or 'rated', not {rating!r}")
+
+    return MOTOR_CLASSES[entry["type"]](
+        maxMotorTorque    = torque,
+        maxMotorAngVelRPM = speed_rpm,
+        maxMotorPower     = torque * speed_rpm * 2 * np.pi / 60,
+        motorMass         = entry["mass_kg"],
+        motorName         = name,
+        **entry["geometry"],
+    )

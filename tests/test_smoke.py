@@ -55,9 +55,9 @@ def test_psc_mode_fails_clearly(module_name):
             cls.optimizeActuator(SimpleNamespace(), UsePSCasVariable=1)
 
 
-@pytest.mark.parametrize("module_name", sorted(set(DISPATCH.values())))
-def test_optimiser_supports_at_least_one_motor(module_name):
-    assert golden.supported_motors(module_name)
+@pytest.mark.parametrize("gb_type", sorted(DISPATCH))
+def test_optimiser_supports_at_least_one_motor(gb_type):
+    assert golden.supported_motors(DISPATCH[gb_type], gb_type)
 
 
 @pytest.mark.parametrize(
