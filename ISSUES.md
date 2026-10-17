@@ -377,3 +377,34 @@ Related, not part of this fix:
 
 **Status:** open — planned as Phase 1 fix 2.2; unblocked now that the IDSPG Onshape link is in
 the README (bug 3).
+
+### 8. RO100 rotor screw size — M4 or M5 differs between gearbox types
+
+**Description:** the RO100 rotor has 6 holes on PCD 74 that bolt the gearbox input (ISSPG sun hub,
+ICPG / IDSPG coupler) to the rotor. The real rotor takes **both M4 and M5** screws, so either is
+valid, but the code is not uniform:
+- **M4 (`4`):** `CommonComponents.py` line 416 (`motor` class default), `config_files/motor_config.json`
+  line 45 and `config_files/idspg_motor_config.json` line 45 — used by ICPG (`Opt_ICPG.py` line 176)
+  and IDSPG. The same entry's countersunk head (`rotorCSKHeadUpperDiaMM` 8, `rotorCSKHeadHeightMM`
+  2.3) is the M4 size.
+- **M5 (`5`):** `Opt_ISSPG_inside.py` line 69 and `Opt_ISSPG_compact.py` line 70 — ISSPG's own copy
+  of RO100. ISSPG uses it directly as the sun-hub bolt size
+  (`ActuatorAndGearbox_ISSPG_compact.py` line 754, `ActuatorAndGearbox_ISSPG_inside.py` line 743).
+
+So ISSPG designs the sun hub for M5 bolts while the other types use M4, which changes hole/head
+sizes and the material around them in the CAD.
+
+Related — ISSPG's RO100 copy also differs elsewhere (`Opt_ISSPG_inside.py` lines 59–75,
+`Opt_ISSPG_compact.py` lines 60–76):
+- `rotor_height` 33.2 vs 33.45 and `stator_top_rotor_top_offset` 3 vs 2.75 — the user confirmed
+  33.45 and 2.75 are correct (2026-10-17); ISSPG's values are wrong;
+- `motorMass` 0.525 kg vs 0.71 kg (datasheet 710 g) — and RO80 0.265 kg vs 0.352 kg — still open.
+
+**Question for the designers:** which screw size should be the standard for the RO100 rotor —
+M4 or M5? If M5, the countersunk head size (8 / 2.3) must change with it.
+
+**Probable fix:** once decided, store one value in the planned `motors.json` (as the screw size,
+e.g. M4 → 4) and remove ISSPG's own motor copies so every gearbox reads the same entry. Re-record
+the affected golden baselines (ISSPG if M4; ICPG and IDSPG if M5) and check the CAD.
+
+**Status:** open — question for the designers. No code changed.
