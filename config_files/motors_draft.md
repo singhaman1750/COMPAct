@@ -34,6 +34,10 @@ motor's values are complete and confirmed, they move into `motors.json`.
 - **No-load speed:** KV × 48 V (the system voltage) for every framed motor, marked as an estimate;
   frameless motors use their datasheet no-load speed at 48 V (decided 2026-10-17).
 - **Mass:** with cables.
+- **Motor names (decided 2026-10-17):** `motors.json` uses explicit model names (e.g. `U8_Lite`,
+  `U10_Plus_KV80`); the old names are retired, not kept as aliases. The code's `U8` becomes U8 Lite and
+  `U10` becomes U10 Plus **KV80** (the code modelled KV100, so U10 designs change). Old commands,
+  scripts and result files that use `U8` / `U10` must be updated when the code switches.
 
 ## Chosen for `motors.json`
 
@@ -47,7 +51,7 @@ Frameless (5): RI100, RI80, RO100, RO80, RO60.
 
 ## Framed outrunner motors
 
-### U8 Lite (T-Motor) — the code's `U8`, pending confirmation
+### U8 Lite (T-Motor) — replaces the code's `U8` (confirmed 2026-10-17)
 
 | Field | Value | Source |
 |---|---|---|
