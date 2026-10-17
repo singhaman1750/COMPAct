@@ -180,7 +180,10 @@ Run the Python script from the root directory to generate optimal gear parameter
 ```bash
 python actOpt.py --motor <motor> --gb_type <gearbox_type> --gr <ratio>
 ```
-* **`--motor`**: U8, U10, U12, MN8014, VT8020, MAD_M6C12 , RO100 , RI100 , RO80
+* **`--motor`**: any motor name in [`config_files/motors.json`](config_files/motors.json):
+  framed motors (e.g. U8_Lite, U10_Plus_KV80, MN8014, VT8020_PRO, MAD_M6C12_KV170) for sspg, cpg, wpg, dspg;
+  frameless outrunners (RO100, RO80, RO60) for icpg, isspg, idspg;
+  frameless inrunners (RI100, RI80) for insspg, incpg, inwpg, indspg
 * **`--gb_type`**: sspg, cpg, dspg, wpg , icpg , insspg_type_1 {Independent} , insspg_type_2 {Dependent} 
 * **`--gr`**: Must be a value > 2.
 
@@ -244,7 +247,7 @@ The script will output the optimal geometric parameters directly in the terminal
 
 ```text
 Running optimization:
-  Motor       : U8
+  Motor       : U8_Lite
   Gearbox     : sspg
   Gear Ratio  : 6.5
 Time taken: 0.0196 sec
@@ -401,14 +404,14 @@ This framework provides the following features:
 ## ✅ Supported Hardware
 
 ### Supported Motors
-| Motor Code | Description |
+All motors and their data (with sources) are in [`config_files/motors.json`](config_files/motors.json).
+Gears are sized with each motor's peak torque at its no-load speed (48 V); set `"rating"` in that file to change it.
+
+| Motor type | Motors |
 | :--- | :--- |
-| **U8** | T-motor U8 |
-| **U10** | T-motor U10+ |
-| **U12** | T-motor U12 |
-| **MN8014** | T-motor MN8014 |
-| **VT8020** | Vector Techniques 8020 |
-| **MAD_M6C12**| MAD Components M6C12 |
+| **Framed outrunner** (sspg, cpg, wpg, dspg) | T-Motor U8 Lite / Lite L / II / II Lite / II PRO, U10 Plus KV80, U10 II, MN5008, MN6007 II, MN7005, MN8012, MN8014, MN8017, MN1005 V2; MAD M6C12, M6C10, M6C08, M6C06, M6C06 V3, 1005, 7005, 8118, 5008, 5010; Vector 8008 SL, 8015 SL, 10005 SL, 8020 PRO |
+| **Frameless outrunner** (icpg, isspg, idspg) | RO100, RO80, RO60 |
+| **Frameless inrunner** (insspg, incpg, inwpg, indspg) | RI100, RI80 |
 
 ### Supported Gearbox Topologies
 | Type | Description |

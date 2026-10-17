@@ -310,22 +310,22 @@ class motor_driver:
 # -------------------------------------------------------------------------
 class motor_framed_outrunner:
     def __init__(self, 
-                 maxMotorAngVelRPM     = 1190, # RPM
-                 maxMotorTorque        = 8.83, # Nm
-                 maxMotorPower         = 8.83 * 1190 * 2*np.pi/60, # W 
-                 motorMass             = 0.778, # KG
-                 motorDia              = 106.8, # mm
-                 motorLength           = 47.6,  # mm
-                 motor_mount_hole_PCD       = 32,
-                 motor_mount_hole_dia       = 4,
-                 motor_mount_hole_num       = 4,
-                 motor_output_hole_PCD      = 23,
-                 motor_output_hole_dia      = 4,
-                 motor_output_hole_num      = 4,
-                 wire_slot_dist_from_center = 30,
-                 wire_slot_length           = 10,
-                 wire_slot_radius           = 4,
-                 motorName             = "U12"):
+                 maxMotorAngVelRPM, # RPM
+                 maxMotorTorque, # Nm
+                 maxMotorPower, # W 
+                 motorMass, # KG
+                 motorDia, # mm
+                 motorLength,  # mm
+                 motor_mount_hole_PCD,
+                 motor_mount_hole_dia,
+                 motor_mount_hole_num,
+                 motor_output_hole_PCD,
+                 motor_output_hole_dia,
+                 motor_output_hole_num,
+                 wire_slot_dist_from_center,
+                 wire_slot_length,
+                 wire_slot_radius,
+                 motorName):
         
         # Name of the motor
         self.motorName                  = motorName
@@ -395,35 +395,35 @@ class motor_frameless_outrunner:
     """
 
     def __init__(self,
-                 maxMotorAngVelRPM               = 2550,  # RPM
-                 maxMotorTorque                  = 20 / (55 * 2*np.pi/60),  # Nm
-                 maxMotorPower                   = 838,  # W                      #TODO : check if this is correct  
-                 motorMass                       = 0.71, # KG
+                 maxMotorAngVelRPM,  # RPM
+                 maxMotorTorque,  # Nm
+                 maxMotorPower,  # W                      #TODO : check if this is correct  
+                 motorMass, # KG
                  # ── Stator ──────────────────────────────────────────────
-                 stator_OD                       = 100,
-                 stator_ID                       = 74,
-                 stator_height                   = 31.5,
-                 stator_hole_PCD                 = 82.5,
-                 motor_stator_extrusion_dia      = 88,
-                 motor_stator_extrusion_depth    = 2,
+                 stator_OD,
+                 stator_ID,
+                 stator_height,
+                 stator_hole_PCD,
+                 motor_stator_extrusion_dia,
+                 motor_stator_extrusion_depth,
                  # ── Rotor ───────────────────────────────────────────────
-                 motor_OD                        = 113.5,
-                 rotor_ID                        = 101.8,
-                 rotor_height                    = 33.45,
-                 motor_rotor_base_ID             = 60,
-                 motor_rotor_base_thickness      = 3.2,
-                 rotorCSKHeadUpperDiaMM          = 8,
-                 rotorCSKHeadHeightMM            = 2.3,
-                 motor_rotor_hole_PCD            = 74,
-                 motor_rotor_hole_dia            = 4,
-                 stator_top_rotor_top_offset  = 2.75,
-                 stator_hole_dia              = 3,
-                 stator_hole_num              = 3,       # wrong
-                 motor_rotor_hole_num         = 6,
-                 stator_mounitng_holes_head_socket_dia = 4.5,
+                 motor_OD,
+                 rotor_ID,
+                 rotor_height,
+                 motor_rotor_base_ID,
+                 motor_rotor_base_thickness,
+                 rotorCSKHeadUpperDiaMM,
+                 rotorCSKHeadHeightMM,
+                 motor_rotor_hole_PCD,
+                 motor_rotor_hole_dia,
+                 stator_top_rotor_top_offset,
+                 stator_hole_dia,
+                 stator_hole_num,       # wrong
+                 motor_rotor_hole_num,
+                 stator_mounitng_holes_head_socket_dia,
                  # ── Overall envelope ────────────────────────────────────
-                 motor_height                    = 36.2,
-                 motorName                       = "RO100"):
+                 motor_height,
+                 motorName):
 
         # ── Identification ─────────────────────────────────────────────────
         self.motorName = motorName
@@ -526,24 +526,24 @@ class motor_frameless_outrunner:
 class motor_frameless_inrunner:
 
     def __init__(self,
-                 rotor_OD                     = 55.6,
-                 stator_ID                    = 57,
-                 rotor_height                 = 15,
-                 rotor_ID                     = 45,
-                 stator_height                = 24.5,
-                 stator_OD                    = 104,
-                 stator_hole_dia              = 3,
-                 stator_wire_top_height       = 7,
-                 stator_mid_height            = 13,
-                 stator_wire_bottom_height    = 4.5,
-                 stator_wire_OD               = 101,
-                 stator_hole_num              = 4,
-                 stator_wire_ID               = 58,
-                 maxMotorAngVelRPM            = 5040,  # RPM
-                 maxMotorTorque               = 1.3,   # Nm
-                 maxMotorPower                = 1.3 * 5040 * 2*np.pi/60,  # W
-                 motorMass                    = 0.265, # KG
-                 motorName                    = "RI100"):
+                 rotor_OD,
+                 stator_ID,
+                 rotor_height,
+                 rotor_ID,
+                 stator_height,
+                 stator_OD,
+                 stator_hole_dia,
+                 stator_wire_top_height,
+                 stator_mid_height,
+                 stator_wire_bottom_height,
+                 stator_wire_OD,
+                 stator_hole_num,
+                 stator_wire_ID,
+                 maxMotorAngVelRPM,  # RPM
+                 maxMotorTorque,   # Nm
+                 maxMotorPower,  # W
+                 motorMass, # KG
+                 motorName):
 
         self.motorName = motorName
 

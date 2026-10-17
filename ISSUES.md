@@ -404,8 +404,11 @@ Related — ISSPG's RO100 copy also differs elsewhere (`Opt_ISSPG_inside.py` lin
 **Question for the designers:** which screw size should be the standard for the RO100 rotor —
 M4 or M5? If M5, the countersunk head size (8 / 2.3) must change with it.
 
-**Probable fix:** once decided, store one value in the planned `motors.json` (as the screw size,
-e.g. M4 → 4) and remove ISSPG's own motor copies so every gearbox reads the same entry. Re-record
-the affected golden baselines (ISSPG if M4; ICPG and IDSPG if M5) and check the CAD.
+**Probable fix:** once decided, set `motor_rotor_hole_dia` (and, for M5, the countersunk head
+size) for RO100 in `config_files/motors.json`; every gearbox reads that one entry. Re-record the
+ICPG, ISSPG and IDSPG golden baselines and check the CAD.
 
-**Status:** open — question for the designers. No code changed.
+**Status:** open — question for the designers. Phase 2 (2026-10-17) removed ISSPG's own motor
+copies: all gearboxes now read RO100 from `config_files/motors.json`, which uses **M4** for now (so
+ISSPG changed from M5 to M4), with rotor height 33.45, offset 2.75 and the datasheet masses. The
+line numbers above refer to the code before that change.

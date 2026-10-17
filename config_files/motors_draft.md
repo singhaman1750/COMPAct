@@ -1,7 +1,7 @@
 # Motor data — working draft
 
-Collected values for the planned `config_files/motors.json`. **No code reads this file.** Once a
-motor's values are complete and confirmed, they move into `motors.json`.
+Collected values and their sources behind `config_files/motors.json`, which the code reads through
+`CommonComponents.load_motor()`. **No code reads this file**; when a value changes, update both.
 
 ## Decided conventions
 
