@@ -59,6 +59,7 @@ FLOAT_REL_TOL = 1e-9
 FRAMED_GOLDEN_MOTORS = ["U8_Lite", "U10_Plus_KV80", "MN8014", "VT8020_PRO", "MAD_M6C12_KV170"]
 GOLDEN_MOTORS = {
     "sspg": FRAMED_GOLDEN_MOTORS,
+    "cpg": FRAMED_GOLDEN_MOTORS,
 }
 
 # Variants that write into the same CADs/<GROUP>/ folder share a group and
