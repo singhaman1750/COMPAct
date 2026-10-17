@@ -60,6 +60,7 @@ FRAMED_GOLDEN_MOTORS = ["U8_Lite", "U10_Plus_KV80", "MN8014", "VT8020_PRO", "MAD
 GOLDEN_MOTORS = {
     "sspg": FRAMED_GOLDEN_MOTORS,
     "cpg": FRAMED_GOLDEN_MOTORS,
+    "wpg": FRAMED_GOLDEN_MOTORS,
 }
 
 # Variants that write into the same CADs/<GROUP>/ folder share a group and
