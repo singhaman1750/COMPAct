@@ -27,11 +27,21 @@ motor's values are complete and confirmed, they move into `motors.json`.
 - **KV choice (decided 2026-10-17):** one KV variant per motor model — the variant rated for 12S
   (48 V) with the highest peak torque whose peak current is within 120 A. Variants rated only up to
   6S can't run on 48 V.
-  Chosen so far: M6C12 EEE → KV170; M6C06 EEE V3 → KV160. Ruled out by voltage: MN5006 (both KVs,
-  4–6S), MN6007 II KV320 (6S), MN7005 KV230 (6S), M6C12 KV280/KV400 (6S), M6C06 V3 KV320 (6S).
+  Ruled out by voltage: MN5006 (both KVs, 4–6S), MN6007 II KV320 (6S), MN7005 KV230 (6S),
+  M6C12 KV280/KV400 (6S), M6C06 V3 KV320 (6S), U12 II KV60 (22–25S, i.e. 81–100 V).
+- **Only the chosen variant per model goes into `motors.json`**; the others stay in this draft as
+  reference data (decided 2026-10-17).
+- **No-load speed:** KV × 48 V (the system voltage) for every framed motor, marked as an estimate;
+  frameless motors use their datasheet no-load speed at 48 V (decided 2026-10-17).
+- **Mass:** with cables.
 
-Open conventions: operating voltage for no-load speed (48 V system voltage vs manufacturer test
-voltage), mass with or without cables (currently with), which pattern to use when several are listed.
+## Chosen for `motors.json`
+
+Framed (16): U8 Lite, U8 Lite L, U8 II, U8 II Lite, U8 II PRO, MN8012, MN8014, MN8017,
+U10 Plus KV80, U10 II, MN5008 KV170, MN6007 II KV160, MN7005 KV115, MN1005 V2 KV90,
+M6C06 EEE V3 KV160, M6C12 EEE KV170. Remaining MAD EEE motors: 12S variants only, one per model.
+Frameless (5): RI100, RI80, RO100, RO80, RO60.
+Vector Technics: pending (wire slots, torque decision).
 
 ## Framed outrunner motors
 
@@ -101,7 +111,7 @@ Code's current `U10` slot: 38 / 10 / 2.5.
 - KV80: 6–14S, 33 A, 1500 W, 95 mΩ, 514 g incl. cables
   Test (100 % throttle, 56 V): 4.102 N·m @ 31.4 A, 3604 rpm, 1758.4 W, 11 550 g
   → **peak torque 4.31 Nm** (estimate: measured Kt 4.102 / 31.4 = 0.1306 Nm/A × 33 A peak);
-  no-load ≈ 4480 rpm (estimate: KV × 56 V)
+  no-load ≈ 3840 rpm at 48 V (estimate: KV × 48 V; test was at 56 V)
 - KV100: 6–12S, 36 A, 1700 W, 60 mΩ, 508 g incl. cables — matches the code's `U10`
   Test (100 % throttle, 48 V): 3.636 N·m @ 36.5 A, 1751.86 W, 9960 g (speed column reads
   11 814 rpm, which is impossible for KV100 at 48 V — likely a typo; not used)
@@ -111,7 +121,7 @@ Code's current `U10` slot: 38 / 10 / 2.5.
   Test A (100 % throttle, 24 V, other propeller): 3.342 N·m @ 58.9 A, 3307 rpm, 1413.6 W, 9517 g — all columns
   consistent (82 % motor efficiency). **Used.**
   → **peak torque 3.40 Nm** (estimate: measured Kt 3.342 / 58.9 = 0.0567 Nm/A × 60 A peak);
-  no-load ≈ 4080 rpm (estimate: KV × 24 V)
+  no-load ≈ 8160 rpm at 48 V (estimate: KV × 48 V; test was at 24 V)
   Test B (100 % throttle, 24 V): 3.536 N·m @ 63.66 A, 1527.84 W, 9456 g; speed column reads
   9098 rpm, impossible — kept as a cross-check only (scales to 3.33 Nm, within 2 % of test A)
 
