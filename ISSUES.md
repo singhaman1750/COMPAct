@@ -441,20 +441,23 @@ models place their sun-gear countersinks the same way.
 
 **Status:** open — CAD fix for the SSPG model's designer.
 
-### CAD 2. WPG (new model) — shared as view-only, so users cannot copy it
+### CAD 2. WPG (new model) and IDSPG — shared as view-only, so users cannot copy them
 
-**Description:** the new WPG Onshape document linked in the README ("Open WPG in Onshape", Option B
-under Step 3 — `documents/f63553f1c266228274914c8c/...`) is shared **view-only**. A user can open it
-but cannot make a copy ("Copy workspace" is not available), so they cannot get their own
-Variable Studio URL and cannot use it with `actOpt.py --onshape` or `set_values.py`.
+**Description:** two Onshape documents linked in the README (Step 3, Option B) are shared
+**view-only**. A user can open them but cannot make a copy ("Copy workspace" is not available), so
+they cannot get their own Variable Studio URL and cannot use them with `actOpt.py --onshape` or
+`set_values.py`:
+- **WPG (new)** — "Open WPG in Onshape", `documents/f63553f1c266228274914c8c/...`
+- **IDSPG** — "Open IDSPG in Onshape", `documents/bfc847aa97321639994fa267/...`
 
-The old WPG model linked under Step 6 ("Open WPG in Onshape (old)",
+For WPG, the old model linked under Step 6 ("Open WPG in Onshape (old)",
 `documents/ad699ddbc25bac5c32e33135/...`) is a different document and does not match the current
-WPG equations file.
+WPG equations file, so it is not a workaround.
 
-**Probable fix:** the document owner changes the new WPG document's sharing to allow copying —
-in Onshape: **Share → Public** (or share with "Can view" + **"Can copy"** / "Allow copy" enabled),
-the same way the other gearbox models are shared. Then check that "Copy workspace" works from a
-different account.
+**Probable fix:** each document's owner changes its sharing to allow copying — in Onshape:
+**Share → Public** (or share with "Can view" + **"Can copy"** / "Allow copy" enabled), the same way
+the other gearbox models are shared. Then check that "Copy workspace" works from a different
+account.
 
-**Status:** open — for the owner of the WPG Onshape document.
+**Status:** open — for the owners of the WPG and IDSPG Onshape documents. Until then, leave `wpg`
+and `idspg` empty in `Onshape_extension/onshape_models.json`.
