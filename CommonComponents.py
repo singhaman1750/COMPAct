@@ -166,6 +166,21 @@ class bearings_discrete:
 
 
 # -------------------------------------------------------------------------
+# bearing_mass_kg
+# -------------------------------------------------------------------------
+# Mass of a bearing given by its full size, e.g. one fixed in a config file.
+# Matching bore, OD and width together avoids bearings_discrete's ID and OD
+# lookups, which use different tables and can return a different bearing.
+def bearing_mass_kg(id_mm, od_mm, width_mm):
+    all_bearings = (bearings_discrete(idRequiredMM=0).data_bearings
+                    + bearings_discrete(idRequiredMM=0, odRequiredMM=1).data_bearings)
+    for bearing_id, bearing_od, bearing_width, mass in all_bearings:
+        if (bearing_id, bearing_od, bearing_width) == (id_mm, od_mm, width_mm):
+            return mass
+    raise ValueError(f"No bearing {id_mm}x{od_mm}x{width_mm} mm in the bearings_discrete tables")
+
+
+# -------------------------------------------------------------------------
 # Nuts and bolts class
 # -------------------------------------------------------------------------
 

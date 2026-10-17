@@ -112,6 +112,7 @@ If you prefer not to use SolidWorks, the CAD models are also available on Onshap
 
 👉 **[Open DSPG in Onshape](https://cad.onshape.com/documents/b8d43d150fb932ea649dcd0f/w/aaa3fcc8da584cc207374389/e/12e148469fa8eb5b917f5bb1?renderMode=0&uiState=69e2408b879d9edde70b5d36)**
 
+👉 **[Open IDSPG in Onshape](https://cad.onshape.com/documents/bfc847aa97321639994fa267/w/e42f2a8d3124414ae728bb05/e/19b7631b19424696aeb05c64?renderMode=0&uiState=6ad0b2d2fb0e57926652caba)**
 
 👉 **[Open ISSPG OutBearing in Onshape](https://cad.onshape.com/documents/bf5f13d9187efab731a95ba7/w/1261f6088846b1d6dd38ea32/e/9442fa2e352d23d6eb88bc6e?renderMode=0&uiState=6a4e2ba1c2bd25dd66621fae)**
 ```

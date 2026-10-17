@@ -87,6 +87,41 @@ Audited how each of the 10 `Opt_*.py` files actually sources its motor values. O
 
 **Estimated total (working together, interactively):** ~2.5 to 3.5 hours, likely spread across more than one sitting given the schema-design decision in step 1.
 
+### Material modes — 3D-printed and metal
+
+Every gearbox should run in one of two modes:
+
+| Mode | Gears (density and allowable stress) | Structure |
+|---|---|---|
+| 3D-printed (default) | PLA | PLA |
+| Metal | Steel — 7850 kg/m³, 400 MPa | Aluminium — 2700 kg/m³ |
+
+Today every gearbox is effectively 3D-printed only (all `Opt_*.py` pass PLA for gears, structure
+and strength), except INDSPG, which mixes them — see Phase 1 fix 2.1. The `Steel` entries in
+`indspg_motor_config.json`, `idspg_motor_config.json` and `motor_config.json` hold PLA values
+(1245.6 kg/m³, 70 MPa) and must be corrected before metal mode can work.
+
+**Decided:**
+- Chosen with a command-line option: `python actOpt.py ... --material 3dp|metal`, default `3dp`
+  so existing commands are unchanged.
+- All 15 gearbox types, one at a time (INDSPG first), with the golden check after each.
+- The rotor coupler is the only metal part in the 3D-printed build, and is aluminium in both
+  modes. It has its own density setting (`densityRotor` in INDSPG,
+  `ActuatorandGearbox_INDSPG.py:1740-1748`), separate from the gear and structure densities.
+- In metal mode the ring gear is weighed as **steel** for now (see the first follow-up task).
+- Metal mode uses the **same part shapes and thicknesses** as the 3D-printed version for now (see
+  the second follow-up task).
+
+**Follow-up tasks (not part of the first version):**
+1. **Split the ring gear into teeth and housing.** In the gearboxes where the ring gear is part of
+   the outer housing, its mass currently includes the housing around it. In metal mode the teeth
+   should be steel and the housing aluminium, so each mass function must compute the two volumes
+   separately. Until then, the whole ring part is weighed as steel in metal mode, which
+   overestimates the mass.
+2. **Separate thicknesses and clearances for metal mode.** Metal parts don't need the 3D-printing
+   clearances (e.g. `loose_clearance_3DP`) and can be thinner than printed ones. Metal mode needs
+   its own design settings per gearbox; until then it reuses the 3D-printed shapes.
+
 ## Bugs
 
 ### 1. `bearings_discrete` — OD table vs ID table content differ
@@ -148,6 +183,229 @@ python actOpt.py RO100 isspg_compact 6.5
 `CADs/ISSPG/isspg_inside_equations_onshape.txt` and
 `CADs/ISSPG/isspg_compact_equations_onshape.txt` — a one-line change to the `file_path`
 construction in each file's `genEquationFile_editCADdirectly()` (currently at
-`ActuatorAndGearbox_ISSPG_inside.py:818` and `ActuatorAndGearbox_ISSPG_compact.py:811`).
+`ActuatorAndGearbox_ISSPG_inside.py:826` and `ActuatorAndGearbox_ISSPG_compact.py:821`).
 
 **Status:** open — not yet fixed.
+
+### 3. IDSPG has no CAD model or Onshape link
+
+**Description:** `idspg` is a supported gearbox type (`actOpt.py` → `Opt_IDSPG.py`, motor
+`RO100`) and the optimiser writes `CADs/IDSPG/idspg_equations.txt` and
+`CADs/IDSPG/idspg_equations_onshape.txt`, but there is no CAD model to load them into:
+- `README.md` has no "Open IDSPG in Onshape" link (every other type with an `_onshape`
+  equations file has one), and does not mention IDSPG at all.
+- `CADs/IDSPG/` holds only the generated equation files — no SolidWorks assembly and no
+  link.
+- It was never committed: the `dev-IDSPG` branch (commits `651ec36`, `e555672`, `0da3c4a`)
+  added only the optimiser, configs and equation file.
+
+Practical effect: IDSPG results cannot be visualised or checked in CAD, so mass and
+geometry changes to IDSPG can't be verified.
+
+**Probable fix:** the IDSPG designer shares the Onshape document; add it to the README's
+Onshape link list in the same format as INDSPG. (Unconfirmed lead:
+`Onshape_extension/read_values.py:7` points to an Onshape document, `694cff33…`, that is
+not in the README.)
+
+**Blocks:** the IDSPG double-counted bearing mass fix (bug 7) and the other result-changing
+fixes, which are on hold until their CAD models can be checked.
+
+**Status:** resolved — Mahiraj Seervi added the Onshape link to the README (`513373b`,
+2026-10-15). The IDSPG bearing-mass fix is unblocked.
+
+### 4. INSSPG type 2 — old ring-gear mass formula overwrites the new one
+
+**Description:** in `ActuatorandGearbox_INSSPG.py`, `_getMassKG_3DP_type2()` computes the ring-gear
+mass twice, and the second, older calculation always wins:
+1. **New calculation (lines 1141–1172):** compares the bearing with the ring gear
+   (`bearing_OD - 2×clearance` vs `Nr × module + loose clearance`) and picks one of two ring
+   shapes. Each counts 5 volumes — top mount, bearing step, ring gear, bottom part, and the
+   support below the bearing — and includes the 3D-printing clearances. Sets `ring_mass` at
+   line 1159 or 1172.
+2. **Old calculation (lines 1176–1182):** one simple shape with 4 volumes (no support below the
+   bearing, most clearances left out). Runs unconditionally right after, and sets `ring_mass`
+   again at line 1182.
+
+Practical effect: the new ring-mass model is computed and then discarded. INSSPG type 2's ring
+mass, total mass and optimisation result all use the old simple formula.
+
+**History** (all mahi07-06):
+- `91a178d` (2026-07-01 12:03): first INSSPG version, type 1 only, with one simple ring formula
+  — the "old" block.
+- `bc84c74` (2026-07-01 21:52): type 2 added as a copy of type 1. The new conditional ring
+  calculation was added to **both** types; in type 1 the old formula was commented out
+  (lines 1407–1413), in type 2 it was left active.
+- Nothing in either ring section has changed since; `3a1a6b8` (2026-07-02, "changed mass
+  function of ring gear for type 2") changed the middle casing and the sun-gear limit, not
+  the ring block.
+
+So the active old block in type 2 is very likely an oversight from copying type 1.
+
+**Reproduce:** read `_getMassKG_3DP_type2()` — `ring_mass` is assigned inside the
+`if left_side > right_side:` / `else:` branches (lines 1159, 1172) and then unconditionally
+at line 1182, with nothing using the first value in between. Compare `_getMassKG_3DP_type1()`,
+where the same old block (lines 1407–1413) is commented out.
+
+**Probable fix:** delete the old block (lines 1175–1182) so type 2 uses the new calculation,
+as type 1 does. Only `insspg_type_2` results change (ring mass and total mass; possibly the
+chosen design); re-record its golden baselines in the same commit and list the before/after
+numbers. Check the result against the INSSPG type 2 Onshape model.
+
+**Status:** open — planned as Phase 1 fix 2.3; heads-up to mahi07-06 before applying.
+
+### 5. Bearing lookup by OD picks a bearing larger than the space for it
+
+**Description:** three places size a bearing from the space available for its outer diameter,
+so the value is a **maximum** OD. They look it up with
+`bearings_discrete(idRequiredMM=0, odRequiredMM=...)`, which returns the **first bearing whose
+OD is at least** that value — a bearing slightly larger than the space:
+
+| File | Lines | Bearing | Space (max OD) |
+|---|---|---|---|
+| `ActuatorandGearbox_INSSPG.py` | 466–467 | rotor support | `Rotor_ID - 4` |
+| `ActuatorandGearbox_INSSPG.py` | 481–482 | rotor upper support | `Stator_ID - 1.5 * 5` |
+| `ActuatorAndGearbox_ISSPG_compact.py` | 738–739 | sun-2 | `motor_rotor_base_ID` |
+
+Each place has a `#TODO` comment pointing here (INSSPG lines 465 and 480, ISSPG compact
+line 737). In INSSPG the variables are named `IdrequiredMM_R_S` / `IdrequiredMM_R_U_S` even
+though they hold an OD limit.
+
+What is selected today:
+
+| Gearbox / motor | Bearing | Max OD | Selected | Over by |
+|---|---|---|---|---|
+| INSSPG RI100 | rotor support | 41 mm | 30×42×7 | 1 mm |
+| INSSPG RI100 | rotor upper support | 49.5 mm | 40×50×6 | 0.5 mm |
+| INSSPG RI80 | rotor support | 36.5 mm | 25×37×7 | 0.5 mm |
+| INSSPG RI80 | rotor upper support | 43.5 mm | 35×47×7 | 3.5 mm |
+| ISSPG compact RO100 | sun-2 | 60 mm | 50×62×6 | 2 mm |
+| ISSPG compact RO80 | sun-2 | 51 mm | 40×52×7 | 1 mm |
+
+Practical effect: the chosen bearings eat into (or exceed) the clearance the code meant to
+leave, and the CAD geometry and bearing masses are based on them.
+
+**Reproduce:**
+```python
+from CommonComponents import bearings_discrete
+b = bearings_discrete(idRequiredMM=0, odRequiredMM=41)   # INSSPG RI100 rotor support: Rotor_ID 45 - 4
+print(b.getBearingIDMM(), b.getBearingODMM(), b.getBearingWidthMM())
+# 30 42 7  -> OD 42 > 41
+```
+
+**Probable fix:** add a lookup that returns the **largest bearing whose OD fits** (OD ≤ the
+limit) and use it at these three places; rename the INSSPG variables to `OdLimitMM_R_S` /
+`OdLimitMM_R_U_S`. This changes the chosen bearings, and so the CAD geometry and mass, for
+INSSPG (both types) and ISSPG compact — first confirm in the Onshape models whether the
+selected bearings really don't fit, or whether the `- 4` / `- 1.5 * 5` clearances were meant to
+allow for this. Related to bug 1 (the ID and OD lookups use different tables).
+
+**Status:** open — needs the INSSPG and ISSPG designers to check in Onshape.
+
+### 6. INSSPG type 2 — which rotor support bearings it uses is unknown
+
+**Description:** `_getMassKG_3DP_type2()` in `ActuatorandGearbox_INSSPG.py` weighs the two rotor
+support bearings with typed-in masses (line 1087, `#TODO` at line 1086):
+```python
+sun_shaft_bearing_mass = 4 * 0.001 + 0.0066 + 0.0079 # mass of both rotor support bearing added
+```
+6.6 g and 7.9 g fit much smaller bearings than the ones `setVariables()` selects (lines
+465–488), which are labelled "for type 1" and weigh 47–48 g together. The code doesn't say which
+bearings type 2 uses:
+- the bearing selection in `setVariables()` is labelled type 1 only;
+- type 2's casing code that would refer to them is commented out (e.g. line 1094,
+  `#upper_casing_cy_1_ID = self.rotor_upper_support_bearing_ID`);
+- `config_files/insspg_params.json` (lines 93–98) has fixed RI100 sizes (30×42×7 and 40×50×6),
+  but the code reading them is commented out (`ActuatorandGearbox_INSSPG.py` lines 457–462).
+
+Type 1 now uses the masses of its selected bearings (line 1319); type 2 still uses the typed-in
+values for both RI100 and RI80.
+
+**Probable fix:** the INSSPG designer confirms which bearings type 2 uses (per motor); then
+select them in `setVariables()` (or read them from the config) and weigh them with
+`CommonComponents.bearing_mass_kg(id, od, width)`, as INCPG does. Re-record the
+`insspg_type_2` baselines.
+
+**Status:** open — question for mahi07-06.
+
+### 7. IDSPG — sun-shaft and planet bearings counted twice in each stage
+
+**Description:** in `ActuatorandGearbox_IDSPG.py`, each stage's mass function adds the sun-shaft
+bearing and the planet bearings into the stage's bearing total, and then adds them again on
+their own when summing the stage:
+
+| | Stage 1 — `getMassKG_3DP_stg1()` (line 1654) | Stage 2 — `getMassKG_3DP_stg2()` (line 1928) |
+|---|---|---|
+| Sun-shaft bearing, 4 g | line 1873 | line 2088 |
+| Planet bearings, 1 g × 2 per planet | lines 1878–1880 | lines 2093–2095 |
+| Both included in `bearing_mass` | line 1885 | line 2101 |
+| Stage total adds them **again** | lines 1921–1922 | lines 2132–2133 |
+| …plus `bearing_mass` (which already holds them) | line 1923 | line 2134 |
+
+```python
+# stage 1
+bearing_mass = BearingMassKG + sun_shaft_bearing_mass + planet_bearing_combined_mass + 2*0.006   # line 1885
+...
+Actuator_mass = (self.motorMassKG + ...
+                + self.planet_bearing_combined_mass_stg1    # line 1921 <- counted a 2nd time
+                + self.sun_shaft_bearing_mass_stg1          # line 1922 <- counted a 2nd time
+                + self.bearing_mass_stg1                    # line 1923 <- already contains both
+                + ...)
+```
+`getMassKG_3DP()` (line 2139) adds the two stages.
+Each stage total has a `#TODO` comment pointing here (lines 1913 and 2127).
+
+Practical effect: each stage is 4 g + 2 g per planet too heavy. For the golden case
+`idspg` RO100 at gear ratio 20 (4 planets in each stage) that is 12 g per stage, **24 g** in
+total (reported mass 1.560 kg). Because the error grows with the number of planets, it also
+penalises extra planets, so the optimiser may prefer fewer planets than the real mass justifies.
+
+**Reproduce:** read the two stage functions — the values at lines 1873/1880 and 2088/2095 are
+summed into `bearing_mass` (lines 1885, 2101) and then added again at lines 1921–1922 and
+2132–2131.
+
+**Probable fix:** delete the duplicate lines 1921–1922 and 2132–2133, so `bearing_mass_stg1` /
+`bearing_mass_stg2` remain "all bearings in this stage" and each bearing is counted once.
+Only `idspg` results change (about −24 g for RO100 at ratio 20; possibly more planets chosen);
+re-record its golden baselines with before/after numbers and check against the IDSPG Onshape
+model.
+
+Related, not part of this fix:
+- line 1885 also adds an unexplained `2*0.006` (12 g) to stage 1 only, with no comment and no
+  stage-2 equivalent — question for the IDSPG author;
+- the sun-shaft (4 g) and planet (1 g) bearing masses are fixed numbers that don't follow the
+  bearing actually chosen.
+
+**Status:** open — planned as Phase 1 fix 2.2; unblocked now that the IDSPG Onshape link is in
+the README (bug 3).
+
+### 8. RO100 rotor screw size — M4 or M5 differs between gearbox types
+
+**Description:** the RO100 rotor has 6 holes on PCD 74 that bolt the gearbox input (ISSPG sun hub,
+ICPG / IDSPG coupler) to the rotor. The real rotor takes **both M4 and M5** screws, so either is
+valid, but the code is not uniform:
+- **M4 (`4`):** `CommonComponents.py` line 416 (`motor` class default), `config_files/motor_config.json`
+  line 45 and `config_files/idspg_motor_config.json` line 45 — used by ICPG (`Opt_ICPG.py` line 176)
+  and IDSPG. The same entry's countersunk head (`rotorCSKHeadUpperDiaMM` 8, `rotorCSKHeadHeightMM`
+  2.3) is the M4 size.
+- **M5 (`5`):** `Opt_ISSPG_inside.py` line 69 and `Opt_ISSPG_compact.py` line 70 — ISSPG's own copy
+  of RO100. ISSPG uses it directly as the sun-hub bolt size
+  (`ActuatorAndGearbox_ISSPG_compact.py` line 754, `ActuatorAndGearbox_ISSPG_inside.py` line 743).
+
+So ISSPG designs the sun hub for M5 bolts while the other types use M4, which changes hole/head
+sizes and the material around them in the CAD.
+
+Related — ISSPG's RO100 copy also differs elsewhere (`Opt_ISSPG_inside.py` lines 59–75,
+`Opt_ISSPG_compact.py` lines 60–76):
+- `rotor_height` 33.2 vs 33.45 and `stator_top_rotor_top_offset` 3 vs 2.75 — the user confirmed
+  33.45 and 2.75 are correct (2026-10-17); ISSPG's values are wrong;
+- `motorMass` 0.525 kg vs 0.71 kg, and RO80 0.265 kg vs 0.352 kg — the user confirmed the datasheet
+  masses 710 g and 352 g are correct (2026-10-17); ISSPG's values are wrong.
+
+**Question for the designers:** which screw size should be the standard for the RO100 rotor —
+M4 or M5? If M5, the countersunk head size (8 / 2.3) must change with it.
+
+**Probable fix:** once decided, store one value in the planned `motors.json` (as the screw size,
+e.g. M4 → 4) and remove ISSPG's own motor copies so every gearbox reads the same entry. Re-record
+the affected golden baselines (ISSPG if M4; ICPG and IDSPG if M5) and check the CAD.
+
+**Status:** open — question for the designers. No code changed.

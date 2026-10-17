@@ -16,7 +16,13 @@ These check that every gearbox type in `actOpt.py` points to an existing `Opt_*.
 
 ## Golden-output check (about 20–30 minutes)
 
-`tests/golden/golden.py` runs every gearbox type with every motor its `run()` supports, at one gear ratio per family (6.5 single-stage, 10 compound, 20 double-stage and Wolfrom). It compares the optimiser's returned parameters and the CAD equation files it writes against the baselines in `tests/golden/baselines/`.
+`tests/golden/golden.py` runs every gearbox type with every motor its `run()` supports, at one gear ratio per family (6.5 single-stage, 10 compound, 20 double-stage and Wolfrom). It compares three things against the baselines in `tests/golden/baselines/`:
+
+- the optimiser's returned parameters (the chosen design),
+- the CAD equation files it writes,
+- the results CSVs it writes — total mass, efficiency, cost, torque density and the per-part mass breakdown. Run-time lines are left out, since they differ on every run.
+
+A changed results CSV is reported value by value, e.g. `mass: 1.483 -> 1.192`. Each case runs in its own temporary folder, so the check never touches your `results/` folder.
 
 ```bash
 python tests/golden/golden.py check                  # all 46 cases

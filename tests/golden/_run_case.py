@@ -6,6 +6,7 @@ Args: gb_type motor gear_ratio cad_group out_json
 """
 
 import json
+import re
 import sys
 import traceback
 from pathlib import Path
@@ -71,7 +72,36 @@ def main():
         p.relative_to(REPO_ROOT).as_posix(): p.read_text(encoding="utf-8", errors="replace")
         for p in changed
     }
+    # golden.py runs each case in an empty working directory, so everything
+    # under ./results was written by this run.
+    results_dir = Path.cwd() / "results"
+    result["results_files"] = {
+        p.relative_to(results_dir).as_posix(): drop_timing_lines(
+            p.read_text(encoding="utf-8", errors="replace")
+        )
+        for p in sorted(results_dir.rglob("*"))
+        if p.is_file()
+    } if results_dir.exists() else {}
     Path(out_json).write_text(json.dumps(result), encoding="utf-8")
+
+
+_TIMING = re.compile(r"running time|time taken", re.IGNORECASE)
+
+
+def drop_timing_lines(text):
+    """Remove run-time measurements, which differ on every run."""
+    kept, skip_next = [], False
+    for line in text.splitlines():
+        if skip_next:
+            skip_next = False
+            if re.fullmatch(r"\s*[\d.eE+-]+\s*", line):
+                continue
+        if _TIMING.search(line):
+            # 'Running Time (sec)' on its own line is followed by the number
+            skip_next = not re.search(r"\d", line)
+            continue
+        kept.append(line)
+    return "\n".join(kept) + "\n"
 
 
 if __name__ == "__main__":

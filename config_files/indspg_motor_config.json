@@ -13,8 +13,8 @@
     },
     "Material_properties":{
         "Steel": {
-            "density": 1245.6,
-            "maxAllowableStressMPa": 70
+            "density": 7850,
+            "maxAllowableStressMPa": 400
         },
         "Aluminum": {
             "density": 2700

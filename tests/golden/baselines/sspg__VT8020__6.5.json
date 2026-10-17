@@ -14,5 +14,8 @@
   54,
   132,
   0.6
- ]
+ ],
+ "results_files": {
+  "results_BruteForce_VT8020/SSPG_BRUTEFORCE_MIT_VT8020.csv": "Motor Parameters:\nmaxMotorAngVelRPM, maxMotorAngVelRadPerSec, maxMotorTorque, maxMotorPower, motorMass, motorDia, motorLength\n4800 , 502.6548245743669 , 3.819718634205488 , 1900 , 0.713 , 89.4 , 45.5\n \nGear strength and size parameters:\nFOS, serviceFactor, stressAnalysisMethodName, maxGearBoxDia, maxGearAllowableStressMPa\n1.2 , 1.5 , MIT , 79.4 , 70\n \nOptimization Parameters:\nK_mass, K_Eff, K_Width, MODULE_MIN, MODULE_MAX, NUM_PLANET_MIN, NUM_PLANET_MAX, NUM_TEETH_SUN_MIN, NUM_TEETH_PLANET_MIN, GEAR_RATIO_MIN, GEAR_RATIO_MAX, GEAR_RATIO_STEP\n1 , -2 , 0.2 , 0.5 , 1.2 , 3 , 7 , 18 , 28 , 4.0 , 15 , 0.1\n \niter, gearRatio, module, Ns, Np, Nr, numPlanet, fwSunMM, fwPlanetMM, fwRingMM, mass, eff, peakTorque, Cost, Torque_Density, Outer_Bearing_mass, Actuator_width\n5 , 6.5 , 0.6 , 24 , 54 , 132 , 3 , 12.611 , 12.611 , 12.611 , 1.139 , 0.957 , 24.828 , 1.7475561435341231 , 21.798068481123792 , 0.103 , 89.11063357663384\n\n\n"
+ }
 }

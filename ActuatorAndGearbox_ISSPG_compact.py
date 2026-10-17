@@ -734,11 +734,13 @@ class internalsingleStagePlanetaryActuator:
         self.output_bearing_width  = outputbearing.getBearingWidthMM()
 
         # --- sun2 Bearing Dimensions ---
+        #TODO: this is the most OD the bearing may have, but bearings_discrete(odRequiredMM=...) returns the first bearing with OD >= it, i.e. a bearing larger than the space. See ISSUES.md bug 5.
         Sun2BearingODrequiredMM  = self.motor_rotor_base_ID
         sun2bearing              = bearings_discrete(0,Sun2BearingODrequiredMM)
         self.sun2_bearing_ID     = sun2bearing.getBearingIDMM()
         self.sun2_bearing_OD     = sun2bearing.getBearingODMM()
         self.sun2_bearing_width  = sun2bearing.getBearingWidthMM()
+        self.sun2_bearing_mass_selected = sun2bearing.getBearingMassKG()   # mass of this same bearing
 
         #--- Input Bearing Dimension ---
         self.input_bearing_ID    = self.design_params["input_bearing_ID"]
@@ -1602,9 +1604,9 @@ class internalsingleStagePlanetaryActuator:
         #--------------------------------------
         # Mass: sspg_sun2_bearing
         #--------------------------------------
-        Sun2BearingIdrequiredMM  = self.sun2_bearing_ID
-        sun2bearing              = bearings_discrete(Sun2BearingIdrequiredMM)
-        self.sun2_bearing_mass     = sun2bearing.getBearingMassKG()
+        # Use the bearing chosen in setVariables() (looked up by OD). Looking it up again by ID
+        # would use the other bearing table and can return a different bearing (ISSUES.md bug 1).
+        self.sun2_bearing_mass     = self.sun2_bearing_mass_selected
         sun2_bearing_mass = self.sun2_bearing_mass # kg
 
         self.Motor_case_mass              = Motor_case_mass
@@ -1976,7 +1978,7 @@ class optimizationInternalSingleStageActuator:
                                 #Actuator.planetaryGearbox.setNr(Actuator.planetaryGearbox.Ns + 1)
                             Actuator.planetaryGearbox.setNp(Actuator.planetaryGearbox.Np + 1)
                         Actuator.planetaryGearbox.setNs(Actuator.planetaryGearbox.Ns + 1)
-                    Actuator.planetaryGearbox.setModule(Actuator.planetaryGearbox.module + 0.100)
+                    Actuator.planetaryGearbox.setModule(round(Actuator.planetaryGearbox.module + 0.100, 1))
                 if (opt_done == 1):
                     self.printOptimizationResults(opt_actuator, log, csv)
                 self.gearRatioIter += self.GEAR_RATIO_STEP
@@ -2105,7 +2107,7 @@ class optimizationInternalSingleStageActuator:
                                     #Actuator.planetaryGearbox.setNr(Actuator.planetaryGearbox.Ns + 1)
                                 Actuator.planetaryGearbox.setNp(Actuator.planetaryGearbox.Np + 1)
                             Actuator.planetaryGearbox.setNs(Actuator.planetaryGearbox.Ns + 1)
-                        Actuator.planetaryGearbox.setModule(Actuator.planetaryGearbox.module + 0.100)
+                        Actuator.planetaryGearbox.setModule(round(Actuator.planetaryGearbox.module + 0.100, 1))
                     if (opt_done == 1):
                         self.sspgOpt = optimal_continuous_PSC_sspg(GEAR_RATIO_MIN = opt_parameters[0],
                                                                    numPlanet = opt_parameters[1],

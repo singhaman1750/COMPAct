@@ -25,5 +25,8 @@
   0.017162909438651928,
   0.0960248707310069,
   0.26458489897719684
- ]
+ ],
+ "results_files": {
+  "results_BruteForce_RO80/ICPG_BRUTEFORCE_MIT_RO80.csv": "Motor Parameters:\nmaxMotorAngVelRPM, maxMotorAngVelRadPerSec, maxMotorTorque, maxMotorPower, motorMass, motorDia, motorLength\n5040 , 527.7875658030853 , 1.36418522650196 , 490 , 0.352 , 92.6 , 22\n \nGear strength and size parameters:\nFOS, serviceFactor, stressAnalysisMethodName, maxGearBoxDia, maxGearAllowableStressMPa\n1.2 , 1.5 , MIT , 54.45 , 70\n \nOptimization Parameters:\nK_mass, K_Eff, MODULE_BIG_MIN, MODULE_BIG_MAX, MODULE_SMALL_MIN, MODULE_SMALL_MAX, NUM_PLANET_MIN, NUM_PLANET_MAX, NUM_TEETH_SUN_MIN, NUM_TEETH_PLANET_BIG_MIN, NUM_TEETH_PLANET_SMALL_MIN, GEAR_RATIO_MIN, GEAR_RATIO_MAX, GEAR_RATIO_STEP\n1 , -2 , 0.5 , 1.2 , 0.5 , 1.2 , 3 , 7 , 18 , 28 , 28 , 4.0 , 40.0 , 1.0\n \niter, gearRatio, moduleBig, moduleSmall, Ns, NpBig, NpSmall, Nr, numPlanet, fwSunMM, fwPlanetBigMM, fwPanetSmallMM, fwRingMM, mass, eff, peakTorque, Cost, Torque_Density, Outer_Bearing_mass, Actuator_width\n1 , 7.566502463054187 , 0.5 , 0.5 , 21 , 43 , 29 , 93 , 3 , 7.884 , 7.884 , 9.156 , 9.156 , 0.963 , 0.941 , 10.322 , 6.823077834668878 , 10.719 , 0.346 , 56.790063298249365\n\n"
+ }
 }

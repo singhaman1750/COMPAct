@@ -20,5 +20,8 @@
   88,
   0.6,
   0.9
- ]
+ ],
+ "results_files": {
+  "results_BruteForce_MAD_M6C12/DSPG_BRUTEFORCE_MIT_MAD_M6C12.csv": "Motor Parameters:\nmaxMotorAngVelRPM, maxMotorAngVelRadPerSec, maxMotorTorque, maxMotorPower, motorMass, motorDia, motorLength\n7200 , 753.9822368615503 , 2.304563575970645 , 1725 , 0.257 , 72 , 27\n \nGear strength and size parameters:\nFOS, serviceFactor, stressAnalysisMethodName, maxGearBoxDia, maxGearAllowableStressMPa\n1.2 , 1.5 , MIT , 80.0 , 70\n \nOptimization Parameters:\nK_mass, K_Eff, MODULE_STAGE1_MIN, MODULE_STAGE1_MAX, MODULE_STAGE2_MIN, MODULE_STAGE2_MAX, NUM_PLANET_STAGE1_MIN, NUM_PLANET_STAGE1_MAX, NUM_PLANET_STAGE2_MIN, NUM_PLANET_STAGE2_MAX, NUM_TEETH_SUN_MIN, NUM_TEETH_PLANET_MIN, GEAR_RATIO_MIN, GEAR_RATIO_MAX, GEAR_RATIO_STEP\n1 , -2 , 0.5 , 1.2 , 0.5 , 1.2 , 3 , 7 , 3 , 7 , 18 , 28 , 4 , 45 , 1\n \niter, gearRatio, module1, module2, Ns1, Np1, Nr1, numPlanet1, Ns2, Np2, Nr2, numPlanet2, fwSun1MM, fwPlanet1MM, fwRing1MM, fwSun2MM, fwPlanet2MM, fwRing2MM, mass, eff, peakTorque, Cost, Torque_Density, Outer_Bearing_mass_stg1, Outer_Bearing_mass_stg2, Actuator_width\n38 , 20.0 , 0.6 , 0.9 , 27 , 45 , 117 , 3 , 32 , 28 , 88 , 4 , 6.54 , 8.0 , 8.0 , 9.526 , 9.526 , 9.526 , 0.944 , 0.911 , 46.091 , 2.6268138666853424 , 48.82521186440678 , 0.081 , 0.128 , 95.52646271735713\n\n\n"
+ }
 }

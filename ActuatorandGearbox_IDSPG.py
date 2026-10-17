@@ -1910,6 +1910,7 @@ class internaldoubleStagePlanetaryActuator:
         #----------------------------------------
         # Total Actuator Mass
         #----------------------------------------
+        #TODO: sun_shaft_bearing_mass_stg1 and planet_bearing_combined_mass_stg1 are already inside bearing_mass_stg1; adding them here counts them twice. See ISSUES.md bug 7.
         Actuator_mass = (self.motorMassKG 
                         + self.ring_gear_mass_stg1 
                         + self.motor_casing_mass_stg1 
@@ -2123,6 +2124,7 @@ class internaldoubleStagePlanetaryActuator:
         #----------------------------------------
         # Total Actuator Mass
         #----------------------------------------
+        #TODO: sun_shaft_bearing_mass_stg2 and planet_bearing_combined_mass_stg2 are already inside bearing_mass_stg2; adding them here counts them twice. See ISSUES.md bug 7.
         Actuator_mass = (self.ring_gear_mass_stg2
                        + self.carrier_mass_stg2 
                        + self.sec_carrier_mass_stg2 
