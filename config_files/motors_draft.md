@@ -225,7 +225,9 @@ stubs.
   KV120: 12S; 54 A (180 s); **peak torque 6.11 Nm measured** (MZ 32×10.6, 46.0 V, 77.1 A, 3847 rpm;
   highest of six props); Kt measured 0.079 / Kv-based 0.080 / stated 0.108; no-load ≈ 5760 rpm
   (KV × 48); 2954 W (180 s); 0.06 Ω; 0.038 mH; Io 3 A @ 48 V; 566 g ± 5.
-  Does **not** match the code's `VT8020` (KV100, 713 g, 89.4 × 45.5).
+  **This is the code's `VT8020`** (user, 2026-10-17). The code's values (KV100, 40 A, 1900 W, 713 g,
+  89.4 × 45.5, motor mount PCD 51, output 6 × Ø3 @ PCD 71.5) don't match the datasheet and are
+  replaced by the KV120 values above.
 - 4006 SL (380 KV, 6S, 67 g) and 6008 SL (340 KV, 6S, 170 g): ruled out by voltage.
 
 **MAD Components EEE** (product pages) — electrical data and torque are only in images/test
@@ -318,9 +320,8 @@ sheets, not yet received:
   best 12S row 1.021 Nm @ 21.62 A — user chose 1.086, 2026-10-17); no-load ≈ 9600 rpm (KV × 48);
   1029 W; 106 mΩ; 162.9 g. KV240, KV310, KV370: 6S, ruled out; KV110: no data on the page.
 
-**Unidentified code entries:** `VT8020` (KV100, 48 V, 40 A, 1900 W, 713 g, 89.4 × 45.5, motor
-mount PCD 51, output 6 × Ø3 @ PCD 71.5) and `U12` (KV120, 48 V, 95 A, 4560 W, 778 g,
-106.8 × 47.6). `U15` is not used by any script.
+**Unidentified code entries:** `U12` (KV120, 48 V, 95 A, 4560 W, 778 g, 106.8 × 47.6). `U15` is not
+used by any script. (`VT8020` is the Vector 8020 PRO — see above.)
 
 ## Frameless motors (datasheets received 2026-10-16)
 
