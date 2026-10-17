@@ -320,8 +320,10 @@ sheets, not yet received:
   best 12S row 1.021 Nm @ 21.62 A — user chose 1.086, 2026-10-17); no-load ≈ 9600 rpm (KV × 48);
   1029 W; 106 mΩ; 162.9 g. KV240, KV310, KV370: 6S, ruled out; KV110: no data on the page.
 
-**Unidentified code entries:** `U12` (KV120, 48 V, 95 A, 4560 W, 778 g, 106.8 × 47.6). `U15` is not
-used by any script. (`VT8020` is the Vector 8020 PRO — see above.)
+**Dropped code entries (user, 2026-10-17):** `U12` (KV120, 48 V, 95 A, 4560 W, 778 g, 106.8 × 47.6;
+no datasheet) and `U15` (not used by any script) do not go into `motors.json`; their classes and
+config entries are removed when the code switches to `motors.json`. (`VT8020` is the Vector
+8020 PRO — see above.)
 
 ## Frameless motors (datasheets received 2026-10-16)
 
