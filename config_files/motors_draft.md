@@ -183,8 +183,8 @@ sheets, not yet received:
   drawing, test tables). Shared: body Ø72 × 27 mm (the 33.4 mm on the page = 27 body + 6.4 shaft;
   the code's 27 mm is correct), 14 pole pairs, 6 mm shaft, 60 mm 16 AWG leads.
   Stator mount 4 × M4 @ PCD 32 (primary, as in the code), alternative 4 × M3 @ PCD 25.
-  Rotor mount 4 × M3 @ PCD 18 (primary, by analogy with the other motors — the code uses PCD 22;
-  to confirm), alternatives 4 × M3 @ PCD 12 and @ PCD 22.
+  Rotor mount 4 × M3 @ PCD 18 (primary, confirmed by user 2026-10-17; the code used PCD 22),
+  alternatives 4 × M3 @ PCD 12 and @ PCD 22.
   Wire slot (user choice: at the point where the wires emerge; from the drawing, 3.65 px/mm): the three
   leads emerge ≈ 14 mm from centre and run radially across the stator face to the rim as a ≈ 7 mm
   bundle → slot 16 mm from centre, length 4 mm, radius 3.9 mm (3.5 + 0.4). The CAD slot can't model
