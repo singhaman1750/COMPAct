@@ -73,7 +73,7 @@ NUM_TEETH_PLANET_SMALL_MIN = wpg_optimization_params["NUM_TEETH_PLANET_SMALL_MIN
 # run: optimise the WPG actuator for any framed motor in motors.json
 #=============================================================
 def run(motor_name, gear_ratio):
-    motor = load_motor(motor_name)
+    motor = load_motor(motor_name, motor_type="framed_outrunner")
     maxGearboxDiameter = max_gearbox_dia_mult_factor(motor, wpg_optimization_params) * motor.motorDiaMM - 2*wpg_design_params["ringRadialWidthMMBig"]
     wolfromPlanetaryGearboxInstance = wolfromPlanetaryGearbox(design_parameters         = wpg_design_params,
                                                               gear_standard_parameters  = Gear_standard_parameters,

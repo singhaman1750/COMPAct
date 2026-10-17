@@ -70,7 +70,7 @@ NUM_TEETH_PLANET_MIN = sspg_optimization_params["NUM_TEETH_PLANET_MIN"] # 20
 # run: optimise the SSPG actuator for any framed motor in motors.json
 #=============================================================
 def run(motor_name, gear_ratio):
-    motor = load_motor(motor_name)
+    motor = load_motor(motor_name, motor_type="framed_outrunner")
     maxGearboxDiameter = (max_gearbox_dia_mult_factor(motor, sspg_optimization_params) * motor.motorDiaMM
                           - 2*sspg_design_params["ringRadialWidthMM"])
     planetaryGearbox = singleStagePlanetaryGearbox(design_params             = sspg_design_params,

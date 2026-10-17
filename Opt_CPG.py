@@ -73,7 +73,7 @@ NUM_TEETH_PLANET_SMALL_MIN = cpg_optimization_params["NUM_TEETH_PLANET_MIN"] # 2
 # run: optimise the CPG actuator for any framed motor in motors.json
 #=============================================================
 def run(motor_name, gear_ratio):
-    motor = load_motor(motor_name)
+    motor = load_motor(motor_name, motor_type="framed_outrunner")
     maxGearboxDiameter = max_gearbox_dia_mult_factor(motor, cpg_optimization_params) * motor.motorDiaMM
     compoundPlanetaryGearboxInstance = compoundPlanetaryGearbox(design_parameters         = cpg_design_params,
                                                                 gear_standard_parameters  = Gear_standard_parameters,

@@ -61,6 +61,7 @@ GOLDEN_MOTORS = {
     "sspg": FRAMED_GOLDEN_MOTORS,
     "cpg": FRAMED_GOLDEN_MOTORS,
     "wpg": FRAMED_GOLDEN_MOTORS,
+    "dspg": FRAMED_GOLDEN_MOTORS,
 }
 
 # Variants that write into the same CADs/<GROUP>/ folder share a group and
