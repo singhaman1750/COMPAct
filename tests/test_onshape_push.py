@@ -117,3 +117,18 @@ def test_push_refuses_a_version_url(tmp_path, monkeypatch):
     fake_onshape(monkeypatch)
     with pytest.raises(ValueError, match="not a workspace"):
         set_values.push_to_onshape("sspg", models_json=str(models))
+
+
+def test_push_can_send_a_saved_file(tmp_path, monkeypatch):
+    models = write_case(tmp_path, monkeypatch, '"Ns"= 19\n')
+    saved = tmp_path / "saved_equations_onshape.txt"
+    saved.write_text('"Ns"= 21\n')
+    fake_onshape(monkeypatch, stored=[{"name": "Ns", "expression": "21"}])
+    assert set_values.push_to_onshape("sspg", models_json=models, eq_file=str(saved)) == []
+
+
+@pytest.mark.parametrize("case_dir", sorted((REPO_ROOT / "docs" / "cad_issues").glob("*/")), ids=lambda p: p.name)
+def test_saved_cad_issue_cases_parse(case_dir):
+    from Onshape_extension.parse_variables_txt import parse_variable_file
+    files = list(case_dir.glob("*_equations_onshape.txt"))
+    assert files and parse_variable_file(str(files[0]))

@@ -475,3 +475,34 @@ account.
 `isspg_inside`, `isspg_compact`, `incpg_dependent`, `incpg_independent`,
 `insspg_type_1`, `insspg_type_2`,
 `icpg`, `inwpg_dependent`, `inwpg_independent` and `indspg` empty in `Onshape_extension/onshape_models.json`.
+
+### CAD 3. DSPG — stage-1 ring gear is split into two parts
+
+**Description:** in the DSPG Onshape model, the **stage-1 ring gear comes out as two separate
+bodies** instead of one ring.
+
+**Seen with:** `python actOpt.py --motor MAD_M6C06_KV140 --gb_type dspg --gr 20 --onshape`
+(found 2026-10-17). Design: stage 1 Ns1 27 / Np1 48 / Nr1 123, module 0.6, 3 planets; stage 2
+Ns2 40 / Np2 32 / Nr2 104, module 0.7, 4 planets; ratio 20.0.
+
+**Reproduce without re-optimising:** the files from that run are saved in
+[`docs/cad_issues/CAD3_dspg_MAD_M6C06_KV140_gr20/`](docs/cad_issues/CAD3_dspg_MAD_M6C06_KV140_gr20/)
+(the three DSPG equations files and the results CSV). Push them to your DSPG model with:
+```bash
+python Onshape_extension/set_values.py --gb_type dspg --file docs/cad_issues/CAD3_dspg_MAD_M6C06_KV140_gr20/dspg_equations_onshape.txt
+```
+
+**Likely cause (not confirmed):** the MAD M6C06 is a small motor (Ø72 mm), so the optimiser
+allows a gearbox 1.25× the motor diameter (small-motor rule, Phase 2). Stage-1 ring pitch
+diameter is 0.6 × 123 = 73.8 mm (tooth root ≈ 75.3 mm, `a1_ring_OD` 83.8 mm), i.e. **larger than
+the motor** (`a1_motor_OD` 72). If a CAD feature is sized from `a1_motor_OD` (e.g. a motor pocket
+or cut), it would cut through the ring and split it. The DSPG model was presumably only used with
+motors larger than their ring until now.
+
+**Probable fix:** in the DSPG Onshape model, find the feature that cuts the stage-1 ring and size it
+from the ring (e.g. `a1_ring_OD`) or limit it to `min(motor, ring)`; or, if a ring larger than the
+motor is not allowed by the design, the optimiser must not use the 1.25× allowance for DSPG
+(set `MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR` to 1 in `config_files/dspg_params.json`). Check SSPG,
+CPG and WPG with a small motor for the same problem.
+
+**Status:** open — for the DSPG model's designer.

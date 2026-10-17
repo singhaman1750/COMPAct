@@ -9,6 +9,7 @@ Set up once:
 
 Then:
     python Onshape_extension/set_values.py --gb_type sspg
+    python Onshape_extension/set_values.py --gb_type dspg --file docs/cad_issues/<case>/dspg_equations_onshape.txt
 or optimise and push in one go:
     python actOpt.py --motor U8_Lite --gb_type sspg --gr 6.5 --onshape
 
@@ -79,8 +80,9 @@ def _same_expression(a, b):
     return re.sub(r"\s+", "", str(a)) == re.sub(r"\s+", "", str(b))
 
 
-def push_to_onshape(gb_type, save_version=True, models_json=MODELS_JSON):
-    """Write the gearbox type's equations file into its Onshape Variable Studio.
+def push_to_onshape(gb_type, save_version=True, models_json=MODELS_JSON, eq_file=None):
+    """Write the gearbox type's equations file (or `eq_file`, e.g. a saved one) into its
+    Onshape Variable Studio.
 
     Returns the names of variables whose value in Onshape does not match afterwards.
     """
@@ -93,7 +95,7 @@ def push_to_onshape(gb_type, save_version=True, models_json=MODELS_JSON):
     doc = Document.from_url(url)
     if doc.wtype != "w":
         raise ValueError(f"The URL for {gb_type!r} points to a version, not a workspace (/w/): {url}")
-    eq_file = equations_file(gb_type)
+    eq_file = os.path.abspath(eq_file) if eq_file else equations_file(gb_type)
     variables = parse_variable_file(eq_file)
     client = Client(env=ENV_FILE)
     variables_path = f"/api/variables/d/{doc.did}/w/{doc.wid}/e/{doc.eid}/variables"
@@ -129,8 +131,10 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description="Push an optimiser result into its Onshape model.")
     parser.add_argument("--gb_type", required=True, help="Gearbox type, e.g. sspg, icpg, insspg_type_1")
     parser.add_argument("--no-version", action="store_true", help="do not save an Onshape version first")
+    parser.add_argument("--file", help="push this saved equations file instead of the latest result, "
+                                       "e.g. docs/cad_issues/<case>/dspg_equations_onshape.txt")
     args = parser.parse_args(argv)
-    push_to_onshape(args.gb_type, save_version=not args.no_version)
+    push_to_onshape(args.gb_type, save_version=not args.no_version, eq_file=args.file)
 
 
 if __name__ == "__main__":
