@@ -7,7 +7,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from CommonComponents import MOTOR_CLASSES, MOTORS_JSON, load_motor  # noqa: E402
+from CommonComponents import MOTOR_CLASSES, MOTORS_JSON, load_motor, max_gearbox_dia_mult_factor  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / "golden"))
 import golden  # noqa: E402
@@ -118,3 +118,9 @@ def test_unknown_motor_lists_known_names():
 
 def test_golden_motors_exist():
     assert set(golden.FRAMED_GOLDEN_MOTORS) <= set(MOTORS)
+
+
+def test_small_motors_get_the_wider_gearbox_factor():
+    params = {"MAX_GB_DIA_MULT_FACTOR": 1, "MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR": 1.25, "SMALL_MOTOR_DIA_MM": 80}
+    assert max_gearbox_dia_mult_factor(load_motor("MAD_M6C12_KV170"), params) == 1.25  # 72 mm
+    assert max_gearbox_dia_mult_factor(load_motor("U8_Lite"), params) == 1             # 87.1 mm

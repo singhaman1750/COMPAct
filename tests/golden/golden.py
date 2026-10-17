@@ -57,7 +57,9 @@ FLOAT_REL_TOL = 1e-9
 # (via CommonComponents.load_motor) list their golden motors here. Other
 # types are still read from the motor names in their run() if/elif chain.
 FRAMED_GOLDEN_MOTORS = ["U8_Lite", "U10_Plus_KV80", "MN8014", "VT8020_PRO", "MAD_M6C12_KV170"]
-GOLDEN_MOTORS = {}
+GOLDEN_MOTORS = {
+    "sspg": FRAMED_GOLDEN_MOTORS,
+}
 
 # Variants that write into the same CADs/<GROUP>/ folder share a group and
 # must not run at the same time.

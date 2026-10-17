@@ -665,3 +665,11 @@ def load_motor(name, rating=None, path=MOTORS_JSON):
         motorName         = name,
         **entry["geometry"],
     )
+
+
+def max_gearbox_dia_mult_factor(motor, optimization_params):
+    """Allowed gearbox diameter as a multiple of the motor diameter. Motors smaller
+    than SMALL_MOTOR_DIA_MM may have a gearbox wider than the motor."""
+    if motor.motorDiaMM < optimization_params["SMALL_MOTOR_DIA_MM"]:
+        return optimization_params["MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR"]
+    return optimization_params["MAX_GB_DIA_MULT_FACTOR"]
