@@ -62,6 +62,10 @@ GOLDEN_MOTORS = {
     "cpg": FRAMED_GOLDEN_MOTORS,
     "wpg": FRAMED_GOLDEN_MOTORS,
     "dspg": FRAMED_GOLDEN_MOTORS,
+    "icpg": ["RO100", "RO80"],
+    "isspg_inside": ["RO100", "RO80", "RO60"],
+    "isspg_compact": ["RO100", "RO80", "RO60"],
+    "idspg": ["RO100"],
 }
 
 # Variants that write into the same CADs/<GROUP>/ folder share a group and

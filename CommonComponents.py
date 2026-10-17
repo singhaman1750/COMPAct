@@ -633,9 +633,10 @@ MOTOR_CLASSES = {
 }
 
 
-def load_motor(name, rating=None, path=MOTORS_JSON):
+def load_motor(name, motor_type=None, rating=None, path=MOTORS_JSON):
     """Return the motor object for `name` from motors.json.
 
+    motor_type, if given, must match the entry's type (e.g. "frameless_outrunner").
     rating "peak" sizes the gears with peak torque and uses the no-load speed;
     "rated" uses rated torque and rated speed. Default: the file's "rating".
     """
@@ -646,6 +647,10 @@ def load_motor(name, rating=None, path=MOTORS_JSON):
         raise ValueError(f"Unknown motor {name!r}. Known motors: {', '.join(sorted(motors))}")
 
     entry      = motors[name]
+    if motor_type is not None and entry["type"] != motor_type:
+        matching = sorted(n for n, e in motors.items() if e["type"] == motor_type)
+        raise ValueError(f"Motor {name!r} is a {entry['type']} motor; this gearbox needs a {motor_type} "
+                         f"motor: {', '.join(matching)}")
     electrical = entry["electrical"]
     rating     = rating or motors_data["rating"]
     if rating == "peak":

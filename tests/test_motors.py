@@ -124,3 +124,8 @@ def test_small_motors_get_the_wider_gearbox_factor():
     params = {"MAX_GB_DIA_MULT_FACTOR": 1, "MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR": 1.25, "SMALL_MOTOR_DIA_MM": 80}
     assert max_gearbox_dia_mult_factor(load_motor("MAD_M6C12_KV170"), params) == 1.25  # 72 mm
     assert max_gearbox_dia_mult_factor(load_motor("U8_Lite"), params) == 1             # 87.1 mm
+
+
+def test_wrong_motor_type_is_rejected():
+    with pytest.raises(ValueError, match="needs a frameless_outrunner motor: RO100, RO60, RO80"):
+        load_motor("RI100", motor_type="frameless_outrunner")
