@@ -398,7 +398,8 @@ Related — ISSPG's RO100 copy also differs elsewhere (`Opt_ISSPG_inside.py` lin
 `Opt_ISSPG_compact.py` lines 60–76):
 - `rotor_height` 33.2 vs 33.45 and `stator_top_rotor_top_offset` 3 vs 2.75 — the user confirmed
   33.45 and 2.75 are correct (2026-10-17); ISSPG's values are wrong;
-- `motorMass` 0.525 kg vs 0.71 kg (datasheet 710 g) — and RO80 0.265 kg vs 0.352 kg — still open.
+- `motorMass` 0.525 kg vs 0.71 kg, and RO80 0.265 kg vs 0.352 kg — the user confirmed the datasheet
+  masses 710 g and 352 g are correct (2026-10-17); ISSPG's values are wrong.
 
 **Question for the designers:** which screw size should be the standard for the RO100 rotor —
 M4 or M5? If M5, the countersunk head size (8 / 2.3) must change with it.

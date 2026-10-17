@@ -342,5 +342,6 @@ config entries are removed when the code switches to `motors.json`. (`VT8020` is
 RO100 geometry (user, 2026-10-17): rotor height 33.45 mm and stator–rotor offset 2.75 mm (the class /
 `motor_config.json` values; ISSPG's own copy with 33.2 / 3 is wrong). Rotor screw size M4 vs M5: the
 real rotor takes both — question for the designers (ISSUES.md bug 8).
-Open: ISSPG uses 525 g (RO100) and 265 g (RO80) instead of 710 / 352 g. RO60's
+Masses (user, 2026-10-17): RO100 710 g and RO80 352 g (datasheet) are correct; ISSPG's own copies
+(525 g / 265 g) are wrong (ISSUES.md bug 8). RO60's
 datasheet peak torque (2.4 Nm) is below Kt × peak current (3.76 Nm); the datasheet value is used.
