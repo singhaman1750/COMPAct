@@ -37,9 +37,11 @@ motor's values are complete and confirmed, they move into `motors.json`.
 
 ## Chosen for `motors.json`
 
-Framed (16): U8 Lite, U8 Lite L, U8 II, U8 II Lite, U8 II PRO, MN8012, MN8014, MN8017,
+Framed (24): U8 Lite, U8 Lite L, U8 II, U8 II Lite, U8 II PRO, MN8012, MN8014, MN8017,
 U10 Plus KV80, U10 II, MN5008 KV170, MN6007 II KV160, MN7005 KV115, MN1005 V2 KV90,
-M6C06 EEE V3 KV160, M6C12 EEE KV170. Remaining MAD EEE motors: 12S variants only, one per model.
+M6C06 EEE V3 KV160, M6C12 EEE KV170, M6C10 EEE KV150, M6C08 EEE KV180, M6C06 EEE KV140,
+1005 EEE KV90, 7005 EEE KV115, 8118 EEE KV100, 5008 EEE KV170, 5010 EEE KV200 (24 framed).
+Ruled out by voltage: MAD 5005 EEE (all KVs, 4–6S).
 Frameless (5): RI100, RI80, RO100, RO80, RO60.
 Vector Technics: pending (wire slots, torque decision).
 
@@ -218,9 +220,26 @@ sheets, not yet received:
     (+6 %); no-load ≈ 6720 rpm (KV × 24); 1365 W; 31 mΩ; 1.53 A @ 20 V; 256 g.
   - KV400: 6S; 75.7 A; **peak torque 1.71 Nm measured** (20×6.0, 23.33 V, 75.74 A, 7082 rpm); Kt 0.0226
     (−5 %); no-load ≈ 9600 rpm (KV × 24); 1766 W; 17 mΩ; 2.5 A @ 20 V; 268 g.
-- M6C10 EEE: KV 150/200/250/300, 72 × 31.4, same mounts as M6C12
-- M6C08 EEE: KV 130/180/260/320, 72 × 29.4, same mounts
-- M6C06 EEE: KV 140/220/320, 72 × 27.4, same mounts
+- **M6C10 EEE — complete, chosen KV150** (product page images read by helper agents 2026-10-17; test rows re-checked: V×I and T×ω within 0.1 %). Body Ø72 × 25 mm (31.4 incl. shaft).
+  Stator mount 4 × M4 @ PCD 32 (alt. 4 × M3 @ PCD 25); rotor mount 4 × M3 @ PCD 18 (alt. 12, 22).
+  Wire slot (from drawing, approx.): radial bundle 7.3 mm wide emerging ≈ 10–14 mm → 16 / 4 / 4.05.
+  - **KV150 (chosen, user 2026-10-17)**: 12S; 36.3 A; **peak torque 2.377 Nm measured** (24×7.2, 47.76 V,
+    36.26 A, 4801 rpm; = stated 2.38); Kt 0.0656; no-load ≈ 7200 rpm (KV × 48); 1732 W; 120 mΩ; 209 g.
+  - KV200: 12S; 2.302 Nm @ 46.97 A; 201 g. KV250: 8–12S; 2.398 Nm @ 62.65 A; 213 g (rule pick by 0.9 %,
+    not chosen: 1.7× the current, 12 000 rpm). KV300: 6S (ruled out).
+- **M6C08 EEE — complete, chosen KV180** (product page images read by helper agents 2026-10-17; test rows re-checked: V×I and T×ω within 0.1 %). Body Ø72 × 23 mm (29.4 incl. shaft).
+  Stator mount 4 × M4 @ PCD 32 (alt. 4 × M3 @ PCD 25); rotor mount 4 × M3 @ PCD 18 (alt. 12, 22).
+  Wire slot (from drawing, approx.): outlet block centre 11.8 mm, leads emerge 13.5 mm, bundle 7.0 mm
+  → 15.5 / 4 / 3.9.
+  - **KV180 (chosen)**: 12S; 34 A; **peak torque 1.992 Nm measured** (HAVOC 22×7.0, 43.65 V — supply sagged —
+    34.02 A, 4996 rpm; = stated 1.99); Kt 0.0586; no-load ≈ 8640 rpm (KV × 48); 1485 W; 119 mΩ; 180 g.
+  - KV130: 12S; 1.653 Nm @ 19.92 A; 188 g. KV260 (6–8S), KV320 (6S): ruled out.
+- **M6C06 EEE (non-V3) — complete, chosen KV140** (product page images read by helper agents 2026-10-17; test rows re-checked: V×I and T×ω within 0.1 %). Body Ø72 × 21 mm (27.4 incl. shaft).
+  Stator mount 4 × M4 @ PCD 32 (alt. 4 × M3 @ PCD 25); rotor mount 4 × M3 @ PCD 18 (alt. 12, 22).
+  Wire slot (from drawing, approx.): radial bundle 6.9 mm wide emerging ≈ 12.6 mm → 14.6 / 4 / 3.85.
+  - **KV140 (chosen)**: 12S; 21 A; **peak torque 1.487 Nm measured** (24×7.2, 48.07 V, 21.01 A, 3853 rpm;
+    = stated 1.49); Kt 0.0708; no-load ≈ 6720 rpm (KV × 48); 1010 W; 301 mΩ; 163 g.
+  - KV220 (8S), KV320 (6S): ruled out.
 - **M6C06 EEE V3 — complete** (product page images: specs, drawing, test tables; user 2026-10-17).
   Shared: Ø72.1 × 22.4 mm, 14 pole pairs, 4 mm shaft, 60 mm 16 AWG leads. Stator mount 4 × M4 @ PCD 32;
   rotor mount 4 × M3 @ PCD 18 (primary), alternatives 4 × M3 @ PCD 12 and @ PCD 20.
@@ -236,12 +255,37 @@ sheets, not yet received:
     ≈ 7680 rpm (estimate: KV × 24 V); max power 1014 W; 40 mΩ; no-load current 1.0 A @ 20 V;
     mass 160 g (with cable).
   Note: MAD's max current is a 10–30 s short-term limit (MAD note), shorter than T-Motor's 180 s rating.
-- 1005 EEE: KV90, 12S, 279 g, 107 × 22.5, motor D32 M4×4, prop D20 M3×4 + D23 M4×4
-- 7005 EEE: KV115 (12S) / KV230 (6S), 186 g (196 g extended), 79 × 21.8, motor D32 M4×4, prop D20 M3×4 + D23 M4×4
-- 8118 EEE V1.0: KV100, 620 g, 88.6 × 41, motor D30 + D50 M3×4 and D32 M4×4, prop D23 M4×4
-- 5008 EEE V2.0: KV 170–400, 6/8/12S, 124–138 g, 56 × 30.7, motor D25 + D30 M3×4, prop D12/18 M3×2
-- 5005 EEE: KV 280/350/440, 4–6S, 88–92 g, 56 × 27.7, same mounts as 5008
-- 5010 EEE V2.0: KV 110–370, 6/8/12S, 162 g, 56 × 32.7, same mounts as 5008
+- **1005 EEE — complete, KV90** (product page images read by helper agents 2026-10-17; test rows re-checked: V×I and T×ω within 0.1 %). Body Ø107 × 22.5 mm. Stator mount 4 × M4 @ PCD 32;
+  rotor mount 4 × M4 @ PCD 23 (alt. 4 × M3 @ PCD 20). Wire slot (from drawing): oval slot along the
+  circumference at 6 o'clock, 10.1 × 5.8 mm, centre 34.0 mm → 34 / 4.3 / 3.3.
+  KV90: 12S; 34 A; **peak torque 3.92 Nm measured** (CB2 PRO 32×11, 47.92 V, 34.13 A, 3021 rpm; = stated 3.9);
+  Kt 0.1149; no-load ≈ 4320 rpm (KV × 48); 1636 W; 144 mΩ; 279 g.
+- **7005 EEE — complete, KV115** (product page images read by helper agents 2026-10-17; test rows re-checked: V×I and T×ω within 0.1 %). Body Ø79 × 21.8 mm. Stator mount 4 × M4 @ PCD 32;
+  rotor mount 4 × M4 @ PCD 23 (alt. 4 × M3 @ PCD 20). Wire slot (from drawing): oval slot along the
+  circumference, 9.2 × 4.0 mm, centre 28.8 mm → 28.8 / 5.2 / 2.4.
+  KV115: 12S; 21.2 A; **peak torque 1.842 Nm measured** (FLUXER PRO 24×7.2, 47.92 V, 21.2 A, 4235 rpm;
+  = stated 1.8); Kt 0.0869; no-load ≈ 5520 rpm (KV × 48); 1016 W; 191 mΩ; 196 g (the page's
+  "standard 186 g / extended 196 g" is really KV230 / KV115). KV230: 6S, ruled out.
+- **8118 EEE V1.0 — complete, KV100** (product page images read by helper agents 2026-10-17; test rows re-checked: V×I and T×ω within 0.1 %). Body Ø88.6 × 41 mm. Stator mount 4 × M4 @ PCD 32
+  (alt. 4 × M3 @ PCD 50 and @ PCD 30); rotor mount 4 × M4 @ PCD 23. Wire slot (from drawing): boss
+  centred 36.5 mm, 10.1 mm lead ribbon running radially → 36.5 / 4 / 5.45.
+  KV100: 12S; 62 A; **peak torque 5.108 Nm measured** (FLUXER PRO 30×10, 47.78 V, 62.0 A, 4193 rpm;
+  = stated 5.1); Kt 0.0824; no-load ≈ 4800 rpm (KV × 48); 2962 W; 61 mΩ; **520 g** (spec image; the page
+  text says 620 g — user chose 520 g, 2026-10-17).
+- **5008 EEE V2.0 — complete, KV170** (product page images read by helper agents 2026-10-17; test rows re-checked: V×I and T×ω within 0.1 %). Body Ø56 × 25.9 mm (30.7 incl. shaft). Stator mount
+  4 × M3 @ PCD 30 (alt. 4 × M3 @ PCD 25); rotor mount 2 × M3 @ PCD 18 (alt. 2 × M3 @ PCD 12).
+  Wire slot (from drawing): sleeve centre 16.9 mm, 7.6 mm wide → 16.9 / 4 / 4.2.
+  KV170: 12S; 20.6 A; **peak torque 1.088 Nm measured** (HAVOC 18×5.7, 47.60 V, 20.63 A, 6304 rpm; no
+  stated max torque); Kt 0.0527; no-load ≈ 8160 rpm (KV × 48); 981 W; 195 mΩ; 130 g.
+  KV240 (6–8S), KV300, KV340, KV400 (6S): ruled out.
+- 5005 EEE: KV 280/350/440, all 4–6S (confirmed from the test sheets) — **ruled out by voltage**.
+  88 / 90 / 92 g; highest measured torques 0.607 / 0.581 / 0.530 Nm (6S). Reference only.
+- **5010 EEE V2.0 — complete, KV200** (product page images read by helper agents 2026-10-17; test rows re-checked: V×I and T×ω within 0.1 %). Body Ø56, ≈ 21 mm body (32.7 incl. shaft and prop
+  adapter). Stator mount 4 × M3 @ PCD 30 (alt. 4 × M3 @ PCD 25); rotor mount 2 × M3 @ PCD 18
+  (alt. 2 × M3 @ PCD 12). Wire slot (from drawing): sleeve centre 16.8 mm, 7.6 mm wide → 16.8 / 4 / 4.2.
+  KV200: 6–12S; 22.3 A; **peak torque 1.086 Nm measured** (24×7.2 at 6S, 23.54 V, 22.31 A; = stated 1.09;
+  best 12S row 1.021 Nm @ 21.62 A — user chose 1.086, 2026-10-17); no-load ≈ 9600 rpm (KV × 48);
+  1029 W; 106 mΩ; 162.9 g. KV240, KV310, KV370: 6S, ruled out; KV110: no data on the page.
 
 **Unidentified code entries:** `VT8020` (KV100, 48 V, 40 A, 1900 W, 713 g, 89.4 × 45.5, motor
 mount PCD 51, output 6 × Ø3 @ PCD 71.5) and `U12` (KV120, 48 V, 95 A, 4560 W, 778 g,
