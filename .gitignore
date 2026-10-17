@@ -12,3 +12,6 @@ venv/
 .venv/
 .pytest_cache/
 .ruff_cache/
+
+# Personal Onshape model URLs (see Onshape_extension/onshape_models.example.json)
+Onshape_extension/onshape_models.json
