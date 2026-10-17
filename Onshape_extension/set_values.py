@@ -106,13 +106,13 @@ def push_to_onshape(gb_type, save_version=True, models_json=MODELS_JSON):
             HTTP.POST, f"/api/documents/d/{doc.did}/versions",
             body={"documentId": doc.did, "workspaceId": doc.wid, "name": name},
             log_response=False)
-        if response.status_code != 200:
+        if not 200 <= response.status_code < 300:
             raise RuntimeError(f"Could not save a version before writing (HTTP {response.status_code}): "
                                f"{response.text[:300]}. Nothing was changed.")
         print(f"Onshape: saved version '{name}'")
 
     response = client.request(HTTP.POST, variables_path, body=variables, log_response=False)
-    if response.status_code != 200:
+    if not 200 <= response.status_code < 300:  # Onshape answers 204 (no content) on success
         raise RuntimeError(f"Onshape rejected the variables (HTTP {response.status_code}): {response.text[:300]}")
 
     response = client.request(HTTP.GET, variables_path, log_response=False)

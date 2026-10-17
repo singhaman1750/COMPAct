@@ -52,7 +52,7 @@ class FakeResponse:
         return self._payload
 
 
-def fake_onshape(monkeypatch, version_status=200, stored=None):
+def fake_onshape(monkeypatch, version_status=200, stored=None, write_status=204):
     """Replace src.onshape_client with a recorder; returns the list of calls."""
     calls = []
 
@@ -65,7 +65,7 @@ def fake_onshape(monkeypatch, version_status=200, stored=None):
             if path.endswith("/versions"):
                 return FakeResponse(version_status, {})
             if method == "post":
-                return FakeResponse(200, {})
+                return FakeResponse(write_status, None)
             return FakeResponse(200, [{"variables": stored or []}])
 
     real_client = sys.modules.get("src.onshape_client")
