@@ -441,9 +441,9 @@ models place their sun-gear countersinks the same way.
 
 **Status:** open — CAD fix for the SSPG model's designer.
 
-### CAD 2. Eleven Onshape models are shared view-only, so users cannot copy them
+### CAD 2. Twelve Onshape models are shared view-only, so users cannot copy them
 
-**Description:** eleven Onshape documents linked in the README (Step 3, Option B) are shared
+**Description:** twelve Onshape documents linked in the README (Step 3, Option B) are shared
 **view-only**. A user can open them but cannot make a copy ("Copy workspace" is not available), so
 they cannot get their own Variable Studio URL and cannot use them with `actOpt.py --onshape` or
 `set_values.py`:
@@ -458,6 +458,9 @@ they cannot get their own Variable Studio URL and cannot use them with `actOpt.p
 - **ICPG** (`icpg`) — "Open ICPG in Onshape", `documents/1cec852caa1080765682d3d0/...`
 - **INWPG Dependent** (`inwpg_dependent`) — "Open INWPG_Dependent in Onshape", `documents/a5e4d1f2afed2d53000ac6c5/...`
 - **INWPG Independent** (`inwpg_independent`) — "Open INWPG_Independent in Onshape", `documents/a5ebf8aa022054aedcbab90e/...`
+- **INDSPG** (`indspg`) — "Open INDSPG in Onshape", `documents/082ad023b75b2274bed0f04d/...`
+
+Only SSPG, CPG and DSPG can be copied. Every frameless model is affected.
 
 For WPG, the old model linked under Step 6 ("Open WPG in Onshape (old)",
 `documents/ad699ddbc25bac5c32e33135/...`) is a different document and does not match the current
@@ -471,4 +474,4 @@ account.
 **Status:** open — for the owners of these Onshape documents. Until then, leave `wpg`, `idspg`,
 `isspg_inside`, `isspg_compact`, `incpg_dependent`, `incpg_independent`,
 `insspg_type_1`, `insspg_type_2`,
-`icpg`, `inwpg_dependent` and `inwpg_independent` empty in `Onshape_extension/onshape_models.json`.
+`icpg`, `inwpg_dependent`, `inwpg_independent` and `indspg` empty in `Onshape_extension/onshape_models.json`.
