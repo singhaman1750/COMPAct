@@ -40,10 +40,11 @@ motor's values are complete and confirmed, they move into `motors.json`.
 Framed (24): U8 Lite, U8 Lite L, U8 II, U8 II Lite, U8 II PRO, MN8012, MN8014, MN8017,
 U10 Plus KV80, U10 II, MN5008 KV170, MN6007 II KV160, MN7005 KV115, MN1005 V2 KV90,
 M6C06 EEE V3 KV160, M6C12 EEE KV170, M6C10 EEE KV150, M6C08 EEE KV180, M6C06 EEE KV140,
-1005 EEE KV90, 7005 EEE KV115, 8118 EEE KV100, 5008 EEE KV170, 5010 EEE KV200 (24 framed).
-Ruled out by voltage: MAD 5005 EEE (all KVs, 4–6S).
+1005 EEE KV90, 7005 EEE KV115, 8118 EEE KV100, 5008 EEE KV170, 5010 EEE KV200,
+VT 8008 SL KV90, VT 8015 SL KV100, VT 10005 SL KV90, VT 8020 PRO KV120 (28 framed).
+Ruled out by voltage: MAD 5005 EEE (all KVs, 4–6S), VT 4006 SL, VT 6008 SL, VT 8008 SL KV230 (6S).
 Frameless (5): RI100, RI80, RO100, RO80, RO60.
-Vector Technics: pending (wire slots, torque decision).
+Still missing: wire slots for VT 8008 SL and VT 8015 SL (user to give).
 
 ## Framed outrunner motors
 
@@ -186,16 +187,45 @@ torque @ current @ voltage:
   centre (± 2), length ≈ 8 mm centre-to-centre (± 3), radius 2.4 mm (measured ≈ 2 + 0.4, ± 0.7).
   Leads are enamelled wire, so a small slot is plausible. Replace with a measurement if possible.
 
-**Vector Technics** (product pages) — KV / voltage / mass / Ø × L / max continuous current /
-stated Kt / motor mount / prop mount. Stated Kt is 17–38 % above the Kv-based value; no test
-tables:
-- 4006 SL: 380 / 6S / 67 g / 44.6 × 20 / 9 A / 0.033 / 4×M3 @ 25 / 4×M3 @ 12
-- 6008 SL: 340 / 6S / 170 g / 68.8 × 24.3 / 35 A / 0.033 / 4×M3 @ 30 / 12×M3 @ 12, 18, 20
-- 8008 SL: 90 / 12S / 210 g / 88.4 × 26 / 20 A / 0.139 / 4×M3 @ 30 / 8×M3 @ 20, 23
-- 8015 SL: 100 / 12S / 420 g / 88.4 × 34 / 40 A / 0.1245 / 4×M4 @ 36 / 4×M3 @ 20 + 4×M4 @ 23
-- 10005 SL: 90 / 12S / 277 g / 107 × 23 / 12.69 A / 0.1468 / 4×M4 @ 23 / 4×M4 @ 32
-- 8020 PRO 120 KV: 120 / 12S / 566 g / 88.4 × 50.3 / 54 A / 0.108 / 4×M4 @ 40 / 4×M3 @ 20 + 4×M4 @ 23
-  — does **not** match the code's `VT8020` (KV100, 713 g, 89.4 × 45.5)
+**Vector Technics** (datasheet PDFs with drawings and test tables, received 2026-10-17). Torque is
+the measured 100 % row (all rows pass V × I = power and speed < KV × V; T × ω gives 64–82 %
+efficiency). Stated Kt is 35–40 % above measured on every motor and is kept as reference only; the
+Kv-based value matches measured within 0–7 %. The 95 % rows are up to 1.7 % higher than the 100 %
+rows; the rule uses 100 % rows. Rotor primary M4 @ 23 as for T-Motor U8/U10. Heights exclude shaft
+stubs.
+- **8008 SL — chosen KV90.** Body Ø88.4 × 26 mm. Stator mount 4 × M3 @ PCD 30; rotor mount 4 × M4 @
+  PCD 23 (primary), alt. 4 × M3 @ PCD 20. Dual 619/8-2Z bearings, 36S42P.
+  **Wire slot: missing** — not shown on the drawing; user to give later.
+  - **KV90 (chosen)**: 12S; max continuous 20 A (180 s); **peak torque 2.63 Nm measured** (TM 30×10.5,
+    48.7 V, 26.6 A, 2984 rpm); Kt measured 0.099 / Kv-based 0.106 / stated 0.139; no-load ≈ 4320 rpm
+    (KV × 48); 966 W (180 s); 0.22 Ω; 0.17 mH; Io 2 A @ 48 V; 210 g ± 5.
+  - KV110: 12S; 14 A; 2.19 Nm @ 27.7 A (TM 28×9.2, a prop Vector marks "not recommended"; best
+    recommended prop 2.01 Nm @ 25 A); stated Kt 0.118; 0.2 Ω; 210 g. Not chosen (lower torque).
+  - KV230: 6S, ruled out (2.32 Nm @ 60.7 A at 22 V, reference only).
+- **8015 SL — KV100.** Body Ø88.4 × 34 mm. Stator mount 4 × M4 @ PCD 36; rotor mount 4 × M4 @ PCD 23
+  (primary), alt. 4 × M3 @ PCD 20. Dual 689 bearings, 36S42P.
+  **Wire slot: missing** — not shown on the drawing; user to give later.
+  KV100: 12S; 40 A (180 s); **peak torque 5.33 Nm measured** (VT 3010, 47.2 V, 57.8 A, 3648 rpm);
+  Kt measured 0.092 / Kv-based 0.0955 / stated 0.1245; no-load ≈ 4800 rpm (KV × 48); 1495 W (180 s);
+  0.07 Ω; 0.069 mH; Io 1.64 A @ 48 V; 420 g ± 5.
+- **10005 SL — KV90.** Body Ø107 × 23 mm. The spec table's mount patterns are swapped (the phase-wire
+  outlet is on the PCD 32 face; user agreed to swap, 2026-10-17): stator mount 4 × M4 @ PCD 32; rotor
+  mount 4 × M4 @ PCD 23 (primary), alt. 4 × M3 @ PCD 20. Single 61803-2Z bearing, 36S40P.
+  Wire slot (**estimate from the drawing**, low confidence; radial wire outlet through the rim at
+  9 o'clock; user accepted 2026-10-17): 34 mm from centre, length 13 mm, radius 3.9 mm (3.5 + 0.4).
+  KV90: 12S; 12.69 A (180 s); **peak torque 2.994 Nm measured** (30×10.5, 48.62 V, 27.62 A, 3229 rpm;
+  only one test table; reached 121 °C); Kt measured 0.108 / Kv-based 0.106 / stated 0.1468;
+  no-load ≈ 4320 rpm (KV × 48); 626 W (180 s); 0.183 Ω; 0.182 mH; Io 0.96 A @ 48 V; 277 g ± 2.
+- **8020 PRO — KV120.** Body Ø88.4 × 42.5 mm (user choice 2026-10-17: 40.5 can + Ø29 boss; the
+  table's 50.3 includes the Ø8 × 5.9 shaft stub). Stator mount 4 × M4 @ PCD 40; rotor mount 4 × M4 @
+  PCD 23 (primary), alt. 4 × M3 @ PCD 20. Dual 6001-2RS bearings, 36S42P.
+  Wire slot (**estimate from the drawing**, low confidence; radial wire exit through the rim at
+  3 o'clock; user accepted 2026-10-17): 36 mm from centre, length 16 mm, radius 2.9 mm (2.5 + 0.4).
+  KV120: 12S; 54 A (180 s); **peak torque 6.11 Nm measured** (MZ 32×10.6, 46.0 V, 77.1 A, 3847 rpm;
+  highest of six props); Kt measured 0.079 / Kv-based 0.080 / stated 0.108; no-load ≈ 5760 rpm
+  (KV × 48); 2954 W (180 s); 0.06 Ω; 0.038 mH; Io 3 A @ 48 V; 566 g ± 5.
+  Does **not** match the code's `VT8020` (KV100, 713 g, 89.4 × 45.5).
+- 4006 SL (380 KV, 6S, 67 g) and 6008 SL (340 KV, 6S, 170 g): ruled out by voltage.
 
 **MAD Components EEE** (product pages) — electrical data and torque are only in images/test
 sheets, not yet received:
