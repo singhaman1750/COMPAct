@@ -1,10 +1,7 @@
-import sys
-import numpy as np
-from ActuatorAndGearbox_INCPG_dependent import motor
-from ActuatorAndGearbox_INCPG_dependent import material
 from ActuatorAndGearbox_INCPG_dependent import inrunnerCompoundPlanetaryGearbox
 from ActuatorAndGearbox_INCPG_dependent import inrunnerCompoundPlanetaryActuator
 from ActuatorAndGearbox_INCPG_dependent import optimizationInrunnerCompoundPlanetaryActuator
+from CommonComponents import load_motor
 import os
 import json
 
@@ -28,7 +25,6 @@ with open(incpg_params_path, "r") as incpg_dependent_params_file:
 #---------------------------------------------------
 # Transferring relevant data to individual variables
 #---------------------------------------------------
-motor_data          = config_data["Motors"]
 material_properties = config_data["Material_properties"]
 
 Gear_standard_parameters = config_data["Gear_standard_parameters"]
@@ -49,57 +45,6 @@ motor_driver_data = config_data["Motor_drivers"]
 #--------------------------------------------------------
 Motor_Driver_Moteus_params    = motor_driver_data["Moteus"]
 Motor_Driver_OdrivePro_params = motor_driver_data["OdrivePro"]
-
-#--------------------------------------------------------
-# Motors
-#--------------------------------------------------------
-
-# Motor-RI100
-MotorRI100  = motor(rotor_OD                     = 55.6,
-                  stator_ID                    = 57,
-                  rotor_height                 = 15,
-                  rotor_ID                     = 45,
-                  stator_height                = 24.5,
-                  stator_OD                    = 104,
-                  stator_hole_dia              = 3,
-                  stator_wire_top_height       = 7,
-                  stator_mid_height            = 13,
-                  stator_wire_bottom_height    = 4.5,
-                  stator_wire_OD               = 101,
-                  stator_hole_num              = 4,
-                  stator_wire_ID               = 58,
-                  maxMotorAngVelRPM            = 4368,  # RPM
-                  maxMotorTorque               = 1.76,   # Nm
-                  maxMotorPower                = 1.76 * 4368 * 2*np.pi/60,  # W
-                  motorMass                    = 0.500, # KG
-                  motorName                    = "RI100")
-
-#-------------------------------------------------------
-# Gearbox 
-#-------------------------------------------------------
-inrunnerCompoundPlanetaryGearboxInstance = inrunnerCompoundPlanetaryGearbox(design_parameters         = incpg_design_params,
-                                                                            gear_standard_parameters  = Gear_standard_parameters,
-                                                                            densityGears              = PLA["density"],
-                                                                            densityStructure          = PLA["density"],
-                                                                            maxGearAllowableStressMPa = PLA["maxAllowableStressMPa"],
-                                                                            densityAluminum           = Aluminum["density"])
-
-#-----------------------------------------------------
-# Actuator
-#-----------------------------------------------------
-maxGBDia_multFactor           = incpg_optimization_params["MAX_GB_DIA_MULT_FACTOR"] # 1
-
-maxGearboxDiameter_RI100         = maxGBDia_multFactor * MotorRI100.motorDiaMM       
-
-# RI100-Actuator
-Actuator_RI100 = inrunnerCompoundPlanetaryActuator(design_parameters        = incpg_design_params,
-                                                   motor                    = MotorRI100,  
-                                                   motor_driver_params      = Motor_Driver_OdrivePro_params,
-                                                   inrunnerCompoundPlanetaryGearbox = inrunnerCompoundPlanetaryGearboxInstance, 
-                                                   FOS                      = MIT_params["FOS"], 
-                                                   serviceFactor            = MIT_params["serviceFactor"], 
-                                                   maxGearboxDiameter       = maxGearboxDiameter_RI100,
-                                                   stressAnalysisMethodName = "MIT")
 
 #-----------------------------------------------------
 # Optimization
@@ -122,45 +67,48 @@ NUM_PLANET_MIN             = incpg_optimization_params["NUM_PLANET_MIN"]       #
 NUM_PLANET_MAX             = incpg_optimization_params["NUM_PLANET_MAX"]       # 5  
 NUM_TEETH_SUN_MIN          = incpg_optimization_params["NUM_TEETH_SUN_MIN"]    # 20 
 NUM_TEETH_PLANET_BIG_MIN   = incpg_optimization_params["NUM_TEETH_PLANET_MIN"] # 20 
-NUM_TEETH_PLANET_SMALL_MIN = incpg_optimization_params["NUM_TEETH_PLANET_MIN"] # 20 
-
-Optimizer_RI100 = optimizationInrunnerCompoundPlanetaryActuator(design_parameters          = incpg_design_params,
-                                                                gear_standard_parameters   = Gear_standard_parameters,
-                                                                K_Mass                     = K_Mass                     ,
-                                                                K_Eff                      = K_Eff                      ,
-                                                                K_Width                    = K_Width                    ,
-                                                                MODULE_BIG_MIN             = MODULE_BIG_MIN             ,
-                                                                MODULE_BIG_MAX             = MODULE_BIG_MAX             ,
-                                                                MODULE_SMALL_MIN           = MODULE_SMALL_MIN           ,
-                                                                MODULE_SMALL_MAX           = MODULE_SMALL_MAX           ,
-                                                                NUM_PLANET_MIN             = NUM_PLANET_MIN             ,
-                                                                NUM_PLANET_MAX             = NUM_PLANET_MAX             ,
-                                                                NUM_TEETH_SUN_MIN          = NUM_TEETH_SUN_MIN          ,
-                                                                NUM_TEETH_PLANET_BIG_MIN   = NUM_TEETH_PLANET_BIG_MIN   ,
-                                                                NUM_TEETH_PLANET_SMALL_MIN = NUM_TEETH_PLANET_SMALL_MIN ,
-                                                                GEAR_RATIO_MIN             = GEAR_RATIO_MIN             ,
-                                                                GEAR_RATIO_MAX             = GEAR_RATIO_MAX             ,
-                                                                GEAR_RATIO_STEP            = GEAR_RATIO_STEP            )
+NUM_TEETH_PLANET_SMALL_MIN = incpg_optimization_params["NUM_TEETH_PLANET_MIN"] # 20
 
 #=============================================================
-# run function to select the gearbox_type
+# run: optimise the INCPG_dependent actuator for any frameless inrunner in motors.json
 #=============================================================
 def run(motor_name, gear_ratio):
-    if motor_name == "RI100":
-        return Optimizer_RI100.optimizeActuator(
-            Actuator_RI100,
-            UsePSCasVariable=0,
-            log=0,
-            csv=1,
-            printOptParams=1,
-            gearRatioReq=gear_ratio
-        )
-
-    else:
-        raise ValueError(f"Unsupported motor: {motor_name}")
-
-#-------------------------------------------------
-# Optimize
-#-------------------------------------------------
-# totalTime_RI100 = Optimizer_RI100.optimizeActuator(Actuator_RI100, UsePSCasVariable = 0, log=0, csv=1, printOptParams=1, gearRatioReq = 0)
-# print("Optimization Completed : CPG RI100 : Total Time:", totalTime_RI100)
+    motor = load_motor(motor_name, motor_type="frameless_inrunner")
+    maxGearboxDiameter = incpg_optimization_params["MAX_GB_DIA_MULT_FACTOR"] * motor.motorDiaMM
+    inrunnerCompoundPlanetaryGearboxInstance = inrunnerCompoundPlanetaryGearbox(design_parameters         = incpg_design_params,
+                                                                                gear_standard_parameters  = Gear_standard_parameters,
+                                                                                densityGears              = PLA["density"],
+                                                                                densityStructure          = PLA["density"],
+                                                                                maxGearAllowableStressMPa = PLA["maxAllowableStressMPa"],
+                                                                                densityAluminum           = Aluminum["density"])
+    actuator = inrunnerCompoundPlanetaryActuator(design_parameters        = incpg_design_params,
+                                                 motor                    = motor,
+                                                 motor_driver_params      = Motor_Driver_OdrivePro_params,
+                                                 inrunnerCompoundPlanetaryGearbox = inrunnerCompoundPlanetaryGearboxInstance,
+                                                 FOS                      = MIT_params["FOS"],
+                                                 serviceFactor            = MIT_params["serviceFactor"],
+                                                 maxGearboxDiameter       = maxGearboxDiameter,
+                                                 stressAnalysisMethodName = "MIT")
+    optimizer = optimizationInrunnerCompoundPlanetaryActuator(design_parameters          = incpg_design_params,
+                                                              gear_standard_parameters   = Gear_standard_parameters,
+                                                              K_Mass                     = K_Mass                     ,
+                                                              K_Eff                      = K_Eff                      ,
+                                                              K_Width                    = K_Width                    ,
+                                                              MODULE_BIG_MIN             = MODULE_BIG_MIN             ,
+                                                              MODULE_BIG_MAX             = MODULE_BIG_MAX             ,
+                                                              MODULE_SMALL_MIN           = MODULE_SMALL_MIN           ,
+                                                              MODULE_SMALL_MAX           = MODULE_SMALL_MAX           ,
+                                                              NUM_PLANET_MIN             = NUM_PLANET_MIN             ,
+                                                              NUM_PLANET_MAX             = NUM_PLANET_MAX             ,
+                                                              NUM_TEETH_SUN_MIN          = NUM_TEETH_SUN_MIN          ,
+                                                              NUM_TEETH_PLANET_BIG_MIN   = NUM_TEETH_PLANET_BIG_MIN   ,
+                                                              NUM_TEETH_PLANET_SMALL_MIN = NUM_TEETH_PLANET_SMALL_MIN ,
+                                                              GEAR_RATIO_MIN             = GEAR_RATIO_MIN             ,
+                                                              GEAR_RATIO_MAX             = GEAR_RATIO_MAX             ,
+                                                              GEAR_RATIO_STEP            = GEAR_RATIO_STEP            )
+    return optimizer.optimizeActuator(actuator,
+                                      UsePSCasVariable = 0,
+                                      log              = 0,
+                                      csv              = 1,
+                                      printOptParams   = 1,
+                                      gearRatioReq     = gear_ratio)

@@ -66,6 +66,13 @@ GOLDEN_MOTORS = {
     "isspg_inside": ["RO100", "RO80", "RO60"],
     "isspg_compact": ["RO100", "RO80", "RO60"],
     "idspg": ["RO100"],
+    "insspg_type_1": ["RI100", "RI80"],
+    "insspg_type_2": ["RI100", "RI80"],
+    "incpg_dependent": ["RI100"],
+    "incpg_independent": ["RI100", "RI80"],
+    "inwpg_dependent": ["RI100", "RI80"],
+    "inwpg_independent": ["RI100", "RI80"],
+    "indspg": ["RI100", "RI80"],
 }
 
 # Variants that write into the same CADs/<GROUP>/ folder share a group and
