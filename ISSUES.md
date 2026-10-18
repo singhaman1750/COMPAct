@@ -21,6 +21,10 @@ Suggested starting point: combine (2) + (3) into one `test_actopt.py` (~40-50 li
 
 ### Root folder restructure — split into `gearboxes/` and `optimizers/`
 
+> **Update (Phase 3a):** the 14 `Opt_*.py` driver files and `run_all.sh` are gone — one
+> `gearbox_runner.py` (a spec table per gearbox type) replaces them, so steps 3, 4 and 6 below no longer
+> apply; only the `ActuatorAndGearbox*.py` model files would move.
+
 Root currently holds 7 `ActuatorAndGearbox*.py` model files + 10 `Opt_*.py` driver files (17 files) alongside `actOpt.py`, `CommonComponents.py`, config/results folders, etc. Goal: only `actOpt.py`-type entry files stay at root; models move to `gearboxes/`, drivers move to `optimizers/`.
 
 **Open decision (settle first, ~10-15 min):** whether to split `ActuatorAndGearbox.py` (currently bundles SSPG/CPG/WPG/DSPG, 11k lines) into 4 per-type files *before* this move, so `gearboxes/` ends up with 10 uniform one-type-per-file modules instead of 7 files + 1 oversized one. Doing it first avoids touching that file's imports twice.

@@ -8,10 +8,10 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
-import actOpt  # noqa: E402
+import gearbox_runner  # noqa: E402
 from Onshape_extension import set_values  # noqa: E402
 
-DISPATCH = actOpt.GEARBOX_DISPATCH
+DISPATCH = gearbox_runner.GEARBOXES
 BASELINES = REPO_ROOT / "tests" / "golden" / "baselines"
 
 

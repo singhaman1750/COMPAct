@@ -16,7 +16,7 @@ sys.path.insert(0, str(REPO_ROOT))
 
 import numpy as np  # noqa: E402
 
-import actOpt  # noqa: E402
+import gearbox_runner  # noqa: E402
 
 
 def to_json_value(value):
@@ -51,12 +51,7 @@ def main():
     before = snapshot(cad_dir)
     real_stdout = sys.stdout
     try:
-        module = __import__(actOpt.GEARBOX_DISPATCH[gb_type])
-        # Same call convention as actOpt.main()
-        if gb_type in ["insspg_type_1", "insspg_type_2"]:
-            _total_time, opt_parameters = module.run(motor, gear_ratio, gb_type)
-        else:
-            _total_time, opt_parameters = module.run(motor, gear_ratio)
+        _total_time, opt_parameters = gearbox_runner.run(gb_type, motor, gear_ratio)
         result["opt_parameters"] = to_json_value(opt_parameters)
     except Exception as exc:  # record crashes as part of current behaviour
         result["error"] = f"{type(exc).__name__}: {exc}"
