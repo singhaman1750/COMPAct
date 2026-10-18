@@ -1,4 +1,6 @@
 import functools
+import json
+import os
 import sys
 
 import numpy as np
@@ -308,22 +310,22 @@ class motor_driver:
 # -------------------------------------------------------------------------
 class motor_framed_outrunner:
     def __init__(self, 
-                 maxMotorAngVelRPM     = 1190, # RPM
-                 maxMotorTorque        = 8.83, # Nm
-                 maxMotorPower         = 8.83 * 1190 * 2*np.pi/60, # W 
-                 motorMass             = 0.778, # KG
-                 motorDia              = 106.8, # mm
-                 motorLength           = 47.6,  # mm
-                 motor_mount_hole_PCD       = 32,
-                 motor_mount_hole_dia       = 4,
-                 motor_mount_hole_num       = 4,
-                 motor_output_hole_PCD      = 23,
-                 motor_output_hole_dia      = 4,
-                 motor_output_hole_num      = 4,
-                 wire_slot_dist_from_center = 30,
-                 wire_slot_length           = 10,
-                 wire_slot_radius           = 4,
-                 motorName             = "U12"):
+                 maxMotorAngVelRPM, # RPM
+                 maxMotorTorque, # Nm
+                 maxMotorPower, # W 
+                 motorMass, # KG
+                 motorDia, # mm
+                 motorLength,  # mm
+                 motor_mount_hole_PCD,
+                 motor_mount_hole_dia,
+                 motor_mount_hole_num,
+                 motor_output_hole_PCD,
+                 motor_output_hole_dia,
+                 motor_output_hole_num,
+                 wire_slot_dist_from_center,
+                 wire_slot_length,
+                 wire_slot_radius,
+                 motorName):
         
         # Name of the motor
         self.motorName                  = motorName
@@ -393,35 +395,35 @@ class motor_frameless_outrunner:
     """
 
     def __init__(self,
-                 maxMotorAngVelRPM               = 2550,  # RPM
-                 maxMotorTorque                  = 20 / (55 * 2*np.pi/60),  # Nm
-                 maxMotorPower                   = 838,  # W                      #TODO : check if this is correct  
-                 motorMass                       = 0.71, # KG
+                 maxMotorAngVelRPM,  # RPM
+                 maxMotorTorque,  # Nm
+                 maxMotorPower,  # W                      #TODO : check if this is correct  
+                 motorMass, # KG
                  # ── Stator ──────────────────────────────────────────────
-                 stator_OD                       = 100,
-                 stator_ID                       = 74,
-                 stator_height                   = 31.5,
-                 stator_hole_PCD                 = 82.5,
-                 motor_stator_extrusion_dia      = 88,
-                 motor_stator_extrusion_depth    = 2,
+                 stator_OD,
+                 stator_ID,
+                 stator_height,
+                 stator_hole_PCD,
+                 motor_stator_extrusion_dia,
+                 motor_stator_extrusion_depth,
                  # ── Rotor ───────────────────────────────────────────────
-                 motor_OD                        = 113.5,
-                 rotor_ID                        = 101.8,
-                 rotor_height                    = 33.45,
-                 motor_rotor_base_ID             = 60,
-                 motor_rotor_base_thickness      = 3.2,
-                 rotorCSKHeadUpperDiaMM          = 8,
-                 rotorCSKHeadHeightMM            = 2.3,
-                 motor_rotor_hole_PCD            = 74,
-                 motor_rotor_hole_dia            = 4,
-                 stator_top_rotor_top_offset  = 2.75,
-                 stator_hole_dia              = 3,
-                 stator_hole_num              = 3,       # wrong
-                 motor_rotor_hole_num         = 6,
-                 stator_mounitng_holes_head_socket_dia = 4.5,
+                 motor_OD,
+                 rotor_ID,
+                 rotor_height,
+                 motor_rotor_base_ID,
+                 motor_rotor_base_thickness,
+                 rotorCSKHeadUpperDiaMM,
+                 rotorCSKHeadHeightMM,
+                 motor_rotor_hole_PCD,
+                 motor_rotor_hole_dia,
+                 stator_top_rotor_top_offset,
+                 stator_hole_dia,
+                 stator_hole_num,       # wrong
+                 motor_rotor_hole_num,
+                 stator_mounitng_holes_head_socket_dia,
                  # ── Overall envelope ────────────────────────────────────
-                 motor_height                    = 36.2,
-                 motorName                       = "RO100"):
+                 motor_height,
+                 motorName):
 
         # ── Identification ─────────────────────────────────────────────────
         self.motorName = motorName
@@ -524,24 +526,24 @@ class motor_frameless_outrunner:
 class motor_frameless_inrunner:
 
     def __init__(self,
-                 rotor_OD                     = 55.6,
-                 stator_ID                    = 57,
-                 rotor_height                 = 15,
-                 rotor_ID                     = 45,
-                 stator_height                = 24.5,
-                 stator_OD                    = 104,
-                 stator_hole_dia              = 3,
-                 stator_wire_top_height       = 7,
-                 stator_mid_height            = 13,
-                 stator_wire_bottom_height    = 4.5,
-                 stator_wire_OD               = 101,
-                 stator_hole_num              = 4,
-                 stator_wire_ID               = 58,
-                 maxMotorAngVelRPM            = 5040,  # RPM
-                 maxMotorTorque               = 1.3,   # Nm
-                 maxMotorPower                = 1.3 * 5040 * 2*np.pi/60,  # W
-                 motorMass                    = 0.265, # KG
-                 motorName                    = "RI100"):
+                 rotor_OD,
+                 stator_ID,
+                 rotor_height,
+                 rotor_ID,
+                 stator_height,
+                 stator_OD,
+                 stator_hole_dia,
+                 stator_wire_top_height,
+                 stator_mid_height,
+                 stator_wire_bottom_height,
+                 stator_wire_OD,
+                 stator_hole_num,
+                 stator_wire_ID,
+                 maxMotorAngVelRPM,  # RPM
+                 maxMotorTorque,   # Nm
+                 maxMotorPower,  # W
+                 motorMass, # KG
+                 motorName):
 
         self.motorName = motorName
 
@@ -617,3 +619,62 @@ class motor_frameless_inrunner:
         print(f"  stator_wire_OD      = {self.stator_wire_OD} mm")
         print(f"  stator_hole_num       = {self.stator_hole_num}")
         print(f"  stator_wire_ID      = {self.stator_wire_ID} mm")
+
+
+# -------------------------------------------------------------------------
+# load_motor — build a motor object from config_files/motors.json
+# -------------------------------------------------------------------------
+MOTORS_JSON = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config_files", "motors.json")
+
+MOTOR_CLASSES = {
+    "framed_outrunner":    motor_framed_outrunner,
+    "frameless_outrunner": motor_frameless_outrunner,
+    "frameless_inrunner":  motor_frameless_inrunner,
+}
+
+
+def load_motor(name, motor_type=None, rating=None, path=MOTORS_JSON):
+    """Return the motor object for `name` from motors.json.
+
+    motor_type, if given, must match the entry's type (e.g. "frameless_outrunner").
+    rating "peak" sizes the gears with peak torque and uses the no-load speed;
+    "rated" uses rated torque and rated speed. Default: the file's "rating".
+    """
+    with open(path, "r") as motors_file:
+        motors_data = json.load(motors_file)
+    motors = motors_data["motors"]
+    if name not in motors:
+        raise ValueError(f"Unknown motor {name!r}. Known motors: {', '.join(sorted(motors))}")
+
+    entry      = motors[name]
+    if motor_type is not None and entry["type"] != motor_type:
+        matching = sorted(n for n, e in motors.items() if e["type"] == motor_type)
+        raise ValueError(f"Motor {name!r} is a {entry['type']} motor; this gearbox needs a {motor_type} "
+                         f"motor: {', '.join(matching)}")
+    electrical = entry["electrical"]
+    rating     = rating or motors_data["rating"]
+    if rating == "peak":
+        torque, speed_rpm = electrical["peak_torque_Nm"], electrical["no_load_speed_rpm"]
+    elif rating == "rated":
+        if "rated_torque_Nm" not in electrical or "rated_speed_rpm" not in electrical:
+            raise ValueError(f"Motor {name!r} has no rated torque/speed in motors.json")
+        torque, speed_rpm = electrical["rated_torque_Nm"], electrical["rated_speed_rpm"]
+    else:
+        raise ValueError(f"rating must be 'peak' or 'rated', not {rating!r}")
+
+    return MOTOR_CLASSES[entry["type"]](
+        maxMotorTorque    = torque,
+        maxMotorAngVelRPM = speed_rpm,
+        maxMotorPower     = torque * speed_rpm * 2 * np.pi / 60,
+        motorMass         = entry["mass_kg"],
+        motorName         = name,
+        **entry["geometry"],
+    )
+
+
+def max_gearbox_dia_mult_factor(motor, optimization_params):
+    """Allowed gearbox diameter as a multiple of the motor diameter. Motors smaller
+    than SMALL_MOTOR_DIA_MM may have a gearbox wider than the motor."""
+    if motor.motorDiaMM < optimization_params["SMALL_MOTOR_DIA_MM"]:
+        return optimization_params["MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR"]
+    return optimization_params["MAX_GB_DIA_MULT_FACTOR"]

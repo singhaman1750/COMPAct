@@ -53,6 +53,28 @@ GEAR_RATIO_OVERRIDES = {
 }
 FLOAT_REL_TOL = 1e-9
 
+# Gearbox types whose run() takes any motor from config_files/motors.json
+# (via CommonComponents.load_motor) list their golden motors here. Other
+# types are still read from the motor names in their run() if/elif chain.
+FRAMED_GOLDEN_MOTORS = ["U8_Lite", "U10_Plus_KV80", "MN8014", "VT8020_PRO", "MAD_M6C12_KV170"]
+GOLDEN_MOTORS = {
+    "sspg": FRAMED_GOLDEN_MOTORS,
+    "cpg": FRAMED_GOLDEN_MOTORS,
+    "wpg": FRAMED_GOLDEN_MOTORS,
+    "dspg": FRAMED_GOLDEN_MOTORS,
+    "icpg": ["RO100", "RO80"],
+    "isspg_inside": ["RO100", "RO80", "RO60"],
+    "isspg_compact": ["RO100", "RO80", "RO60"],
+    "idspg": ["RO100"],
+    "insspg_type_1": ["RI100", "RI80"],
+    "insspg_type_2": ["RI100", "RI80"],
+    "incpg_dependent": ["RI100"],
+    "incpg_independent": ["RI100", "RI80"],
+    "inwpg_dependent": ["RI100", "RI80"],
+    "inwpg_independent": ["RI100", "RI80"],
+    "indspg": ["RI100", "RI80"],
+}
+
 # Variants that write into the same CADs/<GROUP>/ folder share a group and
 # must not run at the same time.
 _VARIANT_SUFFIX = re.compile(r"_(type_\d+|dependent|independent|inside|compact)$")
@@ -72,8 +94,11 @@ def load_dispatch():
     raise RuntimeError("GEARBOX_DISPATCH not found in actOpt.py")
 
 
-def supported_motors(module_name):
-    """Motor names compared against the first argument of run(), ignoring comments."""
+def supported_motors(module_name, gb_type=None):
+    """Golden motors for a gearbox type: GOLDEN_MOTORS, or else the motor names
+    compared against the first argument of run(), ignoring comments."""
+    if gb_type in GOLDEN_MOTORS:
+        return GOLDEN_MOTORS[gb_type]
     source = (REPO_ROOT / f"{module_name}.py").read_text(encoding="utf-8")
     tree = ast.parse(source)
     run_fn = next(
@@ -99,7 +124,7 @@ def all_cases(gear_ratios=None):
     cases = []
     for gb_type, module_name in load_dispatch().items():
         family_ratios = GEAR_RATIOS_BY_GROUP[gearbox_group(gb_type)]
-        for motor in supported_motors(module_name):
+        for motor in supported_motors(module_name, gb_type):
             ratios = gear_ratios or GEAR_RATIO_OVERRIDES.get((gb_type, motor), family_ratios)
             for gr in ratios:
                 cases.append({"gb_type": gb_type, "motor": motor, "gear_ratio": gr})

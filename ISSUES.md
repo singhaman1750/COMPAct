@@ -404,8 +404,39 @@ Related — ISSPG's RO100 copy also differs elsewhere (`Opt_ISSPG_inside.py` lin
 **Question for the designers:** which screw size should be the standard for the RO100 rotor —
 M4 or M5? If M5, the countersunk head size (8 / 2.3) must change with it.
 
-**Probable fix:** once decided, store one value in the planned `motors.json` (as the screw size,
-e.g. M4 → 4) and remove ISSPG's own motor copies so every gearbox reads the same entry. Re-record
-the affected golden baselines (ISSPG if M4; ICPG and IDSPG if M5) and check the CAD.
+**Probable fix:** once decided, set `motor_rotor_hole_dia` (and, for M5, the countersunk head
+size) for RO100 in `config_files/motors.json`; every gearbox reads that one entry. Re-record the
+ICPG, ISSPG and IDSPG golden baselines and check the CAD.
 
-**Status:** open — question for the designers. No code changed.
+**Status:** open — question for the designers. Phase 2 (2026-10-17) removed ISSPG's own motor
+copies: all gearboxes now read RO100 from `config_files/motors.json`, which uses **M4** for now (so
+ISSPG changed from M5 to M4), with rotor height 33.45, offset 2.75 and the datasheet masses. The
+line numbers above refer to the code before that change.
+
+## CAD issues
+
+Problems in the CAD models (Onshape / SolidWorks), not in the Python code. Found while checking
+Phase 2 designs in Onshape.
+
+### CAD 1. SSPG — sun-gear countersink radius is not parametric
+
+**Description:** in the SSPG Onshape model, the countersink profile in the sun gear (the holes
+for the screws that fix the sun gear to the motor rotor) is placed at a **fixed radius** from the
+sun-gear centre. It does not follow the motor's rotor hole pattern, so the holes stay in the same
+place whatever motor is loaded.
+
+The optimizer already exports the needed values in `CADs/SSPG/sspg_equations_onshape.txt`:
+`motor_output_hole_PCD`, `motor_output_hole_dia`, `motor_output_hole_num`,
+`motor_output_hole_CSK_OD` and `motor_output_hole_CSK_head_height`. The radius should be
+`motor_output_hole_PCD / 2`.
+
+**Seen with:** `python actOpt.py --motor MAD_M6C06_KV140 --gb_type sspg --gr 6.5`
+(rotor holes 4 × M3 on PCD 18 mm). Motors with other rotor patterns (e.g. U8 Lite, 4 × M4 on PCD
+23 mm) put the holes at a different radius, so the CAD only matches one motor.
+
+**Probable fix:** in the SSPG Onshape model, dimension the countersink sketch position from the
+sun-gear centre with the variable `#motor_output_hole_PCD / 2` (and check the hole count and size
+use `#motor_output_hole_num` / `#motor_output_hole_dia`). Then check whether the CPG, WPG and DSPG
+models place their sun-gear countersinks the same way.
+
+**Status:** open — CAD fix for the SSPG model's designer.

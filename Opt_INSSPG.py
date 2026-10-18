@@ -1,5 +1,3 @@
-import sys
-import numpy as np
 import json
 import os
 
@@ -7,9 +5,9 @@ import os
 # Import classes from your newly created INSSPG file
 # --------------------------------------------------------
 from ActuatorandGearbox_INSSPG import singleStagePlanetaryGearbox
-from ActuatorandGearbox_INSSPG import motor
 from ActuatorandGearbox_INSSPG import singleStagePlanetaryActuator
 from ActuatorandGearbox_INSSPG import optimizationSingleStageActuator
+from CommonComponents import load_motor
 
 #--------------------------------------------------------
 # Importing Config data
@@ -35,7 +33,6 @@ with open(sspg_params_path, "r") as sspg_params_file:
 #---------------------------------------------------
 # Transferring relevant data to individual variables
 #---------------------------------------------------
-motor_data          = motor_config["Motors"]
 material_properties = motor_config["Material_properties"]
 
 Gear_standard_parameters = motor_config["Gear_standard_parameters"]
@@ -55,190 +52,61 @@ sspg_optimization_params = sspg_params["sspg_optimization_parameters"]
 sspg_design_params = {**sspg_design_params_base, **sspg_design_params_3dp}
 
 #--------------------------------------------------------
-# Motor Initialization: RI100
-#--------------------------------------------------------
-motor_name = "RI100"
-m_data     = motor_data[motor_name]
-
-# Instantiate your new Inrunner Motor
-# Kv-based performance spec is converted to direct spec here, since the motor
-# class itself only accepts direct performance parameters (matches the outrunner
-# motor class convention).
-MotorRI100_Kv                   = m_data["Kv"]
-MotorRI100_maxContinuousCurrent = m_data["maxContinuousCurrent"]
-MotorRI100_ratedVoltage         = m_data["ratedVoltage"]
-MotorRI100_maxMotorAngVelRPM    = MotorRI100_Kv * MotorRI100_ratedVoltage
-MotorRI100_maxMotorTorque       = MotorRI100_maxContinuousCurrent / (MotorRI100_Kv * 2 * np.pi / 60)
-
-MotorRI100 = motor(
-    rotor_OD                        = m_data["Rotor_OD"],
-    stator_ID                       = m_data["Stator_ID"],
-    rotor_height                    = m_data["Rotor_height"],
-    rotor_ID                        = m_data["Rotor_ID"],
-    stator_height                   = m_data["stator_height"],
-    stator_OD                       = m_data["Stator_OD"],
-    stator_hole_dia                 = m_data["stator_mounting_holes_dia"],
-    stator_wire_top_height          = m_data["stator_upper_step_height"],
-    stator_wire_bottom_height       = m_data["stator_bottom_step_height_"],
-    stator_wire_OD                  = m_data["stator_side_step_OD"],
-    stator_wire_ID                  = m_data["stator_side_step_ID"],
-    stator_mid_height               = m_data["stator_mid_height"],
-    stator_hole_num                 = m_data["stator_hole_num"],
-    maxMotorAngVelRPM               = MotorRI100_maxMotorAngVelRPM,
-    maxMotorTorque                  = MotorRI100_maxMotorTorque,
-    maxMotorPower                   = m_data["power"],
-    motorMass                       = m_data["massKG"],
-    motorName                       = motor_name
-)
-
-motor_name = "RI80"
-m_data     = motor_data[motor_name]
-
-# Instantiate your new Inrunner Motor
-# Kv-based performance spec is converted to direct spec here, since the motor
-# class itself only accepts direct performance parameters (matches the outrunner
-# motor class convention).
-MotorRI80_Kv                   = m_data["Kv"]
-MotorRI80_maxContinuousCurrent = m_data["maxContinuousCurrent"]
-MotorRI80_ratedVoltage         = m_data["ratedVoltage"]
-MotorRI80_maxMotorAngVelRPM    = MotorRI80_Kv * MotorRI80_ratedVoltage
-MotorRI80_maxMotorTorque       = MotorRI80_maxContinuousCurrent / (MotorRI80_Kv * 2 * np.pi / 60)
-
-MotorRI80 = motor(
-    rotor_OD                        = m_data["Rotor_OD"],
-    stator_ID                       = m_data["Stator_ID"],
-    rotor_height                    = m_data["Rotor_height"],
-    rotor_ID                        = m_data["Rotor_ID"],
-    stator_height                   = m_data["stator_height"],
-    stator_OD                       = m_data["Stator_OD"],
-    stator_hole_dia                 = m_data["stator_mounting_holes_dia"],
-    stator_wire_top_height          = m_data["stator_upper_step_height"],
-    stator_wire_bottom_height       = m_data["stator_bottom_step_height_"],
-    stator_wire_OD                  = m_data["stator_side_step_OD"],
-    stator_wire_ID                  = m_data["stator_side_step_ID"],
-    stator_mid_height               = m_data["stator_mid_height"],
-    stator_hole_num                 = m_data["stator_hole_num"],
-    maxMotorAngVelRPM               = MotorRI80_maxMotorAngVelRPM,
-    maxMotorTorque                  = MotorRI80_maxMotorTorque,
-    maxMotorPower                   = m_data["power"],
-    motorMass                       = m_data["massKG"],
-    motorName                       = motor_name
-)
-
-#--------------------------------------------------------
-# Gearbox Initialization 
-#--------------------------------------------------------
-PlanetaryGearbox = singleStagePlanetaryGearbox(
-    design_params             = sspg_design_params,
-    gear_standard_parameters  = Gear_standard_parameters,
-    maxGearAllowableStressMPa = PLA["maxAllowableStressMPa"], 
-    densityGears              = PLA["density"], 
-    densityStructure          = PLA["density"]
-)
-
-#--------------------------------------------------------
 # Run Execution Function
 #--------------------------------------------------------
-def run(m_name, gear_ratio, gearbox_type="insspg_type_1"):
-    if m_name == "RI100":
-        
-        # 1. Original Max Diameter Math (Unchanged)
-        maxGearboxDiameter_RI100 = MotorRI100.getStatorODMM() - 5.5 - (sspg_design_params["standard_clearance_1_5mm"])*2 - (sspg_design_params["loose_clearance_3DP"])/2  
-
-        # 2. Initialize Actuator INSIDE the run function to pass the type
-        Actuator_RI100 = singleStagePlanetaryActuator(
-            design_params            = sspg_design_params,
-            motor                    = MotorRI100, 
-            motor_driver_params      = None, 
-            planetaryGearbox         = PlanetaryGearbox, 
-            FOS                      = MIT_params["FOS"], 
-            serviceFactor            = MIT_params["serviceFactor"], 
-            maxGearboxDiameter       = maxGearboxDiameter_RI100, 
-            stressAnalysisMethodName = "MIT",
-            insspg_type              = gearbox_type  # <--- PASSES THE TYPE DOWN TO YOUR CLASS
-        )
-
-        # 3. Initialize Optimizer INSIDE the run function
-        Optimizer_RI100 = optimizationSingleStageActuator(
-            design_params             = sspg_design_params,
-            gear_standard_paramaeters = Gear_standard_parameters,
-            K_Mass                    = cost_gains["K_Mass"],
-            K_Eff                     = cost_gains["K_Eff"],
-            K_Width                   = cost_gains["K_Width"],
-            MODULE_MIN                = sspg_optimization_params["MODULE_MIN"],
-            MODULE_MAX                = sspg_optimization_params["MODULE_MAX"],
-            NUM_PLANET_MIN            = sspg_optimization_params["NUM_PLANET_MIN"],
-            NUM_PLANET_MAX            = sspg_optimization_params["NUM_PLANET_MAX"],
-            NUM_TEETH_SUN_MIN         = sspg_optimization_params["NUM_TEETH_SUN_MIN"],
-            NUM_TEETH_PLANET_MIN      = sspg_optimization_params["NUM_TEETH_PLANET_MIN"],
-            GEAR_RATIO_MIN            = sspg_optimization_params["GEAR_RATIO_MIN"],
-            GEAR_RATIO_MAX            = sspg_optimization_params["GEAR_RATIO_MAX"],
-            GEAR_RATIO_STEP           = sspg_optimization_params["GEAR_RATIO_STEP"]
-        )
-
-        # 4. Run the Optimization
-        return Optimizer_RI100.optimizeActuator(
-            Actuator         = Actuator_RI100,
-            UsePSCasVariable = 0,
-            log              = 0,
-            csv              = 1,
-            printOptParams   = 1,
-            gearRatioReq     = gear_ratio
-        )
-    elif m_name == "RI80":
-        # 1. Original Max Diameter Math (Unchanged)
-        maxGearboxDiameter_RI80 = MotorRI80.getStatorODMM() - 5.5 - (sspg_design_params["standard_clearance_1_5mm"])*2 - (sspg_design_params["loose_clearance_3DP"])/2  
-
-        # 2. Initialize Actuator INSIDE the run function to pass the type
-        Actuator_RI80 = singleStagePlanetaryActuator(
-            design_params            = sspg_design_params,
-            motor                    = MotorRI80, 
-            motor_driver_params      = None, 
-            planetaryGearbox         = PlanetaryGearbox, 
-            FOS                      = MIT_params["FOS"], 
-            serviceFactor            = MIT_params["serviceFactor"], 
-            maxGearboxDiameter       = maxGearboxDiameter_RI80, 
-            stressAnalysisMethodName = "MIT",
-            insspg_type              = gearbox_type  # <--- PASSES THE TYPE DOWN TO YOUR CLASS
-        )
-
-        # 3. Initialize Optimizer INSIDE the run function
-        Optimizer_RI80 = optimizationSingleStageActuator(
-            design_params             = sspg_design_params,
-            gear_standard_paramaeters = Gear_standard_parameters,
-            K_Mass                    = cost_gains["K_Mass"],
-            K_Eff                     = cost_gains["K_Eff"],
-            K_Width                   = cost_gains["K_Width"],
-            MODULE_MIN                = sspg_optimization_params["MODULE_MIN"],
-            MODULE_MAX                = sspg_optimization_params["MODULE_MAX"],
-            NUM_PLANET_MIN            = sspg_optimization_params["NUM_PLANET_MIN"],
-            NUM_PLANET_MAX            = sspg_optimization_params["NUM_PLANET_MAX"],
-            NUM_TEETH_SUN_MIN         = sspg_optimization_params["NUM_TEETH_SUN_MIN"],
-            NUM_TEETH_PLANET_MIN      = sspg_optimization_params["NUM_TEETH_PLANET_MIN"],
-            GEAR_RATIO_MIN            = sspg_optimization_params["GEAR_RATIO_MIN"],
-            GEAR_RATIO_MAX            = sspg_optimization_params["GEAR_RATIO_MAX"],
-            GEAR_RATIO_STEP           = sspg_optimization_params["GEAR_RATIO_STEP"]
-        )
-
-        # 4. Run the Optimization
-        return Optimizer_RI80.optimizeActuator(
-            Actuator         = Actuator_RI80,
-            UsePSCasVariable = 0,
-            log              = 0,
-            csv              = 1,
-            printOptParams   = 1,
-            gearRatioReq     = gear_ratio
-        )   
-    else:
-        raise ValueError(f"Unsupported motor: {m_name}")
+def run(motor_name, gear_ratio, gearbox_type="insspg_type_1"):
+    motor = load_motor(motor_name, motor_type="frameless_inrunner")
+    maxGearboxDiameter = motor.getStatorODMM() - 5.5 - (sspg_design_params["standard_clearance_1_5mm"])*2 - (sspg_design_params["loose_clearance_3DP"])/2
+    planetaryGearbox = singleStagePlanetaryGearbox(
+        design_params             = sspg_design_params,
+        gear_standard_parameters  = Gear_standard_parameters,
+        maxGearAllowableStressMPa = PLA["maxAllowableStressMPa"],
+        densityGears              = PLA["density"],
+        densityStructure          = PLA["density"]
+    )
+    actuator = singleStagePlanetaryActuator(
+        design_params            = sspg_design_params,
+        motor                    = motor,
+        motor_driver_params      = None,
+        planetaryGearbox         = planetaryGearbox,
+        FOS                      = MIT_params["FOS"],
+        serviceFactor            = MIT_params["serviceFactor"],
+        maxGearboxDiameter       = maxGearboxDiameter,
+        stressAnalysisMethodName = "MIT",
+        insspg_type              = gearbox_type
+    )
+    optimizer = optimizationSingleStageActuator(
+        design_params             = sspg_design_params,
+        gear_standard_paramaeters = Gear_standard_parameters,
+        K_Mass                    = cost_gains["K_Mass"],
+        K_Eff                     = cost_gains["K_Eff"],
+        K_Width                   = cost_gains["K_Width"],
+        MODULE_MIN                = sspg_optimization_params["MODULE_MIN"],
+        MODULE_MAX                = sspg_optimization_params["MODULE_MAX"],
+        NUM_PLANET_MIN            = sspg_optimization_params["NUM_PLANET_MIN"],
+        NUM_PLANET_MAX            = sspg_optimization_params["NUM_PLANET_MAX"],
+        NUM_TEETH_SUN_MIN         = sspg_optimization_params["NUM_TEETH_SUN_MIN"],
+        NUM_TEETH_PLANET_MIN      = sspg_optimization_params["NUM_TEETH_PLANET_MIN"],
+        GEAR_RATIO_MIN            = sspg_optimization_params["GEAR_RATIO_MIN"],
+        GEAR_RATIO_MAX            = sspg_optimization_params["GEAR_RATIO_MAX"],
+        GEAR_RATIO_STEP           = sspg_optimization_params["GEAR_RATIO_STEP"]
+    )
+    return optimizer.optimizeActuator(
+        Actuator         = actuator,
+        UsePSCasVariable = 0,
+        log              = 0,
+        csv              = 1,
+        printOptParams   = 1,
+        gearRatioReq     = gear_ratio
+    )
 
 #=============================================================
 # Execution Block (If run directly)
 #=============================================================
 if __name__ == "__main__":
-    print(f"--- Starting INSSPG Optimization for {MotorRI100.motorName} ---")
-    
+    print("--- Starting INSSPG Optimization for RI100 ---")
+
     # Defaults to type 1 if you run this file directly instead of actOpt.py
     totalTime_RI100, _ = run("RI100", 0, "insspg_type_1")
-    
+
     print(f"Optimization Completed : RI100 INSSPG : Time taken: {totalTime_RI100:.2f} sec")

@@ -1,0 +1,948 @@
+{
+    "_about": "Motor data for every gearbox type, read by CommonComponents.load_motor(). Values and their sources are recorded in config_files/motors_draft.md.",
+    "rating": "peak",
+    "_rating_help": "peak: gears sized with peak_torque_Nm, stress check at no_load_speed_rpm. rated: rated_torque_Nm and rated_speed_rpm (frameless motors only).",
+    "system_voltage_V": 48,
+    "motors": {
+        "U8_Lite": {
+            "type": "framed_outrunner",
+            "source": "T-Motor U8 Lite datasheet; mounting and wire slot measured by user 2026-10-16",
+            "notes": "Replaces the old code name U8. Rotor alt. 4 x M3 @ PCD 20.",
+            "electrical": {
+                "kv_rpm_per_V": 100,
+                "peak_torque_Nm": 2.73,
+                "peak_torque_basis": "measured",
+                "peak_current_A": 29.3,
+                "no_load_speed_rpm": 4800,
+                "no_load_speed_basis": "estimate: KV x 48 V"
+            },
+            "mass_kg": 0.238,
+            "geometry": {
+                "motorDia": 87.1,
+                "motorLength": 27.05,
+                "motor_mount_hole_num": 4,
+                "motor_mount_hole_dia": 4,
+                "motor_mount_hole_PCD": 36,
+                "motor_output_hole_num": 4,
+                "motor_output_hole_dia": 4,
+                "motor_output_hole_PCD": 23,
+                "wire_slot_dist_from_center": 32,
+                "wire_slot_length": 5.5,
+                "wire_slot_radius": 2.9
+            }
+        },
+        "U8_Lite_L": {
+            "type": "framed_outrunner",
+            "source": "T-Motor U8 Lite L store page; mounting as U8 Lite (user 2026-10-16)",
+            "notes": "Rotor alt. 4 x M3 @ PCD 20.",
+            "electrical": {
+                "kv_rpm_per_V": 110,
+                "peak_torque_Nm": 3.87,
+                "peak_torque_basis": "measured",
+                "peak_current_A": 45.8,
+                "no_load_speed_rpm": 5280,
+                "no_load_speed_basis": "estimate: KV x 48 V"
+            },
+            "mass_kg": 0.282,
+            "geometry": {
+                "motorDia": 87.1,
+                "motorLength": 28.05,
+                "motor_mount_hole_num": 4,
+                "motor_mount_hole_dia": 4,
+                "motor_mount_hole_PCD": 36,
+                "motor_output_hole_num": 4,
+                "motor_output_hole_dia": 4,
+                "motor_output_hole_PCD": 23,
+                "wire_slot_dist_from_center": 32,
+                "wire_slot_length": 5.5,
+                "wire_slot_radius": 2.9
+            }
+        },
+        "U8_II": {
+            "type": "framed_outrunner",
+            "source": "T-Motor U8 II store page; mounting as U8 Lite (user 2026-10-16)",
+            "notes": "Peak torque = measured Kt 0.109 Nm/A x 19.1 A. Rotor alt. 4 x M3 @ PCD 20.",
+            "electrical": {
+                "kv_rpm_per_V": 85,
+                "peak_torque_Nm": 2.08,
+                "peak_torque_basis": "estimate",
+                "peak_current_A": 19.1,
+                "no_load_speed_rpm": 4080,
+                "no_load_speed_basis": "estimate: KV x 48 V"
+            },
+            "mass_kg": 0.277,
+            "geometry": {
+                "motorDia": 87.1,
+                "motorLength": 29.1,
+                "motor_mount_hole_num": 4,
+                "motor_mount_hole_dia": 4,
+                "motor_mount_hole_PCD": 36,
+                "motor_output_hole_num": 4,
+                "motor_output_hole_dia": 4,
+                "motor_output_hole_PCD": 23,
+                "wire_slot_dist_from_center": 32,
+                "wire_slot_length": 5.5,
+                "wire_slot_radius": 2.9
+            }
+        },
+        "U8_II_Lite": {
+            "type": "framed_outrunner",
+            "source": "T-Motor U8 II Lite store page; mounting as U8 Lite (user 2026-10-16)",
+            "notes": "Rotor alt. 4 x M3 @ PCD 20.",
+            "electrical": {
+                "kv_rpm_per_V": 100,
+                "peak_torque_Nm": 2.81,
+                "peak_torque_basis": "measured",
+                "peak_current_A": 31,
+                "no_load_speed_rpm": 4800,
+                "no_load_speed_basis": "estimate: KV x 48 V"
+            },
+            "mass_kg": 0.253,
+            "geometry": {
+                "motorDia": 87.3,
+                "motorLength": 26.05,
+                "motor_mount_hole_num": 4,
+                "motor_mount_hole_dia": 4,
+                "motor_mount_hole_PCD": 36,
+                "motor_output_hole_num": 4,
+                "motor_output_hole_dia": 4,
+                "motor_output_hole_PCD": 23,
+                "wire_slot_dist_from_center": 32,
+                "wire_slot_length": 5.5,
+                "wire_slot_radius": 2.9
+            }
+        },
+        "U8_II_PRO": {
+            "type": "framed_outrunner",
+            "source": "T-Motor U8 II PRO store page; mounting as U8 Lite (user 2026-10-16)",
+            "notes": "Test table copied from U8 II Lite, not trusted; peak torque = Kv-based Kt 0.0955 Nm/A x 31 A.",
+            "electrical": {
+                "kv_rpm_per_V": 100,
+                "peak_torque_Nm": 2.96,
+                "peak_torque_basis": "estimate",
+                "peak_current_A": 31,
+                "no_load_speed_rpm": 4800,
+                "no_load_speed_basis": "estimate: KV x 48 V"
+            },
+            "mass_kg": 0.287,
+            "geometry": {
+                "motorDia": 87.3,
+                "motorLength": 29.55,
+                "motor_mount_hole_num": 4,
+                "motor_mount_hole_dia": 4,
+                "motor_mount_hole_PCD": 36,
+                "motor_output_hole_num": 4,
+                "motor_output_hole_dia": 4,
+                "motor_output_hole_PCD": 23,
+                "wire_slot_dist_from_center": 32,
+                "wire_slot_length": 5.5,
+                "wire_slot_radius": 2.9
+            }
+        },
+        "U10_Plus_KV80": {
+            "type": "framed_outrunner",
+            "source": "T-Motor U10 Plus test report; mounting and wire slot measured by user 2026-10-16",
+            "notes": "Replaces the old code name U10 (which modelled KV100). Peak torque = measured Kt 0.1306 Nm/A x 33 A. Rotor alt. 4 x M3 @ PCD 21.",
+            "electrical": {
+                "kv_rpm_per_V": 80,
+                "peak_torque_Nm": 4.31,
+                "peak_torque_basis": "estimate",
+                "peak_current_A": 33,
+                "no_load_speed_rpm": 3840,
+                "no_load_speed_basis": "estimate: KV x 48 V"
+            },
+            "mass_kg": 0.514,
+            "geometry": {
+                "motorDia": 88.6,
+                "motorLength": 40,
+                "motor_mount_hole_num": 4,
+                "motor_mount_hole_dia": 4,
+                "motor_mount_hole_PCD": 32,
+                "motor_output_hole_num": 4,
+                "motor_output_hole_dia": 4,
+                "motor_output_hole_PCD": 23,
+                "wire_slot_dist_from_center": 37,
+                "wire_slot_length": 10,
+                "wire_slot_radius": 5.4
+            }
+        },
+        "U10_II": {
+            "type": "framed_outrunner",
+            "source": "T-Motor U10 II store page and drawing",
+            "notes": "Wire slot measured from the drawing (approximate). Rotor alt. 4 x M3 @ PCD 20.",
+            "electrical": {
+                "kv_rpm_per_V": 100,
+                "peak_torque_Nm": 3.59,
+                "peak_torque_basis": "measured",
+                "peak_current_A": 32.4,
+                "no_load_speed_rpm": 4800,
+                "no_load_speed_basis": "estimate: KV x 48 V"
+            },
+            "mass_kg": 0.415,
+            "geometry": {
+                "motorDia": 98.6,
+                "motorLength": 33.1,
+                "motor_mount_hole_num": 4,
+                "motor_mount_hole_dia": 5,
+                "motor_mount_hole_PCD": 40,
+                "motor_output_hole_num": 4,
+                "motor_output_hole_dia": 4,
+                "motor_output_hole_PCD": 23,
+                "wire_slot_dist_from_center": 45,
+                "wire_slot_length": 9,
+                "wire_slot_radius": 2.65
+            }
+        },
+        "MN5008_KV170": {
+            "type": "framed_outrunner",
+            "source": "T-Motor MN5008 store page; mounting and wire slot as MN5006 (user 2026-10-17)",
+            "notes": "Peak torque = measured Kt 0.0595 Nm/A x 15 A. Rotor alt. 4 x M3 @ PCD 12.",
+            "electrical": {
+                "kv_rpm_per_V": 170,
+                "peak_torque_Nm": 0.89,
+                "peak_torque_basis": "estimate",
+                "peak_current_A": 15,
+                "no_load_speed_rpm": 8160,
+                "no_load_speed_basis": "estimate: KV x 48 V"
+            },
+            "mass_kg": 0.128,
+            "geometry": {
+                "motorDia": 55.6,
+                "motorLength": 32,
+                "motor_mount_hole_num": 4,
+                "motor_mount_hole_dia": 3,
+                "motor_mount_hole_PCD": 25,
+                "motor_output_hole_num": 4,
+                "motor_output_hole_dia": 3,
+                "motor_output_hole_PCD": 18,
+                "wire_slot_dist_from_center": 14.5,
+                "wire_slot_length": 6,
+                "wire_slot_radius": 2.9
+            }
+        },
+        "MN6007_II_KV160": {
+            "type": "framed_outrunner",
+            "source": "T-Motor MN6007 II store page and drawing (confirmed by user 2026-10-17)",
+            "notes": "Rotor alt. 4 x M3 @ PCD 12 and @ PCD 20.",
+            "electrical": {
+                "kv_rpm_per_V": 160,
+                "peak_torque_Nm": 1.49,
+                "peak_torque_basis": "measured",
+                "peak_current_A": 23.7,
+                "no_load_speed_rpm": 7680,
+                "no_load_speed_basis": "estimate: KV x 48 V"
+            },
+            "mass_kg": 0.159,
+            "geometry": {
+                "motorDia": 67.2,
+                "motorLength": 26.1,
+                "motor_mount_hole_num": 4,
+                "motor_mount_hole_dia": 4,
+                "motor_mount_hole_PCD": 32,
+                "motor_output_hole_num": 4,
+                "motor_output_hole_dia": 3,
+                "motor_output_hole_PCD": 18,
+                "wire_slot_dist_from_center": 24.6,
+                "wire_slot_length": 6.3,
+                "wire_slot_radius": 2.3
+            }
+        },
+        "MN7005_KV115": {
+            "type": "framed_outrunner",
+            "source": "T-Motor MN7005 store page and drawing (user-approved 2026-10-17)",
+            "notes": "Peak torque = measured Kt 0.0938 Nm/A x 15 A. Wire slot estimated from a photo. Rotor alt. 4 x M3 @ PCD 20.",
+            "electrical": {
+                "kv_rpm_per_V": 115,
+                "peak_torque_Nm": 1.41,
+                "peak_torque_basis": "estimate",
+                "peak_current_A": 15,
+                "no_load_speed_rpm": 5520,
+                "no_load_speed_basis": "estimate: KV x 48 V"
+            },
+            "mass_kg": 0.188,
+            "geometry": {
+                "motorDia": 79,
+                "motorLength": 21,
+                "motor_mount_hole_num": 4,
+                "motor_mount_hole_dia": 4,
+                "motor_mount_hole_PCD": 32,
+                "motor_output_hole_num": 4,
+                "motor_output_hole_dia": 4,
+                "motor_output_hole_PCD": 23,
+                "wire_slot_dist_from_center": 28,
+                "wire_slot_length": 6,
+                "wire_slot_radius": 2.9
+            }
+        },
+        "MN8012": {
+            "type": "framed_outrunner",
+            "source": "T-Motor MN8012 store page; mounting as U8, wire slot by user 2026-10-16",
+            "notes": "Rotor alt. 4 x M3 @ PCD 20.",
+            "electrical": {
+                "kv_rpm_per_V": 100,
+                "peak_torque_Nm": 4.06,
+                "peak_torque_basis": "measured",
+                "peak_current_A": 40,
+                "no_load_speed_rpm": 4800,
+                "no_load_speed_basis": "estimate: KV x 48 V"
+            },
+            "mass_kg": 0.351,
+            "geometry": {
+                "motorDia": 87.8,
+                "motorLength": 29,
+                "motor_mount_hole_num": 4,
+                "motor_mount_hole_dia": 4,
+                "motor_mount_hole_PCD": 36,
+                "motor_output_hole_num": 4,
+                "motor_output_hole_dia": 4,
+                "motor_output_hole_PCD": 23,
+                "wire_slot_dist_from_center": 38,
+                "wire_slot_length": 10,
+                "wire_slot_radius": 4.4
+            }
+        },
+        "MN8014": {
+            "type": "framed_outrunner",
+            "source": "T-Motor MN8014 store page; mounting as U8, wire slot by user 2026-10-16",
+            "notes": "Rotor alt. 4 x M3 @ PCD 20.",
+            "electrical": {
+                "kv_rpm_per_V": 100,
+                "peak_torque_Nm": 4.79,
+                "peak_torque_basis": "measured",
+                "peak_current_A": 52,
+                "no_load_speed_rpm": 4800,
+                "no_load_speed_basis": "estimate: KV x 48 V"
+            },
+            "mass_kg": 0.392,
+            "geometry": {
+                "motorDia": 87.8,
+                "motorLength": 31.5,
+                "motor_mount_hole_num": 4,
+                "motor_mount_hole_dia": 4,
+                "motor_mount_hole_PCD": 36,
+                "motor_output_hole_num": 4,
+                "motor_output_hole_dia": 4,
+                "motor_output_hole_PCD": 23,
+                "wire_slot_dist_from_center": 38,
+                "wire_slot_length": 10,
+                "wire_slot_radius": 4.4
+            }
+        },
+        "MN8017": {
+            "type": "framed_outrunner",
+            "source": "T-Motor MN8017 store page; mounting as U8, wire slot by user 2026-10-16",
+            "notes": "Rotor alt. 4 x M3 @ PCD 20.",
+            "electrical": {
+                "kv_rpm_per_V": 120,
+                "peak_torque_Nm": 5.8,
+                "peak_torque_basis": "measured",
+                "peak_current_A": 68.6,
+                "no_load_speed_rpm": 5760,
+                "no_load_speed_basis": "estimate: KV x 48 V"
+            },
+            "mass_kg": 0.453,
+            "geometry": {
+                "motorDia": 87.8,
+                "motorLength": 34.5,
+                "motor_mount_hole_num": 4,
+                "motor_mount_hole_dia": 4,
+                "motor_mount_hole_PCD": 36,
+                "motor_output_hole_num": 4,
+                "motor_output_hole_dia": 4,
+                "motor_output_hole_PCD": 23,
+                "wire_slot_dist_from_center": 38,
+                "wire_slot_length": 10,
+                "wire_slot_radius": 4.4
+            }
+        },
+        "MN1005_V2_KV90": {
+            "type": "framed_outrunner",
+            "source": "T-Motor MN1005 V2 store page and drawing (user-approved 2026-10-17)",
+            "notes": "Peak torque = measured Kt 0.1105 Nm/A x 32 A. Wire slot measured from the drawing, low confidence. Rotor alt. 4 x M3 @ PCD 20.",
+            "electrical": {
+                "kv_rpm_per_V": 90,
+                "peak_torque_Nm": 3.54,
+                "peak_torque_basis": "estimate",
+                "peak_current_A": 32,
+                "no_load_speed_rpm": 4320,
+                "no_load_speed_basis": "estimate: KV x 48 V"
+            },
+            "mass_kg": 0.282,
+            "geometry": {
+                "motorDia": 107,
+                "motorLength": 23,
+                "motor_mount_hole_num": 4,
+                "motor_mount_hole_dia": 4,
+                "motor_mount_hole_PCD": 32,
+                "motor_output_hole_num": 4,
+                "motor_output_hole_dia": 4,
+                "motor_output_hole_PCD": 23,
+                "wire_slot_dist_from_center": 36,
+                "wire_slot_length": 8,
+                "wire_slot_radius": 2.4
+            }
+        },
+        "MAD_M6C12_KV170": {
+            "type": "framed_outrunner",
+            "source": "MAD M6C12 EEE product page images (spec, drawing, test tables) 2026-10-17",
+            "notes": "Stator alt. 4 x M3 @ PCD 25; rotor alt. 4 x M3 @ PCD 12 and @ PCD 22.",
+            "electrical": {
+                "kv_rpm_per_V": 170,
+                "peak_torque_Nm": 3.03,
+                "peak_torque_basis": "measured",
+                "peak_current_A": 51.5,
+                "no_load_speed_rpm": 8160,
+                "no_load_speed_basis": "estimate: KV x 48 V"
+            },
+            "mass_kg": 0.255,
+            "geometry": {
+                "motorDia": 72,
+                "motorLength": 27,
+                "motor_mount_hole_num": 4,
+                "motor_mount_hole_dia": 4,
+                "motor_mount_hole_PCD": 32,
+                "motor_output_hole_num": 4,
+                "motor_output_hole_dia": 3,
+                "motor_output_hole_PCD": 18,
+                "wire_slot_dist_from_center": 16,
+                "wire_slot_length": 4,
+                "wire_slot_radius": 3.9
+            }
+        },
+        "MAD_M6C10_KV150": {
+            "type": "framed_outrunner",
+            "source": "MAD M6C10 EEE product page images 2026-10-17",
+            "notes": "Stator alt. 4 x M3 @ PCD 25; rotor alt. 4 x M3 @ PCD 12 and @ PCD 22.",
+            "electrical": {
+                "kv_rpm_per_V": 150,
+                "peak_torque_Nm": 2.377,
+                "peak_torque_basis": "measured",
+                "peak_current_A": 36.3,
+                "no_load_speed_rpm": 7200,
+                "no_load_speed_basis": "estimate: KV x 48 V"
+            },
+            "mass_kg": 0.209,
+            "geometry": {
+                "motorDia": 72,
+                "motorLength": 25,
+                "motor_mount_hole_num": 4,
+                "motor_mount_hole_dia": 4,
+                "motor_mount_hole_PCD": 32,
+                "motor_output_hole_num": 4,
+                "motor_output_hole_dia": 3,
+                "motor_output_hole_PCD": 18,
+                "wire_slot_dist_from_center": 16,
+                "wire_slot_length": 4,
+                "wire_slot_radius": 4.05
+            }
+        },
+        "MAD_M6C08_KV180": {
+            "type": "framed_outrunner",
+            "source": "MAD M6C08 EEE product page images 2026-10-17",
+            "notes": "Test supply sagged to 43.65 V. Stator alt. 4 x M3 @ PCD 25; rotor alt. 4 x M3 @ PCD 12 and @ PCD 22.",
+            "electrical": {
+                "kv_rpm_per_V": 180,
+                "peak_torque_Nm": 1.992,
+                "peak_torque_basis": "measured",
+                "peak_current_A": 34,
+                "no_load_speed_rpm": 8640,
+                "no_load_speed_basis": "estimate: KV x 48 V"
+            },
+            "mass_kg": 0.18,
+            "geometry": {
+                "motorDia": 72,
+                "motorLength": 23,
+                "motor_mount_hole_num": 4,
+                "motor_mount_hole_dia": 4,
+                "motor_mount_hole_PCD": 32,
+                "motor_output_hole_num": 4,
+                "motor_output_hole_dia": 3,
+                "motor_output_hole_PCD": 18,
+                "wire_slot_dist_from_center": 15.5,
+                "wire_slot_length": 4,
+                "wire_slot_radius": 3.9
+            }
+        },
+        "MAD_M6C06_KV140": {
+            "type": "framed_outrunner",
+            "source": "MAD M6C06 EEE product page images 2026-10-17",
+            "notes": "Stator alt. 4 x M3 @ PCD 25; rotor alt. 4 x M3 @ PCD 12 and @ PCD 22.",
+            "electrical": {
+                "kv_rpm_per_V": 140,
+                "peak_torque_Nm": 1.487,
+                "peak_torque_basis": "measured",
+                "peak_current_A": 21,
+                "no_load_speed_rpm": 6720,
+                "no_load_speed_basis": "estimate: KV x 48 V"
+            },
+            "mass_kg": 0.163,
+            "geometry": {
+                "motorDia": 72,
+                "motorLength": 21,
+                "motor_mount_hole_num": 4,
+                "motor_mount_hole_dia": 4,
+                "motor_mount_hole_PCD": 32,
+                "motor_output_hole_num": 4,
+                "motor_output_hole_dia": 3,
+                "motor_output_hole_PCD": 18,
+                "wire_slot_dist_from_center": 14.6,
+                "wire_slot_length": 4,
+                "wire_slot_radius": 3.85
+            }
+        },
+        "MAD_M6C06_V3_KV160": {
+            "type": "framed_outrunner",
+            "source": "MAD M6C06 EEE V3 product page images (user 2026-10-17)",
+            "notes": "Wire slot estimated from the drawing. Rotor alt. 4 x M3 @ PCD 12 and @ PCD 20.",
+            "electrical": {
+                "kv_rpm_per_V": 160,
+                "peak_torque_Nm": 1.483,
+                "peak_torque_basis": "measured",
+                "peak_current_A": 22.43,
+                "no_load_speed_rpm": 7680,
+                "no_load_speed_basis": "estimate: KV x 48 V"
+            },
+            "mass_kg": 0.157,
+            "geometry": {
+                "motorDia": 72.1,
+                "motorLength": 22.4,
+                "motor_mount_hole_num": 4,
+                "motor_mount_hole_dia": 4,
+                "motor_mount_hole_PCD": 32,
+                "motor_output_hole_num": 4,
+                "motor_output_hole_dia": 3,
+                "motor_output_hole_PCD": 18,
+                "wire_slot_dist_from_center": 32,
+                "wire_slot_length": 7,
+                "wire_slot_radius": 4.15
+            }
+        },
+        "MAD_1005_KV90": {
+            "type": "framed_outrunner",
+            "source": "MAD 1005 EEE product page images 2026-10-17",
+            "notes": "Rotor alt. 4 x M3 @ PCD 20.",
+            "electrical": {
+                "kv_rpm_per_V": 90,
+                "peak_torque_Nm": 3.92,
+                "peak_torque_basis": "measured",
+                "peak_current_A": 34,
+                "no_load_speed_rpm": 4320,
+                "no_load_speed_basis": "estimate: KV x 48 V"
+            },
+            "mass_kg": 0.279,
+            "geometry": {
+                "motorDia": 107,
+                "motorLength": 22.5,
+                "motor_mount_hole_num": 4,
+                "motor_mount_hole_dia": 4,
+                "motor_mount_hole_PCD": 32,
+                "motor_output_hole_num": 4,
+                "motor_output_hole_dia": 4,
+                "motor_output_hole_PCD": 23,
+                "wire_slot_dist_from_center": 34,
+                "wire_slot_length": 4.3,
+                "wire_slot_radius": 3.3
+            }
+        },
+        "MAD_7005_KV115": {
+            "type": "framed_outrunner",
+            "source": "MAD 7005 EEE product page images 2026-10-17",
+            "notes": "Rotor alt. 4 x M3 @ PCD 20.",
+            "electrical": {
+                "kv_rpm_per_V": 115,
+                "peak_torque_Nm": 1.842,
+                "peak_torque_basis": "measured",
+                "peak_current_A": 21.2,
+                "no_load_speed_rpm": 5520,
+                "no_load_speed_basis": "estimate: KV x 48 V"
+            },
+            "mass_kg": 0.196,
+            "geometry": {
+                "motorDia": 79,
+                "motorLength": 21.8,
+                "motor_mount_hole_num": 4,
+                "motor_mount_hole_dia": 4,
+                "motor_mount_hole_PCD": 32,
+                "motor_output_hole_num": 4,
+                "motor_output_hole_dia": 4,
+                "motor_output_hole_PCD": 23,
+                "wire_slot_dist_from_center": 28.8,
+                "wire_slot_length": 5.2,
+                "wire_slot_radius": 2.4
+            }
+        },
+        "MAD_8118_KV100": {
+            "type": "framed_outrunner",
+            "source": "MAD 8118 EEE V1.0 product page images 2026-10-17",
+            "notes": "Mass 520 g from the spec image (page text says 620 g; user chose 520 g). Stator alt. 4 x M3 @ PCD 50 and @ PCD 30.",
+            "electrical": {
+                "kv_rpm_per_V": 100,
+                "peak_torque_Nm": 5.108,
+                "peak_torque_basis": "measured",
+                "peak_current_A": 62,
+                "no_load_speed_rpm": 4800,
+                "no_load_speed_basis": "estimate: KV x 48 V"
+            },
+            "mass_kg": 0.52,
+            "geometry": {
+                "motorDia": 88.6,
+                "motorLength": 41,
+                "motor_mount_hole_num": 4,
+                "motor_mount_hole_dia": 4,
+                "motor_mount_hole_PCD": 32,
+                "motor_output_hole_num": 4,
+                "motor_output_hole_dia": 4,
+                "motor_output_hole_PCD": 23,
+                "wire_slot_dist_from_center": 36.5,
+                "wire_slot_length": 4,
+                "wire_slot_radius": 5.45
+            }
+        },
+        "MAD_5008_KV170": {
+            "type": "framed_outrunner",
+            "source": "MAD 5008 EEE V2.0 product page images 2026-10-17",
+            "notes": "Stator alt. 4 x M3 @ PCD 25; rotor alt. 2 x M3 @ PCD 12.",
+            "electrical": {
+                "kv_rpm_per_V": 170,
+                "peak_torque_Nm": 1.088,
+                "peak_torque_basis": "measured",
+                "peak_current_A": 20.6,
+                "no_load_speed_rpm": 8160,
+                "no_load_speed_basis": "estimate: KV x 48 V"
+            },
+            "mass_kg": 0.13,
+            "geometry": {
+                "motorDia": 56,
+                "motorLength": 25.9,
+                "motor_mount_hole_num": 4,
+                "motor_mount_hole_dia": 3,
+                "motor_mount_hole_PCD": 30,
+                "motor_output_hole_num": 2,
+                "motor_output_hole_dia": 3,
+                "motor_output_hole_PCD": 18,
+                "wire_slot_dist_from_center": 16.9,
+                "wire_slot_length": 4,
+                "wire_slot_radius": 4.2
+            }
+        },
+        "MAD_5010_KV200": {
+            "type": "framed_outrunner",
+            "source": "MAD 5010 EEE V2.0 product page images 2026-10-17",
+            "notes": "Peak torque from the 6S test (best 12S row 1.021 Nm); user chose 1.086 Nm. Stator alt. 4 x M3 @ PCD 25; rotor alt. 2 x M3 @ PCD 12.",
+            "electrical": {
+                "kv_rpm_per_V": 200,
+                "peak_torque_Nm": 1.086,
+                "peak_torque_basis": "measured",
+                "peak_current_A": 22.3,
+                "no_load_speed_rpm": 9600,
+                "no_load_speed_basis": "estimate: KV x 48 V"
+            },
+            "mass_kg": 0.1629,
+            "geometry": {
+                "motorDia": 56,
+                "motorLength": 21,
+                "motor_mount_hole_num": 4,
+                "motor_mount_hole_dia": 3,
+                "motor_mount_hole_PCD": 30,
+                "motor_output_hole_num": 2,
+                "motor_output_hole_dia": 3,
+                "motor_output_hole_PCD": 18,
+                "wire_slot_dist_from_center": 16.8,
+                "wire_slot_length": 4,
+                "wire_slot_radius": 4.2
+            }
+        },
+        "VT8008_SL_KV90": {
+            "type": "framed_outrunner",
+            "source": "Vector Technics 8008 SL 90KV datasheet PDF 2026-10-17",
+            "notes": "Peak current = test current at peak torque (max continuous 20 A, 180 s). Wire slot = 10005 SL values (user 2026-10-17). Rotor alt. 4 x M3 @ PCD 20.",
+            "electrical": {
+                "kv_rpm_per_V": 90,
+                "peak_torque_Nm": 2.63,
+                "peak_torque_basis": "measured",
+                "peak_current_A": 26.6,
+                "no_load_speed_rpm": 4320,
+                "no_load_speed_basis": "estimate: KV x 48 V"
+            },
+            "mass_kg": 0.21,
+            "geometry": {
+                "motorDia": 88.4,
+                "motorLength": 26,
+                "motor_mount_hole_num": 4,
+                "motor_mount_hole_dia": 3,
+                "motor_mount_hole_PCD": 30,
+                "motor_output_hole_num": 4,
+                "motor_output_hole_dia": 4,
+                "motor_output_hole_PCD": 23,
+                "wire_slot_dist_from_center": 34,
+                "wire_slot_length": 13,
+                "wire_slot_radius": 3.9
+            }
+        },
+        "VT8015_SL": {
+            "type": "framed_outrunner",
+            "source": "Vector Technics 8015 SL 100KV datasheet PDF 2026-10-17",
+            "notes": "Peak current = test current at peak torque (max continuous 40 A, 180 s). Wire slot = 10005 SL values (user 2026-10-17). Rotor alt. 4 x M3 @ PCD 20.",
+            "electrical": {
+                "kv_rpm_per_V": 100,
+                "peak_torque_Nm": 5.33,
+                "peak_torque_basis": "measured",
+                "peak_current_A": 57.8,
+                "no_load_speed_rpm": 4800,
+                "no_load_speed_basis": "estimate: KV x 48 V"
+            },
+            "mass_kg": 0.42,
+            "geometry": {
+                "motorDia": 88.4,
+                "motorLength": 34,
+                "motor_mount_hole_num": 4,
+                "motor_mount_hole_dia": 4,
+                "motor_mount_hole_PCD": 36,
+                "motor_output_hole_num": 4,
+                "motor_output_hole_dia": 4,
+                "motor_output_hole_PCD": 23,
+                "wire_slot_dist_from_center": 34,
+                "wire_slot_length": 13,
+                "wire_slot_radius": 3.9
+            }
+        },
+        "VT10005_SL": {
+            "type": "framed_outrunner",
+            "source": "Vector Technics 10005 SL 90KV datasheet PDF 2026-10-17",
+            "notes": "Spec-table mount patterns swapped per the drawing (user 2026-10-17). Wire slot estimated from the drawing. Rotor alt. 4 x M3 @ PCD 20.",
+            "electrical": {
+                "kv_rpm_per_V": 90,
+                "peak_torque_Nm": 2.994,
+                "peak_torque_basis": "measured",
+                "peak_current_A": 27.62,
+                "no_load_speed_rpm": 4320,
+                "no_load_speed_basis": "estimate: KV x 48 V"
+            },
+            "mass_kg": 0.277,
+            "geometry": {
+                "motorDia": 107,
+                "motorLength": 23,
+                "motor_mount_hole_num": 4,
+                "motor_mount_hole_dia": 4,
+                "motor_mount_hole_PCD": 32,
+                "motor_output_hole_num": 4,
+                "motor_output_hole_dia": 4,
+                "motor_output_hole_PCD": 23,
+                "wire_slot_dist_from_center": 34,
+                "wire_slot_length": 13,
+                "wire_slot_radius": 3.9
+            }
+        },
+        "VT8020_PRO": {
+            "type": "framed_outrunner",
+            "source": "Vector Technics 8020 PRO 120KV datasheet PDF 2026-10-17",
+            "notes": "Replaces the old code name VT8020. Height excludes the 5.9 mm shaft stub. Wire slot estimated from the drawing. Rotor alt. 4 x M3 @ PCD 20.",
+            "electrical": {
+                "kv_rpm_per_V": 120,
+                "peak_torque_Nm": 6.11,
+                "peak_torque_basis": "measured",
+                "peak_current_A": 77.1,
+                "no_load_speed_rpm": 5760,
+                "no_load_speed_basis": "estimate: KV x 48 V"
+            },
+            "mass_kg": 0.566,
+            "geometry": {
+                "motorDia": 88.4,
+                "motorLength": 42.5,
+                "motor_mount_hole_num": 4,
+                "motor_mount_hole_dia": 4,
+                "motor_mount_hole_PCD": 40,
+                "motor_output_hole_num": 4,
+                "motor_output_hole_dia": 4,
+                "motor_output_hole_PCD": 23,
+                "wire_slot_dist_from_center": 36,
+                "wire_slot_length": 16,
+                "wire_slot_radius": 2.9
+            }
+        },
+        "RO100": {
+            "type": "frameless_outrunner",
+            "source": "Frameless motor datasheet received 2026-10-16; geometry from motor_config.json (user-confirmed 2026-10-17)",
+            "notes": "Rotor screw M4 until the designers decide M4 vs M5 (ISSUES.md bug 8). stator_hole_num 3 is marked 'wrong' in the old code; kept.",
+            "electrical": {
+                "kv_rpm_per_V": 55,
+                "peak_torque_Nm": 12,
+                "peak_torque_basis": "datasheet",
+                "peak_current_A": 62,
+                "no_load_speed_rpm": 2550,
+                "no_load_speed_basis": "datasheet at 48 V",
+                "rated_torque_Nm": 4.0,
+                "rated_current_A": 20,
+                "rated_speed_rpm": 2000
+            },
+            "mass_kg": 0.71,
+            "geometry": {
+                "stator_OD": 100,
+                "stator_ID": 74,
+                "stator_height": 31.5,
+                "stator_hole_PCD": 82.5,
+                "stator_hole_dia": 3,
+                "motor_stator_extrusion_dia": 88,
+                "motor_stator_extrusion_depth": 2,
+                "motor_OD": 113.5,
+                "rotor_ID": 101.8,
+                "rotor_height": 33.45,
+                "motor_rotor_base_ID": 60,
+                "motor_rotor_base_thickness": 3.2,
+                "motor_rotor_hole_PCD": 74,
+                "motor_rotor_hole_dia": 4,
+                "motor_rotor_hole_num": 6,
+                "stator_top_rotor_top_offset": 2.75,
+                "motor_height": 36.2,
+                "rotorCSKHeadUpperDiaMM": 8,
+                "rotorCSKHeadHeightMM": 2.3,
+                "stator_hole_num": 3,
+                "stator_mounitng_holes_head_socket_dia": 4.5
+            }
+        },
+        "RO80": {
+            "type": "frameless_outrunner",
+            "source": "Frameless motor datasheet received 2026-10-16; geometry from motor_config.json",
+            "notes": "Mass 352 g confirmed by user 2026-10-17 (ISSPG's 265 g was wrong).",
+            "electrical": {
+                "kv_rpm_per_V": 105,
+                "peak_torque_Nm": 4.0,
+                "peak_torque_basis": "datasheet",
+                "peak_current_A": 50,
+                "no_load_speed_rpm": 5040,
+                "no_load_speed_basis": "datasheet at 48 V",
+                "rated_torque_Nm": 1.3,
+                "rated_current_A": 15,
+                "rated_speed_rpm": 3600
+            },
+            "mass_kg": 0.352,
+            "geometry": {
+                "stator_OD": 81,
+                "stator_ID": 55,
+                "stator_height": 22,
+                "stator_hole_PCD": 63,
+                "stator_hole_dia": 3,
+                "motor_stator_extrusion_dia": 68,
+                "motor_stator_extrusion_depth": 1.5,
+                "motor_OD": 92.6,
+                "rotor_ID": 82.6,
+                "rotor_height": 21.6,
+                "motor_rotor_base_ID": 51,
+                "motor_rotor_base_thickness": 2.6,
+                "motor_rotor_hole_PCD": 62,
+                "motor_rotor_hole_dia": 4,
+                "motor_rotor_hole_num": 6,
+                "stator_top_rotor_top_offset": 4.8,
+                "motor_height": 26.4,
+                "rotorCSKHeadUpperDiaMM": 8,
+                "rotorCSKHeadHeightMM": 2.3,
+                "stator_hole_num": 3,
+                "stator_mounitng_holes_head_socket_dia": 4.5
+            }
+        },
+        "RO60": {
+            "type": "frameless_outrunner",
+            "source": "Frameless motor datasheet received 2026-10-16; geometry from Opt_ISSPG_inside.py",
+            "notes": "Datasheet peak torque 2.4 Nm is below Kt x peak current (3.76 Nm); the datasheet value is used.",
+            "electrical": {
+                "kv_rpm_per_V": 115,
+                "peak_torque_Nm": 2.4,
+                "peak_torque_basis": "datasheet",
+                "peak_current_A": 40,
+                "no_load_speed_rpm": 5520,
+                "no_load_speed_basis": "datasheet at 48 V",
+                "rated_torque_Nm": 0.8,
+                "rated_current_A": 8.5,
+                "rated_speed_rpm": 4200
+            },
+            "mass_kg": 0.248,
+            "geometry": {
+                "stator_OD": 61.5,
+                "stator_ID": 32,
+                "stator_height": 19.5,
+                "stator_hole_PCD": 40,
+                "stator_hole_dia": 3,
+                "motor_stator_extrusion_dia": 47.6,
+                "motor_stator_extrusion_depth": 1.8,
+                "motor_OD": 73.8,
+                "rotor_ID": 63.1,
+                "rotor_height": 19,
+                "motor_rotor_base_ID": 37,
+                "motor_rotor_base_thickness": 2,
+                "motor_rotor_hole_PCD": 46,
+                "motor_rotor_hole_dia": 3,
+                "motor_rotor_hole_num": 6,
+                "stator_top_rotor_top_offset": 4,
+                "motor_height": 23,
+                "rotorCSKHeadUpperDiaMM": 8,
+                "rotorCSKHeadHeightMM": 2.3,
+                "stator_hole_num": 3,
+                "stator_mounitng_holes_head_socket_dia": 4.5
+            }
+        },
+        "RI100": {
+            "type": "frameless_inrunner",
+            "source": "Frameless motor datasheet received 2026-10-16; geometry from insspg_motor_config.json / indspg_motor_config.json (identical)",
+            "notes": "",
+            "electrical": {
+                "kv_rpm_per_V": 105,
+                "peak_torque_Nm": 4.95,
+                "peak_torque_basis": "datasheet",
+                "peak_current_A": 38.6,
+                "no_load_speed_rpm": 4368,
+                "no_load_speed_basis": "datasheet at 48 V",
+                "rated_torque_Nm": 1.76,
+                "rated_current_A": 13.6,
+                "rated_speed_rpm": 2825
+            },
+            "mass_kg": 0.5,
+            "geometry": {
+                "rotor_OD": 55.6,
+                "rotor_ID": 45,
+                "rotor_height": 15,
+                "stator_OD": 104,
+                "stator_ID": 57,
+                "stator_height": 24.5,
+                "stator_hole_dia": 3,
+                "stator_hole_num": 4,
+                "stator_wire_top_height": 7,
+                "stator_mid_height": 13,
+                "stator_wire_bottom_height": 4.5,
+                "stator_wire_OD": 101,
+                "stator_wire_ID": 58
+            }
+        },
+        "RI80": {
+            "type": "frameless_inrunner",
+            "source": "Frameless motor datasheet received 2026-10-16; geometry from insspg_motor_config.json / indspg_motor_config.json (identical)",
+            "notes": "",
+            "electrical": {
+                "kv_rpm_per_V": 75,
+                "peak_torque_Nm": 4.1,
+                "peak_torque_basis": "datasheet",
+                "peak_current_A": 27.6,
+                "no_load_speed_rpm": 2960,
+                "no_load_speed_basis": "datasheet at 48 V",
+                "rated_torque_Nm": 1.45,
+                "rated_current_A": 9.4,
+                "rated_speed_rpm": 2430
+            },
+            "mass_kg": 0.411,
+            "geometry": {
+                "rotor_OD": 50,
+                "rotor_ID": 40.5,
+                "rotor_height": 19,
+                "stator_OD": 85,
+                "stator_ID": 51,
+                "stator_height": 26.5,
+                "stator_hole_dia": 3,
+                "stator_hole_num": 4,
+                "stator_wire_top_height": 6.5,
+                "stator_mid_height": 16,
+                "stator_wire_bottom_height": 4,
+                "stator_wire_OD": 82,
+                "stator_wire_ID": 52.5
+            }
+        }
+    }
+}

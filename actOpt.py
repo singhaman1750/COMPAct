@@ -241,7 +241,7 @@ if __name__ == "__main__":
         prog="actOpt.py",
         description="Run planetary gearbox actuator optimization."
     )
-    parser.add_argument("--motor", required=True, help="Motor name, e.g. U8, RO100, RI100")
+    parser.add_argument("--motor", required=True, help="Motor name from config_files/motors.json, e.g. U8_Lite, RO100, RI100")
     parser.add_argument("--gb_type", required=True, help="Gearbox type, e.g. sspg, icpg, insspg_type_1")
     parser.add_argument("--gr", required=True, type=float, help="Gear ratio (must be > 2)")
 

@@ -39,7 +39,8 @@
         "NUM_TEETH_PLANET_BIG_MIN"         : 28, 
         "NUM_TEETH_PLANET_SMALL_MIN"       : 28,
         "MAX_GB_DIA_MULT_FACTOR"           : 1,
-        "MAX_GB_DIA_MULT_FACTOR_MAD_M6C12" : 1.25
+        "MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR" : 1.25,
+        "SMALL_MOTOR_DIA_MM"                 : 80
     },
     "wpg_3DP_design_parameters":{        
         "planetMinDistanceMM"                                   : 7.5,
