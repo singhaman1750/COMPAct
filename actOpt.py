@@ -38,7 +38,7 @@ def main(motor, gearbox_type, gear_ratio=0):
     print("Time taken:", total_time, "sec")
     if opt_parameters is None:
         print("No feasible solution found.")
-        return
+        return None
     else:
         print("Optimization Completed.")
 
@@ -236,6 +236,8 @@ def main(motor, gearbox_type, gear_ratio=0):
         print("Gear Ratio(GR):", opt_parameters[0],": 1")
         print("-------------------------------")
 
+    return opt_parameters
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog="actOpt.py",
@@ -244,7 +246,19 @@ if __name__ == "__main__":
     parser.add_argument("--motor", required=True, help="Motor name from config_files/motors.json, e.g. U8_Lite, RO100, RI100")
     parser.add_argument("--gb_type", required=True, help="Gearbox type, e.g. sspg, icpg, insspg_type_1")
     parser.add_argument("--gr", required=True, type=float, help="Gear ratio (must be > 2)")
+    parser.add_argument("--onshape", action="store_true",
+                        help="after a successful run, push the result into this gearbox's Onshape model "
+                             "(set up Onshape_extension/onshape_models.json and .env first)")
 
     args = parser.parse_args()
 
-    main(args.motor, args.gb_type, args.gr)
+    opt_parameters = main(args.motor, args.gb_type, args.gr)
+    if args.onshape:
+        if opt_parameters is None:
+            print("Onshape: no design found, Onshape model not updated.")
+        else:
+            from Onshape_extension.set_values import push_to_onshape
+            try:
+                push_to_onshape(args.gb_type)
+            except Exception as error:  # the optimisation result is already saved
+                print(f"Onshape: model not updated: {error}")

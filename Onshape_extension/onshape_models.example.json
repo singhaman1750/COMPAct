@@ -1,0 +1,18 @@
+{
+    "_help": "Copy this file to onshape_models.json (not committed) and paste the Variable Studio URL of YOUR copy of each gearbox model. Leave a gearbox empty if you don't use it.",
+    "sspg": "",
+    "cpg": "",
+    "wpg": "",
+    "dspg": "",
+    "isspg_inside": "",
+    "isspg_compact": "",
+    "icpg": "",
+    "idspg": "",
+    "insspg_type_1": "",
+    "insspg_type_2": "",
+    "incpg_dependent": "",
+    "incpg_independent": "",
+    "inwpg_dependent": "",
+    "inwpg_independent": "",
+    "indspg": ""
+}

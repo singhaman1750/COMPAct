@@ -440,3 +440,69 @@ use `#motor_output_hole_num` / `#motor_output_hole_dia`). Then check whether the
 models place their sun-gear countersinks the same way.
 
 **Status:** open — CAD fix for the SSPG model's designer.
+
+### CAD 2. Twelve Onshape models are shared view-only, so users cannot copy them
+
+**Description:** twelve Onshape documents linked in the README (Step 3, Option B) are shared
+**view-only**. A user can open them but cannot make a copy ("Copy workspace" is not available), so
+they cannot get their own Variable Studio URL and cannot use them with `actOpt.py --onshape` or
+`set_values.py`:
+- **WPG (new)** — "Open WPG in Onshape", `documents/f63553f1c266228274914c8c/...`
+- **IDSPG** — "Open IDSPG in Onshape", `documents/bfc847aa97321639994fa267/...`
+- **ISSPG OutBearing** (`isspg_compact`) — "Open ISSPG OutBearing in Onshape", `documents/bf5f13d9187efab731a95ba7/...`
+- **ISSPG InBearing** (`isspg_inside`) — "Open ISSPG InBearing in Onshape", `documents/9fa91e98fe82c4e544284d41/...`
+- **INCPG Dependent** (`incpg_dependent`) — "Open INCPG Dependent in Onshape", `documents/3e794c46f172f3b02cfa18e7/...`
+- **INCPG Independent** (`incpg_independent`) — "Open INCPG Independent in Onshape", `documents/2519b08c3c51bbdac1923e25/...`
+- **INSSPG Dependent** (`insspg_type_2`) — "Open INSSPG_Dependent in Onshape", `documents/97af418b118f30715235cd6a/...`
+- **INSSPG Independent** (`insspg_type_1`) — "Open INSSPG_Independent in Onshape", `documents/e0cb8ed6bb2b36cfcadffcf4/...`
+- **ICPG** (`icpg`) — "Open ICPG in Onshape", `documents/1cec852caa1080765682d3d0/...`
+- **INWPG Dependent** (`inwpg_dependent`) — "Open INWPG_Dependent in Onshape", `documents/a5e4d1f2afed2d53000ac6c5/...`
+- **INWPG Independent** (`inwpg_independent`) — "Open INWPG_Independent in Onshape", `documents/a5ebf8aa022054aedcbab90e/...`
+- **INDSPG** (`indspg`) — "Open INDSPG in Onshape", `documents/082ad023b75b2274bed0f04d/...`
+
+Only SSPG, CPG and DSPG can be copied. Every frameless model is affected.
+
+For WPG, the old model linked under Step 6 ("Open WPG in Onshape (old)",
+`documents/ad699ddbc25bac5c32e33135/...`) is a different document and does not match the current
+WPG equations file, so it is not a workaround.
+
+**Probable fix:** each document's owner changes its sharing to allow copying — in Onshape:
+**Share → Public** (or share with "Can view" + **"Can copy"** / "Allow copy" enabled), the same way
+the other gearbox models are shared. Then check that "Copy workspace" works from a different
+account.
+
+**Status:** open — for the owners of these Onshape documents. Until then, leave `wpg`, `idspg`,
+`isspg_inside`, `isspg_compact`, `incpg_dependent`, `incpg_independent`,
+`insspg_type_1`, `insspg_type_2`,
+`icpg`, `inwpg_dependent`, `inwpg_independent` and `indspg` empty in `Onshape_extension/onshape_models.json`.
+
+### CAD 3. DSPG — stage-1 ring gear is split into two parts
+
+**Description:** in the DSPG Onshape model, the **stage-1 ring gear comes out as two separate
+bodies** instead of one ring.
+
+**Seen with:** `python actOpt.py --motor MAD_M6C06_KV140 --gb_type dspg --gr 20 --onshape`
+(found 2026-10-17). Design: stage 1 Ns1 27 / Np1 48 / Nr1 123, module 0.6, 3 planets; stage 2
+Ns2 40 / Np2 32 / Nr2 104, module 0.7, 4 planets; ratio 20.0.
+
+**Reproduce without re-optimising:** the files from that run are saved in
+[`docs/cad_issues/CAD3_dspg_MAD_M6C06_KV140_gr20/`](docs/cad_issues/CAD3_dspg_MAD_M6C06_KV140_gr20/)
+(the three DSPG equations files and the results CSV). Push them to your DSPG model with:
+```bash
+python Onshape_extension/set_values.py --gb_type dspg --file docs/cad_issues/CAD3_dspg_MAD_M6C06_KV140_gr20/dspg_equations_onshape.txt
+```
+
+**Likely cause (not confirmed):** the MAD M6C06 is a small motor (Ø72 mm), so the optimiser
+allows a gearbox 1.25× the motor diameter (small-motor rule, Phase 2). Stage-1 ring pitch
+diameter is 0.6 × 123 = 73.8 mm (tooth root ≈ 75.3 mm, `a1_ring_OD` 83.8 mm), i.e. **larger than
+the motor** (`a1_motor_OD` 72). If a CAD feature is sized from `a1_motor_OD` (e.g. a motor pocket
+or cut), it would cut through the ring and split it. The DSPG model was presumably only used with
+motors larger than their ring until now.
+
+**Probable fix:** in the DSPG Onshape model, find the feature that cuts the stage-1 ring and size it
+from the ring (e.g. `a1_ring_OD`) or limit it to `min(motor, ring)`; or, if a ring larger than the
+motor is not allowed by the design, the optimiser must not use the 1.25× allowance for DSPG
+(set `MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR` to 1 in `config_files/dspg_params.json`). Check SSPG,
+CPG and WPG with a small motor for the same problem.
+
+**Status:** open — for the DSPG model's designer.
