@@ -122,6 +122,42 @@ and strength), except INDSPG, which mixes them — see Phase 1 fix 2.1. The `Ste
    clearances (e.g. `loose_clearance_3DP`) and can be thinner than printed ones. Metal mode needs
    its own design settings per gearbox; until then it reuses the 3D-printed shapes.
 
+### Unify per-gearbox settings (important — each item changes results)
+
+Found while building the common runner (Phase 3a). The runner keeps every one of these
+differences exactly as it was, so results don't change; each should later become its own
+result-changing commit with re-recorded golden baselines.
+
+1. **Five config files with different material values.** Each gearbox type reads materials, cost
+   gains and MIT factors from one of five files:
+
+   | Config file | Used by | PLA density | Aluminium density | Steel |
+   |---|---|---|---|---|
+   | `config.json` | SSPG, CPG, WPG, DSPG, ISSPG ×2, INCPG ×2, INWPG ×2 | 1250 | 2700 | 7850 / 400 MPa |
+   | `motor_config.json` | ICPG | 1245.6 | **1245.6** (PLA value) | **1245.6 / 70** (PLA values) |
+   | `idspg_motor_config.json` | IDSPG | 1245.6 | **1245.6** | **1245.6 / 70** |
+   | `indspg_motor_config.json` | INDSPG | 1240 | 2700 | 7850 / 400 MPa |
+   | `insspg_motor_config.json` | INSSPG ×2 | 1240.06 | 2700 | 7850 / 400 MPa |
+
+   So PLA has four densities (1250, 1245.6, 1240, 1240.06), and two files give aluminium and steel
+   PLA values. Cost gains (1 / −2 / 0.2) and MIT factors (1.2 / 1.5) are the same in all five.
+2. **ISSPG hard-codes FOS 1.2 and service factor 1.5** (inside and compact) instead of reading
+   `MIT_params` like the other types. Same values today, but they won't follow a config change.
+3. **Motor driver passed inconsistently:** OdrivePro for most types; `None` for INSSPG; not passed
+   at all for ICPG and INDSPG.
+4. **Different maximum-gearbox-diameter rules:**
+   - SSPG, WPG, DSPG: small-motor factor × motor Ø − 2 × ring width (different ring-width keys:
+     `ringRadialWidthMM`, `ringRadialWidthMMBig`, `ring_radial_thickness`);
+   - CPG: small-motor factor × motor Ø;
+   - ICPG: factor × stator ID; IDSPG: factor × (motor OD + 2 × 1.5) and stage 1 = stator ID − 2 ×
+     ring-1 width; INDSPG: factor × (stator wire OD − 2 × ring-2 width) and stage 1 = rotor ID −
+     4 × 1.5;
+   - INCPG, INWPG: factor × motor Ø; INSSPG: stator OD − 5.5 − 2 × 1.5 − 0.8 / 2;
+   - ISSPG: no limit passed.
+   The IDSPG line carries a `#TODO: this is correct and implement in other also`.
+
+**Status:** open — decide one value / rule per item, then change and re-record one item at a time.
+
 ## Bugs
 
 ### 1. `bearings_discrete` — OD table vs ID table content differ
