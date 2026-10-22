@@ -18,7 +18,7 @@ Motors smaller than 80 mm may have a gearbox up to 1.25× the motor diameter
 |---|---|---|---|---|
 | `sspg` | Single-stage planetary | `ActuatorAndGearbox` · `sspg_params.json` | factor × motor Ø − 2 × `ringRadialWidthMM` | CAD 1 (sun countersink radius fixed in the model) |
 | `cpg` | Compound planetary | `ActuatorAndGearbox` · `cpg_params.json` | factor × motor Ø | — |
-| `wpg` | Wolfrom planetary (3K) | `ActuatorAndGearbox` · `wpg_params.json` | factor × motor Ø − 2 × `ringRadialWidthMMBig` | Onshape model view-only (CAD 2) |
+| `wpg` | Wolfrom planetary (3K) | `ActuatorAndGearbox` · `wpg_params.json` | factor × motor Ø − 2 × `ringRadialWidthMMBig` | — |
 | `dspg` | Double-stage planetary | `ActuatorAndGearbox` · `dspg_params.json` | factor × motor Ø − 2 × `ring_radial_thickness` | CAD 3 (stage-1 ring split with small motors); slowest type (~7 min per run) |
 
 The smallest motors (MN5008, MAD 5008, MAD 5010, 55–56 mm) find no SSPG or WPG design at the

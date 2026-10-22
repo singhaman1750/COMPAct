@@ -25,8 +25,8 @@ The shared models are read-only for you. For each gearbox type you use:
 3. In your copy, open the **Variable Studio** tab (bottom tab bar) and copy the full browser URL.
    It looks like `https://cad.onshape.com/documents/<did>/w/<wid>/e/<eid>` and must contain `/w/`.
 
-> Only SSPG, CPG and DSPG can be copied at the moment; the other models are shared view-only
-> ([ISSUES.md, CAD 2](../ISSUES.md)).
+> ICPG, IDSPG, INSSPG (both types) and INDSPG are still shared view-only and can't be copied yet
+> ([ISSUES.md, CAD 2](../ISSUES.md)); all other models can.
 
 ### 3. List the models once
 Copy `Onshape_extension/onshape_models.example.json` to `Onshape_extension/onshape_models.json`
