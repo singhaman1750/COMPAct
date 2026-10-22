@@ -20,6 +20,16 @@ from CommonComponents import load_motor, max_gearbox_dia_mult_factor
 CONFIG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config_files")
 MATERIALS_FILE = "config.json"   # Material_properties for every gearbox type
 
+# Material modes: (gear material, structure material) from Material_properties. The ring gear
+# counts as a gear; parts with their own density keyword (rotor coupler etc., see
+# GearboxSpec.extra_gearbox_densities) keep their material in both modes.
+MATERIAL_MODES = {
+    "3dp":   ("PLA", "PLA"),
+    "metal": ("Steel", "Aluminum"),
+}
+# Added to the results file names, so metal runs don't overwrite 3dp results.
+RESULTS_SUFFIX = {"3dp": "", "metal": "_metal"}
+
 # Optimiser keyword -> key in the gearbox's optimisation parameters, per optimiser kind.
 OPTIMIZER_LIMITS = {
     "single": {
@@ -205,10 +215,12 @@ def _load_json(name):
         return json.load(json_file)
 
 
-def build(gb_type, motor_name):
-    """Return (actuator, optimizer) for a gearbox type and motor."""
+def build(gb_type, motor_name, material="3dp"):
+    """Return (actuator, optimizer) for a gearbox type, motor and material mode."""
     if gb_type not in GEARBOXES:
         raise ValueError(f"Unknown gearbox type: {gb_type}. Known types: {', '.join(GEARBOXES)}")
+    if material not in MATERIAL_MODES:
+        raise ValueError(f"Unknown material mode: {material}. Known modes: {', '.join(MATERIAL_MODES)}")
     spec   = GEARBOXES[gb_type]
     config = _load_json(spec.config_file)
     params = _load_json(spec.params_file)
@@ -217,7 +229,7 @@ def build(gb_type, motor_name):
         design.update(params[key])
     opt       = params[spec.optimization_key]
     materials = _load_json(MATERIALS_FILE)["Material_properties"]   # one table for every type
-    pla       = materials["PLA"]
+    gear_material, structure_material = (materials[name] for name in MATERIAL_MODES[material])
     gear_std  = config["Gear_standard_parameters"]
     module    = importlib.import_module(spec.module)
     single    = spec.optimizer_kind == "single"
@@ -228,9 +240,9 @@ def build(gb_type, motor_name):
     gearbox = getattr(module, spec.gearbox_cls)(
         **{design_kw: design},
         gear_standard_parameters  = gear_std,
-        maxGearAllowableStressMPa = pla["maxAllowableStressMPa"],
-        densityGears              = pla["density"],
-        densityStructure          = pla["density"],
+        maxGearAllowableStressMPa = gear_material["maxAllowableStressMPa"],
+        densityGears              = gear_material["density"],
+        densityStructure          = structure_material["density"],
         **{kw: materials[name]["density"] for kw, name in spec.extra_gearbox_densities.items()})
 
     actuator_kwargs = {design_kw: design, "motor": motor, spec.gearbox_arg: gearbox}
@@ -249,6 +261,7 @@ def build(gb_type, motor_name):
     if spec.passes_gearbox_type:
         actuator_kwargs["insspg_type"] = gb_type
     actuator = getattr(module, spec.actuator_cls)(**actuator_kwargs)
+    actuator.results_suffix = RESULTS_SUFFIX[material]
 
     cost = config["Cost_gain_parameters"]
     optimizer = getattr(module, spec.optimizer_cls)(
@@ -261,9 +274,10 @@ def build(gb_type, motor_name):
     return actuator, optimizer
 
 
-def run(gb_type, motor_name, gear_ratio):
-    """Optimise gearbox type `gb_type` for `motor_name`; returns (total_time, opt_parameters)."""
-    actuator, optimizer = build(gb_type, motor_name)
+def run(gb_type, motor_name, gear_ratio, material="3dp"):
+    """Optimise gearbox type `gb_type` for `motor_name` in a material mode ("3dp" or "metal");
+    returns (total_time, opt_parameters)."""
+    actuator, optimizer = build(gb_type, motor_name, material)
     return optimizer.optimizeActuator(actuator,
                                       UsePSCasVariable = 0,
                                       log              = 0,

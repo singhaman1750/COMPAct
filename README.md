@@ -186,6 +186,9 @@ python actOpt.py --motor <motor> --gb_type <gearbox_type> --gr <ratio>
   frameless inrunners (RI100, RI80) for insspg, incpg, inwpg, indspg
 * **`--gb_type`**: sspg, cpg, dspg, wpg , icpg , insspg_type_1 {Independent} , insspg_type_2 {Dependent} 
 * **`--gr`**: Must be a value > 2.
+* **`--material`** (optional): `3dp` (default) — PLA gears and structure; `metal` — steel gears
+  (7850 kg/m³, 400 MPa) and aluminium structure (2700 kg/m³). Metal results are saved as `..._metal.csv`.
+  Metal mode still uses the 3D-printed part shapes and wall thicknesses.
 
 **Example:**
 To optimize a **RO100** with a **Internal-Compound-Planetary Gearbox** and a **ratio of 6.5**:
