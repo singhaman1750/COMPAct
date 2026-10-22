@@ -1778,7 +1778,8 @@ class inrunnerCompoundPlanetaryActuator:
         #-----------------------------------------
         # Density
         #-----------------------------------------
-        density_3DP_material = self.inrunnerCompoundPlanetaryGearbox.densityGears
+        density_gears     = self.inrunnerCompoundPlanetaryGearbox.densityGears      # gears; the ring gear (and its casing) counts as a gear
+        density_structure = self.inrunnerCompoundPlanetaryGearbox.densityStructure  # motor case, carriers, retainers, holders
         density_aluminum     = self.inrunnerCompoundPlanetaryGearbox.densityAluminum
 
         #-----------------------------------------
@@ -1876,7 +1877,7 @@ class inrunnerCompoundPlanetaryActuator:
                             + np.pi * ((motor_case_OD * 0.5)**2 - (motor_case_ID * 0.5)**2) * motor_case_height
         ) * 1e-9
 
-        motor_case_mass = motor_case_volume * density_3DP_material
+        motor_case_mass = motor_case_volume * density_structure
 
         #--------------------------------------
         # Mass: incpg_gearbox_casing
@@ -1940,7 +1941,7 @@ class inrunnerCompoundPlanetaryActuator:
 
     
         gearbox_casing_volume = ring_volume + bearing_holding_structure_volume + case_mounting_structure_volume + case_mounting_plate_volume  - ring_casing_chamfer_volume + gearbox_casing_bottom_volume# + large_fillet_volume(accomated in the air vents in motor casing) 
-        gearbox_casing_mass = gearbox_casing_volume * density_3DP_material
+        gearbox_casing_mass = gearbox_casing_volume * density_gears
 
         #----------------------------------
         # Mass: cpg_carrier
@@ -1956,7 +1957,7 @@ class inrunnerCompoundPlanetaryActuator:
         carrier_volume = (np.pi * (((carrier_OD*0.5)**2) - ((carrier_ID)*0.5)**2) * carrier_height
                         + np.pi * ((carrier_shaft_OD*0.5)**2) * carrier_shaft_height * carrier_shaft_num) * 1e-9
 
-        carrier_mass = carrier_volume * density_3DP_material
+        carrier_mass = carrier_volume * density_structure
 
         #----------------------------------
         # Mass: cpg_sun
@@ -1987,7 +1988,7 @@ class inrunnerCompoundPlanetaryActuator:
                                 *(fw_s_used+sun_shaft_height+sun_rotor_top_bearing_structure_height+sun_coupler_hub_thickness+sun_rotor_bottom_bearing_structure_height))* 1e-9
 
         sun_volume       = sun_hub_volume + sun_rotor_top_bearing_structure_volume+ sun_gear_volume + sun_shaft_volume + sun_rotor_bottom_bearing_structure_volume - central_bolt_volume
-        sun_mass         = sun_volume * density_3DP_material
+        sun_mass         = sun_volume * density_gears
 
         #--------------------------------------
         # Mass: incpg_planet
@@ -1995,7 +1996,7 @@ class inrunnerCompoundPlanetaryActuator:
         planet_bore = planet_bearing_ID + standard_clearance_1_5mm 
         planet1_volume = (np.pi * ((DiaPlanet1MM*0.5)**2 - (planet_bore*0.5)**2) * planet1FwMM) * 1e-9
         planet2_volume = (np.pi * ((DiaPlanet2MM*0.5)**2 - (planet_bore*0.5)**2) * planet2FwMM) * 1e-9
-        planet_mass   = (planet1_volume + planet2_volume) * density_3DP_material
+        planet_mass   = (planet1_volume + planet2_volume) * density_gears
 
         #--------------------------------------
         # Mass: incpg_sec_carrier
@@ -2010,7 +2011,7 @@ class inrunnerCompoundPlanetaryActuator:
 
         sec_carrier_volume = ((np.pi * ((sec_carrier_top_OD*0.5)**2 - (sec_carrier_top_ID*0.5)**2) * sec_carrier_top_thickness)
                             +(np.pi * ((sec_carrier_bottom_OD*0.5)**2 - (sec_carrier_bottom_ID*0.5)**2) * sec_carrier_bottom_thickness)) * 1e-9
-        sec_carrier_mass   = sec_carrier_volume * density_3DP_material
+        sec_carrier_mass   = sec_carrier_volume * density_structure
         
         #--------------------------------------
         # Mass: rotor_hub
@@ -2077,7 +2078,7 @@ class inrunnerCompoundPlanetaryActuator:
 
         bearing_retainer_volume = (np.pi * ((bearing_retainer_OD*0.5)**2 - (bearing_retainer_ID*0.5)**2) * bearing_step_width) * 1e-9
 
-        bearing_retainer_mass   = bearing_retainer_volume * density_3DP_material
+        bearing_retainer_mass   = bearing_retainer_volume * density_structure
 
         self.motor_case_mass                    = motor_case_mass
         self.gearbox_casing_mass                = gearbox_casing_mass
@@ -2354,9 +2355,9 @@ class optimizationInrunnerCompoundPlanetaryActuator:
             csv = 1
         
         if csv:
-            fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/INCPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}.csv"
+            fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/INCPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}{Actuator.results_suffix}.csv"
         elif log:
-            fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/INCPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}_LOG.txt"
+            fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/INCPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}{Actuator.results_suffix}_LOG.txt"
         
         os.makedirs(os.path.dirname(fileName), exist_ok=True)
         with open(fileName, "w") as file1:
