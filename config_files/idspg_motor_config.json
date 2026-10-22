@@ -11,19 +11,6 @@
         "FOS": 1.2,
         "serviceFactor": 1.5
     },
-    "Material_properties":{
-        "Steel": {
-            "density": 1245.6,
-            "maxAllowableStressMPa": 70
-        },
-        "Aluminum": {
-            "density": 1245.6
-        },
-        "PLA": {
-            "density": 1245.6,
-            "maxAllowableStressMPa": 70
-        }
-    },
      "Motor_drivers":{
         "Moteus":{
             "driver_upper_holes_dist_from_center" : 23,

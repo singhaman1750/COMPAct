@@ -16,17 +16,17 @@
   93,
   0.5,
   0.5,
-  1.0818009757861078,
+  1.083156727466791,
   0.346,
-  0.06237057532757198,
-  0.03284644265076326,
-  0.13501181128898374,
-  0.040384366349130216,
-  0.01716290943865192,
-  0.0960248707310069,
-  0.383800975786108
+  0.06259089527895391,
+  0.032962470547089014,
+  0.13548873162430128,
+  0.04052702146468591,
+  0.01722353628637998,
+  0.09636407226538105,
+  0.3851567274667912
  ],
  "results_files": {
-  "results_BruteForce_RO80/ICPG_BRUTEFORCE_MIT_RO80.csv": "Motor Parameters:\nmaxMotorAngVelRPM, maxMotorAngVelRadPerSec, maxMotorTorque, maxMotorPower, motorMass, motorDia, motorLength\n5040 , 527.7875658030853 , 4.0 , 2111.150263212341 , 0.352 , 92.6 , 22\n \nGear strength and size parameters:\nFOS, serviceFactor, stressAnalysisMethodName, maxGearBoxDia, maxGearAllowableStressMPa\n1.2 , 1.5 , MIT , 54.45 , 70\n \nOptimization Parameters:\nK_mass, K_Eff, MODULE_BIG_MIN, MODULE_BIG_MAX, MODULE_SMALL_MIN, MODULE_SMALL_MAX, NUM_PLANET_MIN, NUM_PLANET_MAX, NUM_TEETH_SUN_MIN, NUM_TEETH_PLANET_BIG_MIN, NUM_TEETH_PLANET_SMALL_MIN, GEAR_RATIO_MIN, GEAR_RATIO_MAX, GEAR_RATIO_STEP\n1 , -2 , 0.5 , 1.2 , 0.5 , 1.2 , 3 , 7 , 18 , 28 , 28 , 4.0 , 40.0 , 1.0\n \niter, gearRatio, moduleBig, moduleSmall, Ns, NpBig, NpSmall, Nr, numPlanet, fwSunMM, fwPlanetBigMM, fwPanetSmallMM, fwRingMM, mass, eff, peakTorque, Cost, Torque_Density, Outer_Bearing_mass, Actuator_width\n1 , 7.566502463054187 , 0.5 , 0.5 , 21 , 43 , 29 , 93 , 3 , 23.118 , 23.118 , 26.846 , 26.846 , 1.082 , 0.941 , 30.266 , 13.5270962843985 , 27.972 , 0.346 , 89.71407516285291\n\n"
+  "results_BruteForce_RO80/ICPG_BRUTEFORCE_MIT_RO80.csv": "Motor Parameters:\nmaxMotorAngVelRPM, maxMotorAngVelRadPerSec, maxMotorTorque, maxMotorPower, motorMass, motorDia, motorLength\n5040 , 527.7875658030853 , 4.0 , 2111.150263212341 , 0.352 , 92.6 , 22\n \nGear strength and size parameters:\nFOS, serviceFactor, stressAnalysisMethodName, maxGearBoxDia, maxGearAllowableStressMPa\n1.2 , 1.5 , MIT , 54.45 , 70\n \nOptimization Parameters:\nK_mass, K_Eff, MODULE_BIG_MIN, MODULE_BIG_MAX, MODULE_SMALL_MIN, MODULE_SMALL_MAX, NUM_PLANET_MIN, NUM_PLANET_MAX, NUM_TEETH_SUN_MIN, NUM_TEETH_PLANET_BIG_MIN, NUM_TEETH_PLANET_SMALL_MIN, GEAR_RATIO_MIN, GEAR_RATIO_MAX, GEAR_RATIO_STEP\n1 , -2 , 0.5 , 1.2 , 0.5 , 1.2 , 3 , 7 , 18 , 28 , 28 , 4.0 , 40.0 , 1.0\n \niter, gearRatio, moduleBig, moduleSmall, Ns, NpBig, NpSmall, Nr, numPlanet, fwSunMM, fwPlanetBigMM, fwPanetSmallMM, fwRingMM, mass, eff, peakTorque, Cost, Torque_Density, Outer_Bearing_mass, Actuator_width\n1 , 7.566502463054187 , 0.5 , 0.5 , 21 , 43 , 29 , 93 , 3 , 23.118 , 23.118 , 26.846 , 26.846 , 1.083 , 0.941 , 30.266 , 13.528452036079182 , 27.946 , 0.346 , 89.71407516285291\n\n"
  }
 }

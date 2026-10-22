@@ -18,6 +18,7 @@ from typing import Callable, Optional
 from CommonComponents import load_motor, max_gearbox_dia_mult_factor
 
 CONFIG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config_files")
+MATERIALS_FILE = "config.json"   # Material_properties for every gearbox type
 
 # Optimiser keyword -> key in the gearbox's optimisation parameters, per optimiser kind.
 OPTIMIZER_LIMITS = {
@@ -65,7 +66,7 @@ class GearboxSpec:
     actuator_cls: str
     optimizer_cls: str
     gearbox_arg: str                 # actuator keyword that takes the gearbox
-    config_file: str                 # materials, gear standard, MIT factors, cost gains, drivers
+    config_file: str                 # gear standard, MIT factors, cost gains, drivers
     params_file: str
     design_keys: tuple               # sections of params_file merged into the design parameters
     optimization_key: str
@@ -215,7 +216,7 @@ def build(gb_type, motor_name):
     for key in spec.design_keys:
         design.update(params[key])
     opt       = params[spec.optimization_key]
-    materials = config["Material_properties"]
+    materials = _load_json(MATERIALS_FILE)["Material_properties"]   # one table for every type
     pla       = materials["PLA"]
     gear_std  = config["Gear_standard_parameters"]
     module    = importlib.import_module(spec.module)
