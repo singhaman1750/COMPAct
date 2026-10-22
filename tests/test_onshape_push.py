@@ -1,4 +1,5 @@
 import json
+import re
 import sys
 import types
 from pathlib import Path
@@ -132,3 +133,21 @@ def test_saved_cad_issue_cases_parse(case_dir):
     from Onshape_extension.parse_variables_txt import parse_variable_file
     files = list(case_dir.glob("*_equations_onshape.txt"))
     assert files and parse_variable_file(str(files[0]))
+
+
+def _equation_files():
+    files = sorted(REPO_ROOT.glob("CADs/*/*_equations_onshape.txt"))
+    files += sorted(REPO_ROOT.glob("docs/cad_issues/*/*_equations_onshape.txt"))
+    return files
+
+
+COUNT_NAME = re.compile(r"(^|_)(num|N[a-z]\w*|N\d?)(_|$)|_num$|^num_|_number")
+
+
+@pytest.mark.parametrize("path", _equation_files(), ids=lambda p: f"{p.parent.name}/{p.name}")
+def test_counts_are_sent_as_numbers(path):
+    # A count missing from NUMBER_VARS would be sent to Onshape as a length in mm.
+    from Onshape_extension.parse_variables_txt import NUMBER_VARS
+    names = re.findall(r'^\s*"(.+?)"\s*=', path.read_text(encoding="utf-8"), re.M)
+    missing = sorted({n for n in names if COUNT_NAME.search(n)} - NUMBER_VARS)
+    assert not missing, f"add to NUMBER_VARS in Onshape_extension/parse_variables_txt.py: {missing}"
