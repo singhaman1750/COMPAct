@@ -11,19 +11,6 @@
         "FOS": 1.2,
         "serviceFactor": 1.5
     },
-    "Material_properties":{
-        "Steel": {
-            "density": 7850,
-            "maxAllowableStressMPa": 400
-        },
-        "Aluminum": {
-            "density": 2700
-        },
-        "PLA": {
-            "density": 1240,
-            "maxAllowableStressMPa": 70
-        }
-    },
     
     "Design_parameters":{
         "Internal_designs": {

@@ -48,7 +48,7 @@ def print_result(gearbox_type, opt_parameters):
     print("-------------------------------")
 
 
-def main(motor, gearbox_type, gear_ratio=0):
+def main(motor, gearbox_type, gear_ratio=0, material="3dp"):
     if gearbox_type not in gearbox_runner.GEARBOXES:
         raise ValueError(f"Unknown gearbox type: {gearbox_type}")
 
@@ -56,8 +56,9 @@ def main(motor, gearbox_type, gear_ratio=0):
     print(f"  Motor       : {motor}")
     print(f"  Gearbox     : {gearbox_type}")
     print(f"  Gear Ratio  : {gear_ratio}")
+    print(f"  Material    : {material}")
 
-    total_time, opt_parameters = gearbox_runner.run(gearbox_type, motor, gear_ratio)
+    total_time, opt_parameters = gearbox_runner.run(gearbox_type, motor, gear_ratio, material)
     print("Time taken:", total_time, "sec")
     if opt_parameters is None:
         print("No feasible solution found.")
@@ -76,13 +77,15 @@ if __name__ == "__main__":
     parser.add_argument("--gb_type", required=True, choices=list(gearbox_runner.GEARBOXES),
                         help="Gearbox type")
     parser.add_argument("--gr", required=True, type=float, help="Gear ratio (must be > 2)")
+    parser.add_argument("--material", default="3dp", choices=list(gearbox_runner.MATERIAL_MODES),
+                        help="3dp: PLA gears and structure (default); metal: steel gears, aluminium structure")
     parser.add_argument("--onshape", action="store_true",
                         help="after a successful run, push the result into this gearbox's Onshape model "
                              "(set up Onshape_extension/onshape_models.json and .env first)")
 
     args = parser.parse_args()
 
-    opt_parameters = main(args.motor, args.gb_type, args.gr)
+    opt_parameters = main(args.motor, args.gb_type, args.gr, args.material)
     if args.onshape:
         if opt_parameters is None:
             print("Onshape: no design found, Onshape model not updated.")

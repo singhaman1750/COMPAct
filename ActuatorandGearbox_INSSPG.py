@@ -987,7 +987,8 @@ class singleStagePlanetaryActuator:
         Nr        = self.planetaryGearbox.Nr
         numPlanet = self.planetaryGearbox.numPlanet
 
-        density_3DP_material = self.planetaryGearbox.densityGears
+        density_gears     = self.planetaryGearbox.densityGears      # gears; the ring gear (and its casing) counts as a gear
+        density_structure = self.planetaryGearbox.densityStructure  # motor case, carriers, retainers, holders
 
         sunFwM    = self.planetaryGearbox.fwSunMM * 0.001
         planetFwM = self.planetaryGearbox.fwPlanetMM * 0.001
@@ -1046,7 +1047,7 @@ class singleStagePlanetaryActuator:
         carrier_volume = (np.pi * (((carrier_OD*0.5)**2) - ((carrier_ID)*0.5)**2) * carrier_height
                          + np.pi * ((carrier_shaft_OD*0.5)**2) * carrier_shaft_height * carrier_shaft_num) * 1e-9
 
-        carrier_mass = carrier_volume * density_3DP_material
+        carrier_mass = carrier_volume * density_structure
 
         ##------sun_gear_mass_calculation--------##
 
@@ -1064,12 +1065,12 @@ class singleStagePlanetaryActuator:
 
         
         sun_volume       = sun_hub_volume + sun_gear_volume + sun_shaft_volume + sun_uper_support_volume + sun_bottom_part_volume
-        sun_mass         = sun_volume * density_3DP_material
+        sun_mass         = sun_volume * density_gears
 
         ##--------planet_gear_volume------------##
 
         planet_volume = (np.pi * ((DiaPlanetMM*0.5)**2 - (planet_bore*0.5)**2) * planetFwMM) * 1e-9
-        planet_mass   = planet_volume * density_3DP_material
+        planet_mass   = planet_volume * density_gears
         
         ##--------sec_carrier_volume-----------##
 
@@ -1079,7 +1080,7 @@ class singleStagePlanetaryActuator:
 
 
         sec_carrier_volume = (np.pi * ((sec_carrier_OD*0.5)**2 - (sec_carrier_ID*0.5)**2) * sec_carrier_thickness) * 1e-9 + sec_carrier_bearing_support_volume
-        sec_carrier_mass   = sec_carrier_volume * density_3DP_material
+        sec_carrier_mass   = sec_carrier_volume * density_structure
         
         ##------sun and planet bearing mass ---------##
 
@@ -1118,7 +1119,7 @@ class singleStagePlanetaryActuator:
         bottom_casing_vol = bottom_casing_plate_VOL+bottom_casing_bearing_support_VOL - bottom_casing_hole_VOL + 4*np.pi*2*((9/2)**2-(5.5/2)**2)*1e-9
 
         Motor_case_vol = middle_casing_VOL+bottom_casing_vol
-        Motor_case_mass = Motor_case_vol * density_3DP_material
+        Motor_case_mass = Motor_case_vol * density_structure
 
         ##---------carrier_vol--------##
         # Radii
@@ -1134,7 +1135,7 @@ class singleStagePlanetaryActuator:
         vol_carrier_trapezoid = math.pi * fw_carrier * r_carrier_trapezoid ** 2
 
         vol_carrier_net = vol_carrier_disk + 3 * vol_carrier_trapezoid   # 3 trapezoidal arms
-        carrier_mass = vol_carrier_net * density_3DP_material
+        carrier_mass = vol_carrier_net * density_structure
 
         ##---------ring_gear_mass--------##
 
@@ -1156,7 +1157,7 @@ class singleStagePlanetaryActuator:
                                        -  np.pi*(standard_clearance_1_5mm*2)*((self.Stator_OD/2+self.stator_casing_thickness)**2-(self.stator_side_step_OD/2)**2)*1e-9)
             
             ring_vol_net = top_mount_vol + bearing_step_volume + ring_gear_volume + ring_bottom_part_volume + ring_bearing_support_below_volume
-            ring_mass = ring_vol_net * density_3DP_material
+            ring_mass = ring_vol_net * density_gears
 
         else:
             # FALSE: Gear side is larger
@@ -1169,7 +1170,7 @@ class singleStagePlanetaryActuator:
                                        -  np.pi*(standard_clearance_1_5mm*2)*((self.Stator_OD/2+self.stator_casing_thickness)**2-(self.stator_side_step_OD/2)**2)*1e-9)
             
             ring_vol_net = top_mount_vol + bearing_step_volume + ring_gear_volume + ring_bottom_part_volume + ring_bearing_support_below_volume
-            ring_mass = ring_vol_net * density_3DP_material
+            ring_mass = ring_vol_net * density_gears
 
         # --------------------------------------------------------
         
@@ -1179,12 +1180,12 @@ class singleStagePlanetaryActuator:
         ring_bottom_part_volume = np.pi * (self.stator_casing_thickness)*((self.Stator_OD/2+self.stator_casing_thickness)**2-(ring_OD/2)**2)*1e-9 + np.pi * (sec_carrier_thickness+clearance_planet+self.loose_clearance_3DP)*((self.Stator_OD/2+self.stator_casing_thickness)**2-(self.Stator_OD/2-self.stator_mounting_holes_dia/2-self.stator_casing_thickness-standard_clearance_1_5mm/2)**2)* 1e-9
         
         ring_vol_net = top_mount_vol + bearing_step_volume + ring_gear_volume + ring_bottom_part_volume
-        ring_mass = ring_vol_net * density_3DP_material
+        ring_mass = ring_vol_net * density_gears
 
         ##-------bearing-retainer-mass---------##
 
         bearing_retainer_volume = np.pi * bearing_retainer_thickness * ((bearing_OD/2+self.case_mounting_wrench_size+standard_clearance_1_5mm)**2 - (bearing_OD/2-standard_clearance_1_5mm)**2)*1e-9
-        bearing_retainer_mass = bearing_retainer_volume * density_3DP_material
+        bearing_retainer_mass = bearing_retainer_volume * density_structure
 
         ##--------all_parts_mass--------##
 
@@ -1222,7 +1223,8 @@ class singleStagePlanetaryActuator:
         Nr        = self.planetaryGearbox.Nr
         numPlanet = self.planetaryGearbox.numPlanet
 
-        density_3DP_material = self.planetaryGearbox.densityGears
+        density_gears     = self.planetaryGearbox.densityGears      # gears; the ring gear (and its casing) counts as a gear
+        density_structure = self.planetaryGearbox.densityStructure  # motor case, carriers, retainers, holders
 
         sunFwM    = self.planetaryGearbox.fwSunMM * 0.001
         planetFwM = self.planetaryGearbox.fwPlanetMM * 0.001
@@ -1282,7 +1284,7 @@ class singleStagePlanetaryActuator:
         carrier_volume = (np.pi * (((carrier_OD*0.5)**2) - ((carrier_ID)*0.5)**2) * carrier_height
                         + np.pi * ((carrier_shaft_OD*0.5)**2) * carrier_shaft_height * carrier_shaft_num) * 1e-9
 
-        carrier_mass = carrier_volume * density_3DP_material
+        carrier_mass = carrier_volume * density_structure
 
         ##------sun_gear_mass_calculation--------##
 
@@ -1299,12 +1301,12 @@ class singleStagePlanetaryActuator:
         sun_bottom_part_volume = np.pi*(self.Rotor_height+self.stator_bottom_step_height_)*((14/2)** - (self.sun_central_bolt_socket_head_dia/2)**2)*1e-9 + np.pi * (standard_clearance_1_5mm*4)*((14/2+standard_clearance_1_5mm)**2-(14/2)**2)*1e-9
         
         sun_volume       = sun_hub_volume + sun_gear_volume + sun_shaft_volume + sun_uper_support_volume + sun_bottom_part_volume
-        sun_mass         = sun_volume * density_3DP_material
+        sun_mass         = sun_volume * density_gears
 
         ##--------planet_gear_volume------------##
 
         planet_volume = (np.pi * ((DiaPlanetMM*0.5)**2 - (planet_bore*0.5)**2) * planetFwMM) * 1e-9
-        planet_mass   = planet_volume * density_3DP_material
+        planet_mass   = planet_volume * density_gears
         
         ##--------sec_carrier_volume-----------##
 
@@ -1312,7 +1314,7 @@ class singleStagePlanetaryActuator:
         sec_carrier_ID = (DiaSunMM + DiaPlanetMM) - planet_shaft_dia - 2 * standard_clearance_1_5mm
 
         sec_carrier_volume = (np.pi * ((sec_carrier_OD*0.5)**2 - (sec_carrier_ID*0.5)**2) * sec_carrier_thickness) * 1e-9
-        sec_carrier_mass   = sec_carrier_volume * density_3DP_material
+        sec_carrier_mass   = sec_carrier_volume * density_structure
         
         ##------sun and planet bearing mass ---------##
 
@@ -1350,7 +1352,7 @@ class singleStagePlanetaryActuator:
         bottom_casing_vol = bottom_casing_plate_VOL+bottom_casing_step_height_VOL+bottom_casing_bearing_support_VOL - bottom_casing_hole_VOL
 
         Motor_case_vol = uper_casing_VOL + middle_casing_VOL+bottom_casing_vol
-        Motor_case_mass = Motor_case_vol * density_3DP_material
+        Motor_case_mass = Motor_case_vol * density_structure
 
         ##---------carrier_vol--------##
         # Radii
@@ -1366,7 +1368,7 @@ class singleStagePlanetaryActuator:
         vol_carrier_trapezoid = math.pi * fw_carrier * r_carrier_trapezoid ** 2
 
         vol_carrier_net = vol_carrier_disk + 3 * vol_carrier_trapezoid   # 3 trapezoidal arms
-        carrier_mass = vol_carrier_net * density_3DP_material
+        carrier_mass = vol_carrier_net * density_structure
 
         ##---------ring_gear_mass--------##
 
@@ -1386,7 +1388,7 @@ class singleStagePlanetaryActuator:
             ring_bottom_part_volume = np.pi * (self.stator_casing_thickness)*((self.Stator_OD/2+self.stator_casing_thickness)**2-(ring_OD/2)**2)*1e-9 + np.pi * (sec_carrier_thickness+clearance_planet+self.loose_clearance_3DP)*((self.Stator_OD/2+self.stator_casing_thickness)**2-(self.Stator_OD/2-self.stator_mounting_holes_dia/2-self.stator_casing_thickness-standard_clearance_1_5mm/2)**2)* 1e-9
         
             ring_vol_net = top_mount_vol + bearing_step_volume + ring_gear_volume + ring_bottom_part_volume + ring_bearing_support_below_volume
-            ring_mass = ring_vol_net * density_3DP_material
+            ring_mass = ring_vol_net * density_gears
 
 
         else:
@@ -1398,7 +1400,7 @@ class singleStagePlanetaryActuator:
             ring_bottom_part_volume = np.pi * (self.stator_casing_thickness)*((self.Stator_OD/2+self.stator_casing_thickness)**2-(ring_OD/2)**2)*1e-9 + np.pi * (sec_carrier_thickness+clearance_planet+self.loose_clearance_3DP)*((self.Stator_OD/2+self.stator_casing_thickness)**2-(self.Stator_OD/2-self.stator_mounting_holes_dia/2-self.stator_casing_thickness-standard_clearance_1_5mm/2)**2)* 1e-9
             
             ring_vol_net = top_mount_vol + bearing_step_volume + ring_gear_volume + ring_bottom_part_volume + ring_bearing_support_below_volume
-            ring_mass = ring_vol_net * density_3DP_material
+            ring_mass = ring_vol_net * density_gears
 
         # --------------------------------------------------------
 
@@ -1415,7 +1417,7 @@ class singleStagePlanetaryActuator:
         ##-------bearing-retainer-mass---------##
 
         bearing_retainer_volume = np.pi * bearing_retainer_thickness * ((bearing_OD/2+self.case_mounting_wrench_size+standard_clearance_1_5mm)**2 - (bearing_OD/2-standard_clearance_1_5mm)**2)*1e-9
-        bearing_retainer_mass = bearing_retainer_volume * density_3DP_material
+        bearing_retainer_mass = bearing_retainer_volume * density_structure
 
         ##--------all_parts_mass--------##
 
@@ -1621,10 +1623,10 @@ class optimizationSingleStageActuator:
         os.makedirs(output_dir, exist_ok=True)
         
         if csv:
-            main_fileName = os.path.join(output_dir, f"SSPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}_{Actuator.insspg_type}.csv")
-            param_fileName = os.path.join(output_dir, f"SSPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}_{Actuator.insspg_type}_Motor_Params.csv")
+            main_fileName = os.path.join(output_dir, f"SSPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}_{Actuator.insspg_type}{Actuator.results_suffix}.csv")
+            param_fileName = os.path.join(output_dir, f"SSPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}_{Actuator.insspg_type}_Motor_Params{Actuator.results_suffix}.csv")
         elif log:
-            main_fileName = os.path.join(output_dir, f"SSPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}_{Actuator.insspg_type}_LOG.txt")
+            main_fileName = os.path.join(output_dir, f"SSPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}_{Actuator.insspg_type}{Actuator.results_suffix}_LOG.txt")
             param_fileName = None
             
         # Writes the Motor_Params CSV

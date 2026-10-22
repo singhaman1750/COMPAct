@@ -1533,9 +1533,9 @@ class optimizationInternalCompoundPlanetaryActuator:
         os.makedirs(output_dir, exist_ok=True)
         
         if csv:
-            fileName = os.path.join(output_dir, f"ICPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}.csv")
+            fileName = os.path.join(output_dir, f"ICPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}{Actuator.results_suffix}.csv")
         elif log:
-            fileName = os.path.join(output_dir, f"ICPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}_LOG.txt")
+            fileName = os.path.join(output_dir, f"ICPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}{Actuator.results_suffix}_LOG.txt")
 
         with open(fileName, "w") as file1:
             sys.stdout = file1

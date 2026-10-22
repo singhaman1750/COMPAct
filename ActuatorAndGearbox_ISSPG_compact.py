@@ -1327,7 +1327,8 @@ class internalsingleStagePlanetaryActuator:
         # density of materials
         #------------------------------------
         # density of both gears and the structural materials is the same in 3D printed gearbox
-        density_3DP_material = self.planetaryGearbox.densityGears #kg/m^3
+        density_gears     = self.planetaryGearbox.densityGears      # gears; the ring gear (and its casing) counts as a gear
+        density_structure = self.planetaryGearbox.densityStructure  # motor case, carriers, retainers, holders
 
         #------------------------------------
         # Face Width
@@ -1439,7 +1440,7 @@ class internalsingleStagePlanetaryActuator:
 
         Motor_case_volume = (casing_volume + motor_case_mounting_structure_volume  + casing_cap_volume #+ motor_mounting_pattern_volume
                                 )
-        Motor_case_mass   = Motor_case_volume * density_3DP_material
+        Motor_case_mass   = Motor_case_volume * density_structure
 
         #--------------------------------------
         # Mass: Ring_gear
@@ -1473,7 +1474,7 @@ class internalsingleStagePlanetaryActuator:
                                                     ((ring_stator_ID*0.5)**2)) * ring_stator_height * 1e-9
         ring_hub_volume                  = np.pi * (((ring_hub_OD*0.5)**2) - ((ring_hub_ID)*0.5)**2) * ring_hub_thickness * 1e-9
 
-        ring_mass = (ring_gear_volume + bearing_holding_structure_volume + ring_stator_structure_volume + ring_hub_volume) * density_3DP_material
+        ring_mass = (ring_gear_volume + bearing_holding_structure_volume + ring_stator_structure_volume + ring_hub_volume) * density_gears
 
         #--------------------------------------
         # Mass: sspg_planet
@@ -1485,7 +1486,7 @@ class internalsingleStagePlanetaryActuator:
         planet_bearing_strcuture_volume = np.pi * ((planet_bearing_structure_OD*0.5) ** 2) * planet_bearing_structure_thickness * 1e-9
 
         planet_volume = planet_gear_volume - 2*planet_bearing_strcuture_volume
-        planet_mass   = planet_volume * density_3DP_material * numPlanet
+        planet_mass   = planet_volume * density_gears * numPlanet
 
         #----------------------------------
         # Mass: sspg_carrier
@@ -1516,7 +1517,7 @@ class internalsingleStagePlanetaryActuator:
                         + np.pi * ((carrier_shaft_OD*0.5)**2) * carrier_shaft_height * carrier_shaft_num
                         ) * 1e-9
 
-        carrier_mass = carrier_volume * density_3DP_material
+        carrier_mass = carrier_volume * density_structure
 
         #----------------------------------
         # Mass: sspg_sun
@@ -1545,7 +1546,7 @@ class internalsingleStagePlanetaryActuator:
         sun_hub_carrier_volume = (np.pi * (((sun_hub_carrier_OD*0.5)**2) - ((sun_hub_carrier_ID*0.5)**2)) * sun_hub_carrier_height)* 1e-9 
 
         sun_volume       = sun_hub_volume + sun_gear_volume + sun_shaft_volume + input_bearing_structure_volume-central_bolt_volume - sun_hub_carrier_volume
-        sun_mass         = sun_volume * density_3DP_material
+        sun_mass         = sun_volume * density_gears
 
         #--------------------------------------
         # Mass: sspg_sec_carrier
@@ -1562,7 +1563,7 @@ class internalsingleStagePlanetaryActuator:
 
         sec_carrier_volume = ((np.pi * ((sec_carrier_top_OD*0.5)**2 - (sec_carrier_top_ID*0.5)**2) * sec_carrier_top_thickness)
                             +(np.pi * ((sec_carrier_bottom_OD*0.5)**2 - (sec_carrier_bottom_ID*0.5)**2) * sec_carrier_bottom_thickness)) * 1e-9
-        sec_carrier_mass   = sec_carrier_volume * density_3DP_material
+        sec_carrier_mass   = sec_carrier_volume * density_structure
 
         #--------------------------------------
         # Mass: magnet_mount
@@ -1876,9 +1877,9 @@ class optimizationInternalSingleStageActuator:
             csv = 1
 
         if csv:
-            fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/ISSPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}.csv"
+            fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/ISSPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}{Actuator.results_suffix}.csv"
         elif log:
-            fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/ISSPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}.txt"
+            fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/ISSPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}{Actuator.results_suffix}.txt"
             
         os.makedirs(os.path.dirname(fileName), exist_ok=True)
         with open(fileName, "w") as file1:

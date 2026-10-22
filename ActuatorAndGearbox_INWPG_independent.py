@@ -2306,7 +2306,8 @@ class inrunnerWolfromPlanetaryActuator:
         #-----------------------------------------
         # Density
         #-----------------------------------------
-        density_3DP_material = self.inrunnerWolfromPlanetaryGearbox.densityGears
+        density_gears     = self.inrunnerWolfromPlanetaryGearbox.densityGears      # gears; the ring gear (and its casing) counts as a gear
+        density_structure = self.inrunnerWolfromPlanetaryGearbox.densityStructure  # motor case, carriers, retainers, holders
         density_aluminum     = self.inrunnerWolfromPlanetaryGearbox.densityAluminum
 
         #-----------------------------------------
@@ -2401,7 +2402,7 @@ class inrunnerWolfromPlanetaryActuator:
                             + np.pi * ((motor_case_bearing_structure_OD * 0.5)**2 - (motor_case_base_ID * 0.5)**2) * motor_case_bearing_structure_height
         ) * 1e-9
 
-        motor_case_mass = motor_case_volume * density_3DP_material
+        motor_case_mass = motor_case_volume * density_structure
 
         #--------------------------------------
         # Mass: rotor_top_bearing_holder
@@ -2419,7 +2420,7 @@ class inrunnerWolfromPlanetaryActuator:
                                         + np.pi * (((rotor_top_bearing_holder_ID) * 0.5)**2 - (rotor_top_bearing_holder_extrude_ID * 0.5)**2) * rotor_top_bearing_holder_extrude_thickness
                                         )* 1e-9
                                         
-        rotor_top_bearing_holder_mass = rotor_top_bearing_holder_volume * density_3DP_material
+        rotor_top_bearing_holder_mass = rotor_top_bearing_holder_volume * density_structure
 
         #--------------------------------------
         # Mass: incpg_gearbox_casing
@@ -2461,7 +2462,7 @@ class inrunnerWolfromPlanetaryActuator:
         gearbox_casing_top_volume = np.pi * (((gearbox_casing_top_OD*0.5)**2) - ((gearbox_casing_top_ID*0.5)**2)) * gearbox_casing_top_height * 1e-9
             
         gearbox_casing_volume = ring_volume + bearing_holding_structure_volume + case_mounting_structure_volume + case_mounting_plate_volume + gearbox_casing_top_volume 
-        gearbox_casing_mass = gearbox_casing_volume * density_3DP_material
+        gearbox_casing_mass = gearbox_casing_volume * density_gears
 
         #----------------------------------
         # Mass: small_ring
@@ -2483,7 +2484,7 @@ class inrunnerWolfromPlanetaryActuator:
                             + np.pi * (((output_bearing_structure_OD*0.5)**2) - ((output_bearing_structure_ID*0.5)**2)) * output_bearing_structure_height
                             ) * 1e-9
 
-        small_ring_mass = small_ring_volume * density_3DP_material
+        small_ring_mass = small_ring_volume * density_gears
 
         #----------------------------------
         # Mass: cpg_carrier
@@ -2505,7 +2506,7 @@ class inrunnerWolfromPlanetaryActuator:
                         + np.pi * (((carrier_bearing_structure_OD*0.5)**2) - ((carrier_bearing_structure_ID*0.5)**2)) * carrier_bearing_structure_height
                         ) * 1e-9
 
-        carrier_mass = carrier_volume * density_3DP_material
+        carrier_mass = carrier_volume * density_structure
 
         #----------------------------------
         # Mass: inwpg_sun
@@ -2543,7 +2544,7 @@ class inrunnerWolfromPlanetaryActuator:
                                 *(fw_s_used+sun_shaft_height+sun_magnet_mount_shaft_height+sun_coupler_hub_thickness))* 1e-9
 
         sun_volume       = sun_hub_volume + sun_gear_volume + sun_shaft_volume + sun_magnet_mount_shaft_volume - central_bolt_volume
-        sun_mass         = sun_volume * density_3DP_material
+        sun_mass         = sun_volume * density_gears
 
         #--------------------------------------
         # Mass: inwpg_planet
@@ -2551,7 +2552,7 @@ class inrunnerWolfromPlanetaryActuator:
         planet_bore = planet_bearing_ID + standard_clearance_1_5mm 
         planet1_volume = (np.pi * ((DiaPlanet1MM*0.5)**2 - (planet_bore*0.5)**2) * planet1FwMM) * 1e-9
         planet2_volume = (np.pi * ((DiaPlanet2MM*0.5)**2 - (planet_bore*0.5)**2) * planet2FwMM) * 1e-9
-        planet_mass   = (planet1_volume + planet2_volume) * density_3DP_material
+        planet_mass   = (planet1_volume + planet2_volume) * density_gears
 
         #--------------------------------------
         # Mass: inwpg_sec_carrier
@@ -2560,7 +2561,7 @@ class inrunnerWolfromPlanetaryActuator:
         sec_carrier_ID = (DiaSunMM + DiaPlanet1MM) - self.planet_pin_nut_wrench_size - 2*standard_clearance_1_5mm
 
         sec_carrier_volume = (np.pi * ((sec_carrier_OD*0.5)**2 - (sec_carrier_ID*0.5)**2) * sec_carrier_thickness) * 1e-9
-        sec_carrier_mass   = sec_carrier_volume * density_3DP_material
+        sec_carrier_mass   = sec_carrier_volume * density_structure
         
         #--------------------------------------
         # Mass: rotor_hub
@@ -2633,7 +2634,7 @@ class inrunnerWolfromPlanetaryActuator:
 
         bearing_retainer_volume = (np.pi * ((bearing_retainer_OD*0.5)**2 - (bearing_retainer_ID*0.5)**2) * bearing_step_width) * 1e-9
 
-        bearing_retainer_mass   = bearing_retainer_volume * density_3DP_material
+        bearing_retainer_mass   = bearing_retainer_volume * density_structure
 
         self.motor_case_mass                    = motor_case_mass
         self.rotor_top_bearing_holder_mass      = rotor_top_bearing_holder_mass
@@ -2805,9 +2806,9 @@ class optimizationInrunnerWolfromPlanetaryActuator:
             csv = 1
         
         if csv:
-            fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/INWPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}.csv"
+            fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/INWPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}{Actuator.results_suffix}.csv"
         elif log:
-            fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/INWPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}_LOG.txt"
+            fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/INWPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}{Actuator.results_suffix}_LOG.txt"
             
         os.makedirs(os.path.dirname(fileName), exist_ok=True)
         with open(fileName, "w") as wolfromLogFile:

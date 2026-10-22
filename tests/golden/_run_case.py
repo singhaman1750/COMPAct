@@ -2,7 +2,7 @@
 Runs one optimisation case in a fresh process and writes the outcome as JSON.
 Called by golden.py; not meant to be run by hand.
 
-Args: gb_type motor gear_ratio cad_group out_json
+Args: gb_type motor gear_ratio cad_group out_json [material]
 """
 
 import json
@@ -44,14 +44,17 @@ def snapshot(cad_dir):
 
 def main():
     gb_type, motor, gear_ratio, cad_group, out_json = sys.argv[1:6]
+    material = sys.argv[6] if len(sys.argv) > 6 else "3dp"
     gear_ratio = float(gear_ratio)
     cad_dir = REPO_ROOT / "CADs" / cad_group
 
     result = {"gb_type": gb_type, "motor": motor, "gear_ratio": gear_ratio, "error": None}
+    if material != "3dp":
+        result["material"] = material
     before = snapshot(cad_dir)
     real_stdout = sys.stdout
     try:
-        _total_time, opt_parameters = gearbox_runner.run(gb_type, motor, gear_ratio)
+        _total_time, opt_parameters = gearbox_runner.run(gb_type, motor, gear_ratio, material)
         result["opt_parameters"] = to_json_value(opt_parameters)
     except Exception as exc:  # record crashes as part of current behaviour
         result["error"] = f"{type(exc).__name__}: {exc}"

@@ -13,6 +13,7 @@ Usage (from the repo root):
     python tests/golden/golden.py check             # compare against baselines
     python tests/golden/golden.py check --only idspg insspg_type_1
     python tests/golden/golden.py list              # show the cases
+    python tests/golden/golden.py check --material metal
 
 A baseline captures *current* behaviour, including known bugs and crashes.
 When a commit is meant to change results, re-record only the affected cases
@@ -96,11 +97,17 @@ def all_cases(gear_ratios=None):
             ratios = gear_ratios or GEAR_RATIO_OVERRIDES.get((gb_type, motor), family_ratios)
             for gr in ratios:
                 cases.append({"gb_type": gb_type, "motor": motor, "gear_ratio": gr})
+        # Metal mode: one case per gearbox type, with its first golden motor.
+        motor = GOLDEN_MOTORS[gb_type][0]
+        for gr in gear_ratios or GEAR_RATIO_OVERRIDES.get((gb_type, motor), family_ratios):
+            cases.append({"gb_type": gb_type, "motor": motor, "gear_ratio": gr, "material": "metal"})
     return cases
 
 
 def case_id(case):
-    return f"{case['gb_type']}__{case['motor']}__{case['gear_ratio']}"
+    material = case.get("material", "3dp")
+    suffix = "" if material == "3dp" else f"__{material}"
+    return f"{case['gb_type']}__{case['motor']}__{case['gear_ratio']}{suffix}"
 
 
 def run_case(case):
@@ -117,6 +124,7 @@ def run_case(case):
                 str(case["gear_ratio"]),
                 gearbox_group(case["gb_type"]),
                 str(out_path),
+                case.get("material", "3dp"),
             ],
             cwd=tmp,
             capture_output=True,
@@ -266,6 +274,8 @@ def select_cases(args):
         unknown = set(args.only) - {c["gb_type"] for c in cases}
         if unknown:
             sys.exit(f"unknown gearbox type(s): {', '.join(sorted(unknown))}")
+    if args.material:
+        cases = [c for c in cases if c.get("material", "3dp") == args.material]
     return cases
 
 
@@ -318,6 +328,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("command", choices=["list", "record", "check"])
     parser.add_argument("--only", nargs="+", metavar="GB_TYPE", help="limit to these gearbox types")
+    parser.add_argument("--material", choices=list(gearbox_runner.MATERIAL_MODES),
+                        help="limit to cases in this material mode")
     parser.add_argument(
         "--gear-ratios", nargs="+", type=float, metavar="GR",
         help="override the per-family ratios in GEAR_RATIOS_BY_GROUP",
