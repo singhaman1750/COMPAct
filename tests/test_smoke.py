@@ -80,3 +80,21 @@ def test_every_case_has_a_golden_baseline():
         "No golden baseline for: " + ", ".join(missing)
         + "\nRecord with: python tests/golden/golden.py record --only <gb_type>"
     )
+
+
+@pytest.mark.parametrize("gb_type", sorted(GEARBOXES))
+def test_metal_mode_uses_steel_gears_and_aluminium_structure(gb_type):
+    spec = GEARBOXES[gb_type]
+    materials = json.loads((REPO_ROOT / "config_files" / "config.json").read_text())["Material_properties"]
+    for material, (gear_name, structure_name), suffix in (("3dp", ("PLA", "PLA"), ""), ("metal", ("Steel", "Aluminum"), "_metal")):
+        actuator, _ = gearbox_runner.build(gb_type, golden.GOLDEN_MOTORS[gb_type][0], material)
+        gearbox = getattr(actuator, spec.gearbox_arg)
+        assert gearbox.densityGears == materials[gear_name]["density"]
+        assert gearbox.densityStructure == materials[structure_name]["density"]
+        assert gearbox.maxGearAllowableStressMPa == materials[gear_name]["maxAllowableStressMPa"]
+        assert actuator.results_suffix == suffix
+
+
+def test_unknown_material_mode_is_rejected():
+    with pytest.raises(ValueError, match="Unknown material mode"):
+        gearbox_runner.build("sspg", "U8_Lite", "wood")

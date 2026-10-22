@@ -100,15 +100,23 @@ Every gearbox should run in one of two modes:
 | 3D-printed (default) | PLA | PLA |
 | Metal | Steel — 7850 kg/m³, 400 MPa | Aluminium — 2700 kg/m³ |
 
-Today every gearbox is effectively 3D-printed only (all `Opt_*.py` pass PLA for gears, structure
-and strength), except INDSPG, which mixes them — see Phase 1 fix 2.1. The `Steel` entries in
-`indspg_motor_config.json`, `idspg_motor_config.json` and `motor_config.json` hold PLA values
-(1245.6 kg/m³, 70 MPa) and must be corrected before metal mode can work.
+**Status: done (2026-10-22)** — `python actOpt.py ... --material 3dp|metal` (default `3dp`).
+- `gearbox_runner.MATERIAL_MODES` picks gear and structure materials from the one material table
+  in `config_files/config.json` (all gearbox types read it; the wrong per-type copies are gone).
+- Every 3DP mass function now weighs gears (sun, planets, ring and the casing it is part of) with
+  `densityGears` and the structure (motor case, carriers, retainers, bearing holders) with
+  `densityStructure`; before, most used one density for everything, which in metal mode would
+  have made the whole structure steel.
+- Rotor couplers: INCPG, INWPG (`rotor_hub_mass`) and INDSPG (`rotor_coupler_mass`) have a separate
+  coupler, aluminium in both modes. In the other ten types the coupler is the sun gear's own hub,
+  printed with the sun, so it stays part of the sun (gear material) — there is no separate part.
+- Metal results go to `..._metal.csv` files; the CAD equations file is shared (last run wins).
+- Golden check: one metal case per gearbox type (`<case>__metal`).
 
 **Decided:**
 - Chosen with a command-line option: `python actOpt.py ... --material 3dp|metal`, default `3dp`
   so existing commands are unchanged.
-- All 15 gearbox types, one at a time (INDSPG first), with the golden check after each.
+- All 15 gearbox types.
 - The rotor coupler is the only metal part in the 3D-printed build, and is aluminium in both
   modes. It has its own density setting (`densityRotor` in INDSPG,
   `ActuatorandGearbox_INDSPG.py:1740-1748`), separate from the gear and structure densities.
