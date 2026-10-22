@@ -461,6 +461,21 @@ copies: all gearboxes now read RO100 from `config_files/motors.json`, which uses
 ISSPG changed from M5 to M4), with rotor height 33.45, offset 2.75 and the datasheet masses. The
 line numbers above refer to the code before that change.
 
+### 9. INSSPG — which of type 1 / type 2 is "dependent" and which "independent"?
+
+**Description:** the old README called `insspg_type_1` "Independent" and `insspg_type_2`
+"Dependent", but commit `bc84c74` suggests type 2 is the independent one, and the code itself only
+says "TYPE 1 MATH" / "TYPE 2 MATH" (`ActuatorandGearbox_INSSPG.py`, `getMassKG_3DP` router). There
+are two Onshape models, "INSSPG_Dependent" and "INSSPG_Independent", so the mapping also decides
+which model each type's results belong in.
+
+**For now:** README and `docs/gearboxes.md` say "type 1" / "type 2" without the labels.
+
+**Question for mahi07-06:** which design is type 1 and which is type 2? Then add the labels to
+the README gearbox table, `docs/gearboxes.md` and `docs/onshape.md`.
+
+**Status:** open — question for mahi07-06.
+
 ## CAD issues
 
 Problems in the CAD models (Onshape / SolidWorks), not in the Python code. Found while checking
