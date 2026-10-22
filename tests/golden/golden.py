@@ -1,8 +1,8 @@
 """
 Golden-output regression check for the gearbox optimisers.
 
-Records, for every gearbox type in actOpt.GEARBOX_DISPATCH and every motor its
-Opt_*.run() supports, the optimiser's returned parameters, the CAD equation
+Records, for every gearbox type in gearbox_runner.GEARBOXES and each of its golden
+motors (GOLDEN_MOTORS), the optimiser's returned parameters, the CAD equation
 files the run writes, and the results CSVs it writes (total mass, efficiency,
 cost, per-part mass breakdown; run-time lines removed). A later `check` re-runs
 the same cases and reports any difference, so refactors can be verified to
@@ -20,7 +20,6 @@ in that same commit and say so in the commit message.
 """
 
 import argparse
-import ast
 import json
 import math
 import os
@@ -32,6 +31,8 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO_ROOT))
+import gearbox_runner  # noqa: E402
 BASELINE_DIR = Path(__file__).resolve().parent / "baselines"
 RUN_CASE = Path(__file__).resolve().parent / "_run_case.py"
 
@@ -53,9 +54,8 @@ GEAR_RATIO_OVERRIDES = {
 }
 FLOAT_REL_TOL = 1e-9
 
-# Gearbox types whose run() takes any motor from config_files/motors.json
-# (via CommonComponents.load_motor) list their golden motors here. Other
-# types are still read from the motor names in their run() if/elif chain.
+# The motors each gearbox type is checked with (every type accepts any motor of
+# its kind from config_files/motors.json; these are the ones with baselines).
 FRAMED_GOLDEN_MOTORS = ["U8_Lite", "U10_Plus_KV80", "MN8014", "VT8020_PRO", "MAD_M6C12_KV170"]
 GOLDEN_MOTORS = {
     "sspg": FRAMED_GOLDEN_MOTORS,
@@ -84,47 +84,15 @@ def gearbox_group(gb_type):
     return _VARIANT_SUFFIX.sub("", gb_type).upper()
 
 
-def load_dispatch():
-    tree = ast.parse((REPO_ROOT / "actOpt.py").read_text(encoding="utf-8"))
-    for node in tree.body:
-        if isinstance(node, ast.Assign) and any(
-            isinstance(t, ast.Name) and t.id == "GEARBOX_DISPATCH" for t in node.targets
-        ):
-            return ast.literal_eval(node.value)
-    raise RuntimeError("GEARBOX_DISPATCH not found in actOpt.py")
-
-
-def supported_motors(module_name, gb_type=None):
-    """Golden motors for a gearbox type: GOLDEN_MOTORS, or else the motor names
-    compared against the first argument of run(), ignoring comments."""
-    if gb_type in GOLDEN_MOTORS:
-        return GOLDEN_MOTORS[gb_type]
-    source = (REPO_ROOT / f"{module_name}.py").read_text(encoding="utf-8")
-    tree = ast.parse(source)
-    run_fn = next(
-        n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "run"
-    )
-    motor_arg = run_fn.args.args[0].arg
-    motors = []
-    for node in ast.walk(run_fn):
-        if (
-            isinstance(node, ast.Compare)
-            and isinstance(node.left, ast.Name)
-            and node.left.id == motor_arg
-            and len(node.comparators) == 1
-            and isinstance(node.comparators[0], ast.Constant)
-        ):
-            name = node.comparators[0].value
-            if name not in motors:
-                motors.append(name)
-    return motors
+def gearbox_types():
+    return list(gearbox_runner.GEARBOXES)
 
 
 def all_cases(gear_ratios=None):
     cases = []
-    for gb_type, module_name in load_dispatch().items():
+    for gb_type in gearbox_types():
         family_ratios = GEAR_RATIOS_BY_GROUP[gearbox_group(gb_type)]
-        for motor in supported_motors(module_name, gb_type):
+        for motor in GOLDEN_MOTORS[gb_type]:
             ratios = gear_ratios or GEAR_RATIO_OVERRIDES.get((gb_type, motor), family_ratios)
             for gr in ratios:
                 cases.append({"gb_type": gb_type, "motor": motor, "gear_ratio": gr})

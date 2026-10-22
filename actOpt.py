@@ -1,242 +1,71 @@
 import argparse
 
-GEARBOX_DISPATCH = {
-    "sspg": "Opt_SSPG",
-    "dspg": "Opt_DSPG",
-    "cpg": "Opt_CPG",
-    "icpg": "Opt_ICPG",
-    "insspg_type_1": "Opt_INSSPG",
-    "insspg_type_2": "Opt_INSSPG",
-    "wpg": "Opt_WPG",
-    "incpg_dependent": "Opt_INCPG_dependent",
-    "incpg_independent": "Opt_INCPG_independent",
-    "isspg_inside": "Opt_ISSPG_inside",
-    "isspg_compact": "Opt_ISSPG_compact",
-    "idspg": "Opt_IDSPG",
-    "indspg": "Opt_INDSPG",
-    "inwpg_dependent": "Opt_INWPG_dependent",
-    "inwpg_independent": "Opt_INWPG_independent",
+import gearbox_runner
+
+# How each gearbox type's result is printed: the teeth/module line as (label, index into
+# opt_parameters) pairs, and an optional mass breakdown.
+TEETH_LAYOUTS = {
+    "single": [("Number of teeth: Sun(Ns):", 2), (", Planet(Np):", 3), (", Ring(Nr):", 4),
+               (", Module(m):", 5), (", NumPlanet(n_p):", 1)],
+    "compound": [("Number of teeth: Sun1(Ns1):", 2), (", Planet1(Np1):", 3), (", Planet2(Np2):", 4),
+                 (", Ring(Nr):", 5), (", Module(m):", 6), (", NumPlanet(n_p):", 1)],
+    "wolfrom": [("Number of teeth: Sun1(Ns1):", 2), (", Planet1(Np1):", 3), (", Ring1(R1):", 4),
+                (", Planet2(Np2):", 5), (", Ring2(Nr2):", 6), (", Module1(m1):", 7), (", Module2(m2):", 8),
+                (", NumPlanet(n_p):", 1)],
+    "double": [("Number of teeth: Sun1(Ns1):", 3), (", Planet1(Np1):", 4), (", Ring1(R1):", 5),
+               ("Sun2(Ns2):", 6), (", Planet2(Np2):", 7), (", Ring2(Nr2):", 8), (", Module1(m1):", 9),
+               (", Module2(m2):", 10), (", NumPlanet1(n_p1):", 1), ("NumPlanet2(n_p2):", 2)],
 }
+# (label, index) rounded to 4 digits, then the total actuator mass index (3 digits).
+MASS_BREAKDOWNS = {
+    "icpg": ([("  Sun Gear      :", 10), ("  Planets       :", 11), ("  Ring Gear     :", 12),
+              ("  Main Carrier  :", 13), ("  Sec. Carrier  :", 14), ("  Motor Casing  :", 15),
+              ("total_sum_except_motor_and_baering :", 16), ("  Bearings      :", 9)], 8),
+    "insspg": ([("  Sun Gear      :", 8), ("  Planets       :", 9), ("  Ring Gear     :", 10),
+                ("  Main Carrier  :", 11), ("  Sec. Carrier  :", 12), ("  Motor Casing  :", 13),
+                ("  Bearing Retainer :", 15), ("total_sum_except_motor_and_baering :", 14),
+                ("  Bearings      :", 7)], 6),
+}
+MASS_BREAKDOWN_OF = {"icpg": "icpg", "insspg_type_1": "insspg", "insspg_type_2": "insspg"}
+
+
+def print_result(gearbox_type, opt_parameters):
+    print("-------------------------------")
+    print("Optimal Parameters:")
+    teeth = TEETH_LAYOUTS[gearbox_runner.GEARBOXES[gearbox_type].optimizer_kind]
+    print(*[item for label, index in teeth for item in (label, opt_parameters[index])])
+    print("---")
+    print("Gear Ratio(GR):", opt_parameters[0], ": 1")
+    breakdown = MASS_BREAKDOWN_OF.get(gearbox_type)
+    if breakdown and len(opt_parameters) > 10:
+        parts, total_index = MASS_BREAKDOWNS[breakdown]
+        print("---")
+        print("Mass Breakdown (kg):")
+        for label, index in parts:
+            print(label, round(opt_parameters[index], 4))
+        print("---")
+        print("Total Actuator (motor + gearbox):", round(opt_parameters[total_index], 3), "kg")
+    print("-------------------------------")
+
 
 def main(motor, gearbox_type, gear_ratio=0):
-    if gearbox_type not in GEARBOX_DISPATCH:
+    if gearbox_type not in gearbox_runner.GEARBOXES:
         raise ValueError(f"Unknown gearbox type: {gearbox_type}")
 
-    module_name = GEARBOX_DISPATCH[gearbox_type]
-    module = __import__(module_name)
-
-    print(f"Running optimization:")
+    print("Running optimization:")
     print(f"  Motor       : {motor}")
     print(f"  Gearbox     : {gearbox_type}")
     print(f"  Gear Ratio  : {gear_ratio}")
 
-    # Pass gearbox_type down if it's INSSPG, otherwise run normally
-    if gearbox_type in ["insspg_type_1", "insspg_type_2"]:
-        total_time, opt_parameters = module.run(motor, gear_ratio, gearbox_type)
-    else:
-        total_time, opt_parameters = module.run(motor, gear_ratio)
+    total_time, opt_parameters = gearbox_runner.run(gearbox_type, motor, gear_ratio)
     print("Time taken:", total_time, "sec")
     if opt_parameters is None:
         print("No feasible solution found.")
         return None
-    else:
-        print("Optimization Completed.")
-
-    if(gearbox_type=="sspg"):
-        print("-------------------------------")
-        print("Optimal Parameters:")
-        print("Number of teeth: Sun(Ns):", opt_parameters[2], ", Planet(Np):", opt_parameters[3], ", Ring(Nr):", opt_parameters[4],
-              ", Module(m):", opt_parameters[5], ", NumPlanet(n_p):", opt_parameters[1])
-        print("---")
-        print("Gear Ratio(GR):", opt_parameters[0],": 1")
-        print("-------------------------------")
-
-    elif(gearbox_type=="cpg"):
-        print("-------------------------------")
-        print("Optimal Parameters:")
-        print("Number of teeth: Sun1(Ns1):", opt_parameters[2], ", Planet1(Np1):", opt_parameters[3], ", Planet2(Np2):", opt_parameters[4], ", Ring(Nr):", opt_parameters[5],
-              ", Module(m):", opt_parameters[6], ", NumPlanet(n_p):", opt_parameters[1])
-        print("---")
-        print("Gear Ratio(GR):", opt_parameters[0],": 1")
-        print("-------------------------------")
-
-    elif(gearbox_type=="icpg"):
-        print("-------------------------------")
-        print("Optimal Parameters:")
-        print("Number of teeth: Sun1(Ns1):", opt_parameters[2], ", Planet1(Np1):", opt_parameters[3], ", Planet2(Np2):", opt_parameters[4], ", Ring(Nr):", opt_parameters[5],
-              ", Module(m):", opt_parameters[6], ", NumPlanet(n_p):", opt_parameters[1])
-        print("---")
-        print("Gear Ratio(GR):", opt_parameters[0],": 1")
-# --- NEW MASS BREAKDOWN BLOCK ---
-        if len(opt_parameters) > 10:
-            print("---")
-            print("Mass Breakdown (kg):")
-            print("  Sun Gear      :", round(opt_parameters[10], 4))
-            print("  Planets       :", round(opt_parameters[11], 4))
-            print("  Ring Gear     :", round(opt_parameters[12], 4))
-            print("  Main Carrier  :", round(opt_parameters[13], 4))
-            print("  Sec. Carrier  :", round(opt_parameters[14], 4))
-            print("  Motor Casing  :", round(opt_parameters[15], 4))
-            print("total_sum_except_motor_and_baering :" ,round(opt_parameters[16],4))
-            print("  Bearings      :", round(opt_parameters[9], 4))
-            print("---")
-            print("Total Actuator (motor + gearbox):", round(opt_parameters[8], 3), "kg")
-        print("-------------------------------")
-
-    elif(gearbox_type=="insspg_type_1"):
-        print("-------------------------------")
-        print("Optimal Parameters:")
-        print("Number of teeth: Sun(Ns):", opt_parameters[2], ", Planet(Np):", opt_parameters[3], ", Ring(Nr):", opt_parameters[4],
-            ", Module(m):", opt_parameters[5], ", NumPlanet(n_p):", opt_parameters[1])
-        print("---")
-        print("Gear Ratio(GR):", opt_parameters[0],": 1")
-# --- NEW MASS BREAKDOWN BLOCK ---
-        if len(opt_parameters) > 10:
-            print("---")
-            print("Mass Breakdown (kg):")
-            print("  Sun Gear      :", round(opt_parameters[8], 4))
-            print("  Planets       :", round(opt_parameters[9], 4))
-            print("  Ring Gear     :", round(opt_parameters[10], 4))
-            print("  Main Carrier  :", round(opt_parameters[11], 4))
-            print("  Sec. Carrier  :", round(opt_parameters[12], 4))
-            print("  Motor Casing  :", round(opt_parameters[13], 4))
-            print("  Bearing Retainer :", round(opt_parameters[15], 4))
-            print("total_sum_except_motor_and_baering :" ,round(opt_parameters[14],4))
-            print("  Bearings      :", round(opt_parameters[7], 4))
-            print("---")
-            print("Total Actuator (motor + gearbox):", round(opt_parameters[6], 3), "kg")
-        print("-------------------------------")
-
-    elif(gearbox_type=="insspg_type_2"):
-            print("-------------------------------")
-            print("Optimal Parameters:")
-            print("Number of teeth: Sun(Ns):", opt_parameters[2], ", Planet(Np):", opt_parameters[3], ", Ring(Nr):", opt_parameters[4],
-                ", Module(m):", opt_parameters[5], ", NumPlanet(n_p):", opt_parameters[1])
-            print("---")
-            print("Gear Ratio(GR):", opt_parameters[0],": 1")
-    # --- NEW MASS BREAKDOWN BLOCK ---
-            if len(opt_parameters) > 10:
-                print("---")
-                print("Mass Breakdown (kg):")
-                print("  Sun Gear      :", round(opt_parameters[8], 4))
-                print("  Planets       :", round(opt_parameters[9], 4))
-                print("  Ring Gear     :", round(opt_parameters[10], 4))
-                print("  Main Carrier  :", round(opt_parameters[11], 4))
-                print("  Sec. Carrier  :", round(opt_parameters[12], 4))
-                print("  Motor Casing  :", round(opt_parameters[13], 4))
-                print("  Bearing Retainer :", round(opt_parameters[15], 4))
-                print("total_sum_except_motor_and_baering :" ,round(opt_parameters[14],4))
-                print("  Bearings      :", round(opt_parameters[7], 4))
-                print("---")
-                print("Total Actuator (motor + gearbox):", round(opt_parameters[6], 3), "kg")
-            print("-------------------------------")
-
-    elif(gearbox_type=="wpg"):
-        print("-------------------------------")
-        print("Optimal Parameters:")
-        print("Number of teeth: Sun1(Ns1):", opt_parameters[2], ", Planet1(Np1):", opt_parameters[3], ", Ring1(R1):", opt_parameters[4], ", Planet2(Np2):", opt_parameters[5], ", Ring2(Nr2):", opt_parameters[6],
-              ", Module1(m1):", opt_parameters[7], ", Module2(m2):", opt_parameters[8], ", NumPlanet(n_p):", opt_parameters[1])
-        print("---")
-        print("Gear Ratio(GR):", opt_parameters[0],": 1")
-        print("-------------------------------")
-
-    elif(gearbox_type=="dspg"):
-        print("-------------------------------")
-        print("Optimal Parameters:")
-        print("Number of teeth: Sun1(Ns1):", opt_parameters[3], ", Planet1(Np1):", opt_parameters[4], ", Ring1(R1):", opt_parameters[5], "Sun2(Ns2):", opt_parameters[6], ", Planet2(Np2):", opt_parameters[7], ", Ring2(Nr2):", opt_parameters[8],
-              ", Module1(m1):", opt_parameters[9], ", Module2(m2):", opt_parameters[10], ", NumPlanet1(n_p1):", opt_parameters[1], "NumPlanet2(n_p2):", opt_parameters[2])
-        print("---")
-        print("Gear Ratio(GR):", opt_parameters[0],": 1")
-        print("-------------------------------")
-
-    elif(gearbox_type=="idspg"):
-        print("-------------------------------")
-        print("Optimal Parameters:")
-        print("Number of teeth: Sun1(Ns1):", opt_parameters[3], ", Planet1(Np1):", opt_parameters[4], ", Ring1(R1):", opt_parameters[5], "Sun2(Ns2):", opt_parameters[6], ", Planet2(Np2):", opt_parameters[7], ", Ring2(Nr2):", opt_parameters[8],
-                ", Module1(m1):", opt_parameters[9], ", Module2(m2):", opt_parameters[10], ", NumPlanet1(n_p1):", opt_parameters[1], "NumPlanet2(n_p2):", opt_parameters[2])
-        print("---")
-        print("Gear Ratio(GR):", opt_parameters[0],": 1")
-        print("-------------------------------")
-
-    elif(gearbox_type=="indspg"):
-        print("-------------------------------")
-        print("Optimal Parameters:")
-        print("Number of teeth: Sun1(Ns1):", opt_parameters[3], ", Planet1(Np1):", opt_parameters[4], ", Ring1(R1):", opt_parameters[5], "Sun2(Ns2):", opt_parameters[6], ", Planet2(Np2):", opt_parameters[7], ", Ring2(Nr2):", opt_parameters[8],
-                ", Module1(m1):", opt_parameters[9], ", Module2(m2):", opt_parameters[10], ", NumPlanet1(n_p1):", opt_parameters[1], "NumPlanet2(n_p2):", opt_parameters[2])
-        print("---")
-        print("Gear Ratio(GR):", opt_parameters[0],": 1")
-        print("-------------------------------")
-# --- NEW MASS BREAKDOWN BLOCK ---
-        # if len(opt_parameters) > 10:
-        #     print("---")
-        #     print("Mass Breakdown (kg):")
-        #     print("  Sun Gear      :", round(opt_parameters[10], 4))
-        #     print("  Planets       :", round(opt_parameters[11], 4))
-        #     print("  Ring Gear     :", round(opt_parameters[12], 4))
-        #     print("  Main Carrier  :", round(opt_parameters[13], 4))
-        #     print("  Sec. Carrier  :", round(opt_parameters[14], 4))
-        #     print("  Motor Casing  :", round(opt_parameters[15], 4))
-        #     print("total_sum_except_motor_and_baering :" ,round(opt_parameters[16],4))
-        #     print("  Bearings      :", round(opt_parameters[9], 4))
-        #     print("---")
-        #     print("Total Gearbox   :", round(opt_parameters[8], 3), "kg")
-        #     print("-------------------------------")
-
-    elif(gearbox_type=="incpg_dependent"):
-        print("-------------------------------")
-        print("Optimal Parameters:")
-        print("Number of teeth: Sun1(Ns1):", opt_parameters[2], ", Planet1(Np1):", opt_parameters[3], ", Planet2(Np2):", opt_parameters[4], ", Ring(Nr):", opt_parameters[5],
-              ", Module(m):", opt_parameters[6], ", NumPlanet(n_p):", opt_parameters[1])
-        print("---")
-        print("Gear Ratio(GR):", opt_parameters[0],": 1")
-        print("-------------------------------")
-
-    elif(gearbox_type=="incpg_independent"):
-        print("-------------------------------")
-        print("Optimal Parameters:")
-        print("Number of teeth: Sun1(Ns1):", opt_parameters[2], ", Planet1(Np1):", opt_parameters[3], ", Planet2(Np2):", opt_parameters[4], ", Ring(Nr):", opt_parameters[5],
-              ", Module(m):", opt_parameters[6], ", NumPlanet(n_p):", opt_parameters[1])
-        print("---")
-        print("Gear Ratio(GR):", opt_parameters[0],": 1")
-        print("-------------------------------")
-
-    elif(gearbox_type=="isspg_inside"):
-        print("-------------------------------")
-        print("Optimal Parameters:")
-        print("Number of teeth: Sun(Ns):", opt_parameters[2], ", Planet(Np):", opt_parameters[3], ", Ring(Nr):", opt_parameters[4],
-                ", Module(m):", opt_parameters[5], ", NumPlanet(n_p):", opt_parameters[1])
-        print("---")
-        print("Gear Ratio(GR):", opt_parameters[0],": 1")
-        print("-------------------------------")
-
-    elif(gearbox_type=="isspg_compact"):
-        print("-------------------------------")
-        print("Optimal Parameters:")
-        print("Number of teeth: Sun(Ns):", opt_parameters[2], ", Planet(Np):", opt_parameters[3], ", Ring(Nr):", opt_parameters[4],
-                ", Module(m):", opt_parameters[5], ", NumPlanet(n_p):", opt_parameters[1])
-        print("---")
-        print("Gear Ratio(GR):", opt_parameters[0],": 1")
-        print("-------------------------------")
-
-    elif(gearbox_type=="inwpg_dependent"):
-        print("-------------------------------")
-        print("Optimal Parameters:")
-        print("Number of teeth: Sun1(Ns1):", opt_parameters[2], ", Planet1(Np1):", opt_parameters[3], ", Ring1(R1):", opt_parameters[4], ", Planet2(Np2):", opt_parameters[5], ", Ring2(Nr2):", opt_parameters[6],
-              ", Module1(m1):", opt_parameters[7], ", Module2(m2):", opt_parameters[8], ", NumPlanet(n_p):", opt_parameters[1])
-        print("---")
-        print("Gear Ratio(GR):", opt_parameters[0],": 1")
-        print("-------------------------------")
-    
-    elif(gearbox_type=="inwpg_independent"):
-        print("-------------------------------")
-        print("Optimal Parameters:")
-        print("Number of teeth: Sun1(Ns1):", opt_parameters[2], ", Planet1(Np1):", opt_parameters[3], ", Ring1(R1):", opt_parameters[4], ", Planet2(Np2):", opt_parameters[5], ", Ring2(Nr2):", opt_parameters[6],
-              ", Module1(m1):", opt_parameters[7], ", Module2(m2):", opt_parameters[8], ", NumPlanet(n_p):", opt_parameters[1])
-        print("---")
-        print("Gear Ratio(GR):", opt_parameters[0],": 1")
-        print("-------------------------------")
-
+    print("Optimization Completed.")
+    print_result(gearbox_type, opt_parameters)
     return opt_parameters
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -244,7 +73,8 @@ if __name__ == "__main__":
         description="Run planetary gearbox actuator optimization."
     )
     parser.add_argument("--motor", required=True, help="Motor name from config_files/motors.json, e.g. U8_Lite, RO100, RI100")
-    parser.add_argument("--gb_type", required=True, help="Gearbox type, e.g. sspg, icpg, insspg_type_1")
+    parser.add_argument("--gb_type", required=True, choices=list(gearbox_runner.GEARBOXES),
+                        help="Gearbox type")
     parser.add_argument("--gr", required=True, type=float, help="Gear ratio (must be > 2)")
     parser.add_argument("--onshape", action="store_true",
                         help="after a successful run, push the result into this gearbox's Onshape model "
