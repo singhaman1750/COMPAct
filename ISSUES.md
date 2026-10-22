@@ -476,6 +476,44 @@ the README gearbox table, `docs/gearboxes.md` and `docs/onshape.md`.
 
 **Status:** open — question for mahi07-06.
 
+### 10. INSSPG type 1 — sun bottom-part volume is almost zero (typo in an exponent)
+
+**Description:** `_getMassKG_3DP_type1()` in `ActuatorandGearbox_INSSPG.py` (line 1299):
+```python
+sun_bottom_part_volume = np.pi*(self.Rotor_height+self.stator_bottom_step_height_)*((14/2)** - (self.sun_central_bolt_socket_head_dia/2)**2)*1e-9 + ...
+```
+`(14/2)** - (x)**2` parses as `7 ** (-(x**2))`, i.e. 7 to a large negative power ≈ 0, instead of
+`(14/2)**2 - (x)**2`. The first term (a Ø14 mm ring around the central bolt head) therefore adds
+almost nothing to the sun's mass. Type 2's version of the same volume (line ~1063) is written
+correctly with `**2`.
+
+Practical effect: for RI100 roughly 2 g of PLA missing from the sun (π × (15 + 4.5) mm ×
+(7² − 4.25²) mm² ≈ 1.9 cm³), in every INSSPG type 1 design.
+
+**Probable fix:** `((14/2)**2 - (self.sun_central_bolt_socket_head_dia/2)**2)`; check the Ø14 against
+the INSSPG CAD (it is a typed-in value, unlike type 2 which uses the bearing ID); re-record the
+`insspg_type_1` golden baselines.
+
+**Status:** open — found 2026-10-22 during the rotor-coupler survey.
+
+### 11. INDSPG — rotor coupler inner diameter subtracts the wall thickness only once
+
+**Description:** in `ActuatorandGearbox_INDSPG.py` (line 1748), the aluminium rotor coupler is
+modelled as a tube with a bottom disc:
+```python
+rotor_coupler_OD = self.rotor_ID
+rotor_coupler_ID = self.rotor_ID - rotor_coupler_thickness
+```
+For a tube with wall `rotor_coupler_thickness`, the inner diameter should be
+`OD − 2 × thickness`; subtracting it once gives a wall of half the thickness, so the tube part of
+the coupler mass is roughly halved (the disc uses the same ID, so it is slightly too big).
+
+**Probable fix:** `rotor_coupler_ID = self.rotor_ID - 2 * rotor_coupler_thickness` — unless the CAD
+really uses a half-thickness wall; check against the INDSPG model first. Re-record the `indspg`
+golden baselines.
+
+**Status:** open — found 2026-10-22 during the rotor-coupler survey; needs a CAD check.
+
 ## CAD issues
 
 Problems in the CAD models (Onshape / SolidWorks), not in the Python code. Found while checking
