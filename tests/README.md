@@ -25,7 +25,7 @@ These check that every gearbox type in `gearbox_runner.GEARBOXES` names existing
 A changed results CSV is reported value by value, e.g. `mass: 1.483 -> 1.192`. Each case runs in its own temporary folder, so the check never touches your `results/` folder.
 
 ```bash
-python tests/golden/golden.py check                  # all 46 cases
+python tests/golden/golden.py check                  # all 58 cases
 python tests/golden/golden.py check --only idspg     # one gearbox type
 python tests/golden/golden.py list                   # show the cases
 ```

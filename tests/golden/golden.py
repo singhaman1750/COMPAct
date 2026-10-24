@@ -69,7 +69,7 @@ GOLDEN_MOTORS = {
     "idspg": ["RO100"],
     "insspg_type_1": ["RI100", "RI80"],
     "insspg_type_2": ["RI100", "RI80"],
-    "incpg_dependent": ["RI100"],
+    "incpg_dependent": ["RI100", "RI80"],
     "incpg_independent": ["RI100", "RI80"],
     "inwpg_dependent": ["RI100", "RI80"],
     "inwpg_independent": ["RI100", "RI80"],
