@@ -11,7 +11,7 @@ from CommonComponents import bearing_mass_kg, restores_stdout  # noqa: E402
 
 @pytest.mark.parametrize(
     "size, mass",
-    [((40, 50, 6), 0.023), ((30, 42, 7), 0.024), ((35, 47, 7), 0.027), ((25, 37, 7), 0.021), ((15, 24, 5), 0.007)],
+    [((40, 50, 6), 0.023), ((30, 42, 7), 0.024), ((35, 47, 7), 0.027), ((25, 37, 7), 0.021), ((15, 24, 5), 0.007), ((20, 27, 4), 0.005)],
 )
 def test_bearing_mass_kg_matches_exact_size(size, mass):
     assert bearing_mass_kg(*size) == mass

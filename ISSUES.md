@@ -514,6 +514,24 @@ golden baselines.
 
 **Status:** open — found 2026-10-22 during the rotor-coupler survey; needs a CAD check.
 
+### 12. INCPG / INWPG dependent — rotor top bearing rule chosen by motor name
+
+**Description:** `ActuatorAndGearbox_INCPG_dependent.py` and `ActuatorAndGearbox_INWPG_dependent.py`
+size the rotor top bearing with
+```python
+if self.motor.motorName == "RI100":
+    # at least min_rotor_top_bearing_ID (25 mm), larger if the sun needs it
+else:
+    # just large enough for the sun: module * Ns + 2 * 1.5 mm
+```
+so any new inrunner motor added to `motors.json` silently gets the RI80 rule, whatever its size.
+
+**Probable fix:** decide the rule from the motor's geometry (e.g. the rotor ID), or give each
+motor its own minimum bore in the params file, as the independent types already do per motor name.
+Should give the same results for RI100 and RI80 (golden check).
+
+**Status:** open — found 2026-10-24 when bringing in the `dev-inwpg` branch.
+
 ## CAD issues
 
 Problems in the CAD models (Onshape / SolidWorks), not in the Python code. Found while checking
