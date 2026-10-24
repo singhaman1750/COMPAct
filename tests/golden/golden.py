@@ -34,6 +34,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
 import gearbox_runner  # noqa: E402
+from CommonComponents import CAD_DIR_ENV  # noqa: E402
 BASELINE_DIR = Path(__file__).resolve().parent / "baselines"
 RUN_CASE = Path(__file__).resolve().parent / "_run_case.py"
 
@@ -76,8 +77,7 @@ GOLDEN_MOTORS = {
     "indspg": ["RI100", "RI80"],
 }
 
-# Variants that write into the same CADs/<GROUP>/ folder share a group and
-# must not run at the same time.
+# Variants share their family's group (CADs/<GROUP>/ folder and gear ratio).
 _VARIANT_SUFFIX = re.compile(r"_(type_\d+|dependent|independent|inside|compact)$")
 
 
@@ -111,10 +111,12 @@ def case_id(case):
 
 
 def run_case(case):
-    # Each case runs in its own temporary working directory, so the results/
-    # CSVs it writes are captured there and never touch the repo's results/.
+    # Each case runs in its own temporary working directory and writes its CAD
+    # files into its own CADs/ folder there, so the results/ CSVs and CAD files
+    # it writes never touch the repo, and cases can run at the same time.
     with tempfile.TemporaryDirectory() as tmp:
         out_path = Path(tmp) / "result.json"
+        env = dict(os.environ, **{CAD_DIR_ENV: str(Path(tmp) / "CADs")})
         proc = subprocess.run(
             [
                 sys.executable,
@@ -127,6 +129,7 @@ def run_case(case):
                 case.get("material", "3dp"),
             ],
             cwd=tmp,
+            env=env,
             capture_output=True,
             text=True,
         )
@@ -137,22 +140,22 @@ def run_case(case):
         return json.loads(out_path.read_text(encoding="utf-8"))
 
 
+# Groups whose cases take several minutes each; they start first so that the
+# check is not left waiting for one of them at the end.
+SLOW_GROUPS = ("DSPG", "IDSPG", "INDSPG")
+
+
 def run_cases(cases, workers):
-    """Run cases in parallel, but cases in the same group one after another."""
-    groups = {}
-    for case in cases:
-        groups.setdefault(gearbox_group(case["gb_type"]), []).append(case)
+    """Run all cases in parallel, slowest groups first; yield them in the given order."""
+    def run_one(case):
+        print(f"  running {case_id(case)}", flush=True)
+        return run_case(case)
 
-    def run_group(group_cases):
-        results = []
-        for case in group_cases:
-            print(f"  running {case_id(case)}", flush=True)
-            results.append((case, run_case(case)))
-        return results
-
+    order = sorted(range(len(cases)), key=lambda i: gearbox_group(cases[i]["gb_type"]) not in SLOW_GROUPS)
     with ThreadPoolExecutor(max_workers=workers) as pool:
-        for group_results in pool.map(run_group, groups.values()):
-            yield from group_results
+        futures = {i: pool.submit(run_one, cases[i]) for i in order}
+        for i, case in enumerate(cases):
+            yield case, futures[i].result()
 
 
 def values_match(expected, actual):

@@ -6,6 +6,7 @@ Args: gb_type motor gear_ratio cad_group out_json [material]
 """
 
 import json
+import os
 import re
 import sys
 import traceback
@@ -17,6 +18,7 @@ sys.path.insert(0, str(REPO_ROOT))
 import numpy as np  # noqa: E402
 
 import gearbox_runner  # noqa: E402
+from CommonComponents import CAD_DIR_ENV  # noqa: E402
 
 
 def to_json_value(value):
@@ -46,7 +48,11 @@ def main():
     gb_type, motor, gear_ratio, cad_group, out_json = sys.argv[1:6]
     material = sys.argv[6] if len(sys.argv) > 6 else "3dp"
     gear_ratio = float(gear_ratio)
-    cad_dir = REPO_ROOT / "CADs" / cad_group
+    # golden.py gives every case its own empty CADs/ folder, so all of it is
+    # watched; run by hand (no folder set), only the type's repo folder is.
+    own_cad_dir = os.environ.get(CAD_DIR_ENV)
+    cad_root = Path(own_cad_dir) if own_cad_dir else REPO_ROOT / "CADs"
+    cad_dir = cad_root if own_cad_dir else cad_root / cad_group
 
     result = {"gb_type": gb_type, "motor": motor, "gear_ratio": gear_ratio, "error": None}
     if material != "3dp":
@@ -67,7 +73,8 @@ def main():
     after = snapshot(cad_dir)
     changed = sorted(p for p, stamp in after.items() if before.get(p) != stamp)
     result["cad_files"] = {
-        p.relative_to(REPO_ROOT).as_posix(): p.read_text(encoding="utf-8", errors="replace")
+        # named CADs/<GROUP>/<file> wherever the folder is
+        p.relative_to(cad_root.parent).as_posix(): p.read_text(encoding="utf-8", errors="replace")
         for p in changed
     }
     # golden.py runs each case in an empty working directory, so everything

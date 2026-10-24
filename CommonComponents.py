@@ -22,6 +22,22 @@ def restores_stdout(func):
     return wrapper
 
 # -------------------------------------------------------------------------
+# cad_path
+# -------------------------------------------------------------------------
+# Where a CAD equations file is written: the repo's CADs/ folder, or
+# $COMPACT_CAD_DIR when it is set (the golden check gives every case its own
+# folder, so cases can run in parallel without touching CADs/). Creates the
+# file's folder if needed.
+CAD_DIR_ENV = "COMPACT_CAD_DIR"
+REPO_CAD_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "CADs")
+
+
+def cad_path(*parts):
+    path = os.path.join(os.environ.get(CAD_DIR_ENV) or REPO_CAD_DIR, *parts)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    return path
+
+# -------------------------------------------------------------------------
 # class material
 # -------------------------------------------------------------------------
 
