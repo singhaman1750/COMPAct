@@ -173,9 +173,18 @@ class bearings_discrete:
 # Mass of a bearing given by its full size, e.g. one fixed in a config file.
 # Matching bore, OD and width together avoids bearings_discrete's ID and OD
 # lookups, which use different tables and can return a different bearing.
+# Bearings that are only ever fixed in a config file, never picked by size
+# (adding them to bearings_discrete's tables would change which bearing the
+# other gearboxes pick). [idMM, odMM, widthMM, massKG]
+FIXED_ONLY_BEARINGS = [
+    [20, 27, 4, 0.005],  # 6704; INCPG/INWPG dependent rotor bottom bearing (INWPG dependent's 0.005 kg)
+]
+
+
 def bearing_mass_kg(id_mm, od_mm, width_mm):
     all_bearings = (bearings_discrete(idRequiredMM=0).data_bearings
-                    + bearings_discrete(idRequiredMM=0, odRequiredMM=1).data_bearings)
+                    + bearings_discrete(idRequiredMM=0, odRequiredMM=1).data_bearings
+                    + FIXED_ONLY_BEARINGS)
     for bearing_id, bearing_od, bearing_width, mass in all_bearings:
         if (bearing_id, bearing_od, bearing_width) == (id_mm, od_mm, width_mm):
             return mass

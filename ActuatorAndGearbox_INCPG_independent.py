@@ -840,6 +840,11 @@ class inrunnerCompoundPlanetaryActuator:
         # self.planet_pin_nut_depth       = planet_pin_bolt.nut_thickness
 
         #--------------------- Casings------------------------------------------
+        stator_case_mounting_hole_bolt = nuts_and_bolts_dimensions(bolt_dia=self.stator_hole_dia, bolt_type="socket_head")
+        self.stator_hole_allen_socket_dia = stator_case_mounting_hole_bolt.bolt_head_dia
+        self.stator_hole_nut_wrench_size       = stator_case_mounting_hole_bolt.nut_width_across_flats
+        self.stator_hole_nut_depth     = stator_case_mounting_hole_bolt.nut_thickness
+        
         case_mounting_hole_bolt = nuts_and_bolts_dimensions(bolt_dia=self.case_mounting_hole_dia, bolt_type="socket_head")
 
         self.case_mounting_hole_allen_socket_dia = case_mounting_hole_bolt.bolt_head_dia
@@ -1010,6 +1015,9 @@ class inrunnerCompoundPlanetaryActuator:
                     f'"carrier_trapezoidal_support_hole_socket_head_dia"= {self.carrier_trapezoidal_support_hole_socket_head_dia}\n',
                     f'"carrier_trapezoidal_support_hole_wrench_size"= {self.carrier_trapezoidal_support_hole_wrench_size}\n',
                     f'"carrier_trapezoidal_support_nut_depth"= {self.carrier_trapezoidal_support_nut_depth}\n',
+                    f'"stator_hole_nut_depth"= {self.stator_hole_nut_depth}\n',
+                    f'"stator_hole_nut_wrench_size"= {self.stator_hole_nut_wrench_size}\n',
+                    f'"stator_hole_allen_socket_dia"= {self.stator_hole_allen_socket_dia}\n',
                     f'"case_mounting_hole_allen_socket_dia"= {self.case_mounting_hole_allen_socket_dia}\n',
                     f'"case_mounting_wrench_size"= {self.case_mounting_wrench_size}\n',
                     f'"case_mounting_nut_depth"= {self.case_mounting_nut_depth}\n',
@@ -1153,6 +1161,9 @@ class inrunnerCompoundPlanetaryActuator:
                     f'"carrier_trapezoidal_support_hole_socket_head_dia"= {self.carrier_trapezoidal_support_hole_socket_head_dia}\n',
                     f'"carrier_trapezoidal_support_hole_wrench_size"= {self.carrier_trapezoidal_support_hole_wrench_size}\n',
                     f'"carrier_trapezoidal_support_nut_depth"= {self.carrier_trapezoidal_support_nut_depth}\n',
+                    f'"stator_hole_nut_depth"= {self.stator_hole_nut_depth}\n',
+                    f'"stator_hole_nut_wrench_size"= {self.stator_hole_nut_wrench_size}\n',
+                    f'"stator_hole_allen_socket_dia"= {self.stator_hole_allen_socket_dia}\n',
                     f'"case_mounting_hole_allen_socket_dia"= {self.case_mounting_hole_allen_socket_dia}\n',
                     f'"case_mounting_wrench_size"= {self.case_mounting_wrench_size}\n',
                     f'"case_mounting_nut_depth"= {self.case_mounting_nut_depth}\n',
@@ -1298,6 +1309,9 @@ class inrunnerCompoundPlanetaryActuator:
                     f'"carrier_trapezoidal_support_hole_socket_head_dia"= {self.carrier_trapezoidal_support_hole_socket_head_dia}\n',
                     f'"carrier_trapezoidal_support_hole_wrench_size"= {self.carrier_trapezoidal_support_hole_wrench_size}\n',
                     f'"carrier_trapezoidal_support_nut_depth"= {self.carrier_trapezoidal_support_nut_depth}\n',
+                    f'"stator_hole_nut_depth"= {self.stator_hole_nut_depth}\n',
+                    f'"stator_hole_nut_wrench_size"= {self.stator_hole_nut_wrench_size}\n',
+                    f'"stator_hole_allen_socket_dia"= {self.stator_hole_allen_socket_dia}\n',
                     f'"case_mounting_hole_allen_socket_dia"= {self.case_mounting_hole_allen_socket_dia}\n',
                     f'"case_mounting_wrench_size"= {self.case_mounting_wrench_size}\n',
                     f'"case_mounting_nut_depth"= {self.case_mounting_nut_depth}\n',
@@ -1439,6 +1453,9 @@ class inrunnerCompoundPlanetaryActuator:
                     f'"output_bearing_width"= {self.output_bearing_width}\n',
                     f'"carrier_trapezoidal_support_hole_socket_head_dia"= {self.carrier_trapezoidal_support_hole_socket_head_dia}\n',
                     f'"carrier_trapezoidal_support_hole_wrench_size"= {self.carrier_trapezoidal_support_hole_wrench_size}\n',
+                    f'"stator_hole_nut_depth"= {self.stator_hole_nut_depth}\n',
+                    f'"stator_hole_nut_wrench_size"= {self.stator_hole_nut_wrench_size}\n',
+                    f'"stator_hole_allen_socket_dia"= {self.stator_hole_allen_socket_dia}\n',
                     f'"carrier_trapezoidal_support_nut_depth"= {self.carrier_trapezoidal_support_nut_depth}\n',
                     f'"case_mounting_hole_allen_socket_dia"= {self.case_mounting_hole_allen_socket_dia}\n',
                     f'"case_mounting_wrench_size"= {self.case_mounting_wrench_size}\n',

@@ -44,9 +44,9 @@ RO100's rotor screws are M4 for now (bug 8, M4 vs M5 to be decided). ICPG's conf
 |---|---|---|---|---|
 | `insspg_type_1` | Inrunner single-stage, type 1 | `ActuatorandGearbox_INSSPG` · `insspg_params.json` | stator OD − 5.5 − 2 × 1.5 − 0.8 / 2 | bug 5 |
 | `insspg_type_2` | Inrunner single-stage, type 2 | same module and params | same | bugs 4 and 6 |
-| `incpg_dependent` | Inrunner compound, dependent | `ActuatorAndGearbox_INCPG_dependent` · `incpg_dependent_params.json` | factor × motor Ø | — |
+| `incpg_dependent` | Inrunner compound, dependent | `ActuatorAndGearbox_INCPG_dependent` · `incpg_dependent_params.json` | factor × motor Ø | bug 12 (rotor top bearing rule chosen by motor name) |
 | `incpg_independent` | Inrunner compound, independent | `ActuatorAndGearbox_INCPG_independent` · `incpg_independent_params.json` | factor × motor Ø | rotor bearings are listed per motor name (RI100, RI80) in the params file |
-| `inwpg_dependent` | Inrunner Wolfrom, dependent | `ActuatorAndGearbox_INWPG_dependent` · `inwpg_params_dependent.json` | factor × motor Ø | — |
+| `inwpg_dependent` | Inrunner Wolfrom, dependent | `ActuatorAndGearbox_INWPG_dependent` · `inwpg_params_dependent.json` | factor × motor Ø | bug 12 |
 | `inwpg_independent` | Inrunner Wolfrom, independent | `ActuatorAndGearbox_INWPG_independent` · `inwpg_params_independent.json` | factor × motor Ø | rotor bearings listed per motor name, as INCPG independent |
 | `indspg` | Inrunner double-stage | `ActuatorandGearbox_INDSPG` · `indspg_params.json` | factor × (stator wire OD − 2 × ring-2 width); stage 1: rotor ID − 4 × 1.5 | — |
 
