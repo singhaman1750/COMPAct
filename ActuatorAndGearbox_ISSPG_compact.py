@@ -6,7 +6,7 @@ import sys
 import time
 
 from CommonComponents import bearings_discrete, nuts_and_bolts_dimensions, motor_driver, motor_frameless_outrunner as motor
-from CommonComponents import restores_stdout
+from CommonComponents import restores_stdout, cad_path
 
 class internalsingleStagePlanetaryGearbox:
     def __init__(self, 
@@ -811,14 +811,14 @@ class internalsingleStagePlanetaryActuator:
     
     def genEquationFile(self, motor_name="NO_MOTOR", gearRatioLL = 0.0, gearRatioUL = 0.0):
         # Per-gear-ratio file for a full sweep (gearRatioReq == 0), same layout as the other gearboxes
-        file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'ISSPG', 'Equation_Files', motor_name, f'isspg_equations_{gearRatioLL}_{gearRatioUL}_onshape.txt')
+        file_path = cad_path('ISSPG', 'Equation_Files', motor_name, f'isspg_equations_{gearRatioLL}_{gearRatioUL}_onshape.txt')
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         self.genEquationFile_editCADdirectly(file_path=file_path)
 
     def genEquationFile_editCADdirectly(self, file_path=None):
         self.setVariables()
         if file_path is None:
-            file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'ISSPG', 'isspg_equations_onshape.txt')
+            file_path = cad_path('ISSPG', 'isspg_equations_onshape.txt')
         with open(file_path, 'w') as eqFile:
             eqFile.writelines([
                 f'"Ns"= {self.Ns}\n',

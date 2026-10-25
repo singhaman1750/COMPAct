@@ -7,7 +7,7 @@ import math
 
 
 from CommonComponents import material, bearings_discrete, nuts_and_bolts_dimensions, motor_frameless_outrunner as motor
-from CommonComponents import restores_stdout
+from CommonComponents import restores_stdout, cad_path
 
 
 # ╔══════════════════════════════════════════════════════════════════════════╗
@@ -757,12 +757,12 @@ class internalcompoundPlanetaryActuator:
     def genEquationFile(self, motor_name="NO_MOTOR", gearRatioLL=0.0, gearRatioUL=0.0):
         self.setVariables()
         lines = self._equation_lines()
-        path_sw = os.path.join(os.path.dirname(__file__), 'CADs', 'ICPG', 'Equation_Files',
+        path_sw = cad_path('ICPG', 'Equation_Files',
                                motor_name, f'icpg_equations_{gearRatioLL}_{gearRatioUL}.txt')
         os.makedirs(os.path.dirname(path_sw), exist_ok=True)
         with open(path_sw, 'w') as f:
             f.writelines(lines)
-        path_os = os.path.join(os.path.dirname(__file__), 'CADs', 'ICPG', 'Equation_Files',
+        path_os = cad_path('ICPG', 'Equation_Files',
                                motor_name, f'icpg_equations_{gearRatioLL}_{gearRatioUL}_onshape.txt')
         with open(path_os, 'w') as f:
             f.writelines(lines)
@@ -770,11 +770,11 @@ class internalcompoundPlanetaryActuator:
     def genEquationFile_editCADdirectly(self):
         self.setVariables()
         lines = self._equation_lines()
-        path_sw = os.path.join(os.path.dirname(__file__), 'CADs', 'ICPG', 'icpg_equations.txt')
+        path_sw = cad_path('ICPG', 'icpg_equations.txt')
         os.makedirs(os.path.dirname(path_sw), exist_ok=True)
         with open(path_sw, 'w') as f:
             f.writelines(lines)
-        path_os = os.path.join(os.path.dirname(__file__), 'CADs', 'ICPG', 'icpg_equations_onshape.txt')
+        path_os = cad_path('ICPG', 'icpg_equations_onshape.txt')
         with open(path_os, 'w') as f:
             f.writelines(lines)
 

@@ -1,12 +1,14 @@
 import io
+import re
 import sys
 from pathlib import Path
 
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT))
 
-from CommonComponents import bearing_mass_kg, restores_stdout  # noqa: E402
+from CommonComponents import CAD_DIR_ENV, bearing_mass_kg, cad_path, restores_stdout  # noqa: E402
 
 
 @pytest.mark.parametrize(
@@ -49,3 +51,26 @@ def test_restores_stdout_keeps_return_value():
     before = sys.stdout
     assert redirects_and_returns() == 42
     assert sys.stdout is before
+
+
+def test_cad_path_defaults_to_the_repo_cads_folder(monkeypatch):
+    monkeypatch.delenv(CAD_DIR_ENV, raising=False)
+    assert Path(cad_path("SSPG", "sspg_equations.txt")) == REPO_ROOT / "CADs" / "SSPG" / "sspg_equations.txt"
+
+
+def test_cad_path_uses_and_creates_the_folder_from_the_environment(monkeypatch, tmp_path):
+    monkeypatch.setenv(CAD_DIR_ENV, str(tmp_path / "CADs"))
+    path = Path(cad_path("DSPG", "Equation_Files", "U8_Lite", "dspg_equations.txt"))
+    assert path == tmp_path / "CADs" / "DSPG" / "Equation_Files" / "U8_Lite" / "dspg_equations.txt"
+    assert path.parent.is_dir()
+
+
+@pytest.mark.parametrize(
+    "module",
+    sorted(p.name for p in REPO_ROOT.glob("Actuator*Gearbox*.py")),
+)
+def test_gearbox_modules_write_cad_files_through_cad_path(module):
+    # A path built by hand would write into the repo's CADs/ even during the
+    # golden check, where every case has its own folder.
+    code = (REPO_ROOT / module).read_text(encoding="utf-8")
+    assert not re.search(r"""['"]CADs['"]""", code), f"{module}: use cad_path()"
