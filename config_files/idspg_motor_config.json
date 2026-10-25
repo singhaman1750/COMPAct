@@ -1,0 +1,47 @@
+{   
+    "Gear_standard_parameters":{
+        "coefficientOfFriction": 0.3,
+        "pressureAngleDEG": 20
+    },
+    "Lewis_params": {
+        "FOS": 1.2,
+        "serviceFactor": 2.0
+    },
+    "MIT_params": {
+        "FOS": 1.2,
+        "serviceFactor": 1.5
+    },
+     "Motor_drivers":{
+        "Moteus":{
+            "driver_upper_holes_dist_from_center" : 23,
+            "driver_lower_holes_dist_from_center" : 15,
+            "driver_side_holes_dist_from_center"  : 20,
+            "driver_mount_holes_dia"              : 2.5,
+            "driver_mount_inserts_OD"             : 3.5,
+            "driver_mount_thickness"              : 1.5,
+            "driver_mount_height"                 : 6
+        },
+        "OdrivePro":{
+            "driver_upper_holes_dist_from_center" : 29,
+            "driver_lower_holes_dist_from_center" : 13,
+            "driver_side_holes_dist_from_center"  : 22.5,
+            "driver_mount_holes_dia"              : 3,
+            "driver_mount_inserts_OD"             : 4.8,
+            "driver_mount_thickness"              : 1.5,
+            "driver_mount_height"                 : 6
+        }
+    },
+    
+    "Design_parameters":{
+        "Internal_designs": {
+            "ringRadialWidthMM": 2.5,
+            "ringHousingWidthMM": 2.0
+        }
+    },
+    "Cost_gain_parameters":{
+        "K_Mass": 1,
+        "K_Eff": -2,
+        "K_Width": 0.2
+    }
+}
+

@@ -1,0 +1,27 @@
+{   
+    "Gear_standard_parameters":{
+        "coefficientOfFriction": 0.3,
+        "pressureAngleDEG": 20
+    },
+    "Lewis_params": {
+        "FOS": 1.2,
+        "serviceFactor": 2.0
+    },
+    "MIT_params": {
+        "FOS": 1.2,
+        "serviceFactor": 1.5
+    },
+    
+    "Design_parameters":{
+        "Internal_designs": {
+            "ringRadialWidthMM": 2.5,
+            "ringHousingWidthMM": 2.0
+        }
+    },
+    "Cost_gain_parameters":{
+        "K_Mass": 1,
+        "K_Eff": -2,
+        "K_Width": 0.2
+    }
+}
+

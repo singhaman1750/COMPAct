@@ -234,7 +234,7 @@ class Client:
 
         # Follow a single 307 redirect (Onshape sometimes re-routes requests)
         if response.status_code == 307:
-            response = self._handle_redirect(response, method, headers, log_response, timeout)
+            response = self._handle_redirect(response, method, headers, body, log_response, timeout)
 
         if log_response:
             print(f"[{method.upper()}] {path}  →  {response.status_code}")
@@ -250,6 +250,7 @@ class Client:
         res: requests.Response,
         method: HTTP,
         headers: dict[str, Any],
+        body: Optional[Union[dict, list]],
         log_response: bool,
         timeout: int,
     ) -> requests.Response:
@@ -262,6 +263,7 @@ class Client:
             location.path,
             query=new_query,
             headers=headers,
+            body=body,
             base_url=new_base,
             log_response=log_response,
             timeout=timeout,

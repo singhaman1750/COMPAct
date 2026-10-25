@@ -4,95 +4,41 @@ import os
 import sys
 import time
 
-#-------------------------------------------------------------------------
-# class material
-#-------------------------------------------------------------------------
-class material:
-    def __init__(self, density, maxAllowableStressMPa = 400, bhn = 2, youngsModulus = 10):
-        self.maxAllowableStressMPa = maxAllowableStressMPa
-        self.bhn = bhn
-        self.youngsModulus = youngsModulus
-        self.density = density
+from CommonComponents import material, bearings_discrete, nuts_and_bolts_dimensions, motor_driver, motor_framed_outrunner as motor
+from CommonComponents import restores_stdout, cad_path
 
-#-------------------------------------------------------------------------
-# class bearings
-#-------------------------------------------------------------------------
-class bearings_discrete:
-    def __init__(self,idRequiredMM):
-        # Bearing dataset entered according to e1102 in [idMM,odMM,widthMM,massKG] format pg no b10-12
-        self.data_bearings = [[10,19,5,0.005],[12,21,5,0.006],[15,24,5,0.007],[17,26,5,0.007],[20,32,7,0.017],[25,37,7,0.021],[28,52,12,0.096],[30,42,7,0.024],[32,58,13,0.122],[35,47,7,0.027],[40,52,7,0.031],[45,58,7,0.038],[50,65,7,0.050],[55,72,9,0.081],[60,78,10,0.103],[65,85,10,0.128],[70,90,10,0.134],[75,95,10,0.149],[80,100,10,0.151],[85,110,13,0.263],
-                              [90,115,13,0.276],[95,120,13,0.297],[100,125,13,0.31],[105,130,13,0.324],[110,140,16,0.497],[120,150,16,0.537],[130,165,18,0.758],[140,170,18,0.832],[150,190,20,1.15],[160,200,20,1.23]]
-        self.idRequiredMM = idRequiredMM
-        self.indexBearing =   0
-        while (self.data_bearings[self.indexBearing][0] < self.idRequiredMM):
-            self.indexBearing +=1
-        # # Extract columns
-        # data_bearings = np.array(self.data_bearings)
-        # self.d = data_bearings[:, 0].reshape(-1, 1)  # Inner diameters
-        # self.D = data_bearings[:, 1]  # Outer diameters
-        # self.B = data_bearings[:, 2]  # Widths
-        # self.L = data_bearings[:, 3]  # Load ratings
-
-        # # Create linear regression models
-        # self.lr_D = LinearRegression().fit(self.d, self.D)
-        # self.lr_B = LinearRegression().fit(self.d, self.B)
-        # self.lr_L = LinearRegression().fit(self.d, self.L)
-
-    def getBearingIDMM(self):
-        return self.data_bearings[self.indexBearing][0]
-    
-    def getBearingODMM(self):
-        return self.data_bearings[self.indexBearing][1]
-    
-    def getBearingWidthMM(self):
-        return self.data_bearings[self.indexBearing][2]
-    
-    def getBearingMassKG(self):
-        return self.data_bearings[self.indexBearing][3]
-
-    # # Continuous functions
-    # def getBearingIDMM(self):
-    #     return self.idRequiredMM  # Identity function for d
-
-    # def getBearingODMM(self):
-    #     return np.round(self.lr_D.predict(np.array([[self.idRequiredMM]]))[0],3)
-
-    # def getBearingWidthMM(self):
-    #     return np.round(self.lr_B.predict(np.array([[self.idRequiredMM]]))[0],2)
-
-    # def getBearingMassKG(self):
-    #     return np.round(self.lr_L.predict(np.array([[self.idRequiredMM]]))[0],3)
 
 class bearings_continuous:
-    def __init__(self,idRequiredMM):
-        # Bearing dataset entered according to e1102 in [idMM,odMM,widthMM,massKG] format pg no b10-12
-        self.data_bearings = [[25,37,7,0.021],
-                              [28,52,12,0.096],
-                              [30,42,7,0.024],
-                              [32,58,13,0.122],
-                              [35,47,7,0.027],
-                              [40,52,7,0.031],
-                              [45,58,7,0.038],
-                              [50,65,7,0.050],
-                              [55,72,9,0.081],
-                              [60,78,10,0.103],
-                              [65,85,10,0.128],
-                              [70,90,10,0.134],
-                              [75,95,10,0.149],
-                              [80,100,10,0.151],
-                              [85,110,13,0.263],
-                              [90,115,13,0.276],
-                              [95,120,13,0.297],
-                              [100,125,13,0.31],
-                              [105,130,13,0.324],
-                              [110,140,16,0.497],
-                              [120,150,16,0.537],
-                              [130,165,18,0.758],
-                              [140,170,18,0.832],
-                              [150,190,20,1.15],
-                              [160,200,20,1.23]]
+    def __init__(self, idRequiredMM):
+        # Bearing dataset entered according to e1102 in 
+        # [idMM, odMM, widthMM, massKG] format pg no b10-12
+        self.data_bearings = [[25, 37, 7, 0.021],
+                              [28, 52, 12, 0.096],
+                              [30, 42, 7, 0.024],
+                              [32, 58, 13, 0.122],
+                              [35, 47, 7, 0.027],
+                              [40, 52, 7, 0.031],
+                              [45, 58, 7, 0.038],
+                              [50, 65, 7, 0.050],
+                              [55, 72, 9, 0.081],
+                              [60, 78, 10, 0.103],
+                              [65, 85, 10, 0.128],
+                              [70, 90, 10, 0.134],
+                              [75, 95, 10, 0.149],
+                              [80, 100, 10, 0.151],
+                              [85, 110, 13, 0.263],
+                              [90, 115, 13, 0.276],
+                              [95, 120, 13, 0.297],
+                              [100, 125, 13, 0.31],
+                              [105, 130, 13, 0.324],
+                              [110, 140, 16, 0.497],
+                              [120, 150, 16, 0.537],
+                              [130, 165, 18, 0.758],
+                              [140, 170, 18, 0.832],
+                              [150, 190, 20, 1.15],
+                              [160, 200, 20, 1.23]]
         self.idRequiredMM = idRequiredMM
-        self.indexBearing =   0
+        self.indexBearing = 0
 
         # while (self.data_bearings[self.indexBearing][0] < self.idRequiredMM):
         #     self.indexBearing +=1
@@ -135,93 +81,6 @@ class bearings_continuous:
         Bearing_Weight = a_weights * self.idRequiredMM * self.idRequiredMM + b_weights * self.idRequiredMM + c_weights
         return Bearing_Weight
         return self.data_bearings[self.indexBearing][3]
-
-#-------------------------------------------------------------------------
-# Nuts and bolts class
-#-------------------------------------------------------------------------
-class nuts_and_bolts_dimensions:
-    def __init__(self, bolt_dia, bolt_type="socket_head"):
-        self.bolt_dia  = bolt_dia
-        self.bolt_type = bolt_type
-        self.bolt_head_dia, self.bolt_head_height = self.get_bolt_head_dimensions(diameter=self.bolt_dia, bolt_type=self.bolt_type)
-        self.nut_width_across_flats, self.nut_thickness = self.get_nut_dimensions(diameter=self.bolt_dia)
-
-    def get_bolt_head_dimensions(self, diameter, bolt_type="socket_head"):
-        diameter = float(diameter)
-
-        socket_head_table = {
-            1.6: {"d2": (3.00), "k": (1.60)},
-            2.0: {"d2": (3.80), "k": (2.00)},
-            2.5: {"d2": (4.50), "k": (2.50)},
-            3.0: {"d2": (5.50), "k": (3.00)},
-            4.0: {"d2": (7.00), "k": (4.00)},
-            5.0: {"d2": (8.50), "k": (5.00)},
-            6.0: {"d2": (10.00), "k": (6.00)},
-            8.0: {"d2": (13.00), "k": (8.00)},
-            10.0: {"d2": (16.00), "k": (10.00)}
-        }
-
-        # Only dk is stored for CSK, t is calculated as (dk - d) / 2
-        csk_table = {
-            3.0: {"dk": 6},
-            4.0: {"dk": 8},
-            5.0: {"dk": 10},
-            6.0: {"dk": 12},
-            8.0: {"dk": 16},
-            10.0: {"dk": 20},
-            12.0: {"dk": 24},
-            16.0: {"dk": 30},
-            20.0: {"dk": 36}
-        }
-
-        if bolt_type == "socket_head":
-            spec = socket_head_table.get(diameter)
-            if not spec:
-                raise ValueError(f"Socket head bolt M{diameter} not found.")
-            return [spec["d2"], spec["k"]]  # Return d2, k
-
-        elif bolt_type == "CSK":
-            spec = csk_table.get(diameter)
-            if not spec:
-                raise ValueError(f"CSK bolt M{diameter} not found.")
-            dk = spec["dk"]
-            t = (dk - diameter) / 2
-            return [dk, round(t, 3)]  # Rounded for clarity
-
-        else:
-            raise ValueError("bolt_type must be 'socket_head' or 'CSK'")
-
-    def get_nut_dimensions(self, diameter):
-        diameter = float(diameter)
-
-        nut_table = {
-            2.0: {"width_across_flats": 4, "height": 1.6},
-            2.5: {"width_across_flats": 5, "height": 2},
-            3.0: {"width_across_flats": 5.5, "height": 2.4},
-            4.0: {"width_across_flats": 7, "height": 3.2},
-            5.0: {"width_across_flats": 8, "height": 4},
-            6.0: {"width_across_flats": 10, "height": 5},
-            7.0: {"width_across_flats": None, "height": 5.5},  # ISO not defined
-            8.0: {"width_across_flats": 13, "height": 6.5},
-            10.0: {"width_across_flats": 16, "height": 8},
-            12.0: {"width_across_flats": 18, "height": 10},
-            14.0: {"width_across_flats": 21, "height": 13},
-            16.0: {"width_across_flats": 24, "height": 13},
-            18.0: {"width_across_flats": 27, "height": 15},
-            20.0: {"width_across_flats": 30, "height": 16},
-            24.0: {"width_across_flats": 36, "height": 18},
-            27.0: {"width_across_flats": 40, "height": 20},
-            30.0: {"width_across_flats": 43, "height": 22},
-        }
-
-        spec = nut_table.get(diameter)
-        if not spec:
-            raise ValueError(f"No nut data found for bolt diameter M{diameter}")
-
-        width_across_flats = spec["width_across_flats"]
-        height = spec["height"]
-
-        return [width_across_flats, height]
 
 #=========================================================================
 # Gearbox classes
@@ -2132,123 +1991,6 @@ class doubleStagePlanetaryGearbox:
 #=========================================================================
 # Motor class
 #=========================================================================
-class motor:
-    def __init__(self, 
-                 maxMotorAngVelRPM     = 1190, # RPM
-                 maxMotorTorque        = 8.83, # Nm
-                 maxMotorPower         = 8.83 * 1190 * 2*np.pi/60, # W 
-                 motorMass             = 0.778, # KG
-                 motorDia              = 106.8, # mm
-                 motorLength           = 47.6,  # mm
-                 motor_mount_hole_PCD       = 32,
-                 motor_mount_hole_dia       = 4,
-                 motor_mount_hole_num       = 4,
-                 motor_output_hole_PCD      = 23,
-                 motor_output_hole_dia      = 4,
-                 motor_output_hole_num      = 4,
-                 wire_slot_dist_from_center = 30,
-                 wire_slot_length           = 10,
-                 wire_slot_radius           = 4,
-                 motorName             = "U12"):
-        
-        self.motorName                  = motorName
-        self.maxMotorAngVelRPM          = maxMotorAngVelRPM
-        self.maxMotorAngVelRadPerSec    = maxMotorAngVelRPM * (2 * np.pi / 60)
-        self.maxMotorTorque             = maxMotorTorque
-        self.maxMotorPower              = maxMotorPower
-        self.massKG                     = motorMass     # kg
-        self.motorDiaMM                 = motorDia      # mm #TODO: make use of this parameter
-        self.motorLengthMM              = motorLength   # mm #TODO: make use of this parameter
-        self.motor_mount_hole_PCD       = motor_mount_hole_PCD 
-        self.motor_mount_hole_dia       = motor_mount_hole_dia
-        self.motor_mount_hole_num       = motor_mount_hole_num
-        self.motor_output_hole_PCD      = motor_output_hole_PCD 
-        self.motor_output_hole_dia      = motor_output_hole_dia
-        self.motor_output_hole_num      = motor_output_hole_num
-        self.wire_slot_dist_from_center = wire_slot_dist_from_center 
-        self.wire_slot_length           = wire_slot_length 
-        self.wire_slot_radius           = wire_slot_radius
-
-    # Maximum motor angular velocity in rad/s
-    def getMaxMotorAngVelRadPerSec(self):
-        return self.maxMotorAngVelRadPerSec
-    
-    # Maximum motor power in W
-    def getMaxMotorPower(self):
-        return self.maxMotorPower
-    
-    # Maximum motor torque in Nm
-    def getMaxMotorTorque(self):
-        return self.maxMotorTorque
-    
-    # Mass of the motor in kg
-    def getMassKG(self):
-        return self.massKG
-    
-    #dimension of the motor in MM
-    def getDiaMM(self):
-        return self.motorDiaMM
-    
-    def getLengthMM(self):
-        return self.motorLengthMM
-    
-    #dimensions of Stator
-    def getStatorIDMM(self):
-        return self.motorStatorIDMM
-    
-    def getStatorODMM(self):
-        return self.motorStatorODMM
-    
-    def getStatorHeight(self):
-        return self.motorStatorHeightMM
-    
-    # Print the motor parameters
-    def printParameters(self):
-        print("Maximum motor angular velocity = ", self.maxMotorAngVelRPM, " RPM")
-        print("Maximum motor power = ", self.maxMotorPower, " W")
-        print("Maximum motor torque = ", self.maxMotorTorque, " Nm")
-        print("Maximum motor angular velocity = ", self.maxMotorAngVelRadPerSec, " rad/s")
-        print("Mass of the motor = ", self.massKG, " kg")
-        print ('Diameter of the motor = ', self.motorDiaMM, ' mm')
-        print( " Length of the motor = ", self.motorLengthMM, ' mm')
-        if (self.motorStatorIDMM != 0 and self.motorStatorODMM != 0 and self.motorStatorHeightMM !=0):
-            print (' Inner Diameter of Stator = ', self.motorStatorIDMM, ' mm')
-            print (' Outer Diameter of Stator = ', self.motorStatorODMM, ' mm')
-            print (' Height of Stator = ', self.motorStatorIDMM, ' mm')
-
-#=========================================================================
-# Motor Driver class
-#=========================================================================
-class motor_driver:
-    def __init__(self, driver_name, motor_driver_data):
-        self.driver_name                          = driver_name
-        self.driver_upper_holes_dist_from_center  = motor_driver_data["driver_upper_holes_dist_from_center"]
-        self.driver_lower_holes_dist_from_center  = motor_driver_data["driver_lower_holes_dist_from_center"]
-        self.driver_side_holes_dist_from_center   = motor_driver_data["driver_side_holes_dist_from_center"]
-        self.driver_mount_holes_dia               = motor_driver_data["driver_mount_holes_dia"]
-        self.driver_mount_inserts_OD              = motor_driver_data["driver_mount_inserts_OD"]
-        self.driver_mount_thickness               = motor_driver_data["driver_mount_thickness"]
-        self.driver_mount_height                  = motor_driver_data["driver_mount_height"]
-
-        # self.print_vars()
-    
-    def print_vars(self):
-        print("driver_name:", self.driver_name)
-        print("driver_upper_holes_dist_from_center: ", self.driver_upper_holes_dist_from_center)
-        print("driver_lower_holes_dist_from_center: ", self.driver_lower_holes_dist_from_center)
-        print("driver_side_holes_dist_from_center: ", self.driver_side_holes_dist_from_center)
-        print("driver_mount_holes_dia: ", self.driver_mount_holes_dia)
-        print("driver_mount_inserts_OD: ", self.driver_mount_inserts_OD)
-        print("driver_mount_thickness: ", self.driver_mount_thickness)
-        print("driver_mount_height: ", self.driver_mount_height)
-        print("---")
-
-#=========================================================================
-# Actuator classes
-#=========================================================================
-#-------------------------------------------------------------------------
-# Single Stage Actuator class
-#-------------------------------------------------------------------------
 class singleStagePlanetaryActuator:
     def __init__(self, 
                  design_params,
@@ -2525,7 +2267,8 @@ class singleStagePlanetaryActuator:
 
     def genEquationFile(self, motor_name="NO_MOTOR", gearRatioLL = 0.0, gearRatioUL = 0.0):
         self.setVariables()
-        file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'SSPG', 'Equation_Files', motor_name, f'sspg_equations_{gearRatioLL}_{gearRatioUL}.txt')
+        file_path = cad_path('SSPG', 'Equation_Files', motor_name, f'sspg_equations_{gearRatioLL}_{gearRatioUL}.txt')
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, 'w') as eqFile:
             eqFile.writelines([
                 # ---------------- Optimization Variables ----------------
@@ -2660,7 +2403,8 @@ class singleStagePlanetaryActuator:
                 f'"tight_clearance_3DP" = {self.tight_clearance_3DP}\n',
                 f'"loose_clearance_3DP" = {self.loose_clearance_3DP}\n'                
             ])
-        file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'SSPG', 'Equation_Files', motor_name, f'sspg_equations_{gearRatioLL}_{gearRatioUL}_onshape.txt')
+        file_path = cad_path('SSPG', 'Equation_Files', motor_name, f'sspg_equations_{gearRatioLL}_{gearRatioUL}_onshape.txt')
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, 'w') as eqFile:
             eqFile.writelines([
                 # ---------------- Optimization Variables ----------------
@@ -2797,7 +2541,7 @@ class singleStagePlanetaryActuator:
 
     def genEquationFile_editCADdirectly(self):
         self.setVariables()
-        file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'SSPG', 'sspg_equations.txt')
+        file_path = cad_path('SSPG', 'sspg_equations.txt')
         with open(file_path, 'w') as eqFile:
             eqFile.writelines([
                 # ---------------- Optimization Variables ----------------
@@ -2932,7 +2676,7 @@ class singleStagePlanetaryActuator:
                 f'"tight_clearance_3DP" = {self.tight_clearance_3DP}\n',
                 f'"loose_clearance_3DP" = {self.loose_clearance_3DP}\n'                
             ])
-        file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'SSPG', 'sspg_equations_onshape.txt')
+        file_path = cad_path('SSPG', 'sspg_equations_onshape.txt')
         with open(file_path, 'w') as eqFile:
             eqFile.writelines([
                 # ---------------- Optimization Variables ----------------
@@ -3371,7 +3115,8 @@ class singleStagePlanetaryActuator:
         # density of materials
         #------------------------------------
         # density of both gears and the structural materials is the same in 3D printed gearbox
-        density_3DP_material = self.planetaryGearbox.densityGears
+        density_gears     = self.planetaryGearbox.densityGears      # gears; the ring gear (and its casing) counts as a gear
+        density_structure = self.planetaryGearbox.densityStructure  # motor case, carriers, retainers, holders
 
         #------------------------------------
         # Face Width
@@ -3460,7 +3205,7 @@ class singleStagePlanetaryActuator:
                             + np.pi * ((Motor_case_OD * 0.5)**2 - (Motor_case_ID * 0.5)**2) * Motor_case_height
         ) * 1e-9
 
-        Motor_case_mass = Motor_case_volume * density_3DP_material
+        Motor_case_mass = Motor_case_volume * density_structure
 
         #--------------------------------------
         # Mass: sspg_gearbox_casing
@@ -3504,7 +3249,7 @@ class singleStagePlanetaryActuator:
         large_fillet_height = ringFwMM
         large_fillet_volume = 0.5 * (np.pi * (((large_fillet_OD*0.5)**2) - ((large_fillet_ID)*0.5)**2) * large_fillet_height) * 1e-9
 
-        gearbox_casing_mass = (ring_volume + bearing_holding_structure_volume + case_mounting_structure_volume + large_fillet_volume) * density_3DP_material
+        gearbox_casing_mass = (ring_volume + bearing_holding_structure_volume + case_mounting_structure_volume + large_fillet_volume) * density_gears
 
         #----------------------------------
         # Mass: sspg_carrier
@@ -3520,7 +3265,7 @@ class singleStagePlanetaryActuator:
         carrier_volume = (np.pi * (((carrier_OD*0.5)**2) - ((carrier_ID)*0.5)**2) * carrier_height
                         + np.pi * ((carrier_shaft_OD*0.5)**2) * carrier_shaft_height * carrier_shaft_num) * 1e-9
 
-        carrier_mass = carrier_volume * density_3DP_material
+        carrier_mass = carrier_volume * density_structure
 
         #----------------------------------
         # Mass: sspg_sun
@@ -3537,13 +3282,13 @@ class singleStagePlanetaryActuator:
         sun_shaft_volume = np.pi * ((sun_shaft_dia*0.5) ** 2) * sun_shaft_height * 1e-9
 
         sun_volume       = sun_hub_volume + sun_gear_volume + sun_shaft_volume
-        sun_mass         = sun_volume * density_3DP_material
+        sun_mass         = sun_volume * density_gears
 
         #--------------------------------------
         # Mass: sspg_planet
         #--------------------------------------
         planet_volume = (np.pi * ((DiaPlanetMM*0.5)**2 - (planet_bore*0.5)**2) * planetFwMM) * 1e-9
-        planet_mass   = planet_volume * density_3DP_material
+        planet_mass   = planet_volume * density_gears
 
         #--------------------------------------
         # Mass: sspg_sec_carrier
@@ -3552,7 +3297,7 @@ class singleStagePlanetaryActuator:
         sec_carrier_ID = (DiaSunMM + DiaPlanetMM) - planet_shaft_dia - 2 * standard_clearance_1_5mm
 
         sec_carrier_volume = (np.pi * ((sec_carrier_OD*0.5)**2 - (sec_carrier_ID*0.5)**2) * sec_carrier_thickness) * 1e-9
-        sec_carrier_mass   = sec_carrier_volume * density_3DP_material
+        sec_carrier_mass   = sec_carrier_volume * density_structure
 
         #--------------------------------------
         # Mass: sspg_sun_shaft_bearing
@@ -3579,7 +3324,7 @@ class singleStagePlanetaryActuator:
 
         bearing_retainer_volume = (np.pi * ((bearing_retainer_OD*0.5)**2 - (bearing_retainer_ID*0.5)**2) * bearing_retainer_thickness) * 1e-9
 
-        bearing_retainer_mass   = bearing_retainer_volume * density_3DP_material
+        bearing_retainer_mass   = bearing_retainer_volume * density_structure
 
         self.Motor_case_mass              = Motor_case_mass
         self.gearbox_casing_mass          = gearbox_casing_mass
@@ -3903,7 +3648,8 @@ class compoundPlanetaryActuator:
     def genEquationFile(self, motor_name="NO_MOTOR", gearRatioLL = 0.0, gearRatioUL = 0.0):
         # writing values into text file imported which is imported into solidworks
         self.setVariables()
-        file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'CPG', 'Equation_Files', motor_name, f'cpg_equations_{gearRatioLL}_{gearRatioUL}.txt')
+        file_path = cad_path('CPG', 'Equation_Files', motor_name, f'cpg_equations_{gearRatioLL}_{gearRatioUL}.txt')
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, 'w') as eqFile:
             l = [
                     f'"Ns"= {self.Ns}\n',
@@ -4030,7 +3776,8 @@ class compoundPlanetaryActuator:
             eqFile.writelines(l)
         eqFile.close()
         
-        file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'CPG', 'Equation_Files', motor_name, f'cpg_equations_{gearRatioLL}_{gearRatioUL}_onshape.txt')
+        file_path = cad_path('CPG', 'Equation_Files', motor_name, f'cpg_equations_{gearRatioLL}_{gearRatioUL}_onshape.txt')
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, 'w') as eqFile:
             l = [
                     f'"Ns"= {self.Ns}\n',
@@ -4160,7 +3907,7 @@ class compoundPlanetaryActuator:
     def genEquationFile_editCADdirectly(self):
         # writing values into text file imported which is imported into solidworks
         self.setVariables()
-        file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'CPG', 'cpg_equations.txt')
+        file_path = cad_path('CPG', 'cpg_equations.txt')
         with open(file_path, 'w') as eqFile:
             l = [
                     f'"Ns"= {self.Ns}\n',
@@ -4287,7 +4034,7 @@ class compoundPlanetaryActuator:
             eqFile.writelines(l)
         eqFile.close()
 
-        file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'CPG', 'cpg_equations_onshape.txt')
+        file_path = cad_path('CPG', 'cpg_equations_onshape.txt')
         with open(file_path, 'w') as eqFile:
             l = [
                     f'"Ns"= {self.Ns}\n',
@@ -4740,7 +4487,8 @@ class compoundPlanetaryActuator:
         #-----------------------------------------
         # Density
         #-----------------------------------------
-        density_3DP_material = self.compoundPlanetaryGearbox.densityGears
+        density_gears     = self.compoundPlanetaryGearbox.densityGears      # gears; the ring gear (and its casing) counts as a gear
+        density_structure = self.compoundPlanetaryGearbox.densityStructure  # motor case, carriers, retainers, holders
 
         #-----------------------------------------
         # Face Width
@@ -4841,7 +4589,7 @@ class compoundPlanetaryActuator:
                             + np.pi * ((Motor_case_OD * 0.5)**2 - (Motor_case_ID * 0.5)**2) * Motor_case_height
         ) * 1e-9
 
-        Motor_case_mass = Motor_case_volume * density_3DP_material
+        Motor_case_mass = Motor_case_volume * density_structure
 
         #--------------------------------------
         # Mass: cpg_gearbox_casing
@@ -4885,7 +4633,7 @@ class compoundPlanetaryActuator:
         large_fillet_height = ringFwMM
         large_fillet_volume = 0.5 * (np.pi * (((large_fillet_OD*0.5)**2) - ((large_fillet_ID)*0.5)**2) * large_fillet_height) * 1e-9
 
-        gearbox_casing_mass = (ring_volume + bearing_holding_structure_volume + case_mounting_structure_volume + large_fillet_volume) * density_3DP_material
+        gearbox_casing_mass = (ring_volume + bearing_holding_structure_volume + case_mounting_structure_volume + large_fillet_volume) * density_gears
 
         #----------------------------------
         # Mass: cpg_carrier
@@ -4901,7 +4649,7 @@ class compoundPlanetaryActuator:
         carrier_volume = (np.pi * (((carrier_OD*0.5)**2) - ((carrier_ID)*0.5)**2) * carrier_height
                         + np.pi * ((carrier_shaft_OD*0.5)**2) * carrier_shaft_height * carrier_shaft_num) * 1e-9
 
-        carrier_mass = carrier_volume * density_3DP_material
+        carrier_mass = carrier_volume * density_structure
 
         #----------------------------------
         # Mass: cpg_sun
@@ -4918,14 +4666,14 @@ class compoundPlanetaryActuator:
         sun_shaft_volume = np.pi * ((sun_shaft_dia*0.5) ** 2) * sun_shaft_height * 1e-9
 
         sun_volume       = sun_hub_volume + sun_gear_volume + sun_shaft_volume
-        sun_mass         = sun_volume * density_3DP_material
+        sun_mass         = sun_volume * density_gears
 
         #--------------------------------------
         # Mass: cpg_planet
         #--------------------------------------
         planet1_volume = (np.pi * ((DiaPlanet1MM*0.5)**2 - (planet_bore*0.5)**2) * planet1FwMM) * 1e-9
         planet2_volume = (np.pi * ((DiaPlanet2MM*0.5)**2 - (planet_bore*0.5)**2) * planet2FwMM) * 1e-9
-        planet_mass   = (planet1_volume + planet2_volume) * density_3DP_material
+        planet_mass   = (planet1_volume + planet2_volume) * density_gears
 
         #--------------------------------------
         # Mass: cpg_sec_carrier
@@ -4934,7 +4682,7 @@ class compoundPlanetaryActuator:
         sec_carrier_ID = (DiaSunMM + DiaPlanet1MM) - planet_shaft_dia - 2 * standard_clearance_1_5mm
 
         sec_carrier_volume = (np.pi * ((sec_carrier_OD*0.5)**2 - (sec_carrier_ID*0.5)**2) * sec_carrier_thickness) * 1e-9
-        sec_carrier_mass   = sec_carrier_volume * density_3DP_material
+        sec_carrier_mass   = sec_carrier_volume * density_structure
 
         #--------------------------------------
         # Mass: cpg_sun_shaft_bearing
@@ -4961,7 +4709,7 @@ class compoundPlanetaryActuator:
 
         bearing_retainer_volume = (np.pi * ((bearing_retainer_OD*0.5)**2 - (bearing_retainer_ID*0.5)**2) * bearing_retainer_thickness) * 1e-9
 
-        bearing_retainer_mass   = bearing_retainer_volume * density_3DP_material
+        bearing_retainer_mass   = bearing_retainer_volume * density_structure
 
         self.Motor_case_mass              = Motor_case_mass
         self.gearbox_casing_mass          = gearbox_casing_mass
@@ -5277,12 +5025,15 @@ class wolfromPlanetaryActuator:
         self.alpha_s = ( self.dp_s ** 2 - self.db_s ** 2 )**0.5 / self.db_s * 180 / np.pi - self.pressure_angle_deg
         self.beta_s = ( 360 / ( 4 * self.Ns ) - self.alpha_s ) * 2
 
-        self.sun_hub_dia = self.motor_output_hole_PCD + self.motor_output_hole_dia + self.standard_clearance_1_5mm * 2
+        if self.motor_output_hole_PCD + self.motor_output_hole_CSK_OD + self.standard_clearance_1_5mm * 2 > self.module * self.Ns + 2*self.module:
+            self.sun_hub_dia = self.motor_output_hole_PCD + self.motor_output_hole_CSK_OD + self.standard_clearance_1_5mm * 2
+        else:
+            self.sun_hub_dia = self.module * self.Ns + 2*self.module
 
-        self.fw_s_used = self.fw_p_s + self.fw_p_b + self.clearance_planet + self.sec_carrier_thickness + self.standard_clearance_1_5mm - self.carrier_small_ring_inner_bearing_flap +  self.standard_clearance_1_5mm
+        self.fw_s_used = self.fw_p_s + self.fw_p_b + self.clearance_planet + self.sec_carrier_thickness + self.standard_clearance_1_5mm 
 
         # --- Bearing ---
-        IdrequiredMM = self.module * (self.Ns + self.Np_b) + self.bearingIDClearanceMM
+        IdrequiredMM = self.module * (self.Nr_s) + 2*self.module + 2*self.small_ring_case_thickness
         Bearings            = bearings_discrete(IdrequiredMM)
         self.bearing_ID     = Bearings.getBearingIDMM()
         self.bearing_OD     = Bearings.getBearingODMM()
@@ -5291,15 +5042,18 @@ class wolfromPlanetaryActuator:
         # --- Motor & Gearbox casing ---
         self.case_dist = self.sec_carrier_thickness + self.clearance_planet + self.sun_coupler_hub_thickness - self.case_mounting_surface_height
         self.case_mounting_hole_shift = self.case_mounting_hole_dia / 2 - 0.5
-        self.clearance_motor_and_case = (5 if ((self.Ns + self.Np_b * 2) * self.module) < self.motor_OD else (((self.Ns + self.Np_b * 2) * self.module - self.motor_OD) * 0.5 + 5) )
-        self.motor_case_OD_base = self.motor_OD + self.clearance_motor_and_case * 2 + self.Motor_case_thickness * 2
+        self.clearance_motor_and_case = 5
+        #self.clearance_motor_and_case = (5 if ((self.Ns + self.Np_b * 2) * self.module) < self.motor_OD else (((self.Ns + self.Np_b * 2) * self.module - self.motor_OD) * 0.5 + 5) )
+        #self.motor_case_OD_base = self.motor_OD + self.clearance_motor_and_case * 2 + self.Motor_case_thickness * 2
+        self.motor_case_OD_base = self.maxGearboxDiameter + 2*self.ring_radial_thickness + self.clearance_motor_and_case * 2 + self.Motor_case_thickness * 2
         self.case_mounting_PCD = self.motor_case_OD_base + self.case_mounting_hole_shift * 2
         self.Motor_case_OD_max = self.case_mounting_PCD + self.case_mounting_hole_allen_socket_dia + self.clearance_case_mount_holes_shell_thickness * 2
         self.bearing_mount_thickness = (self.output_mounting_hole_dia * 2 if (self.bearing_OD + self.output_mounting_hole_dia * 4) > (self.Nr_s * self.module + 2 * self.h_b) else ((self.Nr_s * self.module + 2 * self.h_b - (self.bearing_OD + self.output_mounting_hole_dia * 4)) / 2) + self.output_mounting_hole_dia * 2 + self.standard_clearance_1_5mm)
         self.output_mounting_PCD = self.bearing_OD + self.bearing_mount_thickness
-        self.Motor_case_ID = self.motor_OD + self.clearance_motor_and_case * 2
+        #self.Motor_case_ID = self.motor_OD + self.clearance_motor_and_case * 2
+        self.Motor_case_ID = self.maxGearboxDiameter + self.clearance_motor_and_case * 2 + 2*self.ring_radial_thickness
 
-        self.gear_casing_big_ring_to_bearing_dist = self.fw_p_s + self.clearance_planet + self.carrier_thickness + self.standard_clearance_1_5mm*2/3 + self.small_ring_case_thickness - self.standard_clearance_1_5mm # last - is because of change in flap position
+        self.gear_casing_big_ring_to_bearing_dist = self.fw_p_s + self.clearance_planet + self.carrier_thickness + self.carrier_bearing_step_width + self.carrier_small_ring_inner_bearing_height - self.bearing_height - self.carrier_bearing_step_width
 
         # --- Carrier ---
         self.carrier_PCD = ( self.Np_b + self.Ns ) * self.module
@@ -5308,8 +5062,8 @@ class wolfromPlanetaryActuator:
         self.actuator_width = (  self.fw_r_b
                                + self.clearance_planet
                                + self.gear_casing_big_ring_to_bearing_dist
+                               + self.carrier_bearing_step_width
                                + self.bearing_height
-                               + self.standard_clearance_1_5mm
                                + self.case_dist
                                + self.bearing_retainer_thickness
                                + self.motor_height
@@ -5320,7 +5074,8 @@ class wolfromPlanetaryActuator:
     def genEquationFile(self, motor_name="NO_MOTOR", gearRatioLL = 0.0, gearRatioUL = 0.0):
         # writing values into text file imported which is imported into solidworks
         self.setVariables()
-        file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'WPG', 'Equation_Files', motor_name, f'wpg_equations_{gearRatioLL}_{gearRatioUL}.txt')
+        file_path = cad_path('WPG', 'Equation_Files', motor_name, f'wpg_equations_{gearRatioLL}_{gearRatioUL}.txt')
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         # print("File Path: ",file_path)
         with open(file_path, 'w') as eqFile:
             l = [
@@ -5471,7 +5226,8 @@ class wolfromPlanetaryActuator:
             ]
             eqFile.writelines(l)
 
-        file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'WPG', 'Equation_Files', motor_name, f'wpg_equations_{gearRatioLL}_{gearRatioUL}_onshape.txt')
+        file_path = cad_path('WPG', 'Equation_Files', motor_name, f'wpg_equations_{gearRatioLL}_{gearRatioUL}_onshape.txt')
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         # print("File Path: ",file_path)
         with open(file_path, 'w') as eqFile:
             l = [
@@ -5625,7 +5381,7 @@ class wolfromPlanetaryActuator:
     def genEquationFile_editCADdirectly(self):
         # writing values into text file imported which is imported into solidworks
         self.setVariables()
-        file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'WPG', 'wpg_equations.txt')
+        file_path = cad_path('WPG', 'wpg_equations.txt')
         # print("File Path: ",file_path)
         with open(file_path, 'w') as eqFile:
             l = [
@@ -5777,7 +5533,7 @@ class wolfromPlanetaryActuator:
             eqFile.writelines(l)
 
 
-        file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'WPG', 'wpg_equations_onshape.txt')
+        file_path = cad_path('WPG', 'wpg_equations_onshape.txt')
         # print("File Path: ",file_path)
         with open(file_path, 'w') as eqFile:
             l = [
@@ -6470,7 +6226,8 @@ class wolfromPlanetaryActuator:
         #----------------------------------
         # Density of Materials
         #----------------------------------
-        density_3DP_material = self.wolfromPlanetaryGearbox.densityGears
+        density_gears     = self.wolfromPlanetaryGearbox.densityGears      # gears; the ring gear (and its casing) counts as a gear
+        density_structure = self.wolfromPlanetaryGearbox.densityStructure  # motor case, carriers, retainers, holders
 
         #----------------------------------
         # Diameter and Radius
@@ -6527,8 +6284,8 @@ class wolfromPlanetaryActuator:
         output_mounting_hole_dia     = self.output_mounting_hole_dia    
         sec_carrier_thickness        = self.sec_carrier_thickness       
         sun_coupler_hub_thickness    = self.sun_coupler_hub_thickness   
-        # sun_shaft_bearing_OD       = self.sun_shaft_bearing_OD        
-        # carrier_bearing_step_width = self.carrier_bearing_step_width  
+        sun_shaft_bearing_OD       = self.sun_shaft_bearing_OD        
+        carrier_bearing_step_width = self.carrier_bearing_step_width  
         planet_shaft_dia             = self.planet_shaft_dia            
         sun_shaft_bearing_ID         = self.sun_shaft_bearing_ID        
         sun_shaft_bearing_width      = self.sun_shaft_bearing_width     
@@ -6543,6 +6300,7 @@ class wolfromPlanetaryActuator:
         small_ring_output_wall_thickness = self.small_ring_output_wall_thickness # 5
         gearbox_casing_thickness         = self.gearbox_casing_thickness # 4
         small_ring_gear_casing_thickness = self.small_ring_gear_casing_thickness # 4
+        small_ring_case_thickness        = self.small_ring_case_thickness # 4
         bearingIDClearanceMM             = self.bearingIDClearanceMM
 
         # To be written in Motor JSON files
@@ -6552,7 +6310,7 @@ class wolfromPlanetaryActuator:
         #-------------------------------
         # Bearings: Bearing1 & Bearing2
         #-------------------------------
-        IdRequiredMM      = module1 * (Ns + Np1) + bearingIDClearanceMM 
+        IdRequiredMM      = module2 * (Nr2) + 2*module2 + 2*small_ring_case_thickness
                                                                                
         Bearing           = bearings_discrete(IdRequiredMM)
 
@@ -6584,22 +6342,22 @@ class wolfromPlanetaryActuator:
         # wpg_carrier
         #-------------------------------------------------------
         carrier_OD     = ((Ns + Np1) * module1 + planet_pin_socket_head_dia + standard_clearance_1_5mm * 2)
-        carrier_ID     = carrier_small_ring_inner_bearing_OD
+        carrier_ID     = sun_shaft_bearing_OD - standard_clearance_1_5mm * 2
         carrier_height = carrier_thickness
 
-        carrier_bearing_mount_ID     = carrier_small_ring_inner_bearing_OD
-        carrier_bearing_mount_OD     = standard_clearance_1_5mm * (8/3) + carrier_small_ring_inner_bearing_OD
-        carrier_bearing_mount_height = carrier_small_ring_inner_bearing_height - carrier_thickness + standard_clearance_1_5mm
+        carrier_bearing_mount_ID     = carrier_small_ring_inner_bearing_ID
+        carrier_bearing_mount_OD     = carrier_ID
+        carrier_bearing_mount_height = carrier_small_ring_inner_bearing_height + carrier_bearing_step_width
 
         carrier_shaft_OD     = planet_shaft_dia
         carrier_shaft_height = planet1FwMM  + planet2FwMM + clearance_planet * 2
-        carrier_shaft_num    = numPlanet * 2 + numPlanet # assuming support triangle weighs twice as much as shaft
+        carrier_shaft_num    = numPlanet * 2 #+ numPlanet # assuming support triangle weighs twice as much as shaft
 
         carrier_volume = (np.pi * (((carrier_OD*0.5)**2) - ((carrier_ID)*0.5)**2) * carrier_height
                         + np.pi * (((carrier_bearing_mount_OD*0.5)**2) - ((carrier_bearing_mount_ID)*0.5)**2) * carrier_bearing_mount_height  
                         + np.pi * ((carrier_shaft_OD*0.5)**2) * carrier_shaft_height * carrier_shaft_num) * 1e-9
 
-        carrier_mass = carrier_volume * density_3DP_material
+        carrier_mass = carrier_volume * density_structure
 
         #-------------------------------------------------------
         # wpg_motor_casing
@@ -6621,7 +6379,7 @@ class wolfromPlanetaryActuator:
         Motor_case_volume = ( np.pi * ((Motor_case_OD * 0.5)**2) * base_plate_thickness 
                             + np.pi * ((Motor_case_OD * 0.5)**2 - (Motor_case_ID * 0.5)**2) * Motor_case_height) * 1e-9
 
-        Motor_case_mass = Motor_case_volume * density_3DP_material
+        Motor_case_mass = Motor_case_volume * density_structure
 
         #-------------------------------------------------------
         # wpg_gearbox_casing
@@ -6632,7 +6390,7 @@ class wolfromPlanetaryActuator:
         # 3. Ring gear-1
         # 4. Case mounting structure
         #-------------------------------------------------------
-        ring1_ID     = Nr1 * module2
+        ring1_ID     = Nr1 * module1
         ringFwUsedMM = ring1FwMM
 
         # --- Bearing holding structure --- 
@@ -6646,25 +6404,26 @@ class wolfromPlanetaryActuator:
 
         bearing_holding_structure_ID     = bearing_OD
         bearing_holding_structure_OD     = bearing_OD + bearing_mount_thickness * 2
-        bearing_holding_structure_height = bearing_height + standard_clearance_1_5mm
+        bearing_holding_structure_height = bearing_height + standard_clearance_1_5mm + gearbox_casing_thickness/2
 
         bearing_holding_structure_volume = np.pi * (((bearing_holding_structure_OD*0.5)**2) - 
                                                     ((bearing_holding_structure_ID*0.5)**2)) * bearing_holding_structure_height * 1e-9
-        # --- Spacer wall for ring-2 --- 
-        spacer_wall_for_ring2_ID     = ((Nr2 * module2 + 2 * ring2_radial_thickness) + standard_clearance_1_5mm * 2)
-        spacer_wall_for_ring2_OD     = spacer_wall_for_ring2_ID + gearbox_casing_thickness * 2
-        spacer_wall_for_ring2_height = gear_casing_big_ring_to_bearing_dist
-
-        spacer_wall_for_ring2_volume = np.pi * (((spacer_wall_for_ring2_OD*0.5)**2) - 
-                                                ((spacer_wall_for_ring2_ID*0.5)**2)) * spacer_wall_for_ring2_height * 1e-9
-
+        
         # --- Ring gear-1 --- 
         ring_gear1_ID     = (Nr1 * module1)
-        ring_gear1_OD     = ring_gear1_ID + ring1_radial_thickness * 2
+        ring_gear1_OD     = bearing_ID + standard_clearance_1_5mm * 4
         ring_gear1_height = ring1FwMM
 
         ring_gear1_volume = np.pi * (((ring_gear1_OD*0.5)**2) - 
                                      ((ring_gear1_ID*0.5)**2)) * ring_gear1_height * 1e-9
+
+        # --- Spacer wall for ring-2 --- 
+        spacer_wall_for_ring2_ID     = ring_gear1_OD
+        spacer_wall_for_ring2_OD     = spacer_wall_for_ring2_ID + gearbox_casing_thickness * 2
+        spacer_wall_for_ring2_height = gear_casing_big_ring_to_bearing_dist + ring1FwMM + clearance_planet
+
+        spacer_wall_for_ring2_volume = np.pi * (((spacer_wall_for_ring2_OD*0.5)**2) - 
+                                                ((spacer_wall_for_ring2_ID*0.5)**2)) * spacer_wall_for_ring2_height * 1e-9
 
         # --- Case mounting structure --- 
         case_dist = (sec_carrier_thickness 
@@ -6672,25 +6431,18 @@ class wolfromPlanetaryActuator:
                      + sun_coupler_hub_thickness 
                      - case_mounting_surface_height)
 
-        case_mounting_structure_ID     = Motor_case_OD - Motor_case_OD_base_to_chamfer * 2
-        case_mounting_structure_OD     = Motor_case_OD
-        case_mounting_structure_height = case_dist
+        case_mounting_structure_ID     = self.motor_case_OD_base - 2*self.Motor_case_OD_base_to_chamfer
+        case_mounting_structure_OD     = self.Motor_case_OD_max
+        case_mounting_structure_height = case_dist  
 
         case_mounting_structure_volume  = np.pi * (((case_mounting_structure_OD*0.5)**2) - 
                                                     ((case_mounting_structure_ID*0.5)**2)) * case_mounting_structure_height * 1e-9
-
-
-        large_fillet_ID     = ring1_OD
-        large_fillet_OD     = Motor_case_OD
-        large_fillet_height = ring1FwMM/2
-        large_fillet_volume = 0.5 * (np.pi * (((large_fillet_OD*0.5)**2) - ((large_fillet_ID)*0.5)**2) * large_fillet_height) * 1e-9
-
-
+        
         gearbox_casing_mass = (bearing_holding_structure_volume
                                + spacer_wall_for_ring2_volume
                                + case_mounting_structure_volume 
-                               + large_fillet_volume
-                               + ring_gear1_volume) * density_3DP_material
+                               #+ large_fillet_volume
+                               + ring_gear1_volume) * density_gears
 
         #-------------------------------------------------------
         # wpg_motor
@@ -6709,7 +6461,7 @@ class wolfromPlanetaryActuator:
         #-------------------------------------------------------
         planet1_volume = (np.pi * ((DiaPlanet1MM*0.5)**2 - (planet_bore*0.5)**2) * planet1FwMM) * 1e-9
         planet2_volume = (np.pi * ((DiaPlanet2MM*0.5)**2 - (planet_bore*0.5)**2) * planet2FwMM) * 1e-9
-        planet_mass   = (planet1_volume + planet2_volume) * density_3DP_material
+        planet_mass   = (planet1_volume + planet2_volume) * density_gears
 
         #-------------------------------------------------------
         # wpg_sec_carrier
@@ -6718,91 +6470,32 @@ class wolfromPlanetaryActuator:
         sec_carrier_ID = (DiaSunMM + DiaPlanet1MM) - planet_shaft_dia - 2 * standard_clearance_1_5mm
 
         sec_carrier_volume = (np.pi * ((sec_carrier_OD*0.5)**2 - (sec_carrier_ID*0.5)**2) * sec_carrier_thickness) * 1e-9
-        sec_carrier_mass   = sec_carrier_volume * density_3DP_material
+        sec_carrier_mass   = sec_carrier_volume * density_structure
 
-        #-------------------------------------------------------
-        # wpg_small_ring_bearing_shaft
-        #-------------------------------------------------------
-        small_ring_bearing_shaft_dia = carrier_small_ring_inner_bearing_ID
-        small_ring_bearing_shaft_height = (bearing_height 
-                                         + carrier_thickness
-                                         + carrier_small_ring_inner_bearing_flap)
-        
-        small_ring_bearing_shaft_volume = (np.pi 
-                                        * (small_ring_bearing_shaft_dia * 0.5)**2 
-                                        *  small_ring_bearing_shaft_height) * 1e-9
-        
-        small_ring_bearing_shaft_mass = small_ring_bearing_shaft_volume * density_3DP_material
 
         #-------------------------------------------------------
         # wpg_small_ring
         # ---
-        # 1. Ring gear2
-        # 2. ring2bearing_spacer_cone_shell
-        # 3. ring2bearing_spacer_disc
-        # 4. bearing_holding_structure
-        # 5. output_wall
-        # 6. sun_shaft_bearing_holding_structure
         #-------------------------------------------------------
 
-        # --- Ring gear2 ---
-        ring_gear2_ID     = (Nr2 * module2)
-        ring_gear2_OD     = ring_gear2_ID + ring2_radial_thickness * 2
-        ring_gear2_height = ring2FwMM
+        small_ring_OD     = module2 * (Nr2) + 2*module2 + 2*small_ring_case_thickness
+        small_ring_ID     = module2 * (Nr2) 
+        small_ring_height = ring2FwMM + carrier_thickness + carrier_bearing_step_width + clearance_planet
 
-        ring_gear2_volume = np.pi * (((ring_gear2_OD*0.5)**2) - 
-                                     ((ring_gear2_ID*0.5)**2)) * ring_gear2_height * 1e-9
-
-        # --- ring2bearing_spacer_cone_shell ---
-        ring2bearing_spacer_cone_shell_base   = small_ring_gear_casing_thickness
-        ring2bearing_spacer_cone_shell_height = carrier_thickness + standard_clearance_1_5mm + clearance_planet
-        ring2bearing_spacer_cone_shell_radius = ((ring_gear2_OD + carrier_OD) / 2) /2
+        small_ring_bearing_structure_OD = small_ring_OD
+        small_ring_bearing_structure_ID = carrier_small_ring_inner_bearing_OD
+        small_ring_bearing_structure_height = carrier_small_ring_inner_bearing_height + carrier_bearing_step_width
         
-        ring2bearing_spacer_cone_shell_volume = (2 * np.pi * ring2bearing_spacer_cone_shell_radius
-                                                 * ring2bearing_spacer_cone_shell_height
-                                                 * ring2bearing_spacer_cone_shell_base) * 1e-9
+        output_bearing_structure_OD = bearing_ID
+        output_bearing_structure_ID = small_ring_OD
+        output_bearing_structure_height = bearing_height + carrier_bearing_step_width
 
-        # --- ring2bearing_spacer_disc ---
-        ring2bearing_spacer_disc_ID     = bearing_ID - 2 * small_ring_gear_casing_thickness
-        ring2bearing_spacer_disc_OD     = carrier_OD + small_ring_gear_casing_thickness * 2
-        ring2bearing_spacer_disc_height = small_ring_gear_casing_thickness
-        
-        ring2bearing_spacer_disc_volume = np.pi * (((ring2bearing_spacer_disc_OD*0.5)**2) - 
-                                                   ((ring2bearing_spacer_disc_ID*0.5)**2)) * ring2bearing_spacer_disc_height * 1e-9
+        small_ring_volume = (np.pi * (((small_ring_OD*0.5)**2) - ((small_ring_ID)*0.5)**2) * small_ring_height
+                            + np.pi * (((small_ring_bearing_structure_OD*0.5)**2)- ((small_ring_bearing_structure_ID*0.5)**2)) * small_ring_bearing_structure_height 
+                            + np.pi * (((output_bearing_structure_OD*0.5)**2) - ((output_bearing_structure_ID*0.5)**2)) * output_bearing_structure_height
+                            ) * 1e-9
 
-        # --- bearing_holding_structure ---
-        bearing_holding_structure_OD     = bearing_ID
-        bearing_holding_structure_ID     = bearing_ID - 2 * small_ring_gear_casing_thickness
-        bearing_holding_structure_height = bearing_height + standard_clearance_1_5mm * (2/3)
-
-        bearing_holding_structure_volume = np.pi * (((bearing_holding_structure_OD*0.5)**2) - 
-                                                   ((bearing_holding_structure_ID*0.5)**2)) * bearing_holding_structure_height * 1e-9
-
-        # --- output_wall ---
-        output_wall_dia    = bearing_ID - 2 * small_ring_gear_casing_thickness
-        output_wall_height = small_ring_output_wall_thickness
-        output_wall_volume = np.pi * (output_wall_dia / 2)**2 * output_wall_height * 1e-9
-
-        # --- sun_shaft_bearing_holding_structure ---
-        # truncated hollow cone Volume = 0.5 * Hollow cylinder volume. 
-        # 45deg chamfer (height = width)
-        sun_shaft_bearing_holding_structure_ID     = carrier_small_ring_inner_bearing_ID
-        sun_shaft_bearing_holding_structure_height = (bearing_height + carrier_thickness - carrier_small_ring_inner_bearing_height)
-        sun_shaft_bearing_holding_structure_OD     = (sun_shaft_bearing_holding_structure_ID 
-                                                      + sun_shaft_bearing_holding_structure_height * 2)
-        
-        sun_shaft_bearing_holding_structure_volume = (0.5 
-                                                      * np.pi 
-                                                      * (((sun_shaft_bearing_holding_structure_OD*0.5)**2) - 
-                                                         ((sun_shaft_bearing_holding_structure_ID*0.5)**2)) 
-                                                      * sun_shaft_bearing_holding_structure_height * 1e-9)
-
-        small_ring_mass = (ring_gear2_volume 
-                         + ring2bearing_spacer_cone_shell_volume 
-                         + ring2bearing_spacer_disc_volume
-                         + bearing_holding_structure_volume
-                         + output_wall_volume
-                         + sun_shaft_bearing_holding_structure_volume) * density_3DP_material
+        small_ring_mass = small_ring_volume * density_gears
 
         #-------------------------------------------------------
         # wpg_sun_shaft_bearing
@@ -6812,7 +6505,7 @@ class wolfromPlanetaryActuator:
         #-------------------------------------------------------
         # wpg_sun
         #-------------------------------------------------------
-        sun_hub_dia = motor_output_hole_PCD + motor_output_hole_dia + standard_clearance_1_5mm * 4
+        sun_hub_dia = self.sun_hub_dia
 
         sun_shaft_dia    = sun_shaft_bearing_ID
         sun_shaft_height = sun_shaft_bearing_width + 2 * standard_clearance_1_5mm
@@ -6829,7 +6522,7 @@ class wolfromPlanetaryActuator:
         sun_shaft_volume = np.pi * ((sun_shaft_dia*0.5) ** 2) * sun_shaft_height * 1e-9
 
         sun_volume       = sun_hub_volume + sun_gear_volume + sun_shaft_volume
-        sun_mass         = sun_volume * density_3DP_material
+        sun_mass         = sun_volume * density_gears
 
         Actuator_mass = (carrier_small_ring_inner_bearing_mass + 
                         carrier_mass + 
@@ -6840,10 +6533,17 @@ class wolfromPlanetaryActuator:
                         planet_bearing_combined_mass +
                         planet_mass * numPlanet +
                         sec_carrier_mass +
-                        small_ring_bearing_shaft_mass +
                         small_ring_mass +
                         sun_shaft_bearing_mass +
                         sun_mass)
+        
+        Actuator_mass_without_bearing = (carrier_mass + 
+                                        gearbox_casing_mass +
+                                        Motor_case_mass + 
+                                        planet_mass * numPlanet +
+                                        sec_carrier_mass +
+                                        small_ring_mass +
+                                        sun_mass)
 
         self.carrier_small_ring_inner_bearing_mass = carrier_small_ring_inner_bearing_mass
         self.carrier_mass                          = carrier_mass
@@ -6854,10 +6554,12 @@ class wolfromPlanetaryActuator:
         self.planet_bearing_combined_mass          = planet_bearing_combined_mass
         self.planet_mass                           = planet_mass
         self.sec_carrier_mass                      = sec_carrier_mass
-        self.small_ring_bearing_shaft_mass         = small_ring_bearing_shaft_mass
         self.small_ring_mass                       = small_ring_mass
         self.sun_shaft_bearing_mass                = sun_shaft_bearing_mass
         self.sun_mass                              = sun_mass
+        self.Actuator_mass_without_bearing           = Actuator_mass_without_bearing
+        self.Actuator_mass                           = Actuator_mass
+        
 
         return Actuator_mass
 
@@ -6871,10 +6573,11 @@ class wolfromPlanetaryActuator:
         print("planet_bearing_combined_mass :", 1000 * self.planet_bearing_combined_mass)         
         print("planet_mass :", 1000 * self.planet_mass)                          
         print("sec_carrier_mass :", 1000 * self.sec_carrier_mass)                     
-        print("small_ring_bearing_shaft_mass :", 1000 * self.small_ring_bearing_shaft_mass)        
         print("small_ring_mass :", 1000 * self.small_ring_mass)                      
         print("sun_shaft_bearing_mass :", 1000 * self.sun_shaft_bearing_mass)               
-        print("sun_mass :", 1000 * self.sun_mass)                             
+        print("sun_mass :", 1000 * self.sun_mass) 
+        print("Actuator_mass_without_bearing :", 1000 * self.Actuator_mass_without_bearing)
+        print("Actuator_mass :", 1000 * self.Actuator_mass) 
 
 #-------------------------------------------------------------------------
 # Double Stage Actuator class
@@ -7274,7 +6977,8 @@ class doubleStagePlanetaryActuator:
 
     def genEquationFile(self, motor_name="NO_MOTOR", gearRatioLL = 0.0, gearRatioUL = 0.0):
        self.setVariables()
-       file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'DSPG', 'Equation_Files', motor_name, f'dspg_equations_{gearRatioLL}_{gearRatioUL}_stg1.txt')
+       file_path = cad_path('DSPG', 'Equation_Files', motor_name, f'dspg_equations_{gearRatioLL}_{gearRatioUL}_stg1.txt')
+       os.makedirs(os.path.dirname(file_path), exist_ok=True)
        with open(file_path, 'w') as file1:
         lines = [
                 f'"Ns" = {self.Ns1}\n',
@@ -7410,7 +7114,8 @@ class doubleStagePlanetaryActuator:
         file1.writelines(lines)
        file1.close()
        # file_path = os.path.join(os.path.dirname(__file__),'DSPG', 'dspg_equations_stg2.txt')
-       file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'DSPG', 'Equation_Files', motor_name, f'dspg_equations_{gearRatioLL}_{gearRatioUL}_stg2.txt')
+       file_path = cad_path('DSPG', 'Equation_Files', motor_name, f'dspg_equations_{gearRatioLL}_{gearRatioUL}_stg2.txt')
+       os.makedirs(os.path.dirname(file_path), exist_ok=True)
        with open(file_path, 'w') as file2:
         lines = [
             f'"Ns" = {self.Ns2}\n',
@@ -7545,7 +7250,8 @@ class doubleStagePlanetaryActuator:
         file2.writelines(lines)
        file2.close()
 
-       file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'DSPG', 'Equation_Files', motor_name, f'dspg_equations_{gearRatioLL}_{gearRatioUL}_onshape.txt')
+       file_path = cad_path('DSPG', 'Equation_Files', motor_name, f'dspg_equations_{gearRatioLL}_{gearRatioUL}_onshape.txt')
+       os.makedirs(os.path.dirname(file_path), exist_ok=True)
        with open(file_path, 'w') as file1:
         lines = [
                 f'"a1_Ns" = {self.Ns1}\n',
@@ -7819,7 +7525,7 @@ class doubleStagePlanetaryActuator:
 
     def genEquationFile_editCADdirectly(self):
        self.setVariables()
-       file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'DSPG', 'dspg_equations_stg1.txt')
+       file_path = cad_path('DSPG', 'dspg_equations_stg1.txt')
        with open(file_path, 'w') as file1:
         lines = [
                 f'"Ns" = {self.Ns1}\n',
@@ -7954,7 +7660,7 @@ class doubleStagePlanetaryActuator:
             ]
         file1.writelines(lines)
        file1.close()
-       file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'DSPG', 'dspg_equations_stg2.txt')
+       file_path = cad_path('DSPG', 'dspg_equations_stg2.txt')
        with open(file_path, 'w') as file2:
         lines = [
             f'"Ns" = {self.Ns2}\n',
@@ -8089,7 +7795,7 @@ class doubleStagePlanetaryActuator:
         file2.writelines(lines)
        file2.close()
 
-       file_path = os.path.join(os.path.dirname(__file__), 'CADs', 'DSPG', 'dspg_equations_onshape.txt')
+       file_path = cad_path('DSPG', 'dspg_equations_onshape.txt')
        with open(file_path, 'w') as file1:
         lines = [
                 f'"a1_Ns" = {self.Ns1}\n',
@@ -8892,7 +8598,8 @@ class doubleStagePlanetaryActuator:
         #------------------------------------
         # density of materials
         #------------------------------------
-        density_3DP_material = self.doubleStagePlanetaryGearbox.densityGears
+        density_gears     = self.doubleStagePlanetaryGearbox.densityGears      # gears; the ring gear (and its casing) counts as a gear
+        density_structure = self.doubleStagePlanetaryGearbox.densityStructure  # motor case, carriers, retainers, holders
 
         #------------------------------------
         # Face Width
@@ -8994,7 +8701,7 @@ class doubleStagePlanetaryActuator:
                             + np.pi * ((Motor_case_OD * 0.5)**2 - (Motor_case_ID * 0.5)**2) * Motor_case_height
         ) * 1e-9
 
-        Motor_case_mass = Motor_case_volume * density_3DP_material
+        Motor_case_mass = Motor_case_volume * density_structure
 
         #--------------------------------------
         # Mass: dspg_gearbox_casing
@@ -9049,7 +8756,7 @@ class doubleStagePlanetaryActuator:
         large_fillet_height = ringFwMM
         large_fillet_volume = 0.5 * (np.pi * (((large_fillet_OD*0.5)**2) - ((large_fillet_ID)*0.5)**2) * large_fillet_height) * 1e-9
 
-        gearbox_casing_mass = (ring_volume + bearing_holding_structure_volume + case_mounting_structure_volume + large_fillet_volume) * density_3DP_material
+        gearbox_casing_mass = (ring_volume + bearing_holding_structure_volume + case_mounting_structure_volume + large_fillet_volume) * density_gears
 
         #----------------------------------
         # Mass: dspg_carrier
@@ -9074,9 +8781,9 @@ class doubleStagePlanetaryActuator:
         sun2_shaft_volume = np.pi * ((sun2_shaft_dia*0.5) ** 2) * sun2_shaft_height * 1e-9
 
         sun2_volume       = sun2_gear_volume + sun2_shaft_volume
-        sun2_mass         = sun2_volume * density_3DP_material
+        sun2_mass         = sun2_volume * density_gears
 
-        carrier_mass = carrier_volume * density_3DP_material
+        carrier_mass = carrier_volume * density_structure
 
         carrier_stg1_mass = sun2_mass + carrier_mass
 
@@ -9095,13 +8802,13 @@ class doubleStagePlanetaryActuator:
         sun_shaft_volume = np.pi * ((sun_shaft_dia*0.5) ** 2) * sun_shaft_height * 1e-9
 
         sun_volume       = sun_hub_volume + sun_gear_volume + sun_shaft_volume
-        sun_mass         = sun_volume * density_3DP_material
+        sun_mass         = sun_volume * density_gears
 
         #--------------------------------------
         # Mass: dspg_planet
         #--------------------------------------
         planet_volume = (np.pi * ((DiaPlanetMM*0.5)**2 - (planet_bore*0.5)**2) * planetFwMM) * 1e-9
-        planet_mass   = planet_volume * density_3DP_material
+        planet_mass   = planet_volume * density_gears
 
         #--------------------------------------
         # Mass: dspg_sec_carrier
@@ -9110,7 +8817,7 @@ class doubleStagePlanetaryActuator:
         sec_carrier_ID = (DiaSunMM + DiaPlanetMM) - planet_shaft_dia - 2 * standard_clearance_1_5mm
 
         sec_carrier_volume = (np.pi * ((sec_carrier_OD*0.5)**2 - (sec_carrier_ID*0.5)**2) * sec_carrier_thickness) * 1e-9
-        sec_carrier_mass   = sec_carrier_volume * density_3DP_material
+        sec_carrier_mass   = sec_carrier_volume * density_structure
 
         #--------------------------------------
         # Mass: dspg_sun_shaft_bearing
@@ -9138,7 +8845,7 @@ class doubleStagePlanetaryActuator:
 
         bearing_retainer_volume = (np.pi * ((bearing_retainer_OD*0.5)**2 - (bearing_retainer_ID*0.5)**2) * bearing_retainer_thickness) * 1e-9
 
-        bearing_retainer_mass   = bearing_retainer_volume * density_3DP_material
+        bearing_retainer_mass   = bearing_retainer_volume * density_structure
 
         self.Motor_case_mass_stg1              = Motor_case_mass
         self.gearbox_casing_mass_stg1          = gearbox_casing_mass
@@ -9183,7 +8890,8 @@ class doubleStagePlanetaryActuator:
         #------------------------------------
         # density of materials
         #------------------------------------
-        density_3DP_material = self.doubleStagePlanetaryGearbox.densityGears
+        density_gears     = self.doubleStagePlanetaryGearbox.densityGears      # gears; the ring gear (and its casing) counts as a gear
+        density_structure = self.doubleStagePlanetaryGearbox.densityStructure  # motor case, carriers, retainers, holders
 
         #------------------------------------
         # Face Width
@@ -9318,7 +9026,7 @@ class doubleStagePlanetaryActuator:
         large_fillet_height = ringFwMM
         large_fillet_volume = 0.5 * (np.pi * (((large_fillet_OD*0.5)**2) - ((large_fillet_ID)*0.5)**2) * large_fillet_height) * 1e-9
 
-        gearbox_casing_mass = (ring_volume + bearing_holding_structure_volume + case_mounting_structure_volume + large_fillet_volume) * density_3DP_material
+        gearbox_casing_mass = (ring_volume + bearing_holding_structure_volume + case_mounting_structure_volume + large_fillet_volume) * density_gears
 
         #----------------------------------
         # Mass: dspg_carrier
@@ -9334,13 +9042,13 @@ class doubleStagePlanetaryActuator:
         carrier_volume = (np.pi * (((carrier_OD*0.5)**2) - ((carrier_ID)*0.5)**2) * carrier_height
                         + np.pi * ((carrier_shaft_OD*0.5)**2) * carrier_shaft_height * carrier_shaft_num) * 1e-9
 
-        carrier_mass = carrier_volume * density_3DP_material
+        carrier_mass = carrier_volume * density_structure
 
         #--------------------------------------
         # Mass: dspg_planet
         #--------------------------------------
         planet_volume = (np.pi * ((DiaPlanetMM*0.5)**2 - (planet_bore*0.5)**2) * planetFwMM) * 1e-9
-        planet_mass   = planet_volume * density_3DP_material
+        planet_mass   = planet_volume * density_gears
 
         #--------------------------------------
         # Mass: dspg_sec_carrier
@@ -9349,7 +9057,7 @@ class doubleStagePlanetaryActuator:
         sec_carrier_ID = (DiaSunMM + DiaPlanetMM) - planet_shaft_dia - 2 * standard_clearance_1_5mm
 
         sec_carrier_volume = (np.pi * ((sec_carrier_OD*0.5)**2 - (sec_carrier_ID*0.5)**2) * sec_carrier_thickness) * 1e-9
-        sec_carrier_mass = sec_carrier_volume * density_3DP_material
+        sec_carrier_mass = sec_carrier_volume * density_structure
 
         #--------------------------------------
         # Mass: dspg_sun_shaft_bearing
@@ -9377,7 +9085,7 @@ class doubleStagePlanetaryActuator:
 
         bearing_retainer_volume = (np.pi * ((bearing_retainer_OD * 0.5)**2 - (bearing_retainer_ID * 0.5)**2) * bearing_retainer_thickness) * 1e-9
 
-        bearing_retainer_mass   = bearing_retainer_volume * density_3DP_material
+        bearing_retainer_mass   = bearing_retainer_volume * density_structure
 
         self.gearbox_casing_mass_stg2          = gearbox_casing_mass
         self.carrier_mass_stg2                 = carrier_mass
@@ -9605,8 +9313,11 @@ class optimizationSingleStageActuator:
             # print(iter,",", gearRatio,",",module,",", Ns,",", Np,",", Nr,",", numPlanet,",",  fwSunMM,",", fwPlanetMM,",", fwRingMM,",",Opt_PSC_sun,",", Opt_PSC_planet,",", Opt_PSC_ring,",", Opt_CD_SP, ",", Opt_CD_PR,",", mass,",", eff,",", peakTorque,",", Cost, ",", Torque_Density, ",", Outer_Bearing_mass, ",", Actuator_width)
             print(iter,",", gearRatio,",",module,",", Ns,",", Np,",", Nr,",", numPlanet,",",  fwSunMM,",", fwPlanetMM,",", fwRingMM,",", mass,",", eff,",", peakTorque,",", Cost, ",", Torque_Density, ",", Outer_Bearing_mass, ",", Actuator_width)
 
-    def optimizeActuator(self, Actuator=singleStagePlanetaryActuator, UsePSCasVariable = 1, log = 0, csv = 1, gearRatioReq = 0, printOptParams = 1):
+    @restores_stdout
+    def optimizeActuator(self, Actuator=singleStagePlanetaryActuator, UsePSCasVariable = 0, log = 0, csv = 1, gearRatioReq = 0, printOptParams = 1):
         self.UsePSCasVariable = UsePSCasVariable
+        if UsePSCasVariable:
+            raise NotImplementedError("UsePSCasVariable=1 is not available: the continuous PSC optimiser (optimal_continuous_PSC_*) is not implemented. Use UsePSCasVariable=0.")
         totalTime = 0
         opt_parameters = None # [Gear Ratio, numPlanet, Ns, Np, Nr, Module]
         self.gearRatioReq = gearRatioReq
@@ -9639,10 +9350,11 @@ class optimizationSingleStageActuator:
             csv = 1
 
         if csv:
-            fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/SSPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}.csv"
+            fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/SSPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}{Actuator.results_suffix}.csv"
         elif log:
-            fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/SSPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}.txt"
+            fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/SSPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}{Actuator.results_suffix}.txt"
             
+        os.makedirs(os.path.dirname(fileName), exist_ok=True)
         with open(fileName, "w") as file1:
             sys.stdout = file1
             if (printOptParams):
@@ -9739,7 +9451,7 @@ class optimizationSingleStageActuator:
                                 #Actuator.planetaryGearbox.setNr(Actuator.planetaryGearbox.Ns + 1)
                             Actuator.planetaryGearbox.setNp(Actuator.planetaryGearbox.Np + 1)
                         Actuator.planetaryGearbox.setNs(Actuator.planetaryGearbox.Ns + 1)
-                    Actuator.planetaryGearbox.setModule(Actuator.planetaryGearbox.module + 0.100)
+                    Actuator.planetaryGearbox.setModule(round(Actuator.planetaryGearbox.module + 0.100, 1))
                 if (opt_done == 1):
                     self.printOptimizationResults(opt_actuator, log, csv)
                 self.gearRatioIter += self.GEAR_RATIO_STEP
@@ -9785,6 +9497,7 @@ class optimizationSingleStageActuator:
             elif log:
                 fileName = f"./results/results_bilevel_{Actuator.motor.motorName}/SSPG_BILEVEL_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}.txt"
             
+            os.makedirs(os.path.dirname(fileName), exist_ok=True)
             with open(fileName, "w") as file1:
                 sys.stdout = file1
                 self.printOptimizationParameters(Actuator, log, csv)
@@ -9867,7 +9580,7 @@ class optimizationSingleStageActuator:
                                     #Actuator.planetaryGearbox.setNr(Actuator.planetaryGearbox.Ns + 1)
                                 Actuator.planetaryGearbox.setNp(Actuator.planetaryGearbox.Np + 1)
                             Actuator.planetaryGearbox.setNs(Actuator.planetaryGearbox.Ns + 1)
-                        Actuator.planetaryGearbox.setModule(Actuator.planetaryGearbox.module + 0.100)
+                        Actuator.planetaryGearbox.setModule(round(Actuator.planetaryGearbox.module + 0.100, 1))
                     if (opt_done == 1):
                         self.sspgOpt = optimal_continuous_PSC_sspg(GEAR_RATIO_MIN = opt_parameters[0],
                                                                    numPlanet = opt_parameters[1],
@@ -9959,7 +9672,7 @@ class optimizationCompoundPlanetaryActuator:
         self.cntrIterBeforeCons      = 0
         self.iter                    = 1
         self.gearRatioIter           = GEAR_RATIO_MIN
-        self.UsePSCasVariable        = 1 # Default Yes
+        self.UsePSCasVariable        = 0 # Default Yes
 
         self.gear_standard_parameters = gear_standard_parameters
         self.design_parameters        = design_parameters
@@ -10085,8 +9798,11 @@ class optimizationCompoundPlanetaryActuator:
             Actuator_width = Actuator.actuator_width
             print(iter, ",", gearRatio, ",", moduleBig, ",", moduleSmall, ",", Ns, ",", NpBig, ",", NpSmall, ",", Nr, ",", numPlanet, ",", fwSunMM, ",", fwPlanetBigMM, ",", fwPlanetSmallMM, ",", fwRingMM, ",", mass, ",", eff, ",", peakTorque, ",", Cost, ",", Torque_Density, ",", Outer_Bearing_mass, ",", Actuator_width)
 
+    @restores_stdout
     def optimizeActuator(self, Actuator=compoundPlanetaryActuator, UsePSCasVariable = 0, log=1, csv=0, printOptParams=1, gearRatioReq = 0):   
         self.UsePSCasVariable = UsePSCasVariable
+        if UsePSCasVariable:
+            raise NotImplementedError("UsePSCasVariable=1 is not available: the continuous PSC optimiser (optimal_continuous_PSC_*) is not implemented. Use UsePSCasVariable=0.")
         totalTime = 0
         self.gearRatioReq = gearRatioReq
         opt_parameters = None
@@ -10119,10 +9835,11 @@ class optimizationCompoundPlanetaryActuator:
             csv = 1
         
         if csv:
-            fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/CPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}.csv"
+            fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/CPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}{Actuator.results_suffix}.csv"
         elif log:
-            fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/CPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}_LOG.txt"
+            fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/CPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}{Actuator.results_suffix}_LOG.txt"
         
+        os.makedirs(os.path.dirname(fileName), exist_ok=True)
         with open(fileName, "w") as file1:
             sys.stdout = file1
             if (printOptParams):
@@ -10287,6 +10004,7 @@ class optimizationCompoundPlanetaryActuator:
         elif log:
             fileName = f"./results/results_bilevel_{Actuator.motor.motorName}/CPG_BILEVEL_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}_LOG.txt"
         
+        os.makedirs(os.path.dirname(fileName), exist_ok=True)
         with open(fileName, "w") as file1:
             sys.stdout = file1
             self.printOptimizationParameters(Actuator, log, csv)
@@ -10483,15 +10201,18 @@ class optimizationWolfromPlanetaryActuator:
         self.cntrIterBeforeCons       = 0
         self.iter                     = 0
         self.gearRatioIter            = self.GEAR_RATIO_MIN
-        self.UsePSCasVariable         = 1
+        self.UsePSCasVariable         = 0
         self.design_parameters        = design_parameters
         self.gear_standard_parameters = gear_standard_parameters
 
         self.gearRatioReq = 0
 
-    def optimizeActuator(self, Actuator = wolfromPlanetaryActuator, UsePSCasVariable = 1, log = 0, csv = 1, printOptParams=1, gearRatioReq = 0):
+    @restores_stdout
+    def optimizeActuator(self, Actuator = wolfromPlanetaryActuator, UsePSCasVariable = 0, log = 0, csv = 1, printOptParams=1, gearRatioReq = 0):
         startTime = time.time()
         self.UsePSCasVariable = UsePSCasVariable
+        if UsePSCasVariable:
+            raise NotImplementedError("UsePSCasVariable=1 is not available: the continuous PSC optimiser (optimal_continuous_PSC_*) is not implemented. Use UsePSCasVariable=0.")
         self.gearRatioReq = gearRatioReq
         opt_parameters = None
         if UsePSCasVariable == 0:
@@ -10528,10 +10249,11 @@ class optimizationWolfromPlanetaryActuator:
             csv = 1
         
         if csv:
-            fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/WPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}.csv"
+            fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/WPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}{Actuator.results_suffix}.csv"
         elif log:
-            fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/WPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}_LOG.txt"
+            fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/WPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}{Actuator.results_suffix}_LOG.txt"
             
+        os.makedirs(os.path.dirname(fileName), exist_ok=True)
         with open(fileName, "w") as wolfromLogFile:
             sys.stdout = wolfromLogFile
             if (printOptParams):
@@ -10591,7 +10313,7 @@ class optimizationWolfromPlanetaryActuator:
                                                 self.totalFeasibleGearboxes += 1
                                                 # Fiter for the Gear Ratio
                                                 if (Actuator.wolfromPlanetaryGearbox.gearRatio() >= self.gearRatioIter and 
-                                                    Actuator.wolfromPlanetaryGearbox.gearRatio() <= (self.gearRatioIter + 1)):
+                                                    Actuator.wolfromPlanetaryGearbox.gearRatio() <= (self.gearRatioIter + self.GEAR_RATIO_STEP)):
                                                     self.totalGearboxesWithReqGR += 1
                                                     
                                                     # Cost Calculation
@@ -10659,7 +10381,8 @@ class optimizationWolfromPlanetaryActuator:
                     Actuator.wolfromPlanetaryGearbox.setModuleBig(Actuator.wolfromPlanetaryGearbox.moduleBig + 0.100)
                     Actuator.wolfromPlanetaryGearbox.setModuleBig(round(Actuator.wolfromPlanetaryGearbox.moduleBig, 1)) # Round Off
                 if (opt_done == 1):
-                    self.printOptimizationResults(opt_actuator, log, csv)  
+                    self.printOptimizationResults(opt_actuator, log, csv)
+                    opt_actuator.print_mass_of_parts_3DP()  
                 self.gearRatioIter += self.GEAR_RATIO_STEP
     
                 if log:
@@ -10696,6 +10419,7 @@ class optimizationWolfromPlanetaryActuator:
         elif log:
             fileName = f"./results/results_bilevel_{Actuator.motor.motorName}/WPG_BILEVEL_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}_LOG.txt"
         
+        os.makedirs(os.path.dirname(fileName), exist_ok=True)
         with open(fileName, "w") as wolfromLogFile:
             sys.stdout = wolfromLogFile
             self.printOptimizationParameters(Actuator, log, csv)
@@ -10748,7 +10472,7 @@ class optimizationWolfromPlanetaryActuator:
                                                 self.totalFeasibleGearboxes += 1
                                                 # Fiter for the Gear Ratio
                                                 if (Actuator.wolfromPlanetaryGearbox.gearRatio() >= self.gearRatioIter and 
-                                                    Actuator.wolfromPlanetaryGearbox.gearRatio() <= (self.gearRatioIter + 1)):
+                                                    Actuator.wolfromPlanetaryGearbox.gearRatio() <= (self.gearRatioIter + self.GEAR_RATIO_STEP)):
                                                     
                                                     self.totalGearboxesWithReqGR += 1
                                                     
@@ -11043,15 +10767,18 @@ class optimizationDoubleStagePlanetaryActuator:
         self.cntrIterBeforeCons      = 0
         self.iter                    = 0
         self.gearRatioIter           = self.GEAR_RATIO_MIN 
-        self.UsePSCasVariable        = 1 # Default   
+        self.UsePSCasVariable        = 0 # Default   
 
         self.gear_standard_parameters = gear_standard_parameters
         self.design_parameters        = design_parameters
 
         self.gearRatioReq            = 0
 
+    @restores_stdout
     def optimizeActuator(self, Actuator=doubleStagePlanetaryActuator, UsePSCasVariable=0, log=1, csv=0, gearRatioReq = 0, printOptParams = 1):
         self.UsePSCasVariable = UsePSCasVariable
+        if UsePSCasVariable:
+            raise NotImplementedError("UsePSCasVariable=1 is not available: the continuous PSC optimiser (optimal_continuous_PSC_*) is not implemented. Use UsePSCasVariable=0.")
         totalTime = 0
         self.gearRatioReq = gearRatioReq
         opt_parameters = None
@@ -11084,10 +10811,11 @@ class optimizationDoubleStagePlanetaryActuator:
             csv = 1
         
         if csv:
-            fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/DSPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}.csv"
+            fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/DSPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}{Actuator.results_suffix}.csv"
         elif log:
-            fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/DSPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}_LOG.txt"
+            fileName = f"./results/results_BruteForce_{Actuator.motor.motorName}/DSPG_BRUTEFORCE_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}{Actuator.results_suffix}_LOG.txt"
         
+        os.makedirs(os.path.dirname(fileName), exist_ok=True)
         with open(fileName, "w") as DSPGLogFile:
             sys.stdout = DSPGLogFile
             if(printOptParams):
@@ -11155,7 +10883,7 @@ class optimizationDoubleStagePlanetaryActuator:
                                                             self.totalFeasibleGearboxes += 1
                                                             # Fiter for the Gear Ratio
                                                             if (Actuator.doubleStagePlanetaryGearbox.gearRatio() >= self.gearRatioIter and 
-                                                                Actuator.doubleStagePlanetaryGearbox.gearRatio() <= (self.gearRatioIter + 1)):
+                                                                Actuator.doubleStagePlanetaryGearbox.gearRatio() <= (self.gearRatioIter + self.GEAR_RATIO_STEP)):
 
                                                                 self.totalGearboxesWithReqGR += 1
 
@@ -11276,6 +11004,7 @@ class optimizationDoubleStagePlanetaryActuator:
         elif log:
             fileName = f"./results/results_bilevel_{Actuator.motor.motorName}/DSPG_BILEVEL_{Actuator.stressAnalysisMethodName}_{Actuator.motor.motorName}_LOG.txt"
         
+        os.makedirs(os.path.dirname(fileName), exist_ok=True)
         with open(fileName, "w") as dspgLogFile:
             sys.stdout = dspgLogFile
             self.printOptimizationParameters(Actuator, log, csv)

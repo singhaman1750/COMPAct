@@ -17,396 +17,126 @@ This repository provides an implementation of the paper:
 
 <br>
 
-## COMPAct Flowchart
+Given a motor and a gear ratio, COMPAct finds the planetary gearbox (teeth, module, number of planets,
+face widths) that minimises actuator mass and width while maximising efficiency, and writes the
+parameters that drive a parametric CAD model (SolidWorks or Onshape), ready to 3D-print.
 
 <p align="center">
   <img src="images/COMPAct_intro_full.png" alt="Flowchart of COMPAct: Actuator Design Framework">
 </p>
 
-
 ---
 
-## Quick Start Guide
+## Install
 
-#### **Setup & Installations**
-* **Step 1:** [Setup & Requirements](#step-1-setup--requirements)
-* **Step 2:** [Installation](#step-2-installation)
-* **Step 3:** [CAD Automation Setup](#step-3-cad-automation-setup-optional)
-
-#### **Optimization & Automated design generation**
-* **Step 4:** [Run Optimization](#step-4-run-optimization)
-* **Step 5:** [View Results](#step-5-view-results)
-* **Step 6:** [Generate Automated CAD designs](#step-6-generate-automated-cad-designs)
-* **Step 7:** [3D-print and Assemble](#step-7-3d-print-and-assemble)
-
----
-
-### Step 1: Setup & Requirements
-
-#### System Requirements
-* **Python 3.x**
-* **SolidWorks 2024** (or higher) – *Required for CAD automation features.*
-
-#### Recommended Terminal
-* **Windows:** [Git Bash](https://git-scm.com/downloads) is highly recommended.
-* **Linux/macOS:** Default terminal.
-
----
-
-### Step 2: Installation
-Clone the repository and install the dependencies:
+Requires **Python 3** (on Windows, [Git Bash](https://git-scm.com/downloads) is recommended).
 
 ```bash
-# Clone the repository
 git clone https://github.com/singhaman1750/COMPAct.git
-```
-
-```bash
-# Enter the directory
 cd COMPAct
+pip install -r requirements.txt
 ```
+
+## Quick start
 
 ```bash
-# Install required packages
-pip install numpy matplotlib pandas requests
+python actOpt.py --motor U8_Lite --gb_type sspg --gr 6.5
 ```
 
----
+| Option | Meaning |
+|---|---|
+| `--motor` | A motor from [`config_files/motors.json`](config_files/motors.json) (see [Motors](#motors)) |
+| `--gb_type` | A gearbox type from the table below |
+| `--gr` | Gear ratio (> 2). The optimiser returns the best design near this ratio. |
+| `--material` | `3dp` (default): PLA gears and structure. `metal`: steel gears, aluminium structure (see [Material modes](#material-modes)) |
+| `--onshape` | Also push the result into your Onshape model (see [CAD](#cad-models)) |
 
-### Step 3: CAD Automation Setup (Optional)
+The terminal shows the chosen design (teeth, module, planets, ratio). Two files are written:
+- `results/results_BruteForce_<motor>/<TYPE>_BRUTEFORCE_MIT_<motor>.csv` — mass, efficiency,
+  width, cost and the mass of every part (`..._metal.csv` in metal mode);
+- `CADs/<TYPE>/<type>_equations*.txt` — the parameters for the CAD model. Every run overwrites
+  these; `git checkout -- CADs` restores the committed versions.
 
-### Option A: *SolidWorks (Local)*
+## Gearbox types
 
-Due to file size limits, CAD files are zipped. You must extract them before running the framework.
+| `--gb_type` | Gearbox | Motor kind | Example | Onshape model |
+|---|---|---|---|---|
+| `sspg` | Single-stage planetary | framed outrunner | `--motor U8_Lite --gr 6.5` | [open](https://cad.onshape.com/documents/c1aac326515ba734f63b9b3f/w/f9cccd7b90ce6d7934076c7c/e/11d494d64974a13f1ae2def2) |
+| `cpg` | Compound planetary | framed outrunner | `--motor U8_Lite --gr 10` | [open](https://cad.onshape.com/documents/dabf50453c93c1c427cef77a/w/58e59ba240adf6d2a07794cc/e/2fd7bc338e9316193d1a2f79) |
+| `wpg` | Wolfrom planetary (3K) | framed outrunner | `--motor U8_Lite --gr 20` | [open](https://cad.onshape.com/documents/f63553f1c266228274914c8c/w/f5b45617c0141f8d43fbf21e/e/1c09941ddaf2e9f39000d746) |
+| `dspg` | Double-stage planetary | framed outrunner | `--motor U8_Lite --gr 20` | [open](https://cad.onshape.com/documents/b8d43d150fb932ea649dcd0f/w/aaa3fcc8da584cc207374389/e/12e148469fa8eb5b917f5bb1) |
+| `isspg_inside` | Internal single-stage, InBearing | frameless outrunner | `--motor RO100 --gr 6.5` | [open](https://cad.onshape.com/documents/9fa91e98fe82c4e544284d41/w/828f637e6a1fef0940224c5c/e/c80b77fbcf87c09b3b593c8a) |
+| `isspg_compact` | Internal single-stage, OutBearing | frameless outrunner | `--motor RO100 --gr 6.5` | [open](https://cad.onshape.com/documents/bf5f13d9187efab731a95ba7/w/1261f6088846b1d6dd38ea32/e/9442fa2e352d23d6eb88bc6e) |
+| `icpg` | Internal compound | frameless outrunner | `--motor RO100 --gr 10` | [open](https://cad.onshape.com/documents/1cec852caa1080765682d3d0/w/9b7913f319aab1fd6ef5de45/e/f9d06c56e5c97df7f6c68aa9) ⚠️ |
+| `idspg` | Internal double-stage | frameless outrunner | `--motor RO100 --gr 20` | [open](https://cad.onshape.com/documents/bfc847aa97321639994fa267/w/e42f2a8d3124414ae728bb05/e/19b7631b19424696aeb05c64) ⚠️ |
+| `insspg_type_1` | Inrunner single-stage, type 1 | frameless inrunner | `--motor RI100 --gr 6.5` | see note ⚠️ |
+| `insspg_type_2` | Inrunner single-stage, type 2 | frameless inrunner | `--motor RI100 --gr 6.5` | see note ⚠️ |
+| `incpg_dependent` | Inrunner compound, dependent | frameless inrunner | `--motor RI100 --gr 10` | [open](https://cad.onshape.com/documents/3e794c46f172f3b02cfa18e7/w/dfc878270d998ca1ea8223c8/e/c324bd70f7c31566e927c1f7) |
+| `incpg_independent` | Inrunner compound, independent | frameless inrunner | `--motor RI100 --gr 10` | [open](https://cad.onshape.com/documents/2519b08c3c51bbdac1923e25/w/095a9ef04c28fad58dcdbe6c/e/7335150ff09908ff2cd1b9b2) |
+| `inwpg_dependent` | Inrunner Wolfrom, dependent | frameless inrunner | `--motor RI100 --gr 20` | [open](https://cad.onshape.com/documents/a5e4d1f2afed2d53000ac6c5/w/fa005d0cbd6ffa3820332b7d/e/64e86c89d3ac5b23fd7711ba) |
+| `inwpg_independent` | Inrunner Wolfrom, independent | frameless inrunner | `--motor RI100 --gr 20` | [open](https://cad.onshape.com/documents/a5ebf8aa022054aedcbab90e/w/226eaf19e9c48cb8a6efbe49/e/e7a9e7fa0a60f50822757623) |
+| `indspg` | Inrunner double-stage | frameless inrunner | `--motor RI100 --gr 20` | [open](https://cad.onshape.com/documents/082ad023b75b2274bed0f04d/w/29fd6b162304a5c614568daf/e/f5c1a1cba8355822de1c14c1) ⚠️ |
 
-**NOTE:** _If you only need the optimized gear parameters (teeth count, module, etc.), you can skip this step. Extraction is only required if you intend to use the **automated 3D modeling**._
+⚠️ ICPG, IDSPG, INSSPG and INDSPG models are still shared view-only and cannot be copied yet
+([ISSUES.md, CAD 2](ISSUES.md)). The two INSSPG models are
+[dependent](https://cad.onshape.com/documents/97af418b118f30715235cd6a/w/253f8dd6e8e424cb9f7bb1dd/e/bcd4cd4dc6121c4e6915a50e)
+and [independent](https://cad.onshape.com/documents/e0cb8ed6bb2b36cfcadffcf4/w/a5de456488f59701ab182711/e/b8af8d5da69957495c24591f);
+which of them is type 1 and which type 2 is still to be confirmed.
+Each type is described in [docs/gearboxes.md](docs/gearboxes.md).
 
-1.  Navigate to the `CADs` directory.
-2.  Inside each gearbox folder (e.g., `CADs/SSPG/`), unzip the archive (e.g., `sspg_actuator.zip`) into the **same directory**.
+## Motors
 
-Your directory structure should look like this after extraction:
-```text
-COMPAct-Actuator_design_framework/
-└── CADs/
-    ├── SSPG/sspg_actuator/sspg_actuator/...
-    ├── CPG/cpg_actuator/cpg_actuator/...
-    ├── DSPG/dspg_actuator/dspg_actuator/...
-    └── WPG/wpg_actuator/wpg_actuator/...
-```
+[`config_files/motors.json`](config_files/motors.json) holds 33 motors with datasheet values and their
+sources. A gearbox type accepts any motor of its kind:
 
-### Option B: *Onshape (Cloud-based)*
+| Motor kind | Motors |
+|---|---|
+| Framed outrunner | T-Motor U8 Lite / Lite L / II / II Lite / II PRO, U10 Plus KV80, U10 II, MN5008, MN6007 II, MN7005, MN8012, MN8014, MN8017, MN1005 V2; MAD M6C12, M6C10, M6C08, M6C06, M6C06 V3, 1005, 7005, 8118, 5008, 5010; Vector 8008 SL, 8015 SL, 10005 SL, 8020 PRO |
+| Frameless outrunner | RO100, RO80, RO60 |
+| Frameless inrunner | RI100, RI80 |
 
-If you prefer not to use SolidWorks, the CAD models are also available on Onshape. No extraction or local files needed.
+Gears are sized with each motor's **peak torque** and checked at its **no-load speed** (48 V supply);
+set `"rating"` in `motors.json` to `"rated"` to use rated values instead (frameless motors only).
+Use the exact names from `motors.json` (e.g. `MAD_M6C12_KV170`); a wrong name lists the valid ones.
+To add a motor, see [docs/motors.md](docs/motors.md).
 
-#### 1. SSPG (Single-Stage Planetary Gearbox)
-[COPY PASTE THE LINK IF HYPERLINK DOESN'T OPEN] 
+## Material modes
 
-👉 **[Open SSPG in Onshape](https://cad.onshape.com/documents/c1aac326515ba734f63b9b3f/w/f9cccd7b90ce6d7934076c7c/e/11d494d64974a13f1ae2def2?renderMode=0&leftPanel=false&uiState=69ba77262aa7d6ac3cb56ff9)**
+| `--material` | Gears (incl. ring gear) | Structure | Rotor coupler |
+|---|---|---|---|
+| `3dp` (default) | PLA | PLA | aluminium |
+| `metal` | steel, 7850 kg/m³, 400 MPa | aluminium, 2700 kg/m³ | aluminium |
 
+Metal mode still uses the 3D-printed part shapes and wall thicknesses, so metal designs come out
+narrower but heavier than they would with metal-specific walls (follow-up in [ISSUES.md](ISSUES.md)).
 
-👉 **[Open CPG in Onshape](https://cad.onshape.com/documents/dabf50453c93c1c427cef77a/w/58e59ba240adf6d2a07794cc/e/2fd7bc338e9316193d1a2f79)**
+## CAD models
 
-
-👉 **[Open WPG in Onshape](https://cad.onshape.com/documents/ad699ddbc25bac5c32e33135/w/758de9a639163030bca8fa73/e/4cb254c85cc1f2d31a39a63a?renderMode=0&uiState=69d8cb5213bdc8529ffa3f3c)**
-
-
-👉 **[Open DSPG in Onshape](https://cad.onshape.com/documents/b8d43d150fb932ea649dcd0f/w/aaa3fcc8da584cc207374389/e/12e148469fa8eb5b917f5bb1?renderMode=0&uiState=69e2408b879d9edde70b5d36)**
-
-
-👉 **[Open ISSPG OutBearing in Onshape](https://cad.onshape.com/documents/bf5f13d9187efab731a95ba7/w/1261f6088846b1d6dd38ea32/e/9442fa2e352d23d6eb88bc6e?renderMode=0&uiState=6a4e2ba1c2bd25dd66621fae)**
-```
-https://cad.onshape.com/documents/bf5f13d9187efab731a95ba7/w/1261f6088846b1d6dd38ea32/e/9442fa2e352d23d6eb88bc6e?renderMode=0&uiState=6a4e2ba1c2bd25dd66621fae
-```
-
-👉 **[Open ISSPG InBearing in Onshape](https://cad.onshape.com/documents/9fa91e98fe82c4e544284d41/w/828f637e6a1fef0940224c5c/e/c80b77fbcf87c09b3b593c8a?renderMode=0&uiState=6a4e2b7864f03bde749b5369)**
-```
-https://cad.onshape.com/documents/9fa91e98fe82c4e544284d41/w/828f637e6a1fef0940224c5c/e/c80b77fbcf87c09b3b593c8a?renderMode=0&uiState=6a4e2b7864f03bde749b5369
-```
-
-👉 **[Open INCPG Dependent in Onshape](https://cad.onshape.com/documents/3e794c46f172f3b02cfa18e7/w/dfc878270d998ca1ea8223c8/e/c324bd70f7c31566e927c1f7?renderMode=0&uiState=6a4e2aa99c74fab5cc5dc0f1)**
-```
-https://cad.onshape.com/documents/3e794c46f172f3b02cfa18e7/w/dfc878270d998ca1ea8223c8/e/c324bd70f7c31566e927c1f7?renderMode=0&uiState=6a4e2aa99c74fab5cc5dc0f1
-```
-
-👉 **[Open INCPG Independent in Onshape](https://cad.onshape.com/documents/2519b08c3c51bbdac1923e25/w/095a9ef04c28fad58dcdbe6c/e/7335150ff09908ff2cd1b9b2?renderMode=0&uiState=6a4e2b048984a6ae63298aa8)**
-```
-https://cad.onshape.com/documents/2519b08c3c51bbdac1923e25/w/095a9ef04c28fad58dcdbe6c/e/7335150ff09908ff2cd1b9b2?renderMode=0&uiState=6a4e2b048984a6ae63298aa8
-```
-
-👉 **[Open INSSPG_Dependent in Onshape](https://cad.onshape.com/documents/97af418b118f30715235cd6a/w/253f8dd6e8e424cb9f7bb1dd/e/bcd4cd4dc6121c4e6915a50e?renderMode=0&leftPanel=false&uiState=6a4e2b9a82db92af62774962)**
-```
-https://cad.onshape.com/documents/97af418b118f30715235cd6a/w/253f8dd6e8e424cb9f7bb1dd/e/bcd4cd4dc6121c4e6915a50e?renderMode=0&leftPanel=false&uiState=6a4e2b9a82db92af62774962
-```
-
-👉 **[Open INSSPG_Independent in Onshape](https://cad.onshape.com/documents/e0cb8ed6bb2b36cfcadffcf4/w/a5de456488f59701ab182711/e/b8af8d5da69957495c24591f?renderMode=0&leftPanel=false&uiState=6a4e2ac13b9f34e29a45f140)**
-```
-https://cad.onshape.com/documents/e0cb8ed6bb2b36cfcadffcf4/w/a5de456488f59701ab182711/e/b8af8d5da69957495c24591f?renderMode=0&leftPanel=false&uiState=6a4e2ac13b9f34e29a45f140 
-```
-
-👉 **[Open ICPG in Onshape](https://cad.onshape.com/documents/1cec852caa1080765682d3d0/w/9b7913f319aab1fd6ef5de45/e/f9d06c56e5c97df7f6c68aa9?renderMode=0&uiState=6a4e2d38c2bd25dd666223f5)** 
-```
-https://cad.onshape.com/documents/1cec852caa1080765682d3d0/w/9b7913f319aab1fd6ef5de45/e/f9d06c56e5c97df7f6c68aa9?renderMode=0&uiState=6a4e2d38c2bd25dd666223f5 
-```
-
-To get your own editable copy:
-1. Open the link above — you will see the model in view-only mode
-2. Click the **Onshape logo / menu icon** in the top-left corner
-3. Select **"Make a copy"**
-4. Give it a name and save it to your own Onshape workspace
-
-> ✅ Your copy is fully independent — any changes you make will **not** affect the original shared document. You can now edit the Variable Studio, modify geometry, and run the automation script against your own copy.
-
----
-
-### Step 4: Run Optimization
-Run the Python script from the root directory to generate optimal gear parameters.
-
-**Syntax:**
+**Onshape (cloud):** make your own copy of a model, list it once in
+`Onshape_extension/onshape_models.json`, then add `--onshape` to any optimisation:
 ```bash
-python actOpt.py <motor> <gearbox> <ratio>
+python actOpt.py --motor U8_Lite --gb_type sspg --gr 6.5 --onshape
 ```
-* **`<motor>`**: U8, U10, U12, MN8014, VT8020, MAD_M6C12 , RO100 , RI100 , RO80
-* **`<gearbox>`**: sspg, cpg, dspg, wpg , icpg , insspg_type_1 {Independent} , insspg_type_2 {Dependent} 
-* **`<ratio>`**: Must be a value > 2.
+Setup, re-pushing a saved result and troubleshooting: [docs/onshape.md](docs/onshape.md).
 
-**Example:**
-To optimize a **RO100** with a **Internal-Compound-Planetary Gearbox** and a **ratio of 6.5**:
+**SolidWorks (local, SolidWorks 2024 or newer):** SSPG, CPG, WPG and DSPG have models in
+`CADs/<TYPE>/<type>_actuator.zip` (CPG is already unzipped). Unzip the archive into the same folder
+so that you get `CADs/<TYPE>/<type>_actuator/<type>_actuator.SLDASM` (some unzip tools add an
+extra folder level — remove it). Run an optimisation, open the `.SLDASM` and click **Rebuild**; the
+model follows the new `CADs/<TYPE>/<type>_equations*.txt`.
 
-```bash
-python actOpt_icpg.py RO100 icpg 6.5
-```
+**Build:** export the printed parts to STL; the CAD model shows which standard bearings to fit.
+Example STL sets are in `CADs/Actuator_STL_files/`. A spreadsheet with a mass analysis is
+[here](https://docs.google.com/spreadsheets/d/1QYUox6946nNlciWFAQ1L-EqQNLNdAT6GV0OtC5uI0eU/edit?usp=sharing).
 
----
-**Example:**
-To optimize a **RI100** with a **Inrunner-Dependent-Single-Stage Planetary Gearbox** and a **ratio of 6.5**:
+## For developers
 
-```bash
-python actOpt_insspg.py RI100 insspg_type_2 6.5
-```
+- [`gearbox_runner.py`](gearbox_runner.py) — one table (`GEARBOXES`) describing every gearbox type,
+  and `run()`, which builds and optimises it. The gearbox maths is in `ActuatorAndGearbox*.py`.
+- Tests: `python -m pytest`; the slow golden-output check is described in [tests/README.md](tests/README.md).
+- Known bugs and open tasks: [ISSUES.md](ISSUES.md).
 
----
-**Example:**
-To optimize a **RI100** with a **Inrunner-Independent-Single-Stage Planetary Gearbox** and a **ratio of 6.5**:
-
-```bash
-python actOpt_insspg.py RI100 insspg_type_1 6.5
-```
-
-**Syntax for ISSPG:**  
-```bash
-python <actuator_type>.py <motor> isspg <ratio>
-```
-* **`<actuator_type>`**: ISSPG_inside_gen_eq, ISSPG_compact_gen_eq
-* **`<motor>`**: RO80, RO100
-* **`<ratio>`**: Must be a value > 2.  
-Note: ISSPG_inside_gen_eq is for InBearing design and ISSPG_compact_gen_eq is for OutBearing design
-  
-**Example:**
-To optimize **RO100** with an **Internal Single-Stage Planetary Gearbox InBearing** and a **ratio of 6.5**:
-
-```bash
-python ISSPG_inside_gen_eq.py RO100 isspg 6.5
-```
-
-**Syntax for INCPG:**
-```bash
-python <actuator_type>.py <motor> incpg <ratio>
-```
-* **`<actuator_type>`**: InrunnerCPG_independent_gen_eq, InrunnerCPG_dependent_gen_eq
-* **`<motor>`**: RI100
-* **`<ratio>`**: Must be a value > 2.
-  
-**Example:**
-To optimize **RI100** with an **Inrunner Compound Planetary Gearbox Independent** and a **ratio of 6.5**:
-
-```bash
-python InrunnerCPG_independent_gen_eq.py RI100 incpg 6.5
-```
-
----
-
-### Step 5: View Results
-The script will output the optimal geometric parameters directly in the terminal:
-
-```text
-Running optimization:
-  Motor       : U8
-  Gearbox     : sspg
-  Gear Ratio  : 6.5
-Time taken: 0.0196 sec
-Optimization Completed.
--------------------------------
-Optimal Parameters:
-Number of teeth: Sun(Ns): 23 , Planet(Np): 52 , Ring(Nr): 127 , Module(m): 0.6 , NumPlanet(n_p): 3
----
-Gear Ratio(GR): 6.52 : 1
--------------------------------
-```
-
-Detailed parameter files are automatically generated in the following locations:
-
-* **SSPG:** `CADs/SSPG/sspg_equations.txt`
-* **CPG:** `CADs/CPG/cpg_equations.txt`
-* **DSPG:** `CADs/DSPG/dspg_equations.txt`
-* **WPG:** `CADs/WPG/wpg_equations.txt`
-  
-#### MASS ANALYSIS
-```
-https://docs.google.com/spreadsheets/d/1QYUox6946nNlciWFAQ1L-EqQNLNdAT6GV0OtC5uI0eU/edit?usp=sharing
-```
----
-
-### Step 6: Generate Automated CAD designs
-
-There are two ways to apply the optimization results to a CAD model — using **SolidWorks** (local) or **Onshape** (cloud-based). Both use the same equations file generated in Step 2.
-
-#### Option A: SolidWorks (Local)
-
-**NOTE:** _If you skipped the CAD extraction in Step 2, you cannot use this option._
-
-1.  Open **SolidWorks**.
-2.  Open the assembly file (`.SLDASM`) for your specific gearbox type:
-    * **SSPG:** `CADs/SSPG/sspg_actuator/sspg_actuator/sspg_actuator.SLDASM`
-    * *(Paths for CPG, DSPG, and WPG follow the same folder pattern)*
-3.  Click the **Rebuild** (Traffic Light) icon.
-4.  The 3D model will automatically update to reflect the calculated parameters.
-
----
-
-#### Option B: Onshape (Cloud-based)
-
-This extension lets you push optimization results directly to a parametric Onshape CAD model via the Onshape REST API — no SolidWorks or local CAD files required.
-
-##### i. Make a Copy of the Onshape Document
-
-If you haven't already done so in the extraction step above, open the shared Onshape document and make your own copy:
-
-👉 **[Open SSPG in Onshape](https://cad.onshape.com/documents/c1aac326515ba734f63b9b3f/w/f9cccd7b90ce6d7934076c7c/e/11d494d64974a13f1ae2def2?renderMode=0&leftPanel=false&uiState=69ba77262aa7d6ac3cb56ff9)**
-
-👉 **[Open CPG in Onshape](https://cad.onshape.com/documents/dabf50453c93c1c427cef77a/w/58e59ba240adf6d2a07794cc/e/2fd7bc338e9316193d1a2f79)**
-
-👉 **[Open WPG in Onshape](https://cad.onshape.com/documents/ad699ddbc25bac5c32e33135/w/758de9a639163030bca8fa73/e/4cb254c85cc1f2d31a39a63a?renderMode=0&uiState=69d8cb5213bdc8529ffa3f3c)**
-
-👉 **[Open DSPG in Onshape](https://cad.onshape.com/documents/b8d43d150fb932ea649dcd0f/w/aaa3fcc8da584cc207374389/e/12e148469fa8eb5b917f5bb1?renderMode=0&uiState=69e2408b879d9edde70b5d36)**
-
-1. Click the **Onshape logo / menu icon** in the top-left corner
-2. Select **"Make a copy"**
-3. Give it a name and save it to your own Onshape workspace
-
-> ✅ Your copy is fully independent — any changes the script makes will **not** affect the original shared document.
-
-##### ii. Generate Onshape API Keys
-
-The script authenticates with the Onshape REST API using personal API keys.
-
-1. Go to [dev-portal.onshape.com](https://dev-portal.onshape.com) and sign in
-2. Navigate to **API Keys** → **Create New API Key**
-3. Copy the **Access Key** and **Secret Key**
-4. Create a file named `.env` inside the `Onshape_extension/` folder with the following content:
-
-```env
-ONSHAPE_ACCESS_KEY=your_access_key
-ONSHAPE_SECRET_KEY=your_secret_key
-```
-
-> 🔒 **Never commit your `.env` file.** Make sure `.env` is listed in your `.gitignore`.
-
-##### iii. Get Your Variable Studio URL
-
-The script needs to know which Onshape document and Variable Studio to update. This is done via the URL in your browser.
-
-1. Open your **copied** Onshape document
-2. Click on the **Variable Studio** tab at the bottom of the screen (it appears alongside part studios and assemblies)
-3. Once you are on the Variable Studio page, copy the **full URL** from your browser's address bar — it will look something like:
-   ```
-   https://cad.onshape.com/documents/abc123.../w/def456.../e/ghi789...
-   ```
-4. Open `Onshape_extension/set_values.py` and paste the URL into the `url` field:
-   ```python
-   doc = Document.from_url(
-       url="https://cad.onshape.com/documents/<your-url-here>"
-   )
-   ```
-
-> 💡 This URL encodes your document ID, workspace ID, and element ID — it is unique to your copy. Using the original shared link will fail as you do not have write access to it.
-
-<!-- ##### iv. Set the Equations File
-
-In `set_values.py`, make sure the equations file name matches the one generated by the optimizer in Step 2. For SSPG this will be:
-
-```python
-variables_to_set = parse_variable_file("sspg_equations.txt")
-```
-
-Update the filename if you are running a different gearbox type (e.g., `cpg_equations.txt`). -->
-
-##### iv. Run the Script
-
-From the root of the repository:
-
-```bash
-cd Onshape_extension
-python3 set_values.py
-```
-
-The script will print the variable values before and after the update so you can confirm the changes were applied correctly:
-
-```text
-=== BEFORE ===
-{ ... current variable values ... }
-
-=== SETTING VARIABLE ===
-[POST] /api/variables/d/.../w/.../e/.../variables  →  200
-
-=== AFTER ===
-{ ... updated variable values ... }
-```
-
-> ⚠️ A `200` status does not always mean the update succeeded — Onshape returns 200 even for malformed payloads. Always check the `AFTER` output to confirm your variables were updated as expected.
-
----
-
-### Step 7: 3D-print and Assemble
-* **3D Printing:** Export the updated plastic parts to `.STL` format.
-* **Bearings:** Check the updated CAD model to identify which standard bearings are required for your specific configuration.
-
-----
-
-This framework provides the following features:
-1. **Optimize planetary gearbox** parameters for a **given motor** across the following gearbox types:
-      - Single Stage Planetary Gearbox (SSPG),
-      - Compound Planetary Gearbox (CPG),
-      - Wolfrom Planetary Gearbox (3K)(WPG), and
-      - Double Stage Planetary Gearbox (DSPG).
-
-2. Perform multi-objective optimization to **minimize actuator mass** and **axial width** while **maximizing efficiency**.
-3. **Automatically generate parametric actuator CAD** from optimization results, enabling direct **3D printing without manual redesign**.
-
-----
-
-## ✅ Supported Hardware
-
-### Supported Motors
-| Motor Code | Description |
-| :--- | :--- |
-| **U8** | T-motor U8 |
-| **U10** | T-motor U10+ |
-| **U12** | T-motor U12 |
-| **MN8014** | T-motor MN8014 |
-| **VT8020** | Vector Techniques 8020 |
-| **MAD_M6C12**| MAD Components M6C12 |
-
-### Supported Gearbox Topologies
-| Type | Description |
-| :--- | :--- |
-| **sspg** | Single-Stage Planetary Gearbox |
-| **cpg** | Compound Planetary Gearbox |
-| **wpg** | Wolfrom Planetary Gearbox (3K) |
-| **dspg** | Double-Stage Planetary Gearbox |
-
----
-
-## 📄 Citation
+## Citation
 
 If you use this framework in your research, please cite:
 
@@ -421,3 +151,11 @@ If you use this framework in your research, please cite:
       url={https://arxiv.org/abs/2510.07197}, 
 }
 ```
+
+## What's new
+
+- **More actuators:** besides the original four (SSPG, CPG, WPG, DSPG), COMPAct now designs 11
+  actuator types for frameless outrunner and inrunner motors — 15 in total (see
+  [Gearbox types](#gearbox-types)).
+- **WPG corrected:** new WPG design and corrected part masses.
+- 33 motors, metal mode (`--material metal`) and one-command Onshape updates (`--onshape`).

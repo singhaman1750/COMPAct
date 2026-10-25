@@ -91,7 +91,8 @@
         "driver_lower_holes_dist_from_center": 13,
         "driver_mount_height": 6,
         "motor_mount_driver_hole_num": 4,
-        "driver_side_holes_dist_from_center": 22.5
+        "driver_side_holes_dist_from_center": 22.5,
+        "stator_mounting_hole_allen_socket_head_dia": 5.5
 
 
 
