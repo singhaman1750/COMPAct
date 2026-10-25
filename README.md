@@ -151,3 +151,11 @@ If you use this framework in your research, please cite:
       url={https://arxiv.org/abs/2510.07197}, 
 }
 ```
+
+## What's new
+
+- **More actuators:** besides the original four (SSPG, CPG, WPG, DSPG), COMPAct now designs 11
+  actuator types for frameless outrunner and inrunner motors — 15 in total (see
+  [Gearbox types](#gearbox-types)).
+- **WPG corrected:** new WPG design and corrected part masses.
+- 33 motors, metal mode (`--material metal`) and one-command Onshape updates (`--onshape`).
