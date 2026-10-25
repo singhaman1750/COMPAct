@@ -129,6 +129,23 @@ model follows the new `CADs/<TYPE>/<type>_equations*.txt`.
 Example STL sets are in `CADs/Actuator_STL_files/`. A spreadsheet with a mass analysis is
 [here](https://docs.google.com/spreadsheets/d/1QYUox6946nNlciWFAQ1L-EqQNLNdAT6GV0OtC5uI0eU/edit?usp=sharing).
 
+## Changes since the paper
+
+The code used for the paper is tagged
+[`v1.0-icra2026`](https://github.com/singhaman1750/COMPAct/tree/v1.0-icra2026); to reproduce its
+results, run `git checkout v1.0-icra2026`. Since then:
+
+| Change | Paper version | Now |
+|---|---|---|
+| Command | `python actOpt.py U8 sspg 6.5` | `python actOpt.py --motor U8_Lite --gb_type sspg --gr 6.5` |
+| Motor names | `U8`, `U10`, `MAD_M6C12`, `VT8020`; `U12`, `U15` | `U8_Lite`, `U10_Plus_KV80`, `MAD_M6C12_KV170`, `VT8020_PRO`; U12 and U15 removed; 33 motors in total |
+| Scripts | `actOpt_icpg.py`, `actOpt_insspg.py`, `Opt_*.py` | all gearbox types through `actOpt.py` |
+| Gear sizing | torque from continuous current and KV | peak torque, checked at no-load speed (48 V) — see [Motors](#motors) |
+| New | — | 15 gearbox types, `--material metal`, `--onshape`, tests |
+
+Results therefore differ from the paper's numbers; mass and geometry bug fixes are listed in
+[ISSUES.md](ISSUES.md).
+
 ## For developers
 
 - [`gearbox_runner.py`](gearbox_runner.py) — one table (`GEARBOXES`) describing every gearbox type,
