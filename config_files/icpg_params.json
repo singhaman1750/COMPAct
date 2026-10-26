@@ -71,7 +71,7 @@
         "loose_clearance_3DP"                                    : 0.8,
         "ring_gear_thickness_mounting_casing"                    : 4 ,
         "bearing_retainer_hole_dia"                              : 4 ,
-        "bearing_retainer_hole_num"                              : 6 ,
+        "bearing_retainer_hole_num"                              : 8 ,
         "case_mounting_hole_dia" : 5 ,
         "case_mounting_hole_wrench_size" : 7.8 ,
         "case_mounting_hole_wrench_thickness" : 3.8 ,
