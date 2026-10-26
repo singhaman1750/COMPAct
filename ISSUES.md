@@ -469,12 +469,10 @@ says "TYPE 1 MATH" / "TYPE 2 MATH" (`ActuatorandGearbox_INSSPG.py`, `getMassKG_3
 are two Onshape models, "INSSPG_Dependent" and "INSSPG_Independent", so the mapping also decides
 which model each type's results belong in.
 
-**For now:** README and `docs/gearboxes.md` say "type 1" / "type 2" without the labels.
-
-**Question for mahi07-06:** which design is type 1 and which is type 2? Then add the labels to
-the README gearbox table, `docs/gearboxes.md` and `docs/onshape.md`.
-
-**Status:** open — question for mahi07-06.
+**Status:** resolved — Mahiraj Seervi confirmed (2026-10-26, `184d9ea`): `insspg_type_1` is
+**independent** (Onshape `documents/e0cb8ed6bb2b36cfcadffcf4/...`), `insspg_type_2` is
+**dependent** (`documents/97af418b118f30715235cd6a/...`). Labels added to the README,
+`docs/gearboxes.md` and `docs/onshape.md`.
 
 ### 10. INSSPG type 1 — sun bottom-part volume is almost zero (typo in an exponent)
 
@@ -560,19 +558,18 @@ models place their sun-gear countersinks the same way.
 
 **Status:** open — CAD fix for the SSPG model's designer.
 
-### CAD 2. Five Onshape models are still shared view-only, so users cannot copy them
+### CAD 2. Some Onshape models were shared view-only, so users could not copy them
 
 **Description:** some Onshape documents linked in the README's gearbox table are shared
 **view-only**. A user can open them but cannot make a copy ("Copy workspace" is not available), so
 they cannot get their own Variable Studio URL and cannot use them with `actOpt.py --onshape` or
 `set_values.py`.
 
-Still view-only:
+Were view-only until 2026-10-26:
 - **ICPG** (`icpg`) — `documents/1cec852caa1080765682d3d0/...`
 - **IDSPG** (`idspg`) — `documents/bfc847aa97321639994fa267/...`
 - **INSSPG Dependent** — `documents/97af418b118f30715235cd6a/...`
-- **INSSPG Independent** — `documents/e0cb8ed6bb2b36cfcadffcf4/...` (which INSSPG type each one is:
-  bug 9)
+- **INSSPG Independent** — `documents/e0cb8ed6bb2b36cfcadffcf4/...`
 - **INDSPG** (`indspg`) — `documents/082ad023b75b2274bed0f04d/...`
 
 Opened for copying (2026-10-23): WPG (new), ISSPG InBearing and OutBearing, INCPG Dependent and
@@ -583,8 +580,8 @@ Independent, INWPG Dependent and Independent. SSPG, CPG and DSPG could always be
 the other gearbox models are shared. Then check that "Copy workspace" works from a different
 account.
 
-**Status:** open for the five models above. Until then, leave `icpg`, `idspg`, `insspg_type_1`,
-`insspg_type_2` and `indspg` empty in `Onshape_extension/onshape_models.json`.
+**Status:** resolved — Mahiraj Seervi opened the last five models for copying (2026-10-26,
+`3f05974`); every model in the README's gearbox table can now be copied.
 
 ### CAD 3. DSPG — stage-1 ring gear is split into two parts
 
