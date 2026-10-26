@@ -67,18 +67,18 @@ The terminal shows the chosen design (teeth, module, planets, ratio). Two files 
 | `dspg` | Double-stage planetary | framed outrunner | `--motor U8_Lite --gr 20` | [open](https://cad.onshape.com/documents/b8d43d150fb932ea649dcd0f/w/aaa3fcc8da584cc207374389/e/12e148469fa8eb5b917f5bb1) |
 | `isspg_inside` | Internal single-stage, InBearing | frameless outrunner | `--motor RO100 --gr 6.5` | [open](https://cad.onshape.com/documents/9fa91e98fe82c4e544284d41/w/828f637e6a1fef0940224c5c/e/c80b77fbcf87c09b3b593c8a) |
 | `isspg_compact` | Internal single-stage, OutBearing | frameless outrunner | `--motor RO100 --gr 6.5` | [open](https://cad.onshape.com/documents/bf5f13d9187efab731a95ba7/w/1261f6088846b1d6dd38ea32/e/9442fa2e352d23d6eb88bc6e) |
-| `icpg` | Internal compound | frameless outrunner | `--motor RO100 --gr 10` | [open](https://cad.onshape.com/documents/1cec852caa1080765682d3d0/w/9b7913f319aab1fd6ef5de45/e/f9d06c56e5c97df7f6c68aa9) ⚠️ |
-| `idspg` | Internal double-stage | frameless outrunner | `--motor RO100 --gr 20` | [open](https://cad.onshape.com/documents/bfc847aa97321639994fa267/w/e42f2a8d3124414ae728bb05/e/19b7631b19424696aeb05c64) ⚠️ |
+| `icpg` | Internal compound | frameless outrunner | `--motor RO100 --gr 10` | [open](https://cad.onshape.com/documents/1cec852caa1080765682d3d0/w/9b7913f319aab1fd6ef5de45/e/f9d06c56e5c97df7f6c68aa9) |
+| `idspg` | Internal double-stage | frameless outrunner | `--motor RO100 --gr 20` | [open](https://cad.onshape.com/documents/bfc847aa97321639994fa267/w/e42f2a8d3124414ae728bb05/e/19b7631b19424696aeb05c64) |
 | `insspg_type_1` | Inrunner single-stage, type 1, Independent | frameless inrunner | `--motor RI100 --gr 6.5` |  [open](https://cad.onshape.com/documents/e0cb8ed6bb2b36cfcadffcf4/w/a5de456488f59701ab182711/e/b8af8d5da69957495c24591f) |
 | `insspg_type_2` | Inrunner single-stage, type 2, Dependent | frameless inrunner | `--motor RI100 --gr 6.5` | [open](https://cad.onshape.com/documents/97af418b118f30715235cd6a/w/253f8dd6e8e424cb9f7bb1dd/e/bcd4cd4dc6121c4e6915a50e) |
 | `incpg_dependent` | Inrunner compound, dependent | frameless inrunner | `--motor RI100 --gr 10` | [open](https://cad.onshape.com/documents/3e794c46f172f3b02cfa18e7/w/dfc878270d998ca1ea8223c8/e/c324bd70f7c31566e927c1f7) |
 | `incpg_independent` | Inrunner compound, independent | frameless inrunner | `--motor RI100 --gr 10` | [open](https://cad.onshape.com/documents/2519b08c3c51bbdac1923e25/w/095a9ef04c28fad58dcdbe6c/e/7335150ff09908ff2cd1b9b2) |
 | `inwpg_dependent` | Inrunner Wolfrom, dependent | frameless inrunner | `--motor RI100 --gr 20` | [open](https://cad.onshape.com/documents/a5e4d1f2afed2d53000ac6c5/w/fa005d0cbd6ffa3820332b7d/e/64e86c89d3ac5b23fd7711ba) |
 | `inwpg_independent` | Inrunner Wolfrom, independent | frameless inrunner | `--motor RI100 --gr 20` | [open](https://cad.onshape.com/documents/a5ebf8aa022054aedcbab90e/w/226eaf19e9c48cb8a6efbe49/e/e7a9e7fa0a60f50822757623) |
-| `indspg` | Inrunner double-stage | frameless inrunner | `--motor RI100 --gr 20` | [open](https://cad.onshape.com/documents/082ad023b75b2274bed0f04d/w/29fd6b162304a5c614568daf/e/f5c1a1cba8355822de1c14c1) ⚠️ |
+| `indspg` | Inrunner double-stage | frameless inrunner | `--motor RI100 --gr 20` | [open](https://cad.onshape.com/documents/082ad023b75b2274bed0f04d/w/29fd6b162304a5c614568daf/e/f5c1a1cba8355822de1c14c1) |
 
 ⚠️ ICPG, IDSPG, INSSPG and INDSPG models are still shared view-only and cannot be copied yet
-([ISSUES.md, CAD 2](ISSUES.md)). 
+([ISSUES.md, CAD 2](ISSUES.md)). This bug is fixed, remove this line
 Each type is described in [docs/gearboxes.md](docs/gearboxes.md).
 
 ## Motors
