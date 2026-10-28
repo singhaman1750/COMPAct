@@ -9,6 +9,7 @@ from ActuatorAndGearbox import singleStagePlanetaryGearbox
 
 from CommonComponents import material, bearings_discrete, nuts_and_bolts_dimensions, motor_frameless_inrunner as motor
 from CommonComponents import restores_stdout, cad_path
+from two_stage_search import stage_designs, pair_counts, pairs_in_ratio_bin, set_stage
 
 
 # ╔══════════════════════════════════════════════════════════════════════════╗
@@ -2207,130 +2208,100 @@ class optimizationDoubleStageActuator:
                 # print("iter, gearRatio, module1, module2, Ns1, Np1, Nr1, numPlanet1, Ns2, Np2, Nr2, numPlanet2, fwSun1MM, fwPlanet1MM, fwRing1MM, fwSun2MM, fwPlanet2MM, fwRing2MM, Opt_PSC_sun1,  Opt_PSC_planet1, Opt_PSC_ring1, Opt_PSC_sun2, Opt_PSC_planet2, Opt_PSC_ring2, Opt_CD_SP1, Opt_CD_PR1, Opt_CD_SP2, Opt_CD_PR2, mass, eff, peakTorque, Cost, Torque_Density")
                 print("iter, gearRatio, module1, module2, Ns1, Np1, Nr1, numPlanet1, Ns2, Np2, Nr2, numPlanet2, fwSun1MM, fwPlanet1MM, fwRing1MM, fwSun2MM, fwPlanet2MM, fwRing2MM, mass, eff, peakTorque, Cost, Torque_Density, Outer_Bearing_mass_stg1, Outer_Bearing_mass_stg2, Actuator_width")
 
+            # Every check looks at one stage only, so each stage's designs are listed once here
+            # (in the order the old nested loops visited them) and only the pairs whose ratio is
+            # in the bin are evaluated, in that same order -- see two_stage_search.py.
+            gearbox        = Actuator.inrunnerdoubleStagePlanetaryGearbox
+            stage1_designs = stage_designs(gearbox.Stage1, self.MODULE_STAGE1_MIN, self.MODULE_STAGE1_MAX,
+                                           self.NUM_TEETH_SUN_MIN, self.NUM_TEETH_PLANET_MIN,
+                                           self.NUM_PLANET_STAGE1_MIN, self.NUM_PLANET_STAGE1_MAX, Actuator.maxGearboxDiameter_Stg1,
+                                           lambda: (gearbox.Stage1.geometricConstraint()
+                                                    and gearbox.Stage1.meshingConstraint()
+                                                    and gearbox.noPlanetInterferenceConstraintStg1()))
+            stage2_designs = stage_designs(gearbox.Stage2, self.MODULE_STAGE2_MIN, self.MODULE_STAGE2_MAX,
+                                           self.NUM_TEETH_SUN_MIN, self.NUM_TEETH_PLANET_MIN,
+                                           self.NUM_PLANET_STAGE2_MIN, self.NUM_PLANET_STAGE2_MAX, Actuator.maxGearboxDiameter,
+                                           lambda: (gearbox.Stage2.geometricConstraint()
+                                                    and gearbox.Stage2.meshingConstraint()
+                                                    and gearbox.additionalConstraints()
+                                                    and gearbox.noPlanetInterferenceConstraintStg2()))
+
             while self.gearRatioIter <= self.GEAR_RATIO_MAX:
                 opt_done  = 0
                 self.iter = 0
                 self.Cost = 100000
                 MinCost   = self.Cost
 
-                Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.setModule(self.MODULE_STAGE1_MIN)
-                while Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.module <= self.MODULE_STAGE1_MAX:
-                    Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.setModule(self.MODULE_STAGE2_MIN)
-                    while Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.module <= self.MODULE_STAGE2_MAX:
-                        # Setting Ns
-                        Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.setNs(self.NUM_TEETH_SUN_MIN)
-                        while 2*Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.getPCRadiusSunMM() <= Actuator.maxGearboxDiameter_Stg1:  # specific stage 1 Max diameter
-                            # Setting Np
-                            Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.setNp(self.NUM_TEETH_PLANET_MIN)
-                            while 2*Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.getPCRadiusPlanetMM() <= Actuator.maxGearboxDiameter_Stg1*0.5: # specific stage 1 Max diameter
-                                # Setting Nr
-                                Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.setNr(2*Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.Np + 
-                                                                                Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.Ns)
-                                if 2*Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.getPCRadiusRingMM() <= Actuator.maxGearboxDiameter_Stg1: # specific stage 1 Max diameter
-                                # while 2*Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.getPCRadiusRingMM() <= maxGearBoxDia:
-                                    # Setting number of Planet
-                                    Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.setNumPlanet(self.NUM_PLANET_STAGE1_MIN)
-                                    while Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.numPlanet <= self.NUM_PLANET_STAGE1_MAX:
-                                        # # Setting Nr
-                                        Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.setNs(self.NUM_TEETH_SUN_MIN)
-                                        while 2*Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.getPCRadiusSunMM() <= Actuator.maxGearboxDiameter:
-                                            # Setting Np
-                                            Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.setNp(self.NUM_TEETH_PLANET_MIN)
-                                            while 2*Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.getPCRadiusPlanetMM() <= Actuator.maxGearboxDiameter*0.5:
-                                                # Setting Ns
-                                                Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.setNr(2*Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.Np + 
-                                                                                                Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.Ns)
-                                                if 2*Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.getPCRadiusRingMM() <= Actuator.maxGearboxDiameter:
-                                                # while 2*Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.getPCRadiusRingMM() <= maxGearBoxDia:
-                                                    # Setting number of Planet
-                                                    Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.setNumPlanet(self.NUM_PLANET_STAGE2_MIN)
-                                                    while Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.numPlanet <= self.NUM_PLANET_STAGE2_MAX:
-                                                        self.cntrIterBeforeCons += 1
-                                                        #print("Before Constraints", cntrIterBeforeCons)
-                                                        if (Actuator.inrunnerdoubleStagePlanetaryGearbox.geometricConstraint() and 
-                                                            Actuator.inrunnerdoubleStagePlanetaryGearbox.meshingConstraint()   and
-                                                            Actuator.inrunnerdoubleStagePlanetaryGearbox.additionalConstraints() and
-                                                            Actuator.inrunnerdoubleStagePlanetaryGearbox.noPlanetInterferenceConstraint()       
-                                                            ):
-                                                            self.totalFeasibleGearboxes += 1
-                                                            # Fiter for the Gear Ratio
-                                                            if (Actuator.inrunnerdoubleStagePlanetaryGearbox.gearRatio() >= self.gearRatioIter and 
-                                                                Actuator.inrunnerdoubleStagePlanetaryGearbox.gearRatio() <= (self.gearRatioIter + self.GEAR_RATIO_STEP)):
+                pairs_tried, pairs_feasible = pair_counts(stage1_designs, stage2_designs)
+                self.cntrIterBeforeCons     += pairs_tried
+                self.totalFeasibleGearboxes += pairs_feasible
+                for module1, design1, module2, design2 in pairs_in_ratio_bin(stage1_designs, stage2_designs,
+                                                                             self.gearRatioIter,
+                                                                             self.gearRatioIter + self.GEAR_RATIO_STEP):
+                    set_stage(gearbox.Stage1, module1, design1)
+                    set_stage(gearbox.Stage2, module2, design2)
+                    self.totalGearboxesWithReqGR += 1
 
-                                                                self.totalGearboxesWithReqGR += 1
+                    Actuator.updateFacewidth()
+                    # effActuator = Actuator.inrunnerdoubleStagePlanetaryGearbox.getEfficiency()
+                    # massActuator = Actuator.getMassKG_3DP()
 
-                                                                Actuator.updateFacewidth()
-                                                                # effActuator = Actuator.inrunnerdoubleStagePlanetaryGearbox.getEfficiency()
-                                                                # massActuator = Actuator.getMassKG_3DP()
-                                                                
-                                                                self.Cost = self.cost(Actuator=Actuator)
+                    self.Cost = self.cost(Actuator=Actuator)
 
-                                                                if self.Cost < MinCost:
-                                                                    MinCost = self.Cost
-                                                                    self.iter +=1
-                                                                    # Actuator.genEquationFile()
-                                                                    if (self.gearRatioReq == 0):
-                                                                        Actuator.genEquationFile(motor_name=Actuator.motor.motorName, gearRatioLL=round(self.gearRatioIter, 1), gearRatioUL = (round(self.gearRatioIter + self.GEAR_RATIO_STEP,1)))
-                                                                    else:
-                                                                        Actuator.genEquationFile_editCADdirectly()
+                    if self.Cost < MinCost:
+                        MinCost = self.Cost
+                        self.iter +=1
+                        # Actuator.genEquationFile()
+                        if (self.gearRatioReq == 0):
+                            Actuator.genEquationFile(motor_name=Actuator.motor.motorName, gearRatioLL=round(self.gearRatioIter, 1), gearRatioUL = (round(self.gearRatioIter + self.GEAR_RATIO_STEP,1)))
+                        else:
+                            Actuator.genEquationFile_editCADdirectly()
 
-                                                                    opt_done = 1
-                                                                    opt_parameters = [Actuator.inrunnerdoubleStagePlanetaryGearbox.gearRatio(),
-                                                                                      Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.numPlanet,
-                                                                                      Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.numPlanet,
-                                                                                      Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.Ns,
-                                                                                      Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.Np,
-                                                                                      Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.Nr,
-                                                                                      Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.Ns,
-                                                                                      Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.Np,
-                                                                                      Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.Nr,
-                                                                                      Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.module, 
-                                                                                      Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.module]
-                                                                    opt_planetaryGearbox = inrunnerdoubleStagePlanetaryGearbox(design_parameters         = self.design_parameters,
-                                                                                                                       gear_standard_parameters  = self.gear_standard_parameters,
-                                                                                                                       Ns1                       = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.Ns,
-                                                                                                                       Np1                       = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.Np,
-                                                                                                                       Nr1                       = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.Nr,
-                                                                                                                       Ns2                       = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.Ns,
-                                                                                                                       Np2                       = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.Np,
-                                                                                                                       Nr2                       = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.Nr,  
-                                                                                                                       numPlanet1                = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.numPlanet,
-                                                                                                                       numPlanet2                = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.numPlanet,
-                                                                                                                       module1                   = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.module, # mm
-                                                                                                                       module2                   = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.module, # mm
-                                                                                                                       densityGears              = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.densityGears,
-                                                                                                                       densityStructure          = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.densityStructure, 
-                                                                                                                       densityRotor              = Actuator.inrunnerdoubleStagePlanetaryGearbox.densityRotor,
-                                                                                                                       fwSun1MM                  = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.fwSunMM, # mm
-                                                                                                                       fwPlanet1MM               = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.fwPlanetMM, # mm
-                                                                                                                       fwRing1MM                 = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.fwRingMM, # mm
-                                                                                                                       fwSun2MM                  = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.fwSunMM, # mm
-                                                                                                                       fwPlanet2MM               = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.fwPlanetMM, # mm
-                                                                                                                       fwRing2MM                 = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.fwRingMM, # mm
-                                                                                                                       maxGearAllowableStressMPa = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.maxGearAllowableStressMPa) # MPa
-                                                                    opt_actuator = inrunnerdoubleStageActuator(design_parameters           = self.design_parameters,
-                                                                                                                motor                       = Actuator.motor, 
-                                                                                                                motor_driver_params         = Actuator.motor_driver_params,
-                                                                                                                inrunnerdoubleStagePlanetaryGearbox = opt_planetaryGearbox, 
-                                                                                                                FOS                         = Actuator.FOS, 
-                                                                                                                serviceFactor               = Actuator.serviceFactor, 
-                                                                                                                maxGearboxDiameter          = Actuator.maxGearboxDiameter, # mm 
-                                                                                                                stressAnalysisMethodName    = "MIT") # Lewis or AGMA or MIT
-                                                                    opt_actuator.updateFacewidth()
-                                                                    opt_actuator.getMassKG_3DP()
-                                                                    # self.printOptimizationResults(Actuator, log, csv)
-                                                        Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.setNumPlanet(Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.numPlanet + 1)
-                                                    # Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.setNr(Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.Ns + 1)
-                                                Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.setNp(Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.Np + 1)
-                                            Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.setNs(Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.Ns + 1)
-                                        Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.setNumPlanet(Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.numPlanet + 1)
-                                    # Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.setNr(Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.Nr + 1)
-                                Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.setNp(Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.Np + 1)
-                            Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.setNs(Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.Ns + 1)
-                        Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.setModule(Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.module + 0.100)
-                        Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.setModule(round(Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.module,1))
-                    Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.setModule(Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.module + 0.100)
-                    Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.setModule(round(Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.module,1))
+                        opt_done = 1
+                        opt_parameters = [Actuator.inrunnerdoubleStagePlanetaryGearbox.gearRatio(),
+                                          Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.numPlanet,
+                                          Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.numPlanet,
+                                          Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.Ns,
+                                          Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.Np,
+                                          Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.Nr,
+                                          Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.Ns,
+                                          Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.Np,
+                                          Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.Nr,
+                                          Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.module, 
+                                          Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.module]
+                        opt_planetaryGearbox = inrunnerdoubleStagePlanetaryGearbox(design_parameters         = self.design_parameters,
+                                                                           gear_standard_parameters  = self.gear_standard_parameters,
+                                                                           Ns1                       = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.Ns,
+                                                                           Np1                       = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.Np,
+                                                                           Nr1                       = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.Nr,
+                                                                           Ns2                       = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.Ns,
+                                                                           Np2                       = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.Np,
+                                                                           Nr2                       = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.Nr,  
+                                                                           numPlanet1                = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.numPlanet,
+                                                                           numPlanet2                = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.numPlanet,
+                                                                           module1                   = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.module, # mm
+                                                                           module2                   = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.module, # mm
+                                                                           densityGears              = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.densityGears,
+                                                                           densityStructure          = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.densityStructure, 
+                                                                           densityRotor              = Actuator.inrunnerdoubleStagePlanetaryGearbox.densityRotor,
+                                                                           fwSun1MM                  = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.fwSunMM, # mm
+                                                                           fwPlanet1MM               = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.fwPlanetMM, # mm
+                                                                           fwRing1MM                 = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.fwRingMM, # mm
+                                                                           fwSun2MM                  = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.fwSunMM, # mm
+                                                                           fwPlanet2MM               = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.fwPlanetMM, # mm
+                                                                           fwRing2MM                 = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage2.fwRingMM, # mm
+                                                                           maxGearAllowableStressMPa = Actuator.inrunnerdoubleStagePlanetaryGearbox.Stage1.maxGearAllowableStressMPa) # MPa
+                        opt_actuator = inrunnerdoubleStageActuator(design_parameters           = self.design_parameters,
+                                                                    motor                       = Actuator.motor, 
+                                                                    motor_driver_params         = Actuator.motor_driver_params,
+                                                                    inrunnerdoubleStagePlanetaryGearbox = opt_planetaryGearbox, 
+                                                                    FOS                         = Actuator.FOS, 
+                                                                    serviceFactor               = Actuator.serviceFactor, 
+                                                                    maxGearboxDiameter          = Actuator.maxGearboxDiameter, # mm 
+                                                                    stressAnalysisMethodName    = "MIT") # Lewis or AGMA or MIT
+                        opt_actuator.updateFacewidth()
+                        opt_actuator.getMassKG_3DP()
+                        # self.printOptimizationResults(Actuator, log, csv)
                 if (opt_done == 1):
                         self.printOptimizationResults(opt_actuator, log, csv)
                 self.gearRatioIter += self.GEAR_RATIO_STEP

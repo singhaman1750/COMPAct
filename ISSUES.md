@@ -8,10 +8,22 @@
 - **Fast tests** (`pytest`, about 2 s): every gearbox type builds, the config and motor files are
   valid, the Onshape push works against a fake Onshape, and the README/docs commands and links are
   correct. CI runs them on every push (`.github/workflows/checks.yml`).
-- **Golden-output check** (`tests/golden/golden.py`, 58 cases, about 10 min): every gearbox type
+- **Golden-output check** (`tests/golden/golden.py`, 58 cases, about 30 s): every gearbox type
   with its golden motors, plus one metal case per type. It compares the chosen design, the CAD
   equations files and the results CSVs with recorded baselines. Run it before merging any change;
   a change that is meant to alter results re-records only the affected cases.
+
+### Faster search for the two-stage gearboxes (DSPG, IDSPG, INDSPG)
+
+**Status: done (2026-10-29).** The search nested every stage-2 design inside every stage-1 design
+and checked each pair: about 228 million pairs for DSPG with a U8, of which only ~15 000 have the
+requested ratio. Every check looks at one stage only, so `two_stage_search.py` now lists each
+stage's designs once and evaluates only the pairs whose ratio is in the bin, in the original order
+(same design chosen, ties included). Times for one ratio: DSPG U8 about 6 min → 3 s, IDSPG RO100
+about 2 min → 6 s, INDSPG 5 s → under 1 s; the golden check 10.5 min → 30 s. Checked against the
+old code on 59 cases (5 DSPG motors, 3 IDSPG, 2 INDSPG, several ratios incl. bin edges, metal,
+multi-ratio sweeps): all identical. `tests/test_two_stage_search.py` compares the fast search with
+the original nested loops on a small search. The unused PSC search versions are unchanged.
 
 ### Phase 3b — move the gearbox modules into a folder
 
@@ -484,6 +496,20 @@ file, e.g. `"min_rotor_top_bearing_ID": { "RI100": 25, "RI80": 0 }`, and read wi
 `CommonComponents.per_motor_value()`; a motor that isn't listed stops with a message naming the
 setting. The dependent rule is now `max(sun needs, the motor's minimum)`. Results unchanged
 (golden check). The unused `min_rotor_top_bearing_ID` in `inwpg_params_independent.json` is removed.
+
+### 13. INDSPG — crashes instead of reporting "no design"
+
+**Description:** at the end of `optimizeActuatorWithoutPSC` in `ActuatorandGearbox_INDSPG.py`,
+`opt_actuator.print_mass_of_parts_3DP()` runs even when no design was found, so the run stops with
+`UnboundLocalError: cannot access local variable 'opt_actuator'` instead of saying that no design
+exists. Seen with RI100 at ratio 5 and RI80 at 5, 9.5 and 36 (found 2026-10-29 while checking the
+faster two-stage search, which keeps this behaviour unchanged).
+
+**Probable fix:** only print the part masses `if opt_done == 1`, like the results printout just
+above. Results don't change (only what happens when nothing is found); `actOpt.py` would then
+report no design as for the other types.
+
+**Status:** open.
 
 ## CAD issues
 
