@@ -101,9 +101,45 @@ def test_rated_rating_uses_rated_values():
     assert (motor.maxMotorTorque, motor.maxMotorAngVelRPM) == (el["rated_torque_Nm"], el["rated_speed_rpm"])
 
 
-def test_rated_rating_needs_rated_data():
+def test_rated_rating_needs_rated_data(tmp_path):
+    # Every motor now has rated values; check the error with a copy that lacks them.
+    data = json.loads(Path(MOTORS_JSON).read_text(encoding="utf-8"))
+    for key in ("rated_torque_Nm", "rated_speed_rpm"):
+        del data["motors"]["U8_Lite"]["electrical"][key]
+    path = tmp_path / "motors.json"
+    path.write_text(json.dumps(data), encoding="utf-8")
     with pytest.raises(ValueError, match="no rated torque"):
-        load_motor("U8_Lite", rating="rated")
+        load_motor("U8_Lite", rating="rated", path=str(path))
+
+
+@pytest.mark.parametrize("name", NAMES)
+def test_every_motor_has_rated_values(name):
+    el = MOTORS[name]["electrical"]
+    assert 0 < el["rated_current_A"] < el["peak_current_A"]
+    assert 0 < el["rated_torque_Nm"] < el["peak_torque_Nm"]
+    assert 0 < el["rated_speed_rpm"] < el["no_load_speed_rpm"]
+    motor = load_motor(name, rating="rated")
+    assert (motor.maxMotorTorque, motor.maxMotorAngVelRPM) == (el["rated_torque_Nm"], el["rated_speed_rpm"])
+
+
+@pytest.mark.parametrize("name", NAMES)
+def test_rotor_inertia_is_plausible(name):
+    entry = MOTORS[name]
+    mech = entry["mechanical"]
+    inertia = mech["rotor_inertia_kgm2"]
+    assert mech["rotor_inertia_basis"].split(":")[0] in ("datasheet", "measured", "estimate")
+    assert mech["rotor_inertia_source"]
+    # Less than the whole motor's mass at its outer radius.
+    radius_m = (entry["geometry"].get("motorDia") or entry["geometry"].get("motor_OD")
+                or entry["geometry"]["stator_OD"]) / 2000
+    assert 0 < inertia < entry["mass_kg"] * radius_m ** 2
+
+
+def test_rated_values_of_framed_motors_say_where_they_come_from():
+    for name in by_type("framed_outrunner"):
+        el = MOTORS[name]["electrical"]
+        for key in ("rated_current_basis", "rated_torque_basis", "rated_speed_basis"):
+            assert el[key].split(":")[0] in ("datasheet", "measured", "estimate"), (name, key)
 
 
 def test_unknown_rating_is_rejected():

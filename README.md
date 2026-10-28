@@ -92,7 +92,8 @@ sources. A gearbox type accepts any motor of its kind:
 | Frameless inrunner | RI100, RI80 |
 
 Gears are sized with each motor's **peak torque** and checked at its **no-load speed** (48 V supply);
-set `"rating"` in `motors.json` to `"rated"` to use rated values instead (frameless motors only).
+set `"rating"` in `motors.json` to `"rated"` to use rated values instead (datasheet values for the
+frameless motors, mostly estimates for the framed ones; see [docs/motors.md](docs/motors.md)).
 Use the exact names from `motors.json` (e.g. `MAD_M6C12_KV170`); a wrong name lists the valid ones.
 To add a motor, see [docs/motors.md](docs/motors.md).
 
