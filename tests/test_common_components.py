@@ -8,7 +8,7 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
-from CommonComponents import CAD_DIR_ENV, bearing_mass_kg, cad_path, restores_stdout  # noqa: E402
+from CommonComponents import CAD_DIR_ENV, bearing_mass_kg, cad_path, per_motor_value, restores_stdout  # noqa: E402
 
 
 @pytest.mark.parametrize(
@@ -74,3 +74,14 @@ def test_gearbox_modules_write_cad_files_through_cad_path(module):
     # golden check, where every case has its own folder.
     code = (REPO_ROOT / module).read_text(encoding="utf-8")
     assert not re.search(r"""['"]CADs['"]""", code), f"{module}: use cad_path()"
+
+
+def test_per_motor_value_returns_the_motors_value():
+    params = {"min_bore": {"RI100": 25, "RI80": 0}}
+    assert per_motor_value(params, "min_bore", "RI100") == 25
+    assert per_motor_value(params, "min_bore", "RI80") == 0
+
+
+def test_per_motor_value_rejects_a_motor_that_is_not_listed():
+    with pytest.raises(ValueError, match=r"min_bore has no value for motor 'RI120' \(listed: RI100, RI80\)"):
+        per_motor_value({"min_bore": {"RI100": 25, "RI80": 0}}, "min_bore", "RI120")

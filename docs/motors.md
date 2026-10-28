@@ -44,6 +44,11 @@ with `_KV<n>` when the model comes in several KV variants). Copy an existing ent
   `motor_frameless_outrunner`, `motor_frameless_inrunner` in `CommonComponents.py`) except the
   performance ones; the classes have no defaults, so nothing is silently guessed.
 - Frameless motors also need `rated_torque_Nm`, `rated_current_A`, `rated_speed_rpm`.
+- A new **frameless inrunner** also needs its own value in the settings listed per motor
+  (`{ "RI100": …, "RI80": … }`): `min_rotor_top_bearing_ID` in `incpg_dependent_params.json`
+  and `inwpg_params_dependent.json`, and the six `rotor_top_bearing_*` / `rotor_bottom_bearing_*`
+  sizes in `incpg_independent_params.json` and `inwpg_params_independent.json`. Without them
+  those gearbox types stop with a message naming the missing setting.
 
 ### Conventions for the values
 
