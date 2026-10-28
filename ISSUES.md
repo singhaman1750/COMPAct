@@ -209,7 +209,7 @@ it should be a deliberate decision rather than folded in silently.
 
 **Status:** open — not yet fixed.
 
-### 2. ISSPG "inside" and "compact" variants silently overwrite each other's equations file
+### 2. Variants of a family silently overwrite each other's equations file (ISSPG, INCPG, INWPG, INSSPG)
 
 **Description:** `ActuatorAndGearbox_ISSPG_inside.py` and `ActuatorAndGearbox_ISSPG_compact.py`
 both call `genEquationFile_editCADdirectly()` automatically whenever `optimizeActuator()` finds a
@@ -234,7 +234,15 @@ python actOpt.py RO100 isspg_compact 6.5
 construction in each file's `genEquationFile_editCADdirectly()` (currently at
 `ActuatorAndGearbox_ISSPG_inside.py:826` and `ActuatorAndGearbox_ISSPG_compact.py:821`).
 
-**Status:** open — not yet fixed.
+Not only ISSPG: INCPG, INWPG and INSSPG had the same problem (both variants wrote
+`CADs/<FAMILY>/<family>_equations*.txt`), so `--onshape` could push one variant's design into the
+other variant's model.
+
+**Status:** resolved (2026-10-28) — every gearbox type writes
+`CADs/<FAMILY>/<gb_type>_equations*.txt` (e.g. `CADs/INCPG/incpg_dependent_equations_onshape.txt`),
+including the per-ratio `Equation_Files/` copies, and `set_values` pushes that file. Non-variant
+types keep their names. File contents and results unchanged (golden baselines re-recorded for the
+new names only); tests check that variants never share a file and each pushes its own.
 
 ### 3. IDSPG has no CAD model or Onshape link
 

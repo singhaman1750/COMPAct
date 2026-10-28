@@ -735,22 +735,22 @@ class singleStagePlanetaryActuator:
         lines = self._equation_lines()
         
         # Matches Screenshot Structure: CADs/SSPG/Equation_Files/{motor_name}/
-        path_sw = cad_path('INSSPG',f'insspg_equations_{gearRatioLL}_{gearRatioUL}.txt')
+        path_sw = cad_path('INSSPG',f'{self.insspg_type}_equations_{gearRatioLL}_{gearRatioUL}.txt')
         os.makedirs(os.path.dirname(path_sw), exist_ok=True)
         with open(path_sw, 'w') as eqFile: eqFile.writelines(lines)
 
-        path_os = cad_path('INSSPG',f'insspg_equations_{gearRatioLL}_{gearRatioUL}_onshape.txt')
+        path_os = cad_path('INSSPG',f'{self.insspg_type}_equations_{gearRatioLL}_{gearRatioUL}_onshape.txt')
         with open(path_os, 'w') as eqFile: eqFile.writelines(lines)
 
     def genEquationFile_editCADdirectly(self):
         self.setVariables()
         lines = self._equation_lines()
 
-        path_sw = cad_path('INSSPG', 'insspg_equations.txt')
+        path_sw = cad_path('INSSPG', f'{self.insspg_type}_equations.txt')
         os.makedirs(os.path.dirname(path_sw), exist_ok=True)
         with open(path_sw, 'w') as eqFile: eqFile.writelines(lines)
 
-        path_os = cad_path('INSSPG', 'insspg_equations_onshape.txt')
+        path_os = cad_path('INSSPG', f'{self.insspg_type}_equations_onshape.txt')
         with open(path_os, 'w') as eqFile: eqFile.writelines(lines)
 
     #--------------------------------------------

@@ -54,7 +54,8 @@ python actOpt.py --motor U8_Lite --gb_type sspg --gr 6.5
 The terminal shows the chosen design (teeth, module, planets, ratio). Two files are written:
 - `results/results_BruteForce_<motor>/<TYPE>_BRUTEFORCE_MIT_<motor>.csv` — mass, efficiency,
   width, cost and the mass of every part (`..._metal.csv` in metal mode);
-- `CADs/<TYPE>/<type>_equations*.txt` — the parameters for the CAD model. Every run overwrites
+- `CADs/<TYPE>/<gb_type>_equations*.txt` — the parameters for the CAD model (variants such as
+  `incpg_dependent` write into their family's folder, `CADs/INCPG/`). Every run overwrites
   these; `git checkout -- CADs` restores the committed versions.
 
 ## Gearbox types

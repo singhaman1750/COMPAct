@@ -60,9 +60,9 @@ Each push:
 If the optimiser finds no design, the model is not set up, or the API fails, the optimisation result
 is still saved and the model is left unchanged.
 
-Both variants of a family write the same equations file (e.g. `isspg_inside` and `isspg_compact` →
-`CADs/ISSPG/isspg_equations_onshape.txt`), so push a variant before optimising the other one; with
-`--onshape` this happens automatically.
+Each gearbox type writes its own equations file, `CADs/<FAMILY>/<gb_type>_equations_onshape.txt`
+(e.g. `incpg_dependent` → `CADs/INCPG/incpg_dependent_equations_onshape.txt`), and that is the file
+pushed for it, so the two variants of a family never overwrite each other.
 
 ## Troubleshooting
 

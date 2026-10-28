@@ -1140,7 +1140,7 @@ class inrunnerWolfromPlanetaryActuator:
     def genEquationFile(self, motor_name="NO_MOTOR", gearRatioLL = 0.0, gearRatioUL = 0.0):
         # writing values into text file imported which is imported into solidworks
         self.setVariables()
-        file_path = cad_path('INWPG', 'Equation_Files', motor_name, f'inwpg_equations_{gearRatioLL}_{gearRatioUL}.txt')
+        file_path = cad_path('INWPG', 'Equation_Files', motor_name, f'inwpg_independent_equations_{gearRatioLL}_{gearRatioUL}.txt')
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, 'w') as eqFile:
             l = [
@@ -1298,7 +1298,7 @@ class inrunnerWolfromPlanetaryActuator:
             eqFile.writelines(l)
         eqFile.close()
         
-        file_path = cad_path('INWPG', 'Equation_Files', motor_name, f'inwpg_equations_{gearRatioLL}_{gearRatioUL}_onshape.txt')
+        file_path = cad_path('INWPG', 'Equation_Files', motor_name, f'inwpg_independent_equations_{gearRatioLL}_{gearRatioUL}_onshape.txt')
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, 'w') as eqFile:
             l = [
@@ -1459,7 +1459,7 @@ class inrunnerWolfromPlanetaryActuator:
     def genEquationFile_editCADdirectly(self):
         # writing values into text file imported which is imported into solidworks
         self.setVariables()
-        file_path = cad_path('INWPG', 'inwpg_equations.txt')
+        file_path = cad_path('INWPG', 'inwpg_independent_equations.txt')
         with open(file_path, 'w') as eqFile:
             l = [
                     f'"Ns"= {self.Ns}\n',
@@ -1616,7 +1616,7 @@ class inrunnerWolfromPlanetaryActuator:
             eqFile.writelines(l)
         eqFile.close()
 
-        file_path = cad_path('INWPG', 'inwpg_equations_onshape.txt')
+        file_path = cad_path('INWPG', 'inwpg_independent_equations_onshape.txt')
         with open(file_path, 'w') as eqFile:
             l = [
                     f'"Ns"= {self.Ns}\n',
