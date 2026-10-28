@@ -1,7 +1,7 @@
 {
     "_about": "Motor data for every gearbox type, read by CommonComponents.load_motor(). Values and their sources are recorded in config_files/motors_draft.md.",
     "rating": "peak",
-    "_rating_help": "peak: gears sized with peak_torque_Nm, stress check at no_load_speed_rpm. rated: rated_torque_Nm and rated_speed_rpm (frameless motors only).",
+    "_rating_help": "peak: gears sized with peak_torque_Nm, stress check at no_load_speed_rpm. rated: rated_torque_Nm and rated_speed_rpm (datasheet for frameless motors, mostly estimates for framed motors - see each *_basis).",
     "system_voltage_V": 48,
     "motors": {
         "U8_Lite": {
@@ -14,7 +14,13 @@
                 "peak_torque_basis": "measured",
                 "peak_current_A": 29.3,
                 "no_load_speed_rpm": 4800,
-                "no_load_speed_basis": "estimate: KV x 48 V"
+                "no_load_speed_basis": "estimate: KV x 48 V",
+                "rated_current_A": 7.71,
+                "rated_current_basis": "estimate: T-Motor max continuous power 370 W / 48 V",
+                "rated_torque_Nm": 0.718,
+                "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
+                "rated_speed_rpm": 4669,
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x 170 mOhm line-to-line); T-Motor 'Internal Resistance', taken as line-to-line"
             },
             "mass_kg": 0.238,
             "geometry": {
@@ -29,6 +35,11 @@
                 "wire_slot_dist_from_center": 32,
                 "wire_slot_length": 5.5,
                 "wire_slot_radius": 2.9
+            },
+            "mechanical": {
+                "rotor_inertia_kgm2": 0.000117,
+                "rotor_inertia_basis": "estimate: 0.26 x mass x (motorDia/2)^2, +-30 %",
+                "rotor_inertia_source": "rule calibrated on the measured T-Motor U8 KV100 (1.2e-4 kg m^2, 242 g, Lee, Pan, Rouse, IROS 2019); see motors_draft.md, Phase A"
             }
         },
         "U8_Lite_L": {
@@ -41,7 +52,13 @@
                 "peak_torque_basis": "measured",
                 "peak_current_A": 45.8,
                 "no_load_speed_rpm": 5280,
-                "no_load_speed_basis": "estimate: KV x 48 V"
+                "no_load_speed_basis": "estimate: KV x 48 V",
+                "rated_current_A": 10.25,
+                "rated_current_basis": "estimate: T-Motor max continuous power 492 W / 48 V",
+                "rated_torque_Nm": 0.866,
+                "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
+                "rated_speed_rpm": 5162,
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x 105 mOhm line-to-line); T-Motor 'Internal Resistance', taken as line-to-line"
             },
             "mass_kg": 0.282,
             "geometry": {
@@ -56,6 +73,11 @@
                 "wire_slot_dist_from_center": 32,
                 "wire_slot_length": 5.5,
                 "wire_slot_radius": 2.9
+            },
+            "mechanical": {
+                "rotor_inertia_kgm2": 0.000139,
+                "rotor_inertia_basis": "estimate: 0.26 x mass x (motorDia/2)^2, +-30 %",
+                "rotor_inertia_source": "rule calibrated on the measured T-Motor U8 KV100 (1.2e-4 kg m^2, 242 g, Lee, Pan, Rouse, IROS 2019); see motors_draft.md, Phase A"
             }
         },
         "U8_II": {
@@ -68,7 +90,13 @@
                 "peak_torque_basis": "estimate",
                 "peak_current_A": 19.1,
                 "no_load_speed_rpm": 4080,
-                "no_load_speed_basis": "estimate: KV x 48 V"
+                "no_load_speed_basis": "estimate: KV x 48 V",
+                "rated_current_A": 4.71,
+                "rated_current_basis": "estimate: T-Motor max continuous power 226 W / 48 V",
+                "rated_torque_Nm": 0.513,
+                "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
+                "rated_speed_rpm": 3990,
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x 225 mOhm line-to-line); T-Motor 'Internal Resistance', taken as line-to-line"
             },
             "mass_kg": 0.277,
             "geometry": {
@@ -83,6 +111,11 @@
                 "wire_slot_dist_from_center": 32,
                 "wire_slot_length": 5.5,
                 "wire_slot_radius": 2.9
+            },
+            "mechanical": {
+                "rotor_inertia_kgm2": 0.000137,
+                "rotor_inertia_basis": "estimate: 0.26 x mass x (motorDia/2)^2, +-30 %",
+                "rotor_inertia_source": "rule calibrated on the measured T-Motor U8 KV100 (1.2e-4 kg m^2, 242 g, Lee, Pan, Rouse, IROS 2019); see motors_draft.md, Phase A"
             }
         },
         "U8_II_Lite": {
@@ -95,7 +128,13 @@
                 "peak_torque_basis": "measured",
                 "peak_current_A": 31,
                 "no_load_speed_rpm": 4800,
-                "no_load_speed_basis": "estimate: KV x 48 V"
+                "no_load_speed_basis": "estimate: KV x 48 V",
+                "rated_current_A": 8.06,
+                "rated_current_basis": "estimate: T-Motor max continuous power 387 W / 48 V",
+                "rated_torque_Nm": 0.731,
+                "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
+                "rated_speed_rpm": 4689,
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x 137.5 mOhm line-to-line); T-Motor 'Internal Resistance', taken as line-to-line"
             },
             "mass_kg": 0.253,
             "geometry": {
@@ -110,6 +149,11 @@
                 "wire_slot_dist_from_center": 32,
                 "wire_slot_length": 5.5,
                 "wire_slot_radius": 2.9
+            },
+            "mechanical": {
+                "rotor_inertia_kgm2": 0.000125,
+                "rotor_inertia_basis": "estimate: 0.26 x mass x (motorDia/2)^2, +-30 %",
+                "rotor_inertia_source": "rule calibrated on the measured T-Motor U8 KV100 (1.2e-4 kg m^2, 242 g, Lee, Pan, Rouse, IROS 2019); see motors_draft.md, Phase A"
             }
         },
         "U8_II_PRO": {
@@ -122,7 +166,13 @@
                 "peak_torque_basis": "estimate",
                 "peak_current_A": 31,
                 "no_load_speed_rpm": 4800,
-                "no_load_speed_basis": "estimate: KV x 48 V"
+                "no_load_speed_basis": "estimate: KV x 48 V",
+                "rated_current_A": 7.17,
+                "rated_current_basis": "estimate: T-Motor max continuous power 344 W / 48 V",
+                "rated_torque_Nm": 0.684,
+                "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
+                "rated_speed_rpm": 4701,
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x 137.5 mOhm line-to-line); T-Motor 'Internal Resistance', taken as line-to-line"
             },
             "mass_kg": 0.287,
             "geometry": {
@@ -137,6 +187,11 @@
                 "wire_slot_dist_from_center": 32,
                 "wire_slot_length": 5.5,
                 "wire_slot_radius": 2.9
+            },
+            "mechanical": {
+                "rotor_inertia_kgm2": 0.000142,
+                "rotor_inertia_basis": "estimate: 0.26 x mass x (motorDia/2)^2, +-30 %",
+                "rotor_inertia_source": "rule calibrated on the measured T-Motor U8 KV100 (1.2e-4 kg m^2, 242 g, Lee, Pan, Rouse, IROS 2019); see motors_draft.md, Phase A"
             }
         },
         "U10_Plus_KV80": {
@@ -149,7 +204,13 @@
                 "peak_torque_basis": "estimate",
                 "peak_current_A": 33,
                 "no_load_speed_rpm": 3840,
-                "no_load_speed_basis": "estimate: KV x 48 V"
+                "no_load_speed_basis": "estimate: KV x 48 V",
+                "rated_current_A": 10.23,
+                "rated_current_basis": "estimate: 0.31 x peak current (median continuous/peak of the motors that publish one)",
+                "rated_torque_Nm": 1.336,
+                "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
+                "rated_speed_rpm": 3762,
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x 95 mOhm line-to-line); T-Motor 'Internal Resistance', taken as line-to-line"
             },
             "mass_kg": 0.514,
             "geometry": {
@@ -164,6 +225,11 @@
                 "wire_slot_dist_from_center": 37,
                 "wire_slot_length": 10,
                 "wire_slot_radius": 5.4
+            },
+            "mechanical": {
+                "rotor_inertia_kgm2": 0.000262,
+                "rotor_inertia_basis": "estimate: 0.26 x mass x (motorDia/2)^2, +-30 %",
+                "rotor_inertia_source": "rule calibrated on the measured T-Motor U8 KV100 (1.2e-4 kg m^2, 242 g, Lee, Pan, Rouse, IROS 2019); see motors_draft.md, Phase A"
             }
         },
         "U10_II": {
@@ -176,7 +242,13 @@
                 "peak_torque_basis": "measured",
                 "peak_current_A": 32.4,
                 "no_load_speed_rpm": 4800,
-                "no_load_speed_basis": "estimate: KV x 48 V"
+                "no_load_speed_basis": "estimate: KV x 48 V",
+                "rated_current_A": 9.96,
+                "rated_current_basis": "estimate: T-Motor max continuous power 478 W / 48 V",
+                "rated_torque_Nm": 1.103,
+                "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
+                "rated_speed_rpm": 4699,
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x 101 mOhm line-to-line); T-Motor 'Internal Resistance', taken as line-to-line"
             },
             "mass_kg": 0.415,
             "geometry": {
@@ -191,6 +263,11 @@
                 "wire_slot_dist_from_center": 45,
                 "wire_slot_length": 9,
                 "wire_slot_radius": 2.65
+            },
+            "mechanical": {
+                "rotor_inertia_kgm2": 0.000262,
+                "rotor_inertia_basis": "estimate: 0.26 x mass x (motorDia/2)^2, +-30 %",
+                "rotor_inertia_source": "rule calibrated on the measured T-Motor U8 KV100 (1.2e-4 kg m^2, 242 g, Lee, Pan, Rouse, IROS 2019); see motors_draft.md, Phase A"
             }
         },
         "MN5008_KV170": {
@@ -203,7 +280,13 @@
                 "peak_torque_basis": "estimate",
                 "peak_current_A": 15,
                 "no_load_speed_rpm": 8160,
-                "no_load_speed_basis": "estimate: KV x 48 V"
+                "no_load_speed_basis": "estimate: KV x 48 V",
+                "rated_current_A": 4.65,
+                "rated_current_basis": "estimate: 0.31 x peak current (median continuous/peak of the motors that publish one)",
+                "rated_torque_Nm": 0.276,
+                "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
+                "rated_speed_rpm": 7947,
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x 270 mOhm line-to-line); T-Motor 'Internal Resistance', taken as line-to-line"
             },
             "mass_kg": 0.128,
             "geometry": {
@@ -218,6 +301,11 @@
                 "wire_slot_dist_from_center": 14.5,
                 "wire_slot_length": 6,
                 "wire_slot_radius": 2.9
+            },
+            "mechanical": {
+                "rotor_inertia_kgm2": 2.57e-05,
+                "rotor_inertia_basis": "estimate: 0.26 x mass x (motorDia/2)^2, +-30 %",
+                "rotor_inertia_source": "rule calibrated on the measured T-Motor U8 KV100 (1.2e-4 kg m^2, 242 g, Lee, Pan, Rouse, IROS 2019); see motors_draft.md, Phase A"
             }
         },
         "MN6007_II_KV160": {
@@ -230,7 +318,13 @@
                 "peak_torque_basis": "measured",
                 "peak_current_A": 23.7,
                 "no_load_speed_rpm": 7680,
-                "no_load_speed_basis": "estimate: KV x 48 V"
+                "no_load_speed_basis": "estimate: KV x 48 V",
+                "rated_current_A": 7.35,
+                "rated_current_basis": "estimate: 0.31 x peak current (median continuous/peak of the motors that publish one)",
+                "rated_torque_Nm": 0.462,
+                "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
+                "rated_speed_rpm": 7471,
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x 178 mOhm line-to-line); T-Motor 'Internal Resistance', taken as line-to-line"
             },
             "mass_kg": 0.159,
             "geometry": {
@@ -245,6 +339,11 @@
                 "wire_slot_dist_from_center": 24.6,
                 "wire_slot_length": 6.3,
                 "wire_slot_radius": 2.3
+            },
+            "mechanical": {
+                "rotor_inertia_kgm2": 4.67e-05,
+                "rotor_inertia_basis": "estimate: 0.26 x mass x (motorDia/2)^2, +-30 %",
+                "rotor_inertia_source": "rule calibrated on the measured T-Motor U8 KV100 (1.2e-4 kg m^2, 242 g, Lee, Pan, Rouse, IROS 2019); see motors_draft.md, Phase A"
             }
         },
         "MN7005_KV115": {
@@ -257,7 +356,13 @@
                 "peak_torque_basis": "estimate",
                 "peak_current_A": 15,
                 "no_load_speed_rpm": 5520,
-                "no_load_speed_basis": "estimate: KV x 48 V"
+                "no_load_speed_basis": "estimate: KV x 48 V",
+                "rated_current_A": 4.65,
+                "rated_current_basis": "estimate: 0.31 x peak current (median continuous/peak of the motors that publish one)",
+                "rated_torque_Nm": 0.437,
+                "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
+                "rated_speed_rpm": 5366,
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x 288 mOhm line-to-line); T-Motor 'Internal Resistance', taken as line-to-line"
             },
             "mass_kg": 0.188,
             "geometry": {
@@ -272,6 +377,11 @@
                 "wire_slot_dist_from_center": 28,
                 "wire_slot_length": 6,
                 "wire_slot_radius": 2.9
+            },
+            "mechanical": {
+                "rotor_inertia_kgm2": 7.63e-05,
+                "rotor_inertia_basis": "estimate: 0.26 x mass x (motorDia/2)^2, +-30 %",
+                "rotor_inertia_source": "rule calibrated on the measured T-Motor U8 KV100 (1.2e-4 kg m^2, 242 g, Lee, Pan, Rouse, IROS 2019); see motors_draft.md, Phase A"
             }
         },
         "MN8012": {
@@ -284,7 +394,13 @@
                 "peak_torque_basis": "measured",
                 "peak_current_A": 40,
                 "no_load_speed_rpm": 4800,
-                "no_load_speed_basis": "estimate: KV x 48 V"
+                "no_load_speed_basis": "estimate: KV x 48 V",
+                "rated_current_A": 12.4,
+                "rated_current_basis": "estimate: 0.31 x peak current (median continuous/peak of the motors that publish one)",
+                "rated_torque_Nm": 1.259,
+                "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
+                "rated_speed_rpm": 4695,
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x 85 mOhm line-to-line); T-Motor 'Internal Resistance', taken as line-to-line"
             },
             "mass_kg": 0.351,
             "geometry": {
@@ -299,6 +415,11 @@
                 "wire_slot_dist_from_center": 38,
                 "wire_slot_length": 10,
                 "wire_slot_radius": 4.4
+            },
+            "mechanical": {
+                "rotor_inertia_kgm2": 0.000176,
+                "rotor_inertia_basis": "estimate: 0.26 x mass x (motorDia/2)^2, +-30 %",
+                "rotor_inertia_source": "rule calibrated on the measured T-Motor U8 KV100 (1.2e-4 kg m^2, 242 g, Lee, Pan, Rouse, IROS 2019); see motors_draft.md, Phase A"
             }
         },
         "MN8014": {
@@ -311,7 +432,13 @@
                 "peak_torque_basis": "measured",
                 "peak_current_A": 52,
                 "no_load_speed_rpm": 4800,
-                "no_load_speed_basis": "estimate: KV x 48 V"
+                "no_load_speed_basis": "estimate: KV x 48 V",
+                "rated_current_A": 16.12,
+                "rated_current_basis": "estimate: 0.31 x peak current (median continuous/peak of the motors that publish one)",
+                "rated_torque_Nm": 1.485,
+                "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
+                "rated_speed_rpm": 4695,
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x 65 mOhm line-to-line); T-Motor 'Internal Resistance', taken as line-to-line"
             },
             "mass_kg": 0.392,
             "geometry": {
@@ -326,6 +453,11 @@
                 "wire_slot_dist_from_center": 38,
                 "wire_slot_length": 10,
                 "wire_slot_radius": 4.4
+            },
+            "mechanical": {
+                "rotor_inertia_kgm2": 0.000196,
+                "rotor_inertia_basis": "estimate: 0.26 x mass x (motorDia/2)^2, +-30 %",
+                "rotor_inertia_source": "rule calibrated on the measured T-Motor U8 KV100 (1.2e-4 kg m^2, 242 g, Lee, Pan, Rouse, IROS 2019); see motors_draft.md, Phase A"
             }
         },
         "MN8017": {
@@ -338,7 +470,13 @@
                 "peak_torque_basis": "measured",
                 "peak_current_A": 68.6,
                 "no_load_speed_rpm": 5760,
-                "no_load_speed_basis": "estimate: KV x 48 V"
+                "no_load_speed_basis": "estimate: KV x 48 V",
+                "rated_current_A": 21.27,
+                "rated_current_basis": "estimate: 0.31 x peak current (median continuous/peak of the motors that publish one)",
+                "rated_torque_Nm": 1.798,
+                "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
+                "rated_speed_rpm": 5645,
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x 45 mOhm line-to-line); T-Motor 'Internal Resistance', taken as line-to-line"
             },
             "mass_kg": 0.453,
             "geometry": {
@@ -353,6 +491,11 @@
                 "wire_slot_dist_from_center": 38,
                 "wire_slot_length": 10,
                 "wire_slot_radius": 4.4
+            },
+            "mechanical": {
+                "rotor_inertia_kgm2": 0.000227,
+                "rotor_inertia_basis": "estimate: 0.26 x mass x (motorDia/2)^2, +-30 %",
+                "rotor_inertia_source": "rule calibrated on the measured T-Motor U8 KV100 (1.2e-4 kg m^2, 242 g, Lee, Pan, Rouse, IROS 2019); see motors_draft.md, Phase A"
             }
         },
         "MN1005_V2_KV90": {
@@ -365,7 +508,13 @@
                 "peak_torque_basis": "estimate",
                 "peak_current_A": 32,
                 "no_load_speed_rpm": 4320,
-                "no_load_speed_basis": "estimate: KV x 48 V"
+                "no_load_speed_basis": "estimate: KV x 48 V",
+                "rated_current_A": 9.92,
+                "rated_current_basis": "estimate: 0.31 x peak current (median continuous/peak of the motors that publish one)",
+                "rated_torque_Nm": 1.097,
+                "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
+                "rated_speed_rpm": 4170,
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x 168 mOhm line-to-line); T-Motor 'Internal Resistance', taken as line-to-line"
             },
             "mass_kg": 0.282,
             "geometry": {
@@ -380,6 +529,11 @@
                 "wire_slot_dist_from_center": 36,
                 "wire_slot_length": 8,
                 "wire_slot_radius": 2.4
+            },
+            "mechanical": {
+                "rotor_inertia_kgm2": 0.00021,
+                "rotor_inertia_basis": "estimate: 0.26 x mass x (motorDia/2)^2, +-30 %",
+                "rotor_inertia_source": "rule calibrated on the measured T-Motor U8 KV100 (1.2e-4 kg m^2, 242 g, Lee, Pan, Rouse, IROS 2019); see motors_draft.md, Phase A"
             }
         },
         "MAD_M6C12_KV170": {
@@ -392,7 +546,13 @@
                 "peak_torque_basis": "measured",
                 "peak_current_A": 51.5,
                 "no_load_speed_rpm": 8160,
-                "no_load_speed_basis": "estimate: KV x 48 V"
+                "no_load_speed_basis": "estimate: KV x 48 V",
+                "rated_current_A": 18,
+                "rated_current_basis": "datasheet: MAD 'sustainable working zone' current",
+                "rated_torque_Nm": 1.059,
+                "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
+                "rated_speed_rpm": 7924,
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x 77 mOhm line-to-line); MAD 'Internal resistance', taken as line-to-line"
             },
             "mass_kg": 0.255,
             "geometry": {
@@ -407,6 +567,11 @@
                 "wire_slot_dist_from_center": 16,
                 "wire_slot_length": 4,
                 "wire_slot_radius": 3.9
+            },
+            "mechanical": {
+                "rotor_inertia_kgm2": 8.59e-05,
+                "rotor_inertia_basis": "estimate: 0.26 x mass x (motorDia/2)^2, +-30 %",
+                "rotor_inertia_source": "rule calibrated on the measured T-Motor U8 KV100 (1.2e-4 kg m^2, 242 g, Lee, Pan, Rouse, IROS 2019); see motors_draft.md, Phase A"
             }
         },
         "MAD_M6C10_KV150": {
@@ -419,7 +584,13 @@
                 "peak_torque_basis": "measured",
                 "peak_current_A": 36.3,
                 "no_load_speed_rpm": 7200,
-                "no_load_speed_basis": "estimate: KV x 48 V"
+                "no_load_speed_basis": "estimate: KV x 48 V",
+                "rated_current_A": 12,
+                "rated_current_basis": "datasheet: MAD 'sustainable working zone' current",
+                "rated_torque_Nm": 0.786,
+                "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
+                "rated_speed_rpm": 6984,
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x 120 mOhm line-to-line); MAD 'Internal resistance', taken as line-to-line"
             },
             "mass_kg": 0.209,
             "geometry": {
@@ -434,6 +605,11 @@
                 "wire_slot_dist_from_center": 16,
                 "wire_slot_length": 4,
                 "wire_slot_radius": 4.05
+            },
+            "mechanical": {
+                "rotor_inertia_kgm2": 7.04e-05,
+                "rotor_inertia_basis": "estimate: 0.26 x mass x (motorDia/2)^2, +-30 %",
+                "rotor_inertia_source": "rule calibrated on the measured T-Motor U8 KV100 (1.2e-4 kg m^2, 242 g, Lee, Pan, Rouse, IROS 2019); see motors_draft.md, Phase A"
             }
         },
         "MAD_M6C08_KV180": {
@@ -446,7 +622,13 @@
                 "peak_torque_basis": "measured",
                 "peak_current_A": 34,
                 "no_load_speed_rpm": 8640,
-                "no_load_speed_basis": "estimate: KV x 48 V"
+                "no_load_speed_basis": "estimate: KV x 48 V",
+                "rated_current_A": 12,
+                "rated_current_basis": "datasheet: MAD 'sustainable working zone' current",
+                "rated_torque_Nm": 0.703,
+                "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
+                "rated_speed_rpm": 8383,
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x 119 mOhm line-to-line); MAD 'Internal resistance', taken as line-to-line"
             },
             "mass_kg": 0.18,
             "geometry": {
@@ -461,6 +643,11 @@
                 "wire_slot_dist_from_center": 15.5,
                 "wire_slot_length": 4,
                 "wire_slot_radius": 3.9
+            },
+            "mechanical": {
+                "rotor_inertia_kgm2": 6.07e-05,
+                "rotor_inertia_basis": "estimate: 0.26 x mass x (motorDia/2)^2, +-30 %",
+                "rotor_inertia_source": "rule calibrated on the measured T-Motor U8 KV100 (1.2e-4 kg m^2, 242 g, Lee, Pan, Rouse, IROS 2019); see motors_draft.md, Phase A"
             }
         },
         "MAD_M6C06_KV140": {
@@ -473,7 +660,13 @@
                 "peak_torque_basis": "measured",
                 "peak_current_A": 21,
                 "no_load_speed_rpm": 6720,
-                "no_load_speed_basis": "estimate: KV x 48 V"
+                "no_load_speed_basis": "estimate: KV x 48 V",
+                "rated_current_A": 8,
+                "rated_current_basis": "datasheet: MAD 'sustainable working zone' current",
+                "rated_torque_Nm": 0.566,
+                "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
+                "rated_speed_rpm": 6383,
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x 301 mOhm line-to-line); MAD 'Internal resistance', taken as line-to-line"
             },
             "mass_kg": 0.163,
             "geometry": {
@@ -488,6 +681,11 @@
                 "wire_slot_dist_from_center": 14.6,
                 "wire_slot_length": 4,
                 "wire_slot_radius": 3.85
+            },
+            "mechanical": {
+                "rotor_inertia_kgm2": 5.49e-05,
+                "rotor_inertia_basis": "estimate: 0.26 x mass x (motorDia/2)^2, +-30 %",
+                "rotor_inertia_source": "rule calibrated on the measured T-Motor U8 KV100 (1.2e-4 kg m^2, 242 g, Lee, Pan, Rouse, IROS 2019); see motors_draft.md, Phase A"
             }
         },
         "MAD_M6C06_V3_KV160": {
@@ -500,7 +698,13 @@
                 "peak_torque_basis": "measured",
                 "peak_current_A": 22.43,
                 "no_load_speed_rpm": 7680,
-                "no_load_speed_basis": "estimate: KV x 48 V"
+                "no_load_speed_basis": "estimate: KV x 48 V",
+                "rated_current_A": 7,
+                "rated_current_basis": "datasheet: MAD 'sustainable working zone' current",
+                "rated_torque_Nm": 0.463,
+                "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
+                "rated_speed_rpm": 7497,
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x 163 mOhm line-to-line); MAD 'Internal resistance', taken as line-to-line"
             },
             "mass_kg": 0.157,
             "geometry": {
@@ -515,6 +719,11 @@
                 "wire_slot_dist_from_center": 32,
                 "wire_slot_length": 7,
                 "wire_slot_radius": 4.15
+            },
+            "mechanical": {
+                "rotor_inertia_kgm2": 5.3e-05,
+                "rotor_inertia_basis": "estimate: 0.26 x mass x (motorDia/2)^2, +-30 %",
+                "rotor_inertia_source": "rule calibrated on the measured T-Motor U8 KV100 (1.2e-4 kg m^2, 242 g, Lee, Pan, Rouse, IROS 2019); see motors_draft.md, Phase A"
             }
         },
         "MAD_1005_KV90": {
@@ -527,7 +736,13 @@
                 "peak_torque_basis": "measured",
                 "peak_current_A": 34,
                 "no_load_speed_rpm": 4320,
-                "no_load_speed_basis": "estimate: KV x 48 V"
+                "no_load_speed_basis": "estimate: KV x 48 V",
+                "rated_current_A": 8,
+                "rated_current_basis": "datasheet: MAD 'sustainable working zone' current",
+                "rated_torque_Nm": 0.922,
+                "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
+                "rated_speed_rpm": 4216,
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x 144 mOhm line-to-line); MAD 'Internal resistance', taken as line-to-line"
             },
             "mass_kg": 0.279,
             "geometry": {
@@ -542,6 +757,11 @@
                 "wire_slot_dist_from_center": 34,
                 "wire_slot_length": 4.3,
                 "wire_slot_radius": 3.3
+            },
+            "mechanical": {
+                "rotor_inertia_kgm2": 0.000208,
+                "rotor_inertia_basis": "estimate: 0.26 x mass x (motorDia/2)^2, +-30 %",
+                "rotor_inertia_source": "rule calibrated on the measured T-Motor U8 KV100 (1.2e-4 kg m^2, 242 g, Lee, Pan, Rouse, IROS 2019); see motors_draft.md, Phase A"
             }
         },
         "MAD_7005_KV115": {
@@ -554,7 +774,13 @@
                 "peak_torque_basis": "measured",
                 "peak_current_A": 21.2,
                 "no_load_speed_rpm": 5520,
-                "no_load_speed_basis": "estimate: KV x 48 V"
+                "no_load_speed_basis": "estimate: KV x 48 V",
+                "rated_current_A": 4,
+                "rated_current_basis": "datasheet: MAD 'sustainable working zone' current",
+                "rated_torque_Nm": 0.348,
+                "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
+                "rated_speed_rpm": 5432,
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x 191 mOhm line-to-line); MAD 'Internal resistance', taken as line-to-line"
             },
             "mass_kg": 0.196,
             "geometry": {
@@ -569,6 +795,11 @@
                 "wire_slot_dist_from_center": 28.8,
                 "wire_slot_length": 5.2,
                 "wire_slot_radius": 2.4
+            },
+            "mechanical": {
+                "rotor_inertia_kgm2": 7.95e-05,
+                "rotor_inertia_basis": "estimate: 0.26 x mass x (motorDia/2)^2, +-30 %",
+                "rotor_inertia_source": "rule calibrated on the measured T-Motor U8 KV100 (1.2e-4 kg m^2, 242 g, Lee, Pan, Rouse, IROS 2019); see motors_draft.md, Phase A"
             }
         },
         "MAD_8118_KV100": {
@@ -581,7 +812,13 @@
                 "peak_torque_basis": "measured",
                 "peak_current_A": 62,
                 "no_load_speed_rpm": 4800,
-                "no_load_speed_basis": "estimate: KV x 48 V"
+                "no_load_speed_basis": "estimate: KV x 48 V",
+                "rated_current_A": 20,
+                "rated_current_basis": "datasheet: MAD 'sustainable working zone' current",
+                "rated_torque_Nm": 1.648,
+                "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
+                "rated_speed_rpm": 4678,
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x 61 mOhm line-to-line); MAD 'Internal resistance', taken as line-to-line"
             },
             "mass_kg": 0.52,
             "geometry": {
@@ -596,6 +833,11 @@
                 "wire_slot_dist_from_center": 36.5,
                 "wire_slot_length": 4,
                 "wire_slot_radius": 5.45
+            },
+            "mechanical": {
+                "rotor_inertia_kgm2": 0.000265,
+                "rotor_inertia_basis": "estimate: 0.26 x mass x (motorDia/2)^2, +-30 %",
+                "rotor_inertia_source": "rule calibrated on the measured T-Motor U8 KV100 (1.2e-4 kg m^2, 242 g, Lee, Pan, Rouse, IROS 2019); see motors_draft.md, Phase A"
             }
         },
         "MAD_5008_KV170": {
@@ -608,7 +850,13 @@
                 "peak_torque_basis": "measured",
                 "peak_current_A": 20.6,
                 "no_load_speed_rpm": 8160,
-                "no_load_speed_basis": "estimate: KV x 48 V"
+                "no_load_speed_basis": "estimate: KV x 48 V",
+                "rated_current_A": 7,
+                "rated_current_basis": "datasheet: MAD 'sustainable working zone' current",
+                "rated_torque_Nm": 0.37,
+                "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
+                "rated_speed_rpm": 7928,
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x 195 mOhm line-to-line); MAD 'Internal resistance', taken as line-to-line"
             },
             "mass_kg": 0.13,
             "geometry": {
@@ -623,6 +871,11 @@
                 "wire_slot_dist_from_center": 16.9,
                 "wire_slot_length": 4,
                 "wire_slot_radius": 4.2
+            },
+            "mechanical": {
+                "rotor_inertia_kgm2": 2.65e-05,
+                "rotor_inertia_basis": "estimate: 0.26 x mass x (motorDia/2)^2, +-30 %",
+                "rotor_inertia_source": "rule calibrated on the measured T-Motor U8 KV100 (1.2e-4 kg m^2, 242 g, Lee, Pan, Rouse, IROS 2019); see motors_draft.md, Phase A"
             }
         },
         "MAD_5010_KV200": {
@@ -635,7 +888,13 @@
                 "peak_torque_basis": "measured",
                 "peak_current_A": 22.3,
                 "no_load_speed_rpm": 9600,
-                "no_load_speed_basis": "estimate: KV x 48 V"
+                "no_load_speed_basis": "estimate: KV x 48 V",
+                "rated_current_A": 7,
+                "rated_current_basis": "datasheet: MAD 'sustainable working zone' current",
+                "rated_torque_Nm": 0.341,
+                "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
+                "rated_speed_rpm": 9452,
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x 106 mOhm line-to-line); MAD 'Internal resistance', taken as line-to-line"
             },
             "mass_kg": 0.1629,
             "geometry": {
@@ -650,6 +909,11 @@
                 "wire_slot_dist_from_center": 16.8,
                 "wire_slot_length": 4,
                 "wire_slot_radius": 4.2
+            },
+            "mechanical": {
+                "rotor_inertia_kgm2": 3.32e-05,
+                "rotor_inertia_basis": "estimate: 0.26 x mass x (motorDia/2)^2, +-30 %",
+                "rotor_inertia_source": "rule calibrated on the measured T-Motor U8 KV100 (1.2e-4 kg m^2, 242 g, Lee, Pan, Rouse, IROS 2019); see motors_draft.md, Phase A"
             }
         },
         "VT8008_SL_KV90": {
@@ -662,7 +926,13 @@
                 "peak_torque_basis": "measured",
                 "peak_current_A": 26.6,
                 "no_load_speed_rpm": 4320,
-                "no_load_speed_basis": "estimate: KV x 48 V"
+                "no_load_speed_basis": "estimate: KV x 48 V",
+                "rated_current_A": 8.25,
+                "rated_current_basis": "estimate: 0.31 x peak current (median continuous/peak of the motors that publish one)",
+                "rated_torque_Nm": 0.815,
+                "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
+                "rated_speed_rpm": 3993,
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x 440 mOhm line-to-line); Vector Technics Rph per phase; line-to-line = 2 x Rph"
             },
             "mass_kg": 0.21,
             "geometry": {
@@ -677,6 +947,11 @@
                 "wire_slot_dist_from_center": 34,
                 "wire_slot_length": 13,
                 "wire_slot_radius": 3.9
+            },
+            "mechanical": {
+                "rotor_inertia_kgm2": 0.000107,
+                "rotor_inertia_basis": "estimate: 0.26 x mass x (motorDia/2)^2, +-30 %",
+                "rotor_inertia_source": "rule calibrated on the measured T-Motor U8 KV100 (1.2e-4 kg m^2, 242 g, Lee, Pan, Rouse, IROS 2019); see motors_draft.md, Phase A"
             }
         },
         "VT8015_SL": {
@@ -689,7 +964,13 @@
                 "peak_torque_basis": "measured",
                 "peak_current_A": 57.8,
                 "no_load_speed_rpm": 4800,
-                "no_load_speed_basis": "estimate: KV x 48 V"
+                "no_load_speed_basis": "estimate: KV x 48 V",
+                "rated_current_A": 17.92,
+                "rated_current_basis": "estimate: 0.31 x peak current (median continuous/peak of the motors that publish one)",
+                "rated_torque_Nm": 1.652,
+                "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
+                "rated_speed_rpm": 4549,
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x 140 mOhm line-to-line); Vector Technics Rph per phase; line-to-line = 2 x Rph"
             },
             "mass_kg": 0.42,
             "geometry": {
@@ -704,6 +985,11 @@
                 "wire_slot_dist_from_center": 34,
                 "wire_slot_length": 13,
                 "wire_slot_radius": 3.9
+            },
+            "mechanical": {
+                "rotor_inertia_kgm2": 0.000213,
+                "rotor_inertia_basis": "estimate: 0.26 x mass x (motorDia/2)^2, +-30 %",
+                "rotor_inertia_source": "rule calibrated on the measured T-Motor U8 KV100 (1.2e-4 kg m^2, 242 g, Lee, Pan, Rouse, IROS 2019); see motors_draft.md, Phase A"
             }
         },
         "VT10005_SL": {
@@ -716,7 +1002,13 @@
                 "peak_torque_basis": "measured",
                 "peak_current_A": 27.62,
                 "no_load_speed_rpm": 4320,
-                "no_load_speed_basis": "estimate: KV x 48 V"
+                "no_load_speed_basis": "estimate: KV x 48 V",
+                "rated_current_A": 8.56,
+                "rated_current_basis": "estimate: 0.31 x peak current (median continuous/peak of the motors that publish one)",
+                "rated_torque_Nm": 0.928,
+                "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
+                "rated_speed_rpm": 4038,
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x 366 mOhm line-to-line); Vector Technics Rph per phase; line-to-line = 2 x Rph"
             },
             "mass_kg": 0.277,
             "geometry": {
@@ -731,6 +1023,11 @@
                 "wire_slot_dist_from_center": 34,
                 "wire_slot_length": 13,
                 "wire_slot_radius": 3.9
+            },
+            "mechanical": {
+                "rotor_inertia_kgm2": 0.000206,
+                "rotor_inertia_basis": "estimate: 0.26 x mass x (motorDia/2)^2, +-30 %",
+                "rotor_inertia_source": "rule calibrated on the measured T-Motor U8 KV100 (1.2e-4 kg m^2, 242 g, Lee, Pan, Rouse, IROS 2019); see motors_draft.md, Phase A"
             }
         },
         "VT8020_PRO": {
@@ -743,7 +1040,13 @@
                 "peak_torque_basis": "measured",
                 "peak_current_A": 77.1,
                 "no_load_speed_rpm": 5760,
-                "no_load_speed_basis": "estimate: KV x 48 V"
+                "no_load_speed_basis": "estimate: KV x 48 V",
+                "rated_current_A": 23.9,
+                "rated_current_basis": "estimate: 0.31 x peak current (median continuous/peak of the motors that publish one)",
+                "rated_torque_Nm": 1.894,
+                "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
+                "rated_speed_rpm": 5416,
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x 120 mOhm line-to-line); Vector Technics Rph per phase; line-to-line = 2 x Rph"
             },
             "mass_kg": 0.566,
             "geometry": {
@@ -758,6 +1061,11 @@
                 "wire_slot_dist_from_center": 36,
                 "wire_slot_length": 16,
                 "wire_slot_radius": 2.9
+            },
+            "mechanical": {
+                "rotor_inertia_kgm2": 0.000287,
+                "rotor_inertia_basis": "estimate: 0.26 x mass x (motorDia/2)^2, +-30 %",
+                "rotor_inertia_source": "rule calibrated on the measured T-Motor U8 KV100 (1.2e-4 kg m^2, 242 g, Lee, Pan, Rouse, IROS 2019); see motors_draft.md, Phase A"
             }
         },
         "RO100": {
@@ -798,6 +1106,11 @@
                 "rotorCSKHeadHeightMM": 2.3,
                 "stator_hole_num": 3,
                 "stator_mounitng_holes_head_socket_dia": 4.5
+            },
+            "mechanical": {
+                "rotor_inertia_kgm2": 0.00087,
+                "rotor_inertia_basis": "datasheet",
+                "rotor_inertia_source": "CubeMars product page, 8700 g cm^2 (checked 2026-10-29)"
             }
         },
         "RO80": {
@@ -838,6 +1151,11 @@
                 "rotorCSKHeadHeightMM": 2.3,
                 "stator_hole_num": 3,
                 "stator_mounitng_holes_head_socket_dia": 4.5
+            },
+            "mechanical": {
+                "rotor_inertia_kgm2": 0.0002612,
+                "rotor_inertia_basis": "datasheet",
+                "rotor_inertia_source": "CubeMars product page, 2612 g cm^2 (checked 2026-10-29)"
             }
         },
         "RO60": {
@@ -878,6 +1196,11 @@
                 "rotorCSKHeadHeightMM": 2.3,
                 "stator_hole_num": 3,
                 "stator_mounitng_holes_head_socket_dia": 4.5
+            },
+            "mechanical": {
+                "rotor_inertia_kgm2": 0.0001161,
+                "rotor_inertia_basis": "datasheet",
+                "rotor_inertia_source": "CubeMars product page, 1161 g cm^2 (checked 2026-10-29)"
             }
         },
         "RI100": {
@@ -910,6 +1233,11 @@
                 "stator_wire_bottom_height": 4.5,
                 "stator_wire_OD": 101,
                 "stator_wire_ID": 58
+            },
+            "mechanical": {
+                "rotor_inertia_kgm2": 2.155e-05,
+                "rotor_inertia_basis": "datasheet",
+                "rotor_inertia_source": "CubeMars product page, 215.5 g cm^2 (checked 2026-10-29)"
             }
         },
         "RI80": {
@@ -942,6 +1270,11 @@
                 "stator_wire_bottom_height": 4,
                 "stator_wire_OD": 82,
                 "stator_wire_ID": 52.5
+            },
+            "mechanical": {
+                "rotor_inertia_kgm2": 2.1249e-05,
+                "rotor_inertia_basis": "datasheet",
+                "rotor_inertia_source": "CubeMars product page, 212.49 g cm^2 (checked 2026-10-29)"
             }
         }
     }
