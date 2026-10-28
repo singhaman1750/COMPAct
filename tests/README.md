@@ -14,7 +14,7 @@ pytest
 
 These check that every gearbox type in `gearbox_runner.GEARBOXES` names existing classes and config files, builds with one of its golden motors, has a results print layout in `actOpt.py`, and has a golden baseline. `tests/test_motors.py` checks `config_files/motors.json`. They also check that every config file is valid JSON. CI runs them on every push.
 
-## Golden-output check (about 10 minutes)
+## Golden-output check (under a minute)
 
 `tests/golden/golden.py` runs every gearbox type with each of its golden motors (`GOLDEN_MOTORS` in `golden.py`), plus one metal-mode case per type (`<case>__metal`), at one gear ratio per family (6.5 single-stage, 10 compound, 20 double-stage and Wolfrom). It compares three things against the baselines in `tests/golden/baselines/`:
 
