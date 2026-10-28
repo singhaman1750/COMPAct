@@ -6,7 +6,7 @@ import sys
 import time
 
 from CommonComponents import material, bearings_discrete, nuts_and_bolts_dimensions, motor_driver, motor_frameless_inrunner as motor
-from CommonComponents import restores_stdout, cad_path, bearing_mass_kg
+from CommonComponents import restores_stdout, cad_path, bearing_mass_kg, per_motor_value
 
 class inrunnerCompoundPlanetaryGearbox:
     def __init__(self,
@@ -821,13 +821,9 @@ class inrunnerCompoundPlanetaryActuator:
         self.output_bearing_OD     = OutputBearings.getBearingODMM()
         self.output_bearing_width  = OutputBearings.getBearingWidthMM()
 
-        if self.motor.motorName == "RI100":
-            if self.design_params["min_rotor_top_bearing_ID"] < self.module * self.Ns + 2*self.standard_clearance_1_5mm:
-                RotorTopBearingIDrequiredMM   = self.module * self.Ns + 2*self.standard_clearance_1_5mm
-            else:
-                RotorTopBearingIDrequiredMM   = self.design_params["min_rotor_top_bearing_ID"]
-        else:
-            RotorTopBearingIDrequiredMM   = self.module * self.Ns + 2*self.standard_clearance_1_5mm
+        # Large enough for the sun, and at least this motor's minimum bore
+        RotorTopBearingIDrequiredMM   = max(self.module * self.Ns + 2*self.standard_clearance_1_5mm,
+                                            per_motor_value(self.design_params, "min_rotor_top_bearing_ID", self.motor.motorName))
 
         RotorTopBearings              = bearings_discrete(RotorTopBearingIDrequiredMM)
         self.rotor_top_bearing_ID     = RotorTopBearings.getBearingIDMM()

@@ -43,7 +43,7 @@
         "rotor_hub_sun_hole_dia"                             : 4,
         "rotor_hub_sun_hole_num"                             : 4,
 
-        "min_rotor_top_bearing_ID"                           : 25,
+        "min_rotor_top_bearing_ID"                           : { "RI100": 25, "RI80": 0 },
         
         "rotor_bottom_bearing_ID"                            : 20,
         "rotor_bottom_bearing_OD"                            : 27,

@@ -6,7 +6,7 @@ import sys
 import time
 
 from CommonComponents import material, bearings_discrete, nuts_and_bolts_dimensions, motor_driver, motor_frameless_inrunner as motor
-from CommonComponents import restores_stdout, cad_path
+from CommonComponents import restores_stdout, cad_path, per_motor_value
 
 class inrunnerWolfromPlanetaryGearbox:
     def __init__(self,
@@ -868,13 +868,9 @@ class inrunnerWolfromPlanetaryActuator:
         Np1       = self.inrunnerWolfromPlanetaryGearbox.NpBig
         Np2       = self.inrunnerWolfromPlanetaryGearbox.NpSmall
 
-        if self.motor.motorName == "RI100":
-            if self.design_params["min_rotor_top_bearing_ID"] < module * Ns + 2*self.standard_clearance_1_5mm:
-                RotorTopBearingIDrequiredMM   = module * Ns + 2*self.standard_clearance_1_5mm
-            else:
-                RotorTopBearingIDrequiredMM   = self.design_params["min_rotor_top_bearing_ID"]
-        else:
-            RotorTopBearingIDrequiredMM   = module * Ns + 2*self.standard_clearance_1_5mm
+        # Large enough for the sun, and at least this motor's minimum bore
+        RotorTopBearingIDrequiredMM   = max(module * Ns + 2*self.standard_clearance_1_5mm,
+                                            per_motor_value(self.design_params, "min_rotor_top_bearing_ID", self.motor.motorName))
 
         RotorTopBearings              = bearings_discrete(RotorTopBearingIDrequiredMM)
         self.rotor_top_bearing_ID     = RotorTopBearings.getBearingIDMM()
@@ -1109,13 +1105,9 @@ class inrunnerWolfromPlanetaryActuator:
         self.output_bearing_width  = OutputBearings.getBearingWidthMM()
 
         #problem if ID is 28 (need to remove that bearing in the table)
-        if self.motor.motorName == "RI100":
-            if self.design_params["min_rotor_top_bearing_ID"] < self.module * self.Ns + 2*self.standard_clearance_1_5mm:
-                RotorTopBearingIDrequiredMM   = self.module * self.Ns + 2*self.standard_clearance_1_5mm
-            else:
-                RotorTopBearingIDrequiredMM   = self.design_params["min_rotor_top_bearing_ID"]
-        else:
-            RotorTopBearingIDrequiredMM   = self.module * self.Ns + 2*self.standard_clearance_1_5mm
+        # Large enough for the sun, and at least this motor's minimum bore
+        RotorTopBearingIDrequiredMM   = max(self.module * self.Ns + 2*self.standard_clearance_1_5mm,
+                                            per_motor_value(self.design_params, "min_rotor_top_bearing_ID", self.motor.motorName))
 
         RotorTopBearings              = bearings_discrete(RotorTopBearingIDrequiredMM)
         self.rotor_top_bearing_ID     = RotorTopBearings.getBearingIDMM()

@@ -6,7 +6,7 @@ import sys
 import time
 
 from CommonComponents import material, bearings_discrete, nuts_and_bolts_dimensions, motor_driver, motor_frameless_inrunner as motor
-from CommonComponents import restores_stdout, cad_path, bearing_mass_kg
+from CommonComponents import restores_stdout, cad_path, bearing_mass_kg, per_motor_value
 
 class inrunnerCompoundPlanetaryGearbox:
     def __init__(self,
@@ -683,22 +683,13 @@ class inrunnerCompoundPlanetaryActuator:
         self.rotor_hub_sun_hole_dia  = self.design_params["rotor_hub_sun_hole_dia"]        
         self.rotor_hub_sun_hole_num = self.design_params["rotor_hub_sun_hole_num"]
 
-        if self.motor_name == "RI100":
-            self.rotor_top_bearing_ID  = self.design_params["rotor_top_bearing_ID_RI100"]
-            self.rotor_top_bearing_OD  = self.design_params["rotor_top_bearing_OD_RI100"]
-            self.rotor_top_bearing_width = self.design_params["rotor_top_bearing_width_RI100"]
-
-            self.rotor_bottom_bearing_ID  = self.design_params["rotor_bottom_bearing_ID_RI100"]
-            self.rotor_bottom_bearing_OD  = self.design_params["rotor_bottom_bearing_OD_RI100"]
-            self.rotor_bottom_bearing_width = self.design_params["rotor_bottom_bearing_width_RI100"]
-        elif self.motor_name == "RI80":
-            self.rotor_top_bearing_ID  = self.design_params["rotor_top_bearing_ID_RI80"]
-            self.rotor_top_bearing_OD  = self.design_params["rotor_top_bearing_OD_RI80"]
-            self.rotor_top_bearing_width = self.design_params["rotor_top_bearing_width_RI80"]
-
-            self.rotor_bottom_bearing_ID  = self.design_params["rotor_bottom_bearing_ID_RI80"]
-            self.rotor_bottom_bearing_OD  = self.design_params["rotor_bottom_bearing_OD_RI80"]
-            self.rotor_bottom_bearing_width = self.design_params["rotor_bottom_bearing_width_RI80"]
+        # Rotor bearings, chosen per motor in the params file
+        self.rotor_top_bearing_ID       = per_motor_value(self.design_params, "rotor_top_bearing_ID", self.motor_name)
+        self.rotor_top_bearing_OD       = per_motor_value(self.design_params, "rotor_top_bearing_OD", self.motor_name)
+        self.rotor_top_bearing_width    = per_motor_value(self.design_params, "rotor_top_bearing_width", self.motor_name)
+        self.rotor_bottom_bearing_ID    = per_motor_value(self.design_params, "rotor_bottom_bearing_ID", self.motor_name)
+        self.rotor_bottom_bearing_OD    = per_motor_value(self.design_params, "rotor_bottom_bearing_OD", self.motor_name)
+        self.rotor_bottom_bearing_width = per_motor_value(self.design_params, "rotor_bottom_bearing_width", self.motor_name)
 
         # Masses of the rotor bearings chosen above, for whichever motor is in use
         self.rotor_top_bearing_mass_selected    = bearing_mass_kg(self.rotor_top_bearing_ID, self.rotor_top_bearing_OD, self.rotor_top_bearing_width)

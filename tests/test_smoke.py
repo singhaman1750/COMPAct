@@ -98,3 +98,18 @@ def test_metal_mode_uses_steel_gears_and_aluminium_structure(gb_type):
 def test_unknown_material_mode_is_rejected():
     with pytest.raises(ValueError, match="Unknown material mode"):
         gearbox_runner.build("sspg", "U8_Lite", "wood")
+
+
+# Settings that differ per motor are listed per motor in the params file; a motor
+# that isn't listed must stop with a clear message, not get another motor's value.
+@pytest.mark.parametrize(
+    "gb_type, key",
+    [("incpg_dependent", "min_rotor_top_bearing_ID"), ("inwpg_dependent", "min_rotor_top_bearing_ID"),
+     ("incpg_independent", "rotor_top_bearing_ID"), ("inwpg_independent", "rotor_top_bearing_ID")],
+)
+def test_motor_missing_from_per_motor_settings_is_reported(gb_type, key):
+    actuator, _ = gearbox_runner.build(gb_type, "RI100")
+    actuator.motor.motorName = "RI120"
+    actuator.motor_name = "RI120"
+    with pytest.raises(ValueError, match=f"{key} has no value for motor 'RI120'"):
+        actuator.setVariables()

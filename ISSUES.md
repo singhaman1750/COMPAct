@@ -512,7 +512,7 @@ golden baselines.
 
 **Status:** open — found 2026-10-22 during the rotor-coupler survey; needs a CAD check.
 
-### 12. INCPG / INWPG dependent — rotor top bearing rule chosen by motor name
+### 12. INCPG / INWPG — rotor bearing rules chosen by motor name
 
 **Description:** `ActuatorAndGearbox_INCPG_dependent.py` and `ActuatorAndGearbox_INWPG_dependent.py`
 size the rotor top bearing with
@@ -528,7 +528,15 @@ so any new inrunner motor added to `motors.json` silently gets the RI80 rule, wh
 motor its own minimum bore in the params file, as the independent types already do per motor name.
 Should give the same results for RI100 and RI80 (golden check).
 
-**Status:** open — found 2026-10-24 when bringing in the `dev-inwpg` branch.
+The independent types had the same problem: they picked their rotor bearings with
+`if motor_name == "RI100" … elif "RI80"` from keys like `rotor_top_bearing_ID_RI100`, so a new
+motor got no bearings at all and crashed later with an unrelated error.
+
+**Status:** resolved (2026-10-28) — every per-motor setting is now written per motor in the params
+file, e.g. `"min_rotor_top_bearing_ID": { "RI100": 25, "RI80": 0 }`, and read with
+`CommonComponents.per_motor_value()`; a motor that isn't listed stops with a message naming the
+setting. The dependent rule is now `max(sun needs, the motor's minimum)`. Results unchanged
+(golden check). The unused `min_rotor_top_bearing_ID` in `inwpg_params_independent.json` is removed.
 
 ## CAD issues
 
