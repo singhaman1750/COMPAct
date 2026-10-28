@@ -630,3 +630,35 @@ motor is not allowed by the design, the optimiser must not use the 1.25× allowa
 CPG and WPG with a small motor for the same problem.
 
 **Status:** open — for the DSPG model's designer.
+
+### CAD 4. INCPG dependent — extra material inside the ring-gear teeth
+
+**Description:** in the INCPG dependent Onshape model, a lump of housing material sticks into the
+**ring-gear toothing**, on both sides of the section (circled in the screenshot), so the ring
+teeth are partly filled in and would interfere with the small planets.
+
+![INCPG dependent section, RI100, ratio 9: extra material in the ring-gear teeth (circled)](docs/cad_issues/CAD4_incpg_dependent_RI100_gr9/ring_interference_section.png)
+
+**Seen with:** `python actOpt.py --motor RI100 --gb_type incpg_dependent --gr 9 --onshape`
+(found 2026-10-28). Design: Ns 21, Np big 53, Np small 34, Nr 108, module 0.6, 3 planets; ratio
+9.02. Ring: pitch Ø 64.8 mm, face width `fw_r` 24.75 mm, `ring_radial_width` 3,
+`ring_gearbox_casing_thickness` 5.
+
+**Reproduce without re-optimising:** the files from that run are saved in
+[`docs/cad_issues/CAD4_incpg_dependent_RI100_gr9/`](docs/cad_issues/CAD4_incpg_dependent_RI100_gr9/)
+(both equations files, the results CSV and the screenshot). Push them to your INCPG dependent
+model with:
+```bash
+python Onshape_extension/set_values.py --gb_type incpg_dependent --file docs/cad_issues/CAD4_incpg_dependent_RI100_gr9/incpg_dependent_equations_onshape.txt
+```
+
+**Likely cause (not confirmed):** a housing feature (e.g. a step, fillet or the motor-case section
+below the ring) whose position or size is not tied to the ring's face width or tooth root, so with
+this design it overlaps the ring teeth. Check whether it also appears at other ratios (e.g. 10,
+which was pushed without a report) and in INCPG independent.
+
+**Probable fix:** in the INCPG dependent Onshape model, find the feature that adds the material and
+size or position it from the ring variables (`fw_r`, the ring root diameter) so it stays outside
+the toothing. Python changes only if the model needs a variable the optimiser doesn't write yet.
+
+**Status:** open — for the INCPG model's designer.
