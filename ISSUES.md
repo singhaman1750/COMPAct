@@ -662,3 +662,41 @@ size or position it from the ring variables (`fw_r`, the ring root diameter) so 
 the toothing. Python changes only if the model needs a variable the optimiser doesn't write yet.
 
 **Status:** open — for the INCPG model's designer.
+
+### CAD 5. INCPG independent — casing feature loses its "up to" face, so two mates fail
+
+**Description:** after pushing this design to the INCPG independent model
+(`INCPG_independent_compact`):
+- In the `ring_gearbox_casing` part studio, **Extrude 9** (adds the bosses at the casing flange,
+  from Sketch 6) fails: its **"Up to face"** reference shows **"Missing Face of Extrude 4"**, so
+  the bosses at the flange (arrows) are not built.
+- In the assembly, the mates **Cylindrical 5** and **Cylindrical 12** fail (red), and the case
+  mounting bosses where the ring casing meets the motor case don't line up (circled).
+
+![Assembly: Cylindrical 5 and 12 fail; flange bosses circled](docs/cad_issues/CAD5_incpg_independent_RI100_gr9/assembly_failed_mates.png)
+
+![ring_gearbox_casing: Extrude 9 "Up to face" = Missing Face of Extrude 4](docs/cad_issues/CAD5_incpg_independent_RI100_gr9/casing_extrude9_missing_face.png)
+
+**Seen with:** `python actOpt.py --motor RI100 --gb_type incpg_independent --gr 9 --onshape`
+(found 2026-10-28). Design: Ns 18, Np big 43, Np small 26, Nr 87, module 0.8, 3 planets; ratio
+8.99. Case: `case_mounting_hole_dia` 4, `motor_case_thickness` 3.5, `case_mounting_hole_shift` 2.
+
+**Reproduce without re-optimising:** the files from that run and both screenshots are saved in
+[`docs/cad_issues/CAD5_incpg_independent_RI100_gr9/`](docs/cad_issues/CAD5_incpg_independent_RI100_gr9/). Push them to your INCPG independent model with:
+```bash
+python Onshape_extension/set_values.py --gb_type incpg_independent --file docs/cad_issues/CAD5_incpg_independent_RI100_gr9/incpg_independent_equations_onshape.txt
+```
+
+**Likely cause (not confirmed):** Extrude 9 ends "up to" a face of Extrude 4; with these values
+Extrude 4's geometry changes so that face no longer exists (or gets a new ID), the reference
+breaks, the bosses aren't made, and the two cylindrical mates that use their holes lose their
+geometry. The case values changed recently (M3 → M4 mounting screws and a 4 → 3.5 mm motor case,
+from the `dev-inwpg` branch, 2026-10-24), so check whether the model was updated for them.
+The ratio-10 push on 2026-10-28 (138 of 138 variables set) was not checked in the CAD.
+
+**Probable fix:** in the `ring_gearbox_casing` part studio, give Extrude 9 an end condition that
+can't disappear (e.g. "Blind" with a depth from a variable, or "Up to" a plane/mate connector
+defined by variables), then re-check Cylindrical 5 and 12 in the assembly. Try ratio 10 and RI80
+as well.
+
+**Status:** open — for the INCPG model's designer.
