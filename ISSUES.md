@@ -153,8 +153,9 @@ result-changing commit with re-recorded golden baselines.
 
    So PLA has four densities (1250, 1245.6, 1240, 1240.06), and two files give aluminium and steel
    PLA values. Cost gains (1 / −2 / 0.2) and MIT factors (1.2 / 1.5) are the same in all five.
-2. **ISSPG hard-codes FOS 1.2 and service factor 1.5** (inside and compact) instead of reading
-   `MIT_params` like the other types. Same values today, but they won't follow a config change.
+2. ~~**ISSPG hard-codes FOS 1.2 and service factor 1.5**~~ — **done (2026-10-28):** ISSPG (inside
+   and compact) now reads `MIT_params` from `config.json` like the other types (same values, so
+   results unchanged).
 3. **Motor driver passed inconsistently:** OdrivePro for most types; `None` for INSSPG; not passed
    at all for ICPG and INDSPG.
 4. **Different maximum-gearbox-diameter rules:**

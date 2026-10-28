@@ -30,8 +30,8 @@ The gearbox sits inside the rotor/stator of a frameless motor.
 
 | Type | Gearbox | Module · params file | Max gearbox diameter | Known issues |
 |---|---|---|---|---|
-| `isspg_inside` | Internal single-stage, InBearing | `ActuatorAndGearbox_ISSPG_inside` · `isspg_params.json` | not limited | bug 2 (shares an equations file with compact); FOS 1.2 / 1.5 hard-coded; RO60 finds no design |
-| `isspg_compact` | Internal single-stage, OutBearing | `ActuatorAndGearbox_ISSPG_compact` · `isspg_params.json` | not limited | bugs 2 and 5; same FOS note; RO60 finds no design |
+| `isspg_inside` | Internal single-stage, InBearing | `ActuatorAndGearbox_ISSPG_inside` · `isspg_params.json` | not limited | bug 2 (shares an equations file with compact); RO60 finds no design |
+| `isspg_compact` | Internal single-stage, OutBearing | `ActuatorAndGearbox_ISSPG_compact` · `isspg_params.json` | not limited | bugs 2 and 5; RO60 finds no design |
 | `icpg` | Internal compound | `ActuatorandGearbox_ICPG` · `icpg_params.json` | factor × stator ID (inside the stator) | RO60 finds no design |
 | `idspg` | Internal double-stage | `ActuatorandGearbox_IDSPG` · `idspg_params.json` | factor × (motor OD + 2 × 1.5); stage 1: stator ID − 2 × ring-1 width | bug 7 (bearings counted twice); RO60 finds no design |
 

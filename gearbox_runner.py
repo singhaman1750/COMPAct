@@ -85,7 +85,6 @@ class GearboxSpec:
     max_diameter: Optional[Callable] = None        # (motor, design, opt) -> mm; None: not passed
     max_diameter_stage1: Optional[Callable] = None
     driver: Optional[str] = "OdrivePro"
-    fos_service: Optional[tuple] = None            # (FOS, serviceFactor); None: from MIT_params
     extra_gearbox_densities: dict = field(default_factory=dict)  # keyword -> material name
     passes_gearbox_type: bool = False              # actuator takes insspg_type=gb_type
 
@@ -125,14 +124,12 @@ GEARBOXES = {
         "ActuatorAndGearbox_ISSPG_inside", "internalsingleStagePlanetaryGearbox",
         "internalsingleStagePlanetaryActuator", "optimizationInternalSingleStageActuator", "planetaryGearbox",
         "config.json", "isspg_params.json", ("isspg_3DP_design_parameters",), "isspg_optimization_parameters",
-        "frameless_outrunner", "single",
-        fos_service=(1.2, 1.5)),
+        "frameless_outrunner", "single"),
     "isspg_compact": GearboxSpec(
         "ActuatorAndGearbox_ISSPG_compact", "internalsingleStagePlanetaryGearbox",
         "internalsingleStagePlanetaryActuator", "optimizationInternalSingleStageActuator", "planetaryGearbox",
         "config.json", "isspg_params.json", ("isspg_3DP_design_parameters",), "isspg_optimization_parameters",
-        "frameless_outrunner", "single",
-        fos_service=(1.2, 1.5)),
+        "frameless_outrunner", "single"),
     "icpg": GearboxSpec(
         "ActuatorandGearbox_ICPG", "internalcompoundPlanetaryGearbox", "internalcompoundPlanetaryActuator",
         "optimizationInternalCompoundPlanetaryActuator", "internalcompoundPlanetaryGearbox",
@@ -252,8 +249,8 @@ def build(gb_type, motor_name, material="3dp"):
         actuator_kwargs["motor_driver_params"] = None
     else:
         actuator_kwargs["motor_driver_params"] = config["Motor_drivers"][spec.driver]
-    fos, service_factor = spec.fos_service or (config["MIT_params"]["FOS"], config["MIT_params"]["serviceFactor"])
-    actuator_kwargs.update(FOS=fos, serviceFactor=service_factor, stressAnalysisMethodName="MIT")
+    actuator_kwargs.update(FOS=config["MIT_params"]["FOS"], serviceFactor=config["MIT_params"]["serviceFactor"],
+                           stressAnalysisMethodName="MIT")
     if spec.max_diameter is not None:
         actuator_kwargs["maxGearboxDiameter"] = spec.max_diameter(motor, design, opt)
     if spec.max_diameter_stage1 is not None:
