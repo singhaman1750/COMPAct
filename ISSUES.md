@@ -4,125 +4,60 @@
 
 ### Testing
 
-No formal test suite exists yet (no pytest, no `test_*.py` files). Minimal plan for periodic testing, in order of effort:
+**Status: done.** Details and commands are in [tests/README.md](tests/README.md).
+- **Fast tests** (`pytest`, about 2 s): every gearbox type builds, the config and motor files are
+  valid, the Onshape push works against a fake Onshape, and the README/docs commands and links are
+  correct. CI runs them on every push (`.github/workflows/checks.yml`).
+- **Golden-output check** (`tests/golden/golden.py`, 58 cases, about 10 min): every gearbox type
+  with its golden motors, plus one metal case per type. It compares the chosen design, the CAD
+  equations files and the results CSVs with recorded baselines. Run it before merging any change;
+  a change that is meant to alter results re-records only the affected cases.
 
-1. **Shell smoke test** — re-run the 11 known-good `(motor, gearbox_type)` combinations through `actOpt.py` and check none crash — *~20-30 min (mostly wait time on the slower combos, e.g. DSPG)*:
-   - `U8 sspg`, `U8 cpg`, `U8 dspg`, `U8 wpg`, `RO100 icpg`, `RI100 insspg_type_1`, `RI100 insspg_type_2`, `RI100 incpg_dependent`, `RI100 incpg_independent`, `RO100 isspg_inside`, `RO100 isspg_compact` (all with ratio `6.5`)
+### Phase 3b — move the gearbox modules into a folder
 
-2. **`test_actopt.py` (pytest)** — formalize (1) as a parametrized pytest file: run all 11 combos via `subprocess`, assert exit code 0 and `opt_parameters is not None` — *~30-40 min*
+**Status: open.** Goal: only the entry points (`actOpt.py`, `gearbox_runner.py`,
+`CommonComponents.py`) stay in the root; the 11 `ActuatorAndGearbox*.py` / `ActuatorandGearbox*.py`
+modules move to `gearboxes/`. (The old plan for this also moved the `Opt_*.py` driver scripts and
+`run_all.sh`; Phase 3a replaced those with `gearbox_runner.py`, so only the modules are left.)
 
-3. **Golden-output regression test** — extend (2) to assert the *exact* expected numbers (teeth counts, module, gear ratio) for each combo, not just "didn't crash." This is the one that would catch silent wrong-value bugs (e.g. the ICPG `maxContinuousCurrent`-not-passed issue found during the motor-class investigation) that still exit cleanly — *~30-40 min (need to pin down and record the 11 expected baselines first)*
-
-4. **CI hook** — add a `.github/workflows/test.yml` to run whichever of the above on every push/PR, so it happens automatically instead of manually — *~20-30 min*
-
-Suggested starting point: combine (2) + (3) into one `test_actopt.py` (~40-50 lines).
-
-**Estimated total (working together, interactively):** ~1.5 to 2 hours for all four steps; ~1 hour if you stop after (2)+(3) and skip CI for now.
-
-### Root folder restructure — split into `gearboxes/` and `optimizers/`
-
-> **Update (Phase 3a):** the 14 `Opt_*.py` driver files and `run_all.sh` are gone — one
-> `gearbox_runner.py` (a spec table per gearbox type) replaces them, so steps 3, 4 and 6 below no longer
-> apply; only the `ActuatorAndGearbox*.py` model files would move.
-
-Root currently holds 7 `ActuatorAndGearbox*.py` model files + 10 `Opt_*.py` driver files (17 files) alongside `actOpt.py`, `CommonComponents.py`, config/results folders, etc. Goal: only `actOpt.py`-type entry files stay at root; models move to `gearboxes/`, drivers move to `optimizers/`.
-
-**Open decision (settle first, ~10-15 min):** whether to split `ActuatorAndGearbox.py` (currently bundles SSPG/CPG/WPG/DSPG, 11k lines) into 4 per-type files *before* this move, so `gearboxes/` ends up with 10 uniform one-type-per-file modules instead of 7 files + 1 oversized one. Doing it first avoids touching that file's imports twice.
+**Open decision (first):** split `ActuatorAndGearbox.py` (SSPG, CPG, WPG and DSPG in one file,
+about 11 300 lines) into one file per type before the move, so `gearboxes/` holds one module per
+type.
 
 **Steps:**
-1. Decide final layout, folder names, and whether the `ActuatorAndGearbox.py` split (above) happens first — *~10-15 min*
-2. Create `gearboxes/` and `optimizers/`, `git mv` all 17 (or 20, if split first) files into place, add `__init__.py` to each — *~15 min*
-3. Fix the `config_files/` relative-path logic in all 10 `Opt_*.py` files — each currently does `os.path.join(os.path.dirname(__file__), "config_files/...")`, which breaks once the file is one directory deeper (`config_files/` stays at repo root) — *~20-30 min*
-4. Update every `from ActuatorAndGearbox_X import Y` line in the 10 `Opt_*.py` files to the package-qualified path (`from gearboxes.ActuatorAndGearbox_X import Y`) — *~20-30 min*
-5. Update `actOpt.py`: `GEARBOX_DISPATCH` values need the `optimizers.` prefix, and the dynamic-import mechanism (`__import__(module_name)`) needs to switch to `importlib.import_module(module_name)`, since bare `__import__` on a dotted path returns the top-level package, not the submodule — *~15-20 min*
-6. Update `run_all.sh` to the new paths — *~5 min*
-7. Verify: syntax check all touched files, grep sweep for any remaining un-qualified `Opt_*`/`ActuatorAndGearbox_*` imports, live-run all 11 gearbox-type combos through `actOpt.py` and diff against last known-good output, run `run_all.sh` — *~30-45 min (mostly wait time on the slower combos, e.g. DSPG)*
-8. Commit — *~5 min*
-
-**Estimated total (working together, interactively):** ~2 to 2.5 hours, likely spread across more than one sitting.
+1. Decide the folder name and the split above.
+2. `git mv` the modules into `gearboxes/` (with an `__init__.py`).
+3. Point `GearboxSpec.module` in `gearbox_runner.py` at `gearboxes.<module>`; fix the modules'
+   `from CommonComponents import ...` lines so they still find `CommonComponents.py` in the root.
+4. Update the tests that look for the modules in the root (e.g. the `cad_path` guard in
+   `tests/test_common_components.py`) and the module paths in `docs/gearboxes.md` and the README.
+5. Check: `pytest` and the full golden check — nothing may change.
 
 ### README rewrite
 
-Audited `README.md` against the actual current code (`actOpt.py`'s `GEARBOX_DISPATCH`, every `Opt_*.py` motor branch, `CADs/` folder contents). Findings, in order of severity:
+**Status: done** (Phase 4, PR #85, 2026-10-23). The README is a short guide for new users (install,
+quick start, the 15 gearbox types with Onshape links, motors, material modes, CAD, developers),
+with details in [docs/gearboxes.md](docs/gearboxes.md), [docs/motors.md](docs/motors.md) and
+[docs/onshape.md](docs/onshape.md). `tests/test_docs.py` checks that every command uses a real
+gearbox type and motor, every type is listed, and every link to a repo file exists. Later
+changes: INSSPG labels and the view-only notes (PR #91), "What's new" (PR #89).
 
-**Stale/incomplete content:**
-- **"Supported Hardware" tables only cover ~half the framework.** Motors table lists 6 (`U8, U10, U12, MN8014, VT8020, MAD_M6C12`) but the code supports 10 — missing `RO60, RO80, RO100, RI100`. Gearbox Topologies table lists 4 (`sspg, cpg, wpg, dspg`) but `actOpt.py` dispatches 11 — missing `icpg, insspg_type_1, insspg_type_2, incpg_dependent, incpg_independent, isspg_inside, isspg_compact`. These tables look like they predate the whole R-motor/inrunner-gearbox line of work.
-- **Step 4 (Run Optimization) documents the 7 newer gearbox types as 5 separate repetitive "Syntax + Example" blocks** instead of one table — same info as the Supported Hardware tables should have, just duplicated inconsistently in prose instead.
-- **ISSPG's motor list is wrong** — README says `<motor>`: RO80, RO100, but `Opt_ISSPG_inside.py`/`Opt_ISSPG_compact.py` also support `RO60` (confirmed via `motor_name == "RO60"` branches in both files).
-- **`insspg_type_1`/`insspg_type_2` labels need a domain check.** README calls them "Independent"/"Dependent" respectively, but nothing found in `Opt_INSSPG.py`/`ActuatorandGearbox_INSSPG.py` confirms that mapping in those terms — the code just branches on a `"fw_s_used"` face-width formula, described as "TYPE 1 MATH" vs "TYPE 2 MATH". **Needs your confirmation** before the rewrite states it either way.
-- **Step 5/6 CAD-output paths only cover SSPG/CPG/DSPG/WPG** (`CADs/<TYPE>/<type>_equations.txt`); the other 7 gearbox types write elsewhere (`CADs/ICPG/icpg_equations.txt`, `CADs/INSSPG/insspg_equations.txt`, `CADs/INCPG/incpg_equations.txt`, `CADs/ISSPG/isspg_equations_onshape.txt`, `CADs/DSPG/Equation_Files/<motor>/...`) and aren't documented at all.
-- **No "Project Structure" section** — nothing in the README maps the repo's file layout (`actOpt.py`, `Opt_*.py`, `ActuatorAndGearbox_*.py`, `CommonComponents.py`, `config_files/`, `CADs/`, `results/`) for a new reader.
+### Motor-parameter pipeline — one motor file for every gearbox type
 
-**Presentation/formatting issues:**
-- Onshape links are inconsistently formatted — some gearbox types show only a clickable `👉 **[Open X in Onshape](url)**` link, others additionally repeat the same URL in a raw, unlabeled code block right below it (ISSPG/INCPG/INSSPG do this, SSPG/CPG/WPG/DSPG don't).
-- A dead HTML comment block (lines ~332-340, "iv. Set the Equations File") is left in the raw source — should be deleted or resolved, not commented out.
-- The `[COPY PASTE THE LINK IF HYPERLINK DOESN'T OPEN]` note appears exactly once (above the SSPG link only) even though the same problem would apply to every link.
-- Mass Analysis Google Sheets link (Step 5) uses a bare, unlabeled code fence, inconsistent with the `👉 **[Open X](...)**` link style used everywhere else.
-
-**Plan:**
-1. **Resolve the `insspg_type_1`/`insspg_type_2` → Independent/Dependent question** with you before writing anything — *~5 min*
-2. **Rebuild "Supported Hardware" as the single source of truth**: one motor table (10 rows) and one gearbox-topology table (11 rows), each gearbox row noting which motors it accepts — *~20 min*
-3. **Collapse Step 4's 5 repetitive Syntax/Example blocks** into one syntax block + one combined compatibility table (reusing table from step 2) + 2-3 representative examples instead of one per type — *~20-30 min*
-4. **Fix the ISSPG motor list** (add RO60) and **document all 7 CAD-output paths** missing from Step 5/6 — *~15 min*
-5. **Add a short "Project Structure" section** (file/folder map, one line each) — *~15-20 min*
-6. **Clean up formatting inconsistencies**: normalize Onshape link presentation (pick one style, apply everywhere), delete the dead HTML comment block, fix the Mass Analysis link style — *~15-20 min*
-7. **Review pass together** — read the rewritten README end-to-end against the live repo one more time before committing — *~15 min*
-
-**Estimated total (working together, interactively):** ~1.5 to 2 hours.
-
-### Motor-parameter pipeline — organize the motor JSON config files and make every gearbox type config-driven
-
-Audited how each of the 10 `Opt_*.py` files actually sources its motor values. Only 3 of the 10 are properly config-driven; the rest either hardcode motor values directly in the Python source or load a config file whose relevant data is never used.
-
-**Findings:**
-- **Three different, incompatibly-shaped "motor config" JSON files already exist**, each invented independently: `config_files/config.json` (`"Motors"` keyed by `"MotorU8_framed"` etc., Kv-based, used by SSPG/CPG/DSPG/WPG), `config_files/motor_config.json` (`"Motors"` keyed by `"MotorRO100"`/`"MotorRO80"`, Kv-based, used by ICPG only), and `config_files/insspg_motor_config.json` (`"Motors"` keyed by `"RI100"`, direct-spec, used by INSSPG only — the one we just fixed). No shared schema, no shared key-naming convention.
-- **`Opt_INCPG_dependent.py` and `Opt_INCPG_independent.py` don't read motor data from JSON at all.** Both load `config_files/config.json` at the top, but its `"Motors"` section doesn't even contain an `RI100` entry, and `motor_data[...]` is never indexed anywhere in either file. The actual `MotorRI100 = motor(...)` call hardcodes every value as a literal directly in the source — and that literal block is identically duplicated across both files.
-- **`Opt_ISSPG_inside.py` and `Opt_ISSPG_compact.py` have the same problem.** They load `config_files/config.json` and `config_files/isspg_params.json`, but `isspg_params.json` has no `"Motors"` section at all (only `isspg_optimization_parameters`/`isspg_3DP_design_parameters`), and `motor_data` is never referenced. `MotorRO100`/`MotorRO80`/`MotorRO60` are hardcoded literals, duplicated identically across both files.
-- **Net effect:** updating a motor's spec for INCPG or ISSPG today means manually editing the same numbers in two separate `.py` files, with no config file as the source of truth — exactly the kind of drift that caused the RO80 `maxContinuousCurrent` bug found earlier this session.
-
-**Plan:**
-1. **Design one common motor-config JSON schema** that covers both Kv-based (framed outrunner) and direct-spec (RO/RI frameless) motors, and decide how much motor-class-specific geometry (stator wire dims, rotor mount holes, etc.) belongs in the shared schema vs. per-gearbox-type files — needs your input on the "properly organized" shape, since it touches domain judgment calls, not just code moves — *~20-30 min*
-2. **Consolidate the 3 existing motor-config files** (`config.json`'s `Motors` section, `motor_config.json`, `insspg_motor_config.json`) into that one schema, deciding what happens to the non-motor sections of `config.json` (material properties, motor drivers, gear standards) that other files still depend on — *~30-40 min*
-3. **Add motor entries for INCPG's `RI100`** and **ISSPG's `RO100`/`RO80`/`RO60`** to the consolidated config, using the values currently hardcoded in the 4 affected `Opt_*.py` files as the source of truth to migrate from — *~20-30 min*
-4. **Rewire all 10 `Opt_*.py` files** to read motor values from the single consolidated config via a consistent lookup pattern (mirroring how SSPG/CPG/DSPG/WPG and the now-fixed INSSPG already do it) — *~40-60 min*
-5. **Delete the dead config-loading code** in the 4 affected files (currently loads `config.json`/`isspg_params.json` without ever using their motor data) once the real lookups are wired in — *~10 min*
-6. **Verify**: syntax check, grep sweep for any remaining hardcoded motor literals, live-run all 11 gearbox-type combos through `actOpt.py` and confirm identical output to the established baseline — *~30-45 min (mostly wait time on the slower combos, e.g. DSPG)*
-7. Commit — *~5 min*
-
-**Estimated total (working together, interactively):** ~2.5 to 3.5 hours, likely spread across more than one sitting given the schema-design decision in step 1.
+**Status: done** (Phase 2, PR #80, 2026-10-17). All 33 motors are in
+[`config_files/motors.json`](config_files/motors.json), with datasheet sources; every gearbox type
+reads them with `CommonComponents.load_motor()`. Gears are sized with peak torque, checked at
+no-load speed (48 V); `"rating": "rated"` switches frameless motors to rated values. How to add a
+motor: [docs/motors.md](docs/motors.md); checks: `tests/test_motors.py`.
 
 ### Material modes — 3D-printed and metal
 
-Every gearbox should run in one of two modes:
-
-| Mode | Gears (density and allowable stress) | Structure |
-|---|---|---|
-| 3D-printed (default) | PLA | PLA |
-| Metal | Steel — 7850 kg/m³, 400 MPa | Aluminium — 2700 kg/m³ |
-
-**Status: done (2026-10-22)** — `python actOpt.py ... --material 3dp|metal` (default `3dp`).
-- `gearbox_runner.MATERIAL_MODES` picks gear and structure materials from the one material table
-  in `config_files/config.json` (all gearbox types read it; the wrong per-type copies are gone).
-- Every 3DP mass function now weighs gears (sun, planets, ring and the casing it is part of) with
-  `densityGears` and the structure (motor case, carriers, retainers, bearing holders) with
-  `densityStructure`; before, most used one density for everything, which in metal mode would
-  have made the whole structure steel.
-- Rotor couplers: INCPG, INWPG (`rotor_hub_mass`) and INDSPG (`rotor_coupler_mass`) have a separate
-  coupler, aluminium in both modes. In the other ten types the coupler is the sun gear's own hub,
-  printed with the sun, so it stays part of the sun (gear material) — there is no separate part.
-- Metal results go to `..._metal.csv` files; the CAD equations file is shared (last run wins).
-- Golden check: one metal case per gearbox type (`<case>__metal`).
-
-**Decided:**
-- Chosen with a command-line option: `python actOpt.py ... --material 3dp|metal`, default `3dp`
-  so existing commands are unchanged.
-- All 15 gearbox types.
-- The rotor coupler is the only metal part in the 3D-printed build, and is aluminium in both
-  modes. It has its own density setting (`densityRotor` in INDSPG,
-  `ActuatorandGearbox_INDSPG.py:1740-1748`), separate from the gear and structure densities.
-- In metal mode the ring gear is weighed as **steel** for now (see the first follow-up task).
-- Metal mode uses the **same part shapes and thicknesses** as the 3D-printed version for now (see
-  the second follow-up task).
+**Status: done** (PR #84, 2026-10-22). `python actOpt.py ... --material 3dp|metal` (default
+`3dp`): 3dp = PLA gears and structure; metal = steel gears (7850 kg/m³, 400 MPa) and aluminium
+structure (2700 kg/m³), from the one material table in `config_files/config.json`. Mass functions
+weigh gears and structure with their own densities; the separate rotor couplers (INCPG, INWPG,
+INDSPG) are aluminium in both modes. Metal results go to `..._metal.csv`. The golden check has one
+metal case per gearbox type.
 
 **Follow-up tasks (not part of the first version):**
 1. **Split the ring gear into teeth and housing.** In the gearboxes where the ring gear is part of
@@ -134,13 +69,13 @@ Every gearbox should run in one of two modes:
    clearances (e.g. `loose_clearance_3DP`) and can be thinner than printed ones. Metal mode needs
    its own design settings per gearbox; until then it reuses the 3D-printed shapes.
 
-### Unify per-gearbox settings (important — each item changes results)
+### Unify per-gearbox settings (important — most items change results)
 
 Found while building the common runner (Phase 3a). The runner keeps every one of these
 differences exactly as it was, so results don't change; each should later become its own
 result-changing commit with re-recorded golden baselines.
 
-1. **Five config files with different material values.** Each gearbox type reads materials, cost
+1. ~~**Five config files with different material values.**~~ Each gearbox type reads materials, cost
    gains and MIT factors from one of five files:
 
    | Config file | Used by | PLA density | Aluminium density | Steel |
@@ -153,6 +88,8 @@ result-changing commit with re-recorded golden baselines.
 
    So PLA has four densities (1250, 1245.6, 1240, 1240.06), and two files give aluminium and steel
    PLA values. Cost gains (1 / −2 / 0.2) and MIT factors (1.2 / 1.5) are the same in all five.
+   **Done (2026-10-22, PR #84):** every type now reads materials from the one table in
+   `config.json`; the other four files no longer have `Material_properties`.
 2. ~~**ISSPG hard-codes FOS 1.2 and service factor 1.5**~~ — **done (2026-10-28):** ISSPG (inside
    and compact) now reads `MIT_params` from `config.json` like the other types (same values, so
    results unchanged).
@@ -169,7 +106,8 @@ result-changing commit with re-recorded golden baselines.
    - ISSPG: no limit passed.
    The IDSPG line carries a `#TODO: this is correct and implement in other also`.
 
-**Status:** open — decide one value / rule per item, then change and re-record one item at a time.
+**Status:** items 1 and 2 done; items 3 and 4 open — decide one value / rule per item, then
+change and re-record one item at a time.
 
 ## Bugs
 
