@@ -76,7 +76,10 @@ metal case per gearbox type.
    the outer housing, its mass currently includes the housing around it. In metal mode the teeth
    should be steel and the housing aluminium, so each mass function must compute the two volumes
    separately. Until then, the whole ring part is weighed as steel in metal mode, which
-   overestimates the mass.
+   overestimates the mass. **SSPG done (2026-10-30):** only the ring (ring pitch circle to
+   `ring_OD`, `fw_r + clearance_planet` long) is steel, the rest of the casing aluminium
+   (`ring_mass` + `gearbox_housing_mass` = `gearbox_casing_mass`); 3dp bit-identical; MN8014 6:1
+   metal 1,357 → 1,067 g. Open for the other types; then re-run the metal map.
 2. **Separate thicknesses and clearances for metal mode.** Metal parts don't need the 3D-printing
    clearances (e.g. `loose_clearance_3DP`) and can be thinner than printed ones. Metal mode needs
    its own design settings per gearbox; until then it reuses the 3D-printed shapes.
@@ -147,6 +150,50 @@ search; re-tune `K_Width` (per mm of whole actuator, not of gear); re-record eve
 (every result changes). Overlaps with bug 15 (`actuator_width` vs the CAD). About 1–2 sessions.
 
 **Status:** future — decided 2026-10-29 to use the map's second score for now.
+
+### Co-design integration — use COMPAct from the co-design repo (planned)
+
+**Decision (2026-10-30):** option 1, a git submodule plus an editable install. Not started.
+
+The co-design repo uses the map in its optimisation loop (smooth values and derivatives), and at
+the end of a run gets the real design for the chosen motor, ratio, material and type: gear
+parameters (teeth, modules, planets, face widths) and the Onshape equation files. Gear
+parameters are discrete, so they come from re-running the optimiser, not from the fits.
+
+In the co-design repo:
+
+```bash
+git submodule add https://github.com/singhaman1750/COMPAct external/COMPAct
+git -C external/COMPAct checkout map-v1        # pin the COMPAct version that built the map
+pip install -e external/COMPAct
+```
+
+```python
+from compact_api import ActuatorMap, final_design, nearest_design
+amap = ActuatorMap()                                   # released map (maps/v1)
+a = amap.actuator("U8_Lite", 9.3, "3dp", derivative=True)               # inside the loop
+d = final_design("U8_Lite", 9.3, "3dp", gb_type="cpg", cad_dir="out/hip")  # at the end
+```
+
+Work in COMPAct:
+1. `pyproject.toml`: a `[project]` section, so `pip install -e` works (root modules + `tools`).
+2. `compact_api.py` at the repo root: the only module co-design imports (avoids clashes with
+   generic names like `tools`); exposes `ActuatorMap` (defaulting to `maps/v1`), `final_design`
+   and `nearest_design`.
+3. `final_design(motor, ratio, material, gb_type, cad_dir)`: runs the optimiser for that case in a
+   temporary folder (like `tools/actuator_map/case.run_case`) and returns the real ratio, named gear
+   parameters, face widths, mass / efficiency / sizes / torque fraction and the CAD variables;
+   writes the equation files to `cad_dir`. Runtime: SSPG ~0.1 s, WPG ~10 s, CPG ~20 s, DSPG up to
+   ~75 s.
+4. `nearest_design(...)`: the nearest swept design from the released table (teeth, modules,
+   planets, values); instant, but only at grid ratios and without face widths or CAD files.
+5. Tests: a fresh-environment install, `import compact_api`, one final design.
+6. A short integration guide for the co-design repo, and a `map-v1` tag after merging.
+
+Why: the submodule pins the exact COMPAct commit, so `final_design` runs the same code that built
+the map; the editable install keeps COMPAct's config paths working without restructuring
+(a full pip package would need the Phase 3b restructuring). After the final design, re-evaluate
+the robot once with its real ratio and mass (they can differ slightly from the map's fit).
 
 ### Actuator map — better fits (future)
 

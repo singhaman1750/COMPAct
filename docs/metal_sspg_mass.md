@@ -4,6 +4,20 @@ Analysis from 2026-10-29. Nothing in the code or config was changed for it. The 
 `tools/metal_analysis/sspg_mass_whatif.py`, which rebuilds one optimised design and re-weighs it
 with changed values (see [Reproduce](#reproduce)).
 
+## Status
+
+- **Change #1 done for SSPG (2026-10-30):** only the ring (ring pitch circle to `ring_OD`,
+  `fw_r + clearance_planet` long) is weighed as steel; the rest of the gearbox casing (output-bearing
+  holder, case-mounting ring, fillet) is aluminium. 3dp results are bit-identical; the CAD is
+  unchanged.
+  - MN8014 6:1 metal: 1,357 → **1,067 g** (same gear set).
+  - U8_Lite 6.5:1 metal: 1,224 → **979 g**; the optimiser now picks module 0.5, 25/56/137
+    (ratio 6.48) instead of module 0.6, 23/52/127 (the metal golden baseline was re-recorded).
+  - With the ring steel, a thinner ring wall (#9) now saves about 20 g.
+- The other changes (#2–#8) are still open, and #1 is still open for the other gearbox types.
+- The tables below are the analysis **before** change #1. `tools/metal_analysis/sspg_mass_whatif.py`
+  now starts from the code with #1 in it.
+
 ## Summary
 
 Metal mode (`--material metal`: steel gears, aluminium structure) reuses the 3D-printed SSPG design,
@@ -111,5 +125,7 @@ python tools/metal_analysis/sspg_mass_whatif.py MN8014 6
 
 The script runs the SSPG optimiser for the motor and ratio (metal and 3dp), prints the metal
 mass breakdown, then rebuilds the same gear set with each change and prints the new mass. It runs
-in a temporary CAD folder and changes no files. Casing-as-aluminium (#1) is estimated by
-re-weighing the non-ring part of the casing; the code itself is unchanged.
+in a temporary CAD folder and changes no files. Since change #1 is in the code, the script's base
+already has the steel ring and aluminium housing (it also prints the mass the same gear set had
+with the whole casing steel); the numbers in the tables above were made before, with #1 estimated
+by re-weighing the non-ring part of the casing.

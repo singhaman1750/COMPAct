@@ -3120,8 +3120,8 @@ class singleStagePlanetaryActuator:
         # density of materials
         #------------------------------------
         # density of both gears and the structural materials is the same in 3D printed gearbox
-        density_gears     = self.planetaryGearbox.densityGears      # gears; the ring gear (and its casing) counts as a gear
-        density_structure = self.planetaryGearbox.densityStructure  # motor case, carriers, retainers, holders
+        density_gears     = self.planetaryGearbox.densityGears      # gears and the ring gear's ring
+        density_structure = self.planetaryGearbox.densityStructure  # motor case, gearbox housing, carriers, retainers
 
         #------------------------------------
         # Face Width
@@ -3254,7 +3254,15 @@ class singleStagePlanetaryActuator:
         large_fillet_height = ringFwMM
         large_fillet_volume = 0.5 * (np.pi * (((large_fillet_OD*0.5)**2) - ((large_fillet_ID)*0.5)**2) * large_fillet_height) * 1e-9
 
-        gearbox_casing_mass = (ring_volume + bearing_holding_structure_volume + case_mounting_structure_volume + large_fillet_volume) * density_gears
+        # Only the ring (ring PCD to ring_OD, ringFwUsedMM long) is gear material; the rest of the
+        # casing (bearing holder, case mounting, fillet) is structure: steel ring, aluminium housing
+        # in metal mode.
+        ring_mass = ring_volume * density_gears
+        if density_gears == density_structure:  # one material (3D printed): the original sum, bit-identical
+            gearbox_casing_mass = (ring_volume + bearing_holding_structure_volume + case_mounting_structure_volume + large_fillet_volume) * density_gears
+        else:
+            gearbox_casing_mass = ring_mass + (bearing_holding_structure_volume + case_mounting_structure_volume + large_fillet_volume) * density_structure
+        gearbox_housing_mass = gearbox_casing_mass - ring_mass
 
         #----------------------------------
         # Mass: sspg_carrier
@@ -3333,6 +3341,8 @@ class singleStagePlanetaryActuator:
 
         self.Motor_case_mass              = Motor_case_mass
         self.gearbox_casing_mass          = gearbox_casing_mass
+        self.ring_mass                    = ring_mass
+        self.gearbox_housing_mass         = gearbox_housing_mass
         self.carrier_mass                 = carrier_mass
         self.sun_mass                     = sun_mass
         self.sec_carrier_mass             = sec_carrier_mass
@@ -3362,6 +3372,8 @@ class singleStagePlanetaryActuator:
     def print_mass_of_parts_3DP(self):
         print("Motor_case_mass: ",              1000 * self.Motor_case_mass)
         print("gearbox_casing_mass: ",          1000 * self.gearbox_casing_mass)
+        print("  ring_mass: ",                  1000 * self.ring_mass)
+        print("  gearbox_housing_mass: ",       1000 * self.gearbox_housing_mass)
         print("carrier_mass: ",                 1000 * self.carrier_mass)
         print("sun_mass: ",                     1000 * self.sun_mass)
         print("sec_carrier_mass: ",             1000 * self.sec_carrier_mass)
