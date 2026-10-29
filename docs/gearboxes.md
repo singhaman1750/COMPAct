@@ -5,8 +5,8 @@ describes them. Bug and issue numbers refer to [`ISSUES.md`](../ISSUES.md).
 
 All types share: MIT stress analysis, a brute-force search over teeth, module and planets near the
 requested ratio, a cost that combines mass, efficiency, width and a penalty for missing the ratio
-(gains `K_Mass`, `K_Eff`, `K_Width` in the config file), and materials from
-`config_files/config.json` (see the README's material modes).
+(gains `K_Mass`, `K_Eff`, `K_Width` — one set for every type, in `config_files/cost.json`), and
+materials from `config_files/config.json` (see the README's material modes).
 
 ## Framed outrunner motors
 
@@ -19,7 +19,7 @@ Motors smaller than 80 mm may have a gearbox up to 1.25× the motor diameter
 | `sspg` | Single-stage planetary | `ActuatorAndGearbox` · `sspg_params.json` | factor × motor Ø − 2 × `ringRadialWidthMM` | CAD 1 (sun countersink radius fixed in the model) |
 | `cpg` | Compound planetary | `ActuatorAndGearbox` · `cpg_params.json` | factor × motor Ø | — |
 | `wpg` | Wolfrom planetary (3K) | `ActuatorAndGearbox` · `wpg_params.json` | factor × motor Ø − 2 × `ringRadialWidthMMBig` | — |
-| `dspg` | Double-stage planetary | `ActuatorAndGearbox` · `dspg_params.json` | factor × motor Ø − 2 × `ring_radial_thickness` | CAD 3 (stage-1 ring split with small motors); slowest type (~7 min per run) |
+| `dspg` | Double-stage planetary | `ActuatorAndGearbox` · `dspg_params.json` | factor × motor Ø − 2 × `ring_radial_thickness` | CAD 3 (stage-1 ring split with small motors) |
 
 The smallest motors (MN5008, MAD 5008, MAD 5010, 55–56 mm) find no SSPG or WPG design at the
 golden ratios.
@@ -30,10 +30,17 @@ The gearbox sits inside the rotor/stator of a frameless motor.
 
 | Type | Gearbox | Module · params file | Max gearbox diameter | Known issues |
 |---|---|---|---|---|
-| `isspg_inside` | Internal single-stage, InBearing | `ActuatorAndGearbox_ISSPG_inside` · `isspg_params.json` | not limited | bug 2 (shares an equations file with compact); FOS 1.2 / 1.5 hard-coded; RO60 finds no design |
-| `isspg_compact` | Internal single-stage, OutBearing | `ActuatorAndGearbox_ISSPG_compact` · `isspg_params.json` | not limited | bugs 2 and 5; same FOS note; RO60 finds no design |
+| `isspg_inside` | Internal single-stage, InBearing | `ActuatorAndGearbox_ISSPG_inside` · `isspg_params.json` | not limited | RO60 finds no design |
+| `isspg_compact` | Internal single-stage, OutBearing | `ActuatorAndGearbox_ISSPG_compact` · `isspg_params.json` | not limited | bug 5; RO60 finds no design |
 | `icpg` | Internal compound | `ActuatorandGearbox_ICPG` · `icpg_params.json` | factor × stator ID (inside the stator) | RO60 finds no design |
 | `idspg` | Internal double-stage | `ActuatorandGearbox_IDSPG` · `idspg_params.json` | factor × (motor OD + 2 × 1.5); stage 1: stator ID − 2 × ring-1 width | bug 7 (bearings counted twice); RO60 finds no design |
+
+**Gear width inside the motor (ISSPG, ICPG):** the gears sit inside the frameless outrunner, so
+their face width is capped at the motor's `stator_height` − `gear_axial_margin_mm` (ISSPG 10 mm, ICPG
+3 mm; ICPG counts both planet steps + `planet_step_gap_mm`). PLA gears at peak torque often need more; then the width is
+capped and the torque derated — the run prints e.g. "the gears carry 50 % of the motor's peak
+torque", the CSV has `Torque_carried_fraction`, `Peak_torque_carried` and `FW_limit_MM`, and the
+cost adds `K_torque_shortfall` (`cost.json`) × (1 − fraction). Metal gears normally fit, so nothing changes there.
 
 RO100's rotor screws are M4 for now (bug 8, M4 vs M5 to be decided). ICPG's config file is
 `motor_config.json`, IDSPG's `idspg_motor_config.json`; the others use `config.json`.
@@ -44,11 +51,17 @@ RO100's rotor screws are M4 for now (bug 8, M4 vs M5 to be decided). ICPG's conf
 |---|---|---|---|---|
 | `insspg_type_1` | Inrunner single-stage, type 1 (independent) | `ActuatorandGearbox_INSSPG` · `insspg_params.json` | stator OD − 5.5 − 2 × 1.5 − 0.8 / 2 | bug 5 |
 | `insspg_type_2` | Inrunner single-stage, type 2 (dependent) | same module and params | same | bugs 4 and 6 |
-| `incpg_dependent` | Inrunner compound, dependent | `ActuatorAndGearbox_INCPG_dependent` · `incpg_dependent_params.json` | factor × motor Ø | bug 12 (rotor top bearing rule chosen by motor name) |
-| `incpg_independent` | Inrunner compound, independent | `ActuatorAndGearbox_INCPG_independent` · `incpg_independent_params.json` | factor × motor Ø | rotor bearings are listed per motor name (RI100, RI80) in the params file |
-| `inwpg_dependent` | Inrunner Wolfrom, dependent | `ActuatorAndGearbox_INWPG_dependent` · `inwpg_params_dependent.json` | factor × motor Ø | bug 12 |
-| `inwpg_independent` | Inrunner Wolfrom, independent | `ActuatorAndGearbox_INWPG_independent` · `inwpg_params_independent.json` | factor × motor Ø | rotor bearings listed per motor name, as INCPG independent |
+| `incpg_dependent` | Inrunner compound, dependent | `ActuatorAndGearbox_INCPG_dependent` · `incpg_dependent_params.json` | factor × motor Ø | minimum rotor top bearing bore set per motor in the params file |
+| `incpg_independent` | Inrunner compound, independent | `ActuatorAndGearbox_INCPG_independent` · `incpg_independent_params.json` | factor × motor Ø | rotor bearings set per motor in the params file |
+| `inwpg_dependent` | Inrunner Wolfrom, dependent | `ActuatorAndGearbox_INWPG_dependent` · `inwpg_params_dependent.json` | factor × motor Ø | as INCPG dependent |
+| `inwpg_independent` | Inrunner Wolfrom, independent | `ActuatorAndGearbox_INWPG_independent` · `inwpg_params_independent.json` | factor × motor Ø | as INCPG independent |
 | `indspg` | Inrunner double-stage | `ActuatorandGearbox_INDSPG` · `indspg_params.json` | factor × (stator wire OD − 2 × ring-2 width); stage 1: rotor ID − 4 × 1.5 | — |
+
+**INWPG planet length:** PLA gears at peak torque make INWPG's planets several stator heights
+long, so the planet stack (big + small step, `fw_p_b` + `fw_p_s` in the CAD) is capped at
+`planet_stack_stator_heights` × `stator_height` (2 → 49 mm for RI100, 53 mm for RI80), with the
+same torque derating, CSV columns and cost term as ISSPG/ICPG above. Metal gears stay well under
+it (at most 1.3 stator heights), so nothing changes there.
 
 INSSPG reads `insspg_motor_config.json`, INDSPG `indspg_motor_config.json`; the others `config.json`.
 
@@ -63,4 +76,4 @@ ISSUES.md, "Unify per-gearbox settings"; when one is unified, update this page i
 | Output | Where |
 |---|---|
 | Results CSV | `results/results_BruteForce_<motor>/<TYPE>_BRUTEFORCE_MIT_<motor>[_metal].csv` (INSSPG adds `_<gb_type>`) |
-| CAD equations | `CADs/<FAMILY>/<family>_equations*.txt` — variants share their family's folder (e.g. both ISSPG types write `CADs/ISSPG/`) |
+| CAD equations | `CADs/<FAMILY>/<gb_type>_equations*.txt` — variants write their own files in their family's folder (e.g. `CADs/ISSPG/isspg_inside_equations_onshape.txt` and `isspg_compact_…`) |

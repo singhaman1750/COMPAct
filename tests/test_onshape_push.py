@@ -53,8 +53,9 @@ class FakeResponse:
         return self._payload
 
 
-def fake_onshape(monkeypatch, version_status=200, stored=None, write_status=204):
-    """Replace src.onshape_client with a recorder; returns the list of calls."""
+def fake_onshape(monkeypatch, version_status=200, stored=None, write_status=204, sent=None):
+    """Replace src.onshape_client with a recorder; returns the list of calls.
+    The variables written are appended to `sent`, if given."""
     calls = []
 
     class Client:
@@ -66,6 +67,8 @@ def fake_onshape(monkeypatch, version_status=200, stored=None, write_status=204)
             if path.endswith("/versions"):
                 return FakeResponse(version_status, {})
             if method == "post":
+                if sent is not None:
+                    sent.append(body)
                 return FakeResponse(write_status, None)
             return FakeResponse(200, [{"variables": stored or []}])
 
@@ -151,3 +154,38 @@ def test_counts_are_sent_as_numbers(path):
     names = re.findall(r'^\s*"(.+?)"\s*=', path.read_text(encoding="utf-8"), re.M)
     missing = sorted({n for n in names if COUNT_NAME.search(n)} - NUMBER_VARS)
     assert not missing, f"add to NUMBER_VARS in Onshape_extension/parse_variables_txt.py: {missing}"
+
+
+# Variants of a family (e.g. incpg_dependent / incpg_independent) share a CAD folder but must
+# each write, and push, their own files; they used to overwrite one shared file (ISSUES bug 2).
+VARIANTS = {}
+for _gb_type in DISPATCH:
+    VARIANTS.setdefault(set_values.gearbox_family(_gb_type), []).append(_gb_type)
+VARIANT_PAIRS = sorted(tuple(sorted(v)) for v in VARIANTS.values() if len(v) > 1)
+
+
+@pytest.mark.parametrize("variants", VARIANT_PAIRS, ids="/".join)
+def test_variants_of_a_family_write_different_files(variants):
+    written = {}
+    for gb_type in variants:
+        for baseline in BASELINES.glob(f"{gb_type}__*.json"):
+            for name in json.loads(baseline.read_text(encoding="utf-8"))["cad_files"]:
+                written.setdefault(name, set()).add(gb_type)
+    shared = sorted(name for name, by in written.items() if len(by) > 1)
+    assert not shared, f"written by more than one variant: {shared}"
+
+
+@pytest.mark.parametrize("variants", VARIANT_PAIRS, ids="/".join)
+def test_each_variant_pushes_its_own_file(variants, tmp_path, monkeypatch):
+    from Onshape_extension.parse_variables_txt import parse_variable_file
+    models = tmp_path / "onshape_models.json"
+    models.write_text(json.dumps({t: f"https://cad.onshape.com/documents/D{i}/w/W{i}/e/E{i}"
+                                  for i, t in enumerate(variants)}))
+    sent = []
+    fake_onshape(monkeypatch, sent=sent)
+    for gb_type in variants:
+        set_values.push_to_onshape(gb_type, save_version=False, models_json=str(models))
+    expected = [parse_variable_file(set_values.equations_file(t)) for t in variants]
+    assert sent == expected
+    assert sent[0] != sent[1]
+

@@ -208,6 +208,21 @@ def bearing_mass_kg(id_mm, od_mm, width_mm):
 
 
 # -------------------------------------------------------------------------
+# per_motor_value
+# -------------------------------------------------------------------------
+# A design parameter that depends on the motor, written in the params file as
+# {"RI100": 25, "RI80": 0}. A motor that isn't listed is an error, so a new
+# motor never silently gets another motor's value.
+def per_motor_value(design_params, key, motor_name):
+    values = design_params[key]
+    if motor_name not in values:
+        raise ValueError(
+            f"{key} has no value for motor {motor_name!r} (listed: {', '.join(values)}). "
+            "Add it in the gearbox's params file.")
+    return values[motor_name]
+
+
+# -------------------------------------------------------------------------
 # Nuts and bolts class
 # -------------------------------------------------------------------------
 

@@ -6,7 +6,7 @@ import sys
 import time
 
 from CommonComponents import material, bearings_discrete, nuts_and_bolts_dimensions, motor_driver, motor_frameless_inrunner as motor
-from CommonComponents import restores_stdout, cad_path, bearing_mass_kg
+from CommonComponents import restores_stdout, cad_path, bearing_mass_kg, per_motor_value
 
 class inrunnerCompoundPlanetaryGearbox:
     def __init__(self,
@@ -821,13 +821,9 @@ class inrunnerCompoundPlanetaryActuator:
         self.output_bearing_OD     = OutputBearings.getBearingODMM()
         self.output_bearing_width  = OutputBearings.getBearingWidthMM()
 
-        if self.motor.motorName == "RI100":
-            if self.design_params["min_rotor_top_bearing_ID"] < self.module * self.Ns + 2*self.standard_clearance_1_5mm:
-                RotorTopBearingIDrequiredMM   = self.module * self.Ns + 2*self.standard_clearance_1_5mm
-            else:
-                RotorTopBearingIDrequiredMM   = self.design_params["min_rotor_top_bearing_ID"]
-        else:
-            RotorTopBearingIDrequiredMM   = self.module * self.Ns + 2*self.standard_clearance_1_5mm
+        # Large enough for the sun, and at least this motor's minimum bore
+        RotorTopBearingIDrequiredMM   = max(self.module * self.Ns + 2*self.standard_clearance_1_5mm,
+                                            per_motor_value(self.design_params, "min_rotor_top_bearing_ID", self.motor.motorName))
 
         RotorTopBearings              = bearings_discrete(RotorTopBearingIDrequiredMM)
         self.rotor_top_bearing_ID     = RotorTopBearings.getBearingIDMM()
@@ -886,7 +882,7 @@ class inrunnerCompoundPlanetaryActuator:
     def genEquationFile(self, motor_name="NO_MOTOR", gearRatioLL = 0.0, gearRatioUL = 0.0):
         # writing values into text file imported which is imported into solidworks
         self.setVariables()
-        file_path = cad_path('INCPG', 'Equation_Files', motor_name, f'incpg_equations_{gearRatioLL}_{gearRatioUL}.txt')
+        file_path = cad_path('INCPG', 'Equation_Files', motor_name, f'incpg_dependent_equations_{gearRatioLL}_{gearRatioUL}.txt')
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, 'w') as eqFile:
             l = [
@@ -1028,7 +1024,7 @@ class inrunnerCompoundPlanetaryActuator:
             eqFile.writelines(l)
         eqFile.close()
         
-        file_path = cad_path('INCPG', 'Equation_Files', motor_name, f'incpg_equations_{gearRatioLL}_{gearRatioUL}_onshape.txt')
+        file_path = cad_path('INCPG', 'Equation_Files', motor_name, f'incpg_dependent_equations_{gearRatioLL}_{gearRatioUL}_onshape.txt')
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, 'w') as eqFile:
             l = [
@@ -1173,7 +1169,7 @@ class inrunnerCompoundPlanetaryActuator:
     def genEquationFile_editCADdirectly(self):
         # writing values into text file imported which is imported into solidworks
         self.setVariables()
-        file_path = cad_path('INCPG', 'incpg_equations.txt')
+        file_path = cad_path('INCPG', 'incpg_dependent_equations.txt')
         with open(file_path, 'w') as eqFile:
             l = [
                     f'"Ns"= {self.Ns}\n',
@@ -1314,7 +1310,7 @@ class inrunnerCompoundPlanetaryActuator:
             eqFile.writelines(l)
         eqFile.close()
 
-        file_path = cad_path('INCPG', 'incpg_equations_onshape.txt')
+        file_path = cad_path('INCPG', 'incpg_dependent_equations_onshape.txt')
         with open(file_path, 'w') as eqFile:
             l = [
                     f'"Ns"= {self.Ns}\n',

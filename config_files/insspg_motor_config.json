@@ -16,10 +16,5 @@
             "ringRadialWidthMM": 2.5,
             "ringHousingWidthMM": 2.0
         }
-    },
-    "Cost_gain_parameters": {
-        "K_Mass": 1,
-        "K_Eff": -2,
-        "K_Width": 0.2
     }
 }

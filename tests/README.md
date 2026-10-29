@@ -12,9 +12,9 @@ pip install -r requirements-dev.txt
 pytest
 ```
 
-These check that every gearbox type in `gearbox_runner.GEARBOXES` names existing classes and config files, builds with one of its golden motors, has a results print layout in `actOpt.py`, and has a golden baseline. `tests/test_motors.py` checks `config_files/motors.json`. They also check that every config file is valid JSON. CI runs them on every push.
+These check that every gearbox type in `gearbox_runner.GEARBOXES` names existing classes and config files, builds with one of its golden motors, has a results print layout in `actOpt.py`, and has a golden baseline. `tests/test_motors.py` checks `config_files/motors.json`. They also check that every config file is valid JSON. `tests/test_actuator_map.py` checks the actuator-map tool (`tools/actuator_map/`): a few sweep cases must equal the plain optimiser's golden baselines, and its width/diameter formulas must match the Onshape measurements. `tests/test_actuator_map_e2e.py` runs the whole tool end to end on a small real sweep (RO100, 3dp, 3 types, ratios 4–9; about 15 s): sweep → table → fits → `map.py`, and checks that the map gives back every table row, matches `fit.py`'s fits and switch ratios, and applies the 80 % torque rule. CI runs them on every push.
 
-## Golden-output check (about 10 minutes)
+## Golden-output check (under a minute)
 
 `tests/golden/golden.py` runs every gearbox type with each of its golden motors (`GOLDEN_MOTORS` in `golden.py`), plus one metal-mode case per type (`<case>__metal`), at one gear ratio per family (6.5 single-stage, 10 compound, 20 double-stage and Wolfrom). It compares three things against the baselines in `tests/golden/baselines/`:
 

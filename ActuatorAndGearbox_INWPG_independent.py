@@ -6,7 +6,7 @@ import sys
 import time
 
 from CommonComponents import material, bearings_discrete, nuts_and_bolts_dimensions, motor_driver, motor_frameless_inrunner as motor
-from CommonComponents import restores_stdout, cad_path
+from CommonComponents import restores_stdout, cad_path, per_motor_value
 
 class inrunnerWolfromPlanetaryGearbox:
     def __init__(self,
@@ -805,6 +805,10 @@ class inrunnerWolfromPlanetaryActuator:
 
         self.design_params = design_parameters
         self.motor_driver_params = motor_driver_params
+        # set by mitStressAnalysisMinFacewidth: planet-stack length allowed, and the share of the
+        # motor's peak torque the (possibly capped) gears can carry
+        self.fw_limit_mm             = None
+        self.torque_carried_fraction = 1.0
 
         #--------------------------------------------
         # Motor Specifications
@@ -928,22 +932,13 @@ class inrunnerWolfromPlanetaryActuator:
         self.rotor_hub_sun_hole_dia  = self.design_params["rotor_hub_sun_hole_dia"]        
         self.rotor_hub_sun_hole_num  = self.design_params["rotor_hub_sun_hole_num"]
 
-        if self.motor_name == "RI100":
-            self.rotor_top_bearing_ID  = self.design_params["rotor_top_bearing_ID_RI100"]
-            self.rotor_top_bearing_OD  = self.design_params["rotor_top_bearing_OD_RI100"]
-            self.rotor_top_bearing_width = self.design_params["rotor_top_bearing_width_RI100"]
-
-            self.rotor_bottom_bearing_ID  = self.design_params["rotor_bottom_bearing_ID_RI100"]
-            self.rotor_bottom_bearing_OD  = self.design_params["rotor_bottom_bearing_OD_RI100"]
-            self.rotor_bottom_bearing_width = self.design_params["rotor_bottom_bearing_width_RI100"]
-        elif self.motor_name == "RI80":
-            self.rotor_top_bearing_ID  = self.design_params["rotor_top_bearing_ID_RI80"]
-            self.rotor_top_bearing_OD  = self.design_params["rotor_top_bearing_OD_RI80"]
-            self.rotor_top_bearing_width = self.design_params["rotor_top_bearing_width_RI80"]
-
-            self.rotor_bottom_bearing_ID  = self.design_params["rotor_bottom_bearing_ID_RI80"]
-            self.rotor_bottom_bearing_OD  = self.design_params["rotor_bottom_bearing_OD_RI80"]
-            self.rotor_bottom_bearing_width = self.design_params["rotor_bottom_bearing_width_RI80"]
+        # Rotor bearings, chosen per motor in the params file
+        self.rotor_top_bearing_ID       = per_motor_value(self.design_params, "rotor_top_bearing_ID", self.motor_name)
+        self.rotor_top_bearing_OD       = per_motor_value(self.design_params, "rotor_top_bearing_OD", self.motor_name)
+        self.rotor_top_bearing_width    = per_motor_value(self.design_params, "rotor_top_bearing_width", self.motor_name)
+        self.rotor_bottom_bearing_ID    = per_motor_value(self.design_params, "rotor_bottom_bearing_ID", self.motor_name)
+        self.rotor_bottom_bearing_OD    = per_motor_value(self.design_params, "rotor_bottom_bearing_OD", self.motor_name)
+        self.rotor_bottom_bearing_width = per_motor_value(self.design_params, "rotor_bottom_bearing_width", self.motor_name)
 
         # --- Planet pin and bearing ---
         self.planet_pin_bolt_dia      = self.design_params["planet_pin_bolt_dia"] # 5 
@@ -1149,7 +1144,7 @@ class inrunnerWolfromPlanetaryActuator:
     def genEquationFile(self, motor_name="NO_MOTOR", gearRatioLL = 0.0, gearRatioUL = 0.0):
         # writing values into text file imported which is imported into solidworks
         self.setVariables()
-        file_path = cad_path('INWPG', 'Equation_Files', motor_name, f'inwpg_equations_{gearRatioLL}_{gearRatioUL}.txt')
+        file_path = cad_path('INWPG', 'Equation_Files', motor_name, f'inwpg_independent_equations_{gearRatioLL}_{gearRatioUL}.txt')
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, 'w') as eqFile:
             l = [
@@ -1307,7 +1302,7 @@ class inrunnerWolfromPlanetaryActuator:
             eqFile.writelines(l)
         eqFile.close()
         
-        file_path = cad_path('INWPG', 'Equation_Files', motor_name, f'inwpg_equations_{gearRatioLL}_{gearRatioUL}_onshape.txt')
+        file_path = cad_path('INWPG', 'Equation_Files', motor_name, f'inwpg_independent_equations_{gearRatioLL}_{gearRatioUL}_onshape.txt')
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, 'w') as eqFile:
             l = [
@@ -1468,7 +1463,7 @@ class inrunnerWolfromPlanetaryActuator:
     def genEquationFile_editCADdirectly(self):
         # writing values into text file imported which is imported into solidworks
         self.setVariables()
-        file_path = cad_path('INWPG', 'inwpg_equations.txt')
+        file_path = cad_path('INWPG', 'inwpg_independent_equations.txt')
         with open(file_path, 'w') as eqFile:
             l = [
                     f'"Ns"= {self.Ns}\n',
@@ -1625,7 +1620,7 @@ class inrunnerWolfromPlanetaryActuator:
             eqFile.writelines(l)
         eqFile.close()
 
-        file_path = cad_path('INWPG', 'inwpg_equations_onshape.txt')
+        file_path = cad_path('INWPG', 'inwpg_independent_equations_onshape.txt')
         with open(file_path, 'w') as eqFile:
             l = [
                     f'"Ns"= {self.Ns}\n',
@@ -2289,6 +2284,21 @@ class inrunnerWolfromPlanetaryActuator:
             bMin_ringBig_mit   = bMin_planetBig_mit
             bMin_ringSmall_mit = bMin_planetSmall_mit
 
+        # 3D-printed gears at peak torque make very long planets (several stator heights). The
+        # planet stack (big + small step, as in the CAD: ring widths + clearance_planet) is capped
+        # at planet_stack_stator_heights x the stator height; MIT widths are proportional to the
+        # tooth forces, so the capped gears carry the same fraction of the torque.
+        self.fw_limit_mm             = self.design_params["planet_stack_stator_heights"] * self.motor.stator_height
+        self.torque_carried_fraction = 1.0
+        planets_mm = (bMin_ringBig_mit + bMin_ringSmall_mit) * 1000
+        if planets_mm + self.clearance_planet > self.fw_limit_mm:
+            self.torque_carried_fraction = (self.fw_limit_mm - self.clearance_planet) / planets_mm
+            bMin_sun_mit         *= self.torque_carried_fraction
+            bMin_planetBig_mit   *= self.torque_carried_fraction
+            bMin_planetSmall_mit *= self.torque_carried_fraction
+            bMin_ringBig_mit     *= self.torque_carried_fraction
+            bMin_ringSmall_mit   *= self.torque_carried_fraction
+
         bMin_sun_mitMM         = bMin_sun_mit * 1000
         bMin_planetBig_mitMM   = bMin_planetBig_mit * 1000
         bMin_planetSmall_mitMM = bMin_planetSmall_mit * 1000
@@ -2847,7 +2857,7 @@ class optimizationInrunnerWolfromPlanetaryActuator:
             elif csv:
                 # Printing the optimization iterations below
                 # print("iter, gearRatio, moduleBig, moduleSmall, Ns, NpBig, NpSmall, NrBig, NrSmall, numPlanet, PSCs, PSCp1, PSCp2, PSCr1, PSCr2,fwSunMM, fwPlanetBigMM, fwPanetSmallMM, fwRingBigMM, fwRingSmallMM,  mass, eff, peakTorque, Cost, torque_density")
-                print("iter, gearRatio, moduleBig, moduleSmall, Ns, NpBig, NpSmall, NrBig, NrSmall, numPlanet, fwSunMM, fwPlanetBigMM, fwPanetSmallMM, fwRingBigMM, fwRingSmallMM,  mass, eff, peakTorque, Cost, Torque_Density, Outer_Bearing_mass, Actuator_width")
+                print("iter, gearRatio, moduleBig, moduleSmall, Ns, NpBig, NpSmall, NrBig, NrSmall, numPlanet, fwSunMM, fwPlanetBigMM, fwPanetSmallMM, fwRingBigMM, fwRingSmallMM,  mass, eff, peakTorque, Cost, Torque_Density, Outer_Bearing_mass, Actuator_width, Torque_carried_fraction, Peak_torque_carried, FW_limit_MM")
 
             while self.gearRatioIter <= self.GEAR_RATIO_MAX:
                 opt_done = 0
@@ -2971,6 +2981,11 @@ class optimizationInrunnerWolfromPlanetaryActuator:
                     print(" ")
 
         sys.stdout = sys.__stdout__
+        if opt_parameters and opt_actuator.torque_carried_fraction < 1:
+            print(f"Face width capped at {opt_actuator.fw_limit_mm:.1f} mm (planet_stack_stator_heights x stator height): "
+                  f"the gears carry {100 * opt_actuator.torque_carried_fraction:.0f} % of the motor's peak torque "
+                  f"({opt_actuator.torque_carried_fraction * opt_actuator.motor.getMaxMotorTorque():.2f} of "
+                  f"{opt_actuator.motor.getMaxMotorTorque():.2f} Nm)")
 
         return opt_parameters
 
@@ -3278,10 +3293,10 @@ class optimizationInrunnerWolfromPlanetaryActuator:
                 eff  = round(self.wpgOpt.getEfficiency(Var=False), 3)
             peakTorque      = round(Actuator.motor.getMaxMotorTorque()*Actuator.inrunnerWolfromPlanetaryGearbox.gearRatio(), 3)
             Cost       = Actuator.cost() #self.K_Mass * mass + self.K_Eff * eff
-            torque_density  = round(peakTorque/mass, 3)
+            torque_density  = round(peakTorque * Actuator.torque_carried_fraction / mass, 3)  # torque the gears carry
             Outer_bearing_mass = Actuator.output_bearing_mass
             Actuator_width = Actuator.actuator_width
-            print(iter,",", gearRatio,",",moduleBig,",",moduleSmall,",", Ns,",", NpBig,",", NpSmall,",", NrBig,",",NrSmall,",", numPlanet,",", fwSunMM,",", fwPlanetBigMM,",",fwPlanetSmallMM,",", fwRingBigMM,",",fwRingSmallMM,",", mass, ",", eff,",", peakTorque,",", Cost, ",", torque_density, ",", Outer_bearing_mass, ",", Actuator_width)
+            print(iter,",", gearRatio,",",moduleBig,",",moduleSmall,",", Ns,",", NpBig,",", NpSmall,",", NrBig,",",NrSmall,",", numPlanet,",", fwSunMM,",", fwPlanetBigMM,",",fwPlanetSmallMM,",", fwRingBigMM,",",fwRingSmallMM,",", mass, ",", eff,",", peakTorque,",", Cost, ",", torque_density, ",", Outer_bearing_mass, ",", Actuator_width, ",", Actuator.torque_carried_fraction, ",", round(peakTorque * Actuator.torque_carried_fraction, 3), ",", Actuator.fw_limit_mm)
 
     def cost(self, Actuator=inrunnerWolfromPlanetaryActuator):
         K_gearRatio = 0
@@ -3293,8 +3308,10 @@ class optimizationInrunnerWolfromPlanetaryActuator:
         mass = Actuator.getMassKG_3DP()
         eff = Actuator.inrunnerWolfromPlanetaryGearbox.getEfficiency()
         width = Actuator.inrunnerWolfromPlanetaryGearbox.fwPlanetBigMM + Actuator.inrunnerWolfromPlanetaryGearbox.fwPlanetSmallMM
+        torque_shortfall = 1 - Actuator.torque_carried_fraction  # 0 unless the face width was capped
         cost = (self.K_Mass    * mass 
                 + self.K_Eff   * eff 
                 + self.K_Width * width 
-                + K_gearRatio  * gearRatio_err)
+                + K_gearRatio  * gearRatio_err
+                + Actuator.design_params["K_torque_shortfall"] * torque_shortfall)
         return cost

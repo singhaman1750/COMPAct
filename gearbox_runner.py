@@ -19,6 +19,7 @@ from CommonComponents import load_motor, max_gearbox_dia_mult_factor
 
 CONFIG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config_files")
 MATERIALS_FILE = "config.json"   # Material_properties for every gearbox type
+COST_FILE = "cost.json"          # Cost_gain_parameters for every gearbox type
 
 # Material modes: (gear material, structure material) from Material_properties. The ring gear
 # counts as a gear; parts with their own density keyword (rotor coupler etc., see
@@ -85,7 +86,6 @@ class GearboxSpec:
     max_diameter: Optional[Callable] = None        # (motor, design, opt) -> mm; None: not passed
     max_diameter_stage1: Optional[Callable] = None
     driver: Optional[str] = "OdrivePro"
-    fos_service: Optional[tuple] = None            # (FOS, serviceFactor); None: from MIT_params
     extra_gearbox_densities: dict = field(default_factory=dict)  # keyword -> material name
     passes_gearbox_type: bool = False              # actuator takes insspg_type=gb_type
 
@@ -125,14 +125,12 @@ GEARBOXES = {
         "ActuatorAndGearbox_ISSPG_inside", "internalsingleStagePlanetaryGearbox",
         "internalsingleStagePlanetaryActuator", "optimizationInternalSingleStageActuator", "planetaryGearbox",
         "config.json", "isspg_params.json", ("isspg_3DP_design_parameters",), "isspg_optimization_parameters",
-        "frameless_outrunner", "single",
-        fos_service=(1.2, 1.5)),
+        "frameless_outrunner", "single"),
     "isspg_compact": GearboxSpec(
         "ActuatorAndGearbox_ISSPG_compact", "internalsingleStagePlanetaryGearbox",
         "internalsingleStagePlanetaryActuator", "optimizationInternalSingleStageActuator", "planetaryGearbox",
         "config.json", "isspg_params.json", ("isspg_3DP_design_parameters",), "isspg_optimization_parameters",
-        "frameless_outrunner", "single",
-        fos_service=(1.2, 1.5)),
+        "frameless_outrunner", "single"),
     "icpg": GearboxSpec(
         "ActuatorandGearbox_ICPG", "internalcompoundPlanetaryGearbox", "internalcompoundPlanetaryActuator",
         "optimizationInternalCompoundPlanetaryActuator", "internalcompoundPlanetaryGearbox",
@@ -227,6 +225,8 @@ def build(gb_type, motor_name, material="3dp"):
     design = {}
     for key in spec.design_keys:
         design.update(params[key])
+    gains = _load_json(COST_FILE)["Cost_gain_parameters"]   # one set of gains for every type
+    design["K_torque_shortfall"] = gains["K_torque_shortfall"]  # read by ISSPG, ICPG, INWPG
     opt       = params[spec.optimization_key]
     materials = _load_json(MATERIALS_FILE)["Material_properties"]   # one table for every type
     gear_material, structure_material = (materials[name] for name in MATERIAL_MODES[material])
@@ -252,8 +252,8 @@ def build(gb_type, motor_name, material="3dp"):
         actuator_kwargs["motor_driver_params"] = None
     else:
         actuator_kwargs["motor_driver_params"] = config["Motor_drivers"][spec.driver]
-    fos, service_factor = spec.fos_service or (config["MIT_params"]["FOS"], config["MIT_params"]["serviceFactor"])
-    actuator_kwargs.update(FOS=fos, serviceFactor=service_factor, stressAnalysisMethodName="MIT")
+    actuator_kwargs.update(FOS=config["MIT_params"]["FOS"], serviceFactor=config["MIT_params"]["serviceFactor"],
+                           stressAnalysisMethodName="MIT")
     if spec.max_diameter is not None:
         actuator_kwargs["maxGearboxDiameter"] = spec.max_diameter(motor, design, opt)
     if spec.max_diameter_stage1 is not None:
@@ -263,12 +263,11 @@ def build(gb_type, motor_name, material="3dp"):
     actuator = getattr(module, spec.actuator_cls)(**actuator_kwargs)
     actuator.results_suffix = RESULTS_SUFFIX[material]
 
-    cost = config["Cost_gain_parameters"]
     optimizer = getattr(module, spec.optimizer_cls)(
         **{design_kw: design},
         # the single-stage optimisers spell this keyword "paramaeters"
         **{("gear_standard_paramaeters" if single else "gear_standard_parameters"): gear_std},
-        K_Mass=cost["K_Mass"], K_Eff=cost["K_Eff"], K_Width=cost["K_Width"],
+        K_Mass=gains["K_Mass"], K_Eff=gains["K_Eff"], K_Width=gains["K_Width"],
         **{kw: opt[key] for kw, key in OPTIMIZER_LIMITS[spec.optimizer_kind].items()},
         **{key: opt[key] for key in GEAR_RATIO_LIMITS})
     return actuator, optimizer

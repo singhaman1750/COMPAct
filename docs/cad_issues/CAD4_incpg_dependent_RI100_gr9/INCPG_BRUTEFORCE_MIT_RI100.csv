@@ -1,0 +1,35 @@
+Motor Parameters:
+maxMotorAngVelRPM, maxMotorAngVelRadPerSec, maxMotorTorque, maxMotorPower, motorMass, motorDia, motorLength
+4368 , 457.41589036267385 , 4.95 , 2264.208657295236 , 0.5 , 104 , 24.5
+ 
+Gear strength and size parameters:
+FOS, serviceFactor, stressAnalysisMethodName, maxGearBoxDia, maxGearAllowableStressMPa
+1.2 , 1.5 , MIT , 83.2 , 70
+ 
+Optimization Parameters:
+K_mass, K_Eff, MODULE_BIG_MIN, MODULE_BIG_MAX, MODULE_SMALL_MIN, MODULE_SMALL_MAX, NUM_PLANET_MIN, NUM_PLANET_MAX, NUM_TEETH_SUN_MIN, NUM_TEETH_PLANET_BIG_MIN, NUM_TEETH_PLANET_SMALL_MIN, GEAR_RATIO_MIN, GEAR_RATIO_MAX, GEAR_RATIO_STEP
+1 , -2 , 0.5 , 1.2 , 0.5 , 1.2 , 3 , 7 , 18 , 28 , 28 , 4.0 , 20.0 , 1.0
+ 
+iter, gearRatio, moduleBig, moduleSmall, Ns, NpBig, NpSmall, Nr, numPlanet, fwSunMM, fwPlanetBigMM, fwPanetSmallMM, fwRingMM, mass, eff, peakTorque, Cost, Torque_Density, Output_bearing_mass, Actuator_width
+15 , 9.016806722689076 , 0.6 , 0.6 , 21 , 53 , 34 , 108 , 3 , 19.647 , 19.647 , 23.249 , 23.249 , 1.076 , 0.944 , 44.633 , 7.934194798358184 , 41.48 , 0.081 , 94.39577127788412
+motor_case_mass:  77.35779210383167
+gearbox_casing_mass:  197.75051511580878
+carrier_mass:  48.71037069955655
+sun_mass:  21.12190755374009
+sec_carrier_mass:  15.117579468523106
+planet_mass:  25.682923675170642
+rotor_hub_mass:  15.607432303034093
+planet_bearing_combined_mass:  6.0
+sun_shaft_bearing_mass:  4.0
+output_bearing_mass:  81.0
+bearing_retainer_mass:  6.204645490839841
+rotor_top_bearing_mass:  21.0
+rotor_bottom_bearing_mass:  5.0
+Motor mass: 500.0
+Actuator_mass_without_bearing: 458.91901376084604
+Actuator_mass: 1075.919013760846
+---------------------------------------------------
+
+
+Running Time (sec)
+2.285964012145996

@@ -98,3 +98,35 @@ def test_metal_mode_uses_steel_gears_and_aluminium_structure(gb_type):
 def test_unknown_material_mode_is_rejected():
     with pytest.raises(ValueError, match="Unknown material mode"):
         gearbox_runner.build("sspg", "U8_Lite", "wood")
+
+
+# Settings that differ per motor are listed per motor in the params file; a motor
+# that isn't listed must stop with a clear message, not get another motor's value.
+@pytest.mark.parametrize(
+    "gb_type, key",
+    [("incpg_dependent", "min_rotor_top_bearing_ID"), ("inwpg_dependent", "min_rotor_top_bearing_ID"),
+     ("incpg_independent", "rotor_top_bearing_ID"), ("inwpg_independent", "rotor_top_bearing_ID")],
+)
+def test_motor_missing_from_per_motor_settings_is_reported(gb_type, key):
+    actuator, _ = gearbox_runner.build(gb_type, "RI100")
+    actuator.motor.motorName = "RI120"
+    actuator.motor_name = "RI120"
+    with pytest.raises(ValueError, match=f"{key} has no value for motor 'RI120'"):
+        actuator.setVariables()
+
+
+# Every type takes FOS and service factor from its config file's MIT_params
+# (ISSPG used to have 1.2 / 1.5 typed in), so a config change reaches all of them.
+@pytest.mark.parametrize("gb_type", sorted(GEARBOXES))
+def test_safety_factors_come_from_the_config_file(gb_type, monkeypatch):
+    load_json = gearbox_runner._load_json
+
+    def config_with_other_factors(name):
+        data = load_json(name)
+        if name == GEARBOXES[gb_type].config_file:
+            data["MIT_params"] = {"FOS": 1.7, "serviceFactor": 1.9}
+        return data
+
+    monkeypatch.setattr(gearbox_runner, "_load_json", config_with_other_factors)
+    actuator, _ = gearbox_runner.build(gb_type, golden.GOLDEN_MOTORS[gb_type][0])
+    assert (actuator.FOS, actuator.serviceFactor) == (1.7, 1.9)

@@ -329,6 +329,107 @@ no datasheet) and `U15` (not used by any script) do not go into `motors.json`; t
 config entries are removed when the code switches to `motors.json`. (`VT8020` is the Vector
 8020 PRO — see above.)
 
+## Phase A — rated values and rotor inertia (reviewed 2026-10-29, in `motors.json`)
+
+For the (motor, gear ratio) → actuator map. Written to `motors.json` after review (user, 2026-10-29):
+rated speed by formula for framed motors and datasheet for frameless; framed inertia estimates used
+for now; resistance taken as line-to-line; RI80/RI100 inertia checked on the CubeMars pages. Rule (user, 2026-10-29): rated current = the maker's **real continuous** current where one is
+published; otherwise ≈ ⅓ of peak (the median of the real ratios below).
+
+What the makers publish (research 2026-10-29):
+- **MAD** (mad-motor.com spec sheets): "Maximum Current" plus a footnote, e.g. M6C12: *"the current over
+  52A is non-working zone, 18-52A is short-term (about 10-30s), working zone, and below 18A is sustainable
+  working zone"* → the sustainable limit is used as rated current. 5010 EEE data are at 24 V.
+- **T-Motor U series** (store.tmotor.com): "Peak Current (180s)" (= our peak) and "Maximum Continuous
+  Power (W)" → rated current = continuous power ÷ 48 V (estimate). U10 Plus: no continuous figure.
+- **T-Motor MN series**: only "Peak Current (180s)" and "Max. Power (180s)" — no continuous figure.
+- **Vector Technics**: "Max continuous current (180s)" — a 3-minute rating, 0.46–0.75 of peak, so not
+  used as rated. Resistance is per phase (Rph); line-to-line = 2 × Rph is used below.
+- **CubeMars frameless** (RO/RI): datasheet rated current, torque, speed and **rotor inertia**.
+- Resistance: T-Motor and MAD "internal resistance" (taken as line-to-line; not stated by the makers).
+
+### Rated / peak current where a real continuous value is given
+
+| Motor | Maker | Continuous current | Peak current | Ratio | Continuous value from |
+|---|---|---|---|---|---|
+| U8_Lite | T-Motor U | 7.7 A | 29.3 A | **0.26** | T-Motor max continuous power 370 W / 48 V |
+| U8_Lite_L | T-Motor U | 10.2 A | 45.8 A | **0.22** | T-Motor max continuous power 492 W / 48 V |
+| U8_II | T-Motor U | 4.7 A | 19.1 A | **0.25** | T-Motor max continuous power 226 W / 48 V |
+| U8_II_Lite | T-Motor U | 8.1 A | 31 A | **0.26** | T-Motor max continuous power 387 W / 48 V |
+| U8_II_PRO | T-Motor U | 7.2 A | 31 A | **0.23** | T-Motor max continuous power 344 W / 48 V |
+| U10_II | T-Motor U | 10.0 A | 32.4 A | **0.31** | T-Motor max continuous power 478 W / 48 V |
+| MAD_M6C12_KV170 | MAD | 18.0 A | 51.5 A | **0.35** | MAD 'sustainable working zone' current |
+| MAD_M6C10_KV150 | MAD | 12.0 A | 36.3 A | **0.33** | MAD 'sustainable working zone' current |
+| MAD_M6C08_KV180 | MAD | 12.0 A | 34 A | **0.35** | MAD 'sustainable working zone' current |
+| MAD_M6C06_KV140 | MAD | 8.0 A | 21 A | **0.38** | MAD 'sustainable working zone' current |
+| MAD_M6C06_V3_KV160 | MAD | 7.0 A | 22.43 A | **0.31** | MAD 'sustainable working zone' current |
+| MAD_1005_KV90 | MAD | 8.0 A | 34 A | **0.24** | MAD 'sustainable working zone' current |
+| MAD_7005_KV115 | MAD | 4.0 A | 21.2 A | **0.19** | MAD 'sustainable working zone' current |
+| MAD_8118_KV100 | MAD | 20.0 A | 62 A | **0.32** | MAD 'sustainable working zone' current |
+| MAD_5008_KV170 | MAD | 7.0 A | 20.6 A | **0.34** | MAD 'sustainable working zone' current |
+| MAD_5010_KV200 | MAD | 7.0 A | 22.3 A | **0.31** | MAD 'sustainable working zone' current |
+| RO100 | CubeMars | 20.0 A | 62 A | **0.32** | CubeMars datasheet rated current |
+| RO80 | CubeMars | 15.0 A | 50 A | **0.30** | CubeMars datasheet rated current |
+| RO60 | CubeMars | 8.5 A | 40 A | **0.21** | CubeMars datasheet rated current |
+| RI100 | CubeMars | 13.6 A | 38.6 A | **0.35** | CubeMars datasheet rated current |
+| RI80 | CubeMars | 9.4 A | 27.6 A | **0.34** | CubeMars datasheet rated current |
+
+21 motors: ratio 0.19–0.38, **median 0.31** (mean 0.29). For reference, Vector's 180 s 'max continuous' current is 0.75, 0.69, 0.46, 0.70 of their peak test current — a short-term rating, so not used.
+
+### Draft values for all 33 motors
+
+Rated torque = Kt × rated current with Kt = peak torque ÷ peak current (the measured Kt the peak torque already uses); rated speed = KV × (48 V − rated current × R, line-to-line). Frameless motors keep their datasheet rated values. Inertia: framed = 0.26 × mass × (Ø/2)² (calibrated on the measured T-Motor U8, ±30 %); frameless = CubeMars datasheet.
+
+| Motor | Rated current | basis | Rated torque | Rated speed | R (LL) | Rotor inertia | inertia basis |
+|---|---|---|---|---|---|---|---|
+| U8_Lite | 7.7 A | estimate: continuous power ÷ 48 V | 0.72 Nm | 4669 rpm | 170 mΩ | 1.17e-04 kg·m² | estimate: 0.26·m·(Ø/2)² |
+| U8_Lite_L | 10.2 A | estimate: continuous power ÷ 48 V | 0.87 Nm | 5162 rpm | 105 mΩ | 1.39e-04 kg·m² | estimate: 0.26·m·(Ø/2)² |
+| U8_II | 4.7 A | estimate: continuous power ÷ 48 V | 0.51 Nm | 3990 rpm | 225 mΩ | 1.37e-04 kg·m² | estimate: 0.26·m·(Ø/2)² |
+| U8_II_Lite | 8.1 A | estimate: continuous power ÷ 48 V | 0.73 Nm | 4689 rpm | 138 mΩ | 1.25e-04 kg·m² | estimate: 0.26·m·(Ø/2)² |
+| U8_II_PRO | 7.2 A | estimate: continuous power ÷ 48 V | 0.68 Nm | 4701 rpm | 138 mΩ | 1.42e-04 kg·m² | estimate: 0.26·m·(Ø/2)² |
+| U10_Plus_KV80 | 10.3 A | estimate: 0.31 × peak | 1.35 Nm | 3762 rpm | 95 mΩ | 2.62e-04 kg·m² | estimate: 0.26·m·(Ø/2)² |
+| U10_II | 10.0 A | estimate: continuous power ÷ 48 V | 1.10 Nm | 4699 rpm | 101 mΩ | 2.62e-04 kg·m² | estimate: 0.26·m·(Ø/2)² |
+| MN5008_KV170 | 4.7 A | estimate: 0.31 × peak | 0.28 Nm | 7945 rpm | 270 mΩ | 2.57e-05 kg·m² | estimate: 0.26·m·(Ø/2)² |
+| MN6007_II_KV160 | 7.4 A | estimate: 0.31 × peak | 0.47 Nm | 7469 rpm | 178 mΩ | 4.67e-05 kg·m² | estimate: 0.26·m·(Ø/2)² |
+| MN7005_KV115 | 4.7 A | estimate: 0.31 × peak | 0.44 Nm | 5365 rpm | 288 mΩ | 7.63e-05 kg·m² | estimate: 0.26·m·(Ø/2)² |
+| MN8012 | 12.5 A | estimate: 0.31 × peak | 1.27 Nm | 4694 rpm | 85 mΩ | 1.76e-04 kg·m² | estimate: 0.26·m·(Ø/2)² |
+| MN8014 | 16.2 A | estimate: 0.31 × peak | 1.49 Nm | 4695 rpm | 65 mΩ | 1.96e-04 kg·m² | estimate: 0.26·m·(Ø/2)² |
+| MN8017 | 21.4 A | estimate: 0.31 × peak | 1.81 Nm | 5644 rpm | 45 mΩ | 2.27e-04 kg·m² | estimate: 0.26·m·(Ø/2)² |
+| MN1005_V2_KV90 | 10.0 A | estimate: 0.31 × peak | 1.10 Nm | 4169 rpm | 168 mΩ | 2.10e-04 kg·m² | estimate: 0.26·m·(Ø/2)² |
+| MAD_M6C12_KV170 | 18.0 A | datasheet (MAD sustainable) | 1.06 Nm | 7924 rpm | 77 mΩ | 8.59e-05 kg·m² | estimate: 0.26·m·(Ø/2)² |
+| MAD_M6C10_KV150 | 12.0 A | datasheet (MAD sustainable) | 0.79 Nm | 6984 rpm | 120 mΩ | 7.04e-05 kg·m² | estimate: 0.26·m·(Ø/2)² |
+| MAD_M6C08_KV180 | 12.0 A | datasheet (MAD sustainable) | 0.70 Nm | 8383 rpm | 119 mΩ | 6.07e-05 kg·m² | estimate: 0.26·m·(Ø/2)² |
+| MAD_M6C06_KV140 | 8.0 A | datasheet (MAD sustainable) | 0.57 Nm | 6383 rpm | 301 mΩ | 5.49e-05 kg·m² | estimate: 0.26·m·(Ø/2)² |
+| MAD_M6C06_V3_KV160 | 7.0 A | datasheet (MAD sustainable) | 0.46 Nm | 7497 rpm | 163 mΩ | 5.30e-05 kg·m² | estimate: 0.26·m·(Ø/2)² |
+| MAD_1005_KV90 | 8.0 A | datasheet (MAD sustainable) | 0.92 Nm | 4216 rpm | 144 mΩ | 2.08e-04 kg·m² | estimate: 0.26·m·(Ø/2)² |
+| MAD_7005_KV115 | 4.0 A | datasheet (MAD sustainable) | 0.35 Nm | 5432 rpm | 191 mΩ | 7.95e-05 kg·m² | estimate: 0.26·m·(Ø/2)² |
+| MAD_8118_KV100 | 20.0 A | datasheet (MAD sustainable) | 1.65 Nm | 4678 rpm | 61 mΩ | 2.65e-04 kg·m² | estimate: 0.26·m·(Ø/2)² |
+| MAD_5008_KV170 | 7.0 A | datasheet (MAD sustainable) | 0.37 Nm | 7928 rpm | 195 mΩ | 2.65e-05 kg·m² | estimate: 0.26·m·(Ø/2)² |
+| MAD_5010_KV200 | 7.0 A | datasheet (MAD sustainable) | 0.34 Nm | 9452 rpm | 106 mΩ | 3.32e-05 kg·m² | estimate: 0.26·m·(Ø/2)² |
+| VT8008_SL_KV90 | 8.3 A | estimate: 0.31 × peak | 0.82 Nm | 3991 rpm | 440 mΩ | 1.07e-04 kg·m² | estimate: 0.26·m·(Ø/2)² |
+| VT8015_SL | 18.0 A | estimate: 0.31 × peak | 1.66 Nm | 4547 rpm | 140 mΩ | 2.13e-04 kg·m² | estimate: 0.26·m·(Ø/2)² |
+| VT10005_SL | 8.6 A | estimate: 0.31 × peak | 0.93 Nm | 4036 rpm | 366 mΩ | 2.06e-04 kg·m² | estimate: 0.26·m·(Ø/2)² |
+| VT8020_PRO | 24.1 A | estimate: 0.31 × peak | 1.91 Nm | 5414 rpm | 120 mΩ | 2.87e-04 kg·m² | estimate: 0.26·m·(Ø/2)² |
+| RO100 | 20.0 A | datasheet | 4.00 Nm | 2000 rpm | — | 8.70e-04 kg·m² | CubeMars datasheet |
+| RO80 | 15.0 A | datasheet | 1.30 Nm | 3600 rpm | — | 2.61e-04 kg·m² | CubeMars datasheet |
+| RO60 | 8.5 A | datasheet | 0.80 Nm | 4200 rpm | — | 1.16e-04 kg·m² | CubeMars datasheet |
+| RI100 | 13.6 A | datasheet | 1.76 Nm | 2825 rpm | — | 2.15e-05 kg·m² | CubeMars datasheet |
+| RI80 | 9.4 A | datasheet | 1.45 Nm | 2430 rpm | — | 2.12e-05 kg·m² | CubeMars datasheet (RI80 V2.0 page) |
+
+Caveats:
+- **Rated speed (framed):** KV × (48 V − I·R) gives 93–98 % of no-load speed, because the I·R drop is
+  small. The CubeMars datasheets' rated speeds are 70–83 % of no-load (e.g. RO100 2000 of 2550 rpm), so
+  their "rated speed" is a loaded operating point that the formula does not reproduce. Decided: formula
+  for framed, datasheet for frameless.
+- **Rotor inertia (framed):** no maker publishes it. Rule calibrated on the measured T-Motor U8 KV100,
+  1.2 × 10⁻⁴ kg·m² (Lee, Pan, Rouse, IROS 2019): J ≈ 0.26 × mass × (Ø/2)². The CubeMars outrunners
+  give 0.34–0.38 in the same rule, so expect ±30 %. Replace with measured values where available.
+- **RI80 inertia:** 212.49 g·cm² on the official CubeMars RI80 V2.0 page (all other specs match ours);
+  a retailer listing's 176.68 g·cm² is not used.
+- **RI100 inertia:** 215.5 g·cm², confirmed on the official CubeMars page; low for its ring size
+  (45/55.6 mm), but it is the maker's value.
+- Rated torque uses Kt = peak torque ÷ peak current (the measured Kt behind the peak torque).
+
 ## Frameless motors (datasheets received 2026-10-16)
 
 | Motor | Type | KV | No-load @ 48 V | Rated speed | Kt (Nm/A) | Rated torque | Peak torque | Rated / peak current | Mass |

@@ -1,5 +1,5 @@
 """
-Push an optimiser result (CADs/<FAMILY>/<family>_equations_onshape.txt) into the
+Push an optimiser result (CADs/<FAMILY>/<gb_type>_equations_onshape.txt) into the
 gearbox's Onshape Variable Studio.
 
 Set up once:
@@ -30,7 +30,7 @@ REPO_ROOT   = os.path.dirname(EXT_DIR)
 MODELS_JSON = os.path.join(EXT_DIR, "onshape_models.json")
 ENV_FILE    = os.path.join(EXT_DIR, ".env")
 
-# Variants share their family's CAD folder and equations file.
+# Variants share their family's CAD folder; each writes its own equations file.
 _VARIANT_SUFFIX = re.compile(r"_(type_\d+|dependent|independent|inside|compact)$")
 
 
@@ -39,9 +39,9 @@ def gearbox_family(gb_type):
 
 
 def equations_file(gb_type):
-    """The Onshape equations file the optimiser writes for this gearbox type."""
-    family = gearbox_family(gb_type)
-    return os.path.join(REPO_ROOT, "CADs", family, f"{family.lower()}_equations_onshape.txt")
+    """The Onshape equations file the optimiser writes for this gearbox type:
+    CADs/<FAMILY>/<gb_type>_equations_onshape.txt."""
+    return os.path.join(REPO_ROOT, "CADs", gearbox_family(gb_type), f"{gb_type}_equations_onshape.txt")
 
 
 def model_url(gb_type, path=MODELS_JSON):
