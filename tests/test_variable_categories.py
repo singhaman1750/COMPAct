@@ -22,7 +22,7 @@ sys.path.insert(0, str(REPO / "tests" / "golden"))
 import gearbox_runner  # noqa: E402
 from CommonComponents import bearings_discrete, nuts_and_bolts_dimensions  # noqa: E402
 from golden import BASELINE_DIR  # noqa: E402
-from tools.variables.render import CATEGORIES, load, render  # noqa: E402
+from tools.variables.render import CATEGORIES, load, load_rules, render  # noqa: E402
 
 CONFIG = REPO / "config_files"
 SPEC = load("sspg")
@@ -78,8 +78,8 @@ def design(request, tmp_path_factory):
 def test_counts_and_one_category_each():
     names = [e["name"] for e in CAD]
     assert len(names) == 113 and len(set(names)) == 113
-    assert len(CODE) == 23 and not set(names) & {e["name"] for e in CODE}
-    assert Counter(e["category"] for e in CAD) == {"input": 18, "optimisation": 7, "fixed": 43, "dependent": 45}
+    assert len(CODE) == 27 and not set(names) & {e["name"] for e in CODE}
+    assert Counter(e["category"] for e in CAD) == {"input": 18, "optimisation": 4, "fixed": 43, "dependent": 48}
     for e in CAD + CODE:
         assert e["category"] in CATEGORIES and e["confidence"] in SPEC["confidence"], e["name"]
         assert e["reason"], e["name"]
@@ -97,12 +97,26 @@ def test_spec_lists_exactly_the_variables_the_code_writes(design):
         assert [float(v) for _, v in onshape] == pytest.approx([float(v) for _, v in expected], rel=1e-9)
 
 
+def test_shared_rules_hold_in_every_gearbox_file():
+    rules = load_rules()["rules"]
+    files = sorted(CONFIG.glob("variables/*_variables.json"))
+    assert files
+    for path in files:
+        spec = json.loads(path.read_text(encoding="utf-8"))
+        for e in spec["cad_variables"] + spec["code_only"]:
+            for r in rules:
+                if re.match(r["name_pattern"], e["name"]):
+                    assert (e["category"], e["subtype"]) == (r["category"], r["subtype"]), (path.name, e["name"])
+    names = {e["name"] for e in CAD}
+    assert {"Nr", "fw_s_calc", "fw_p", "fw_r"} <= names     # the rules do apply to SSPG
+
+
 def test_every_dependency_is_classified():
     for e in CAD + CODE:
         missing = [d for d in e.get("depends_on", []) if d not in ALL]
         assert not missing, (e["name"], missing)
         if e["category"] == "dependent":
-            assert e["depends_on"] and ("formula" in e or "lookup" in e), e["name"]
+            assert e["depends_on"] and ("formula" in e or "lookup" in e or "rule" in e), e["name"]
         else:
             assert "source" in e, e["name"]
 
@@ -145,18 +159,22 @@ def test_sources_give_the_values(design):
     vals = values(actuator, optimizer, onshape)
     config = json.loads((CONFIG / "config.json").read_text(encoding="utf-8"))
     params = json.loads((CONFIG / "sspg_params.json").read_text(encoding="utf-8"))
-    motor_geo = json.loads((CONFIG / "motors.json").read_text(encoding="utf-8"))["motors"][actuator.motor.motorName]["geometry"]
+    motors = json.loads((CONFIG / "motors.json").read_text(encoding="utf-8"))
+    material = "metal" if actuator.results_suffix else "3dp"
+    names = {"<motor>": actuator.motor.motorName, "<gear material>": gearbox_runner.MATERIAL_MODES[material][0]}
+
+    def lookup(data, block):
+        for part in block.split("."):
+            data = data[names.get(part, part)]
+        return data
     for e in CAD + CODE:
         s = e.get("source", {})
         if s.get("file") == "sspg_params.json":
             expected = params[s["block"]][s["key"]]
         elif s.get("file") == "motors.json":
-            expected = motor_geo[s["key"]]
+            expected = lookup(motors, s["block"])[s["key"]]
         elif s.get("file") == "config.json":
-            block = config
-            for part in s["block"].split("."):
-                block = block[part]
-            expected = block[s["key"]]
+            expected = lookup(config, s["block"])[s["key"]]
         else:
             continue
         assert vals[e["name"]] == pytest.approx(expected, rel=1e-9), e["name"]
@@ -298,3 +316,44 @@ def test_bearing_mount_wall_multiple_comes_from_the_config(monkeypatch, tmp_path
     assert downstream == {"bearing_mount_thickness", "output_mounting_PCD"}
     assert {k for k in base if base[k] != more[k]} == downstream
     assert more_mass > base_mass
+
+
+@pytest.mark.parametrize("what", ["FOS", "serviceFactor", "motor_peak_torque", "gear_allowable_stress"])
+def test_stress_rule_widths_follow_what_they_depend_on(monkeypatch, tmp_path, what):
+    """The face widths have no closed formula in the spec (the contact ratio is involved), so their
+    dependencies are checked by changing them: doubling FOS, the service factor or the motor torque,
+    or halving the allowable stress, doubles the stress width b. fw_s_calc = b doubles; fw_p and
+    fw_r = max(b, planet-bearing minimum) double when above the minimum. Nothing outside the
+    downstream chain changes."""
+    b = json.loads((BASELINE_DIR / "sspg__U8_Lite__6.5.json").read_text(encoding="utf-8"))
+    _, n, Ns, Np, Nr, module = b["opt_parameters"]
+
+    def run(folder, change):
+        folder.mkdir()
+        actuator, _, _, onshape = write_files(monkeypatch, folder, "U8_Lite", "3dp", Ns, Np, Nr, module, n)
+        if change:
+            if what == "FOS":
+                actuator.FOS *= 2
+            elif what == "serviceFactor":
+                actuator.serviceFactor *= 2
+            elif what == "motor_peak_torque":
+                actuator.motor.maxMotorTorque *= 2
+            else:
+                actuator.planetaryGearbox.maxGearAllowableStressPa /= 2
+            actuator.updateFacewidth()
+            actuator.genEquationFile_editCADdirectly()
+            onshape = equation_lines((folder / "SSPG" / "sspg_equations_onshape.txt").read_text())
+        return dict((k, float(v)) for k, v in onshape), actuator
+
+    base, act = run(tmp_path / "a", False)
+    more, _ = run(tmp_path / "b", True)
+    assert more["fw_s_calc"] == pytest.approx(2 * base["fw_s_calc"], rel=1e-12)
+    minimum = 2 * act.planet_bearing_width + act.standard_clearance_1_5mm * 2 / 3
+    for fw in ("fw_p", "fw_r"):
+        assert more[fw] == pytest.approx(max(2 * base["fw_s_calc"], minimum), rel=1e-12)
+    downstream = {what}
+    for e in CAD:
+        if set(e.get("depends_on", [])) & downstream:
+            downstream.add(e["name"])
+    changed = {k for k in base if base[k] != more[k]}
+    assert "fw_s_calc" in changed and changed <= downstream

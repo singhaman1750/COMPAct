@@ -18,6 +18,10 @@ CATEGORIES = ("input", "optimisation", "fixed", "dependent")
 TITLES = {"input": "Input", "optimisation": "Optimisation", "fixed": "Fixed", "dependent": "Dependent"}
 
 
+def load_rules():
+    return json.loads((SPEC_DIR / "rules.json").read_text(encoding="utf-8"))
+
+
 def load(gearbox):
     return json.loads((SPEC_DIR / f"{gearbox}_variables.json").read_text(encoding="utf-8"))
 
@@ -25,6 +29,8 @@ def load(gearbox):
 def _source(e):
     if "formula" in e:
         return f"`{e['formula']}`"
+    if "rule" in e:
+        return e["rule"]
     if "lookup" in e:
         lk = e["lookup"]
         args = ", ".join(f"{k}={v}" for k, v in lk["args"].items())
@@ -67,6 +73,11 @@ def render(spec):
         out += ["## To review (not high confidence)", ""]
         out += [f"- `{e['name']}` ({TITLES[e['category']]}, {e['confidence']}): {e['reason']}" for e in review]
         out.append("")
+    out += ["## Rules shared by every gearbox", "",
+            "From `config_files/variables/rules.json`; the test holds every gearbox's file to them.", ""]
+    out += [f"- names matching `{r['name_pattern']}` are **{TITLES[r['category']]} / {r['subtype']}**: {r['reason']}"
+            for r in load_rules()["rules"]]
+    out.append("")
     for c in CATEGORIES:
         entries = [e for e in cad if e["category"] == c]
         out += [f"## {TITLES[c]} ({len(entries)})", ""] + _table(entries) + [""]

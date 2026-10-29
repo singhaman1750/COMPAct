@@ -1,0 +1,17 @@
+{
+ "about": "Category rules every gearbox's variables file must follow, so the same kind of variable gets the same category in every gearbox type. A variable whose name matches a pattern must have that category and sub-type (tests/test_variable_categories.py). Add the names a new gearbox uses for the same role to the pattern when that gearbox is classified.",
+ "rules": [
+  {
+   "name_pattern": "^Nr[0-9]*$",
+   "category": "dependent",
+   "subtype": "implicit constraint",
+   "reason": "ring-gear teeth are implicitly constrained: the coaxial geometric constraint (e.g. Nr = Ns + 2 x Np) fixes them once the sun and planet teeth are chosen, so the optimiser sets them instead of searching them"
+  },
+  {
+   "name_pattern": "^fw_(s_calc|p|r)$",
+   "category": "dependent",
+   "subtype": "stress rule",
+   "reason": "gear face widths follow from the tooth-stress rule: the optimisation variables, the motor torque, the gear material and the safety factors fix them, and the optimiser always takes the smallest width that passes"
+  }
+ ]
+}

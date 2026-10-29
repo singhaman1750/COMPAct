@@ -1,11 +1,11 @@
 {
  "gearbox": "sspg",
- "about": "Every SSPG variable sorted into input / optimisation / fixed / dependent. 'cad_variables' are the 113 variables SSPG writes to CADs/SSPG/sspg_equations_onshape.txt, in that order; 'code_only' are values the code uses but does not write to the CAD file; 'unused_config_blocks' are config blocks SSPG never reads. tests/test_variable_categories.py checks the lists against the code, re-evaluates every formula and lookup, and docs/variables/sspg.md is generated from this file (python tools/variables/render.py).",
+ "about": "Every SSPG variable sorted into input / optimisation / fixed / dependent. 'cad_variables' are the 113 variables SSPG writes to CADs/SSPG/sspg_equations_onshape.txt, in that order; 'code_only' are values the code uses but does not write to the CAD file; 'unused_config_blocks' are config blocks SSPG never reads. tests/test_variable_categories.py checks the lists against the code, re-evaluates every formula and lookup, checks the stress-rule widths by changing what they depend on, and docs/variables/sspg.md is generated from this file (python tools/variables/render.py).",
  "categories": {
-  "input": "chosen parts: the motor's dimensions and the motor driver's mount dimensions",
-  "optimisation": "chosen by the optimiser: teeth, module, number of planets, and the gear face widths (set from the motor torque for each design)",
+  "input": "chosen parts and material: the motor's dimensions and torque, the motor driver's mount dimensions, the gear material's allowable stress",
+  "optimisation": "searched by the optimiser: teeth, module, number of planets",
   "fixed": "constants that don't depend on the design: clearances, wall thicknesses, fastener and bearing choices, feature sizes, the gear standard",
-  "dependent": "computed from the variables above, by a formula or a catalogue lookup (bearings, bolts, nuts)"
+  "dependent": "computed from the variables above, by a formula, a catalogue lookup (bearings, bolts, nuts) or a rule the code applies (the tooth-stress rule for face widths)"
  },
  "confidence": {
   "high": "the code reads it directly from one source, or computes it with an explicit formula",
@@ -43,14 +43,14 @@
    "name": "Nr",
    "attr": "Nr",
    "category": "dependent",
-   "subtype": "formula",
+   "subtype": "implicit constraint",
    "formula": "Ns + 2 * Np",
    "depends_on": [
     "Ns",
     "Np"
    ],
-   "confidence": "medium",
-   "reason": "the code writes it under 'Optimization Variables', but the optimiser sets it from Ns and Np (geometric constraint), so it is not a free choice"
+   "confidence": "high",
+   "reason": "implicitly constrained: the geometric (coaxial) constraint Ns + 2 x Np = Nr fixes it, and the optimiser sets it from Ns and Np instead of searching it (the code lists it among the optimisation variables)"
   },
   {
    "name": "module",
@@ -484,20 +484,23 @@
   {
    "name": "fw_s_calc",
    "attr": "fw_s_calc",
-   "category": "optimisation",
-   "subtype": "face width (torque-derived)",
-   "source": {
-    "optimiser": "mitStressAnalysisMinFacewidth"
-   },
+   "category": "dependent",
+   "subtype": "stress rule",
+   "rule": "b = FOS x Ft x qe x qk / (gear_allowable_stress x module), with Ft = serviceFactor x motor_peak_torque / (num_planet x sun pitch radius), qe = 1 / sun-planet contact ratio, qk = curve fit in Ns (mitStressAnalysisMinFacewidth); fw_s_calc = b",
    "depends_on": [
     "module",
     "Ns",
     "Np",
     "Nr",
-    "num_planet"
+    "num_planet",
+    "pressure_angle",
+    "motor_peak_torque",
+    "gear_allowable_stress",
+    "FOS",
+    "serviceFactor"
    ],
-   "confidence": "medium",
-   "reason": "sun face width from the tooth-stress rule (motor peak torque, FOS, gear material). Not searched by the loop but set by the optimiser for each design. The printed sun uses fw_s_used"
+   "confidence": "high",
+   "reason": "sun face width from the tooth-stress rule: fixed by the optimisation variables, the motor torque, the gear material and the safety factors, so the optimiser has no freedom over it (it takes the smallest width that passes, which is always optimal since width only adds mass). The printed sun uses fw_s_used"
   },
   {
    "name": "alpha_s",
@@ -555,22 +558,25 @@
   {
    "name": "fw_p",
    "attr": "fw_p",
-   "category": "optimisation",
-   "subtype": "face width (torque-derived)",
-   "source": {
-    "optimiser": "mitStressAnalysisMinFacewidth"
-   },
+   "category": "dependent",
+   "subtype": "stress rule",
+   "rule": "b = FOS x Ft x qe x qk / (gear_allowable_stress x module), with Ft = serviceFactor x motor_peak_torque / (num_planet x sun pitch radius), qe = 1 / sun-planet contact ratio, qk = curve fit in Ns (mitStressAnalysisMinFacewidth); fw = max(b, 2 x planet_bearing_width + standard_clearance_1_5mm x 2/3)",
    "depends_on": [
     "module",
     "Ns",
     "Np",
     "Nr",
     "num_planet",
+    "pressure_angle",
+    "motor_peak_torque",
+    "gear_allowable_stress",
+    "FOS",
+    "serviceFactor",
     "planet_bearing_width",
     "standard_clearance_1_5mm"
    ],
-   "confidence": "medium",
-   "reason": "planet face width from the tooth-stress rule (motor peak torque, FOS, gear material), at least 2 x planet_bearing_width + standard_clearance_1_5mm x 2/3. Set by the optimiser for each design"
+   "confidence": "high",
+   "reason": "planet face width from the tooth-stress rule, at least room for the two planet bearings: fixed by the optimisation variables, the motor torque, the gear material and the safety factors"
   },
   {
    "name": "alpha_p",
@@ -628,22 +634,25 @@
   {
    "name": "fw_r",
    "attr": "fw_r",
-   "category": "optimisation",
-   "subtype": "face width (torque-derived)",
-   "source": {
-    "optimiser": "mitStressAnalysisMinFacewidth"
-   },
+   "category": "dependent",
+   "subtype": "stress rule",
+   "rule": "b = FOS x Ft x qe x qk / (gear_allowable_stress x module), with Ft = serviceFactor x motor_peak_torque / (num_planet x sun pitch radius), qe = 1 / sun-planet contact ratio, qk = curve fit in Ns (mitStressAnalysisMinFacewidth); fw = max(b, 2 x planet_bearing_width + standard_clearance_1_5mm x 2/3)",
    "depends_on": [
     "module",
     "Ns",
     "Np",
     "Nr",
     "num_planet",
+    "pressure_angle",
+    "motor_peak_torque",
+    "gear_allowable_stress",
+    "FOS",
+    "serviceFactor",
     "planet_bearing_width",
     "standard_clearance_1_5mm"
    ],
-   "confidence": "medium",
-   "reason": "ring (= planet) face width from the tooth-stress rule (motor peak torque, FOS, gear material), at least 2 x planet_bearing_width + standard_clearance_1_5mm x 2/3. Set by the optimiser for each design"
+   "confidence": "high",
+   "reason": "ring (= planet) face width from the tooth-stress rule, at least room for the two planet bearings: fixed by the optimisation variables, the motor torque, the gear material and the safety factors"
   },
   {
    "name": "alpha_r",
@@ -1760,6 +1769,58 @@
    ],
    "confidence": "high",
    "reason": "axial width without the driver mount, written to the results CSV"
+  },
+  {
+   "name": "motor_peak_torque",
+   "attr": "MaxMotorTorque",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.electrical",
+    "key": "peak_torque_Nm"
+   },
+   "confidence": "high",
+   "reason": "motor torque the gears are sized for (peak torque under the default rating setting); sets the face widths"
+  },
+  {
+   "name": "gear_allowable_stress",
+   "attr": "maxGearAllowableStressMPa",
+   "category": "input",
+   "subtype": "material",
+   "source": {
+    "file": "config.json",
+    "block": "Material_properties.<gear material>",
+    "key": "maxAllowableStressMPa"
+   },
+   "confidence": "high",
+   "reason": "allowable tooth stress of the gear material, chosen with the material mode (3dp: PLA, metal: steel); sets the face widths"
+  },
+  {
+   "name": "FOS",
+   "attr": "FOS",
+   "category": "fixed",
+   "subtype": "safety factor",
+   "source": {
+    "file": "config.json",
+    "block": "MIT_params",
+    "key": "FOS"
+   },
+   "confidence": "high",
+   "reason": "factor of safety in the tooth-stress rule"
+  },
+  {
+   "name": "serviceFactor",
+   "attr": "serviceFactor",
+   "category": "fixed",
+   "subtype": "safety factor",
+   "source": {
+    "file": "config.json",
+    "block": "MIT_params",
+    "key": "serviceFactor"
+   },
+   "confidence": "high",
+   "reason": "service factor on the motor torque in the tooth-stress rule"
   },
   {
    "name": "GEAR_RATIO_MIN",

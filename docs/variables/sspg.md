@@ -2,14 +2,14 @@
 
 Generated from `config_files/variables/sspg_variables.json` by `python tools/variables/render.py`; edit the JSON, not this page.
 
-Every SSPG variable sorted into input / optimisation / fixed / dependent. 'cad_variables' are the 113 variables SSPG writes to CADs/SSPG/sspg_equations_onshape.txt, in that order; 'code_only' are values the code uses but does not write to the CAD file; 'unused_config_blocks' are config blocks SSPG never reads. tests/test_variable_categories.py checks the lists against the code, re-evaluates every formula and lookup, and docs/variables/sspg.md is generated from this file (python tools/variables/render.py).
+Every SSPG variable sorted into input / optimisation / fixed / dependent. 'cad_variables' are the 113 variables SSPG writes to CADs/SSPG/sspg_equations_onshape.txt, in that order; 'code_only' are values the code uses but does not write to the CAD file; 'unused_config_blocks' are config blocks SSPG never reads. tests/test_variable_categories.py checks the lists against the code, re-evaluates every formula and lookup, checks the stress-rule widths by changing what they depend on, and docs/variables/sspg.md is generated from this file (python tools/variables/render.py).
 
 ## Categories
 
-- **Input**: chosen parts: the motor's dimensions and the motor driver's mount dimensions
-- **Optimisation**: chosen by the optimiser: teeth, module, number of planets, and the gear face widths (set from the motor torque for each design)
+- **Input**: chosen parts and material: the motor's dimensions and torque, the motor driver's mount dimensions, the gear material's allowable stress
+- **Optimisation**: searched by the optimiser: teeth, module, number of planets
 - **Fixed**: constants that don't depend on the design: clearances, wall thicknesses, fastener and bearing choices, feature sizes, the gear standard
-- **Dependent**: computed from the variables above, by a formula or a catalogue lookup (bearings, bolts, nuts)
+- **Dependent**: computed from the variables above, by a formula, a catalogue lookup (bearings, bolts, nuts) or a rule the code applies (the tooth-stress rule for face widths)
 
 Confidence:
 
@@ -21,20 +21,20 @@ Confidence:
 
 | Category | CAD variables | Code-only |
 |---|---|---|
-| Input | 18 | 0 |
-| Optimisation | 7 | 0 |
-| Fixed | 43 | 20 |
-| Dependent | 45 | 3 |
-| **Total** | **113** | **23** |
+| Input | 18 | 2 |
+| Optimisation | 4 | 0 |
+| Fixed | 43 | 22 |
+| Dependent | 48 | 3 |
+| **Total** | **113** | **27** |
 
-CAD variables by confidence: high 109, medium 4, low 0
+CAD variables by confidence: high 113, medium 0, low 0
 
-## To review (not high confidence)
+## Rules shared by every gearbox
 
-- `Nr` (Dependent, medium): the code writes it under 'Optimization Variables', but the optimiser sets it from Ns and Np (geometric constraint), so it is not a free choice
-- `fw_s_calc` (Optimisation, medium): sun face width from the tooth-stress rule (motor peak torque, FOS, gear material). Not searched by the loop but set by the optimiser for each design. The printed sun uses fw_s_used
-- `fw_p` (Optimisation, medium): planet face width from the tooth-stress rule (motor peak torque, FOS, gear material), at least 2 x planet_bearing_width + standard_clearance_1_5mm x 2/3. Set by the optimiser for each design
-- `fw_r` (Optimisation, medium): ring (= planet) face width from the tooth-stress rule (motor peak torque, FOS, gear material), at least 2 x planet_bearing_width + standard_clearance_1_5mm x 2/3. Set by the optimiser for each design
+From `config_files/variables/rules.json`; the test holds every gearbox's file to them.
+
+- names matching `^Nr[0-9]*$` are **Dependent / implicit constraint**: ring-gear teeth are implicitly constrained: the coaxial geometric constraint (e.g. Nr = Ns + 2 x Np) fixes them once the sun and planet teeth are chosen, so the optimiser sets them instead of searching them
+- names matching `^fw_(s_calc|p|r)$` are **Dependent / stress rule**: gear face widths follow from the tooth-stress rule: the optimisation variables, the motor torque, the gear material and the safety factors fix them, and the optimiser always takes the smallest width that passes
 
 ## Input (18)
 
@@ -59,7 +59,7 @@ CAD variables by confidence: high 109, medium 4, low 0
 | 17 | `driver_mount_thickness` | driver | config.json → Motor_drivers.OdrivePro → `driver_mount_thickness` |  | high | read from the chosen motor driver (OdrivePro); like the motor, it changes with the chosen part |
 | 18 | `driver_mount_height` | driver | config.json → Motor_drivers.OdrivePro → `driver_mount_height` |  | high | read from the chosen motor driver (OdrivePro); like the motor, it changes with the chosen part |
 
-## Optimisation (7)
+## Optimisation (4)
 
 | # | Variable | Sub-type | Source / formula | Depends on | Confidence | Why |
 |---|---|---|---|---|---|---|
@@ -67,9 +67,6 @@ CAD variables by confidence: high 109, medium 4, low 0
 | 2 | `Np` | teeth | optimiser (`optimizationSingleStageActuator`) |  | high | planet teeth: searched by the optimiser loop |
 | 3 | `module` | module | optimiser (`optimizationSingleStageActuator`) |  | high | searched by the optimiser loop (MODULE_MIN..MODULE_MAX, step 0.1) |
 | 4 | `num_planet` | planets | optimiser (`optimizationSingleStageActuator`) |  | high | searched by the optimiser loop (NUM_PLANET_MIN..MAX) |
-| 5 | `fw_s_calc` | face width (torque-derived) | optimiser (`mitStressAnalysisMinFacewidth`) | module, Ns, Np, Nr, num_planet | medium | sun face width from the tooth-stress rule (motor peak torque, FOS, gear material). Not searched by the loop but set by the optimiser for each design. The printed sun uses fw_s_used |
-| 6 | `fw_p` | face width (torque-derived) | optimiser (`mitStressAnalysisMinFacewidth`) | module, Ns, Np, Nr, num_planet, planet_bearing_width, standard_clearance_1_5mm | medium | planet face width from the tooth-stress rule (motor peak torque, FOS, gear material), at least 2 x planet_bearing_width + standard_clearance_1_5mm x 2/3. Set by the optimiser for each design |
-| 7 | `fw_r` | face width (torque-derived) | optimiser (`mitStressAnalysisMinFacewidth`) | module, Ns, Np, Nr, num_planet, planet_bearing_width, standard_clearance_1_5mm | medium | ring (= planet) face width from the tooth-stress rule (motor peak torque, FOS, gear material), at least 2 x planet_bearing_width + standard_clearance_1_5mm x 2/3. Set by the optimiser for each design |
 
 ## Fixed (43)
 
@@ -119,11 +116,11 @@ CAD variables by confidence: high 109, medium 4, low 0
 | 42 | `tight_clearance_3DP` | clearance | sspg_params.json → sspg_3DP_design_parameters → `tight_clearance_3DP` |  | high | 3D-printing fit clearance from the SSPG 3DP design parameters |
 | 43 | `loose_clearance_3DP` | clearance | sspg_params.json → sspg_3DP_design_parameters → `loose_clearance_3DP` |  | high | 3D-printing fit clearance from the SSPG 3DP design parameters |
 
-## Dependent (45)
+## Dependent (48)
 
 | # | Variable | Sub-type | Source / formula | Depends on | Confidence | Why |
 |---|---|---|---|---|---|---|
-| 1 | `Nr` | formula | `Ns + 2 * Np` | Ns, Np | medium | the code writes it under 'Optimization Variables', but the optimiser sets it from Ns and Np (geometric constraint), so it is not a free choice |
+| 1 | `Nr` | implicit constraint | `Ns + 2 * Np` | Ns, Np | high | implicitly constrained: the geometric (coaxial) constraint Ns + 2 x Np = Nr fixes it, and the optimiser sets it from Ns and Np instead of searching it (the code lists it among the optimisation variables) |
 | 2 | `h_a` | formula | `1 * module` | module | high | addendum, standard proportion of the module |
 | 3 | `h_b` | formula | `1.25 * module` | module | high | standard proportion of the module (same value as h_f) |
 | 4 | `clr_tip_root` | formula | `h_f - h_a` | h_f, h_a | high | tip-root clearance from addendum and dedendum |
@@ -140,36 +137,39 @@ CAD variables by confidence: high 109, medium 4, low 0
 | 15 | `Motor_case_OD_max` | formula | `case_mounting_PCD + case_mounting_hole_allen_socket_dia + clearance_case_mount_holes_shell_thickness * 2` | case_mounting_PCD, case_mounting_hole_allen_socket_dia, clearance_case_mount_holes_shell_thickness | high | widest diameter, over the case mounting ears |
 | 16 | `dp_s` | formula | `module * Ns` | module, Ns | high | pitch diameter |
 | 17 | `db_s` | formula | `dp_s * cos(pressure_angle_rad)` | dp_s, pressure_angle_rad | high | base-circle diameter |
-| 18 | `alpha_s` | formula | `(sqrt(dp_s**2 - db_s**2) / db_s) * 180 / pi - pressure_angle_rad * 180 / pi` | dp_s, db_s, pressure_angle_rad | high | involute angle used to draw the tooth |
-| 19 | `beta_s` | formula | `(360 / (4 * Ns) - alpha_s) * 2` | Ns, alpha_s | high | tooth angle used to draw the tooth |
-| 20 | `dp_p` | formula | `module * Np` | module, Np | high | pitch diameter |
-| 21 | `db_p` | formula | `dp_p * cos(pressure_angle_rad)` | dp_p, pressure_angle_rad | high | base-circle diameter |
-| 22 | `alpha_p` | formula | `(sqrt(dp_p**2 - db_p**2) / db_p) * 180 / pi - pressure_angle_rad * 180 / pi` | dp_p, db_p, pressure_angle_rad | high | involute angle used to draw the tooth |
-| 23 | `beta_p` | formula | `(360 / (4 * Np) - alpha_p) * 2` | Np, alpha_p | high | tooth angle used to draw the tooth |
-| 24 | `dp_r` | formula | `module * Nr` | module, Nr | high | pitch diameter |
-| 25 | `db_r` | formula | `dp_r * cos(pressure_angle_rad)` | dp_r, pressure_angle_rad | high | base-circle diameter |
-| 26 | `alpha_r` | formula | `(sqrt(dp_r**2 - db_r**2) / db_r) * 180 / pi - pressure_angle_rad * 180 / pi` | dp_r, db_r, pressure_angle_rad | high | involute angle used to draw the tooth |
-| 27 | `beta_r` | formula | `(360 / (4 * Nr) + alpha_r) * 2` | Nr, alpha_r | high | tooth angle used to draw the tooth |
-| 28 | `case_dist` | formula | `sec_carrier_thickness + clearance_planet + sun_coupler_hub_thickness - case_mounting_surface_height` | sec_carrier_thickness, clearance_planet, sun_coupler_hub_thickness, case_mounting_surface_height | high | axial gap between the motor case and the gearbox case |
-| 29 | `bearing_mount_thickness` | formula | `output_mounting_hole_dia * bearing_mount_wall_bolt_dia_multiple if bearing_OD + output_mounting_hole_dia * (2 * bearing_mount_wall_bolt_dia_multiple) > Nr * module + 2 * h_b else ((Nr * module + 2 * h_b) - (bearing_OD + output_mounting_hole_dia * (2 * bearing_mount_wall_bolt_dia_multiple))) / 2 + output_mounting_hole_dia * bearing_mount_wall_bolt_dia_multiple + standard_clearance_1_5mm` | bearing_OD, output_mounting_hole_dia, bearing_mount_wall_bolt_dia_multiple, Nr, module, h_b, standard_clearance_1_5mm | high | wall around the output bearing: the configured number of output-bolt diameters on each side, or wider (plus a clearance) when the ring gear's teeth reach further out (the same rule is used for the mass) |
-| 30 | `output_mounting_PCD` | formula | `bearing_OD + bearing_mount_thickness` | bearing_OD, bearing_mount_thickness | high | output bolt circle |
-| 31 | `carrier_PCD` | formula | `(Np + Ns) * module` | Np, Ns, module | high | planet-centre circle (twice the centre distance) |
-| 32 | `motor_output_hole_CSK_OD` | lookup | `nuts_and_bolts_dimensions(bolt_dia=motor_output_hole_dia, bolt_type=CSK)` → bolt_head_dia | motor_output_hole_dia | high | standard countersunk fastener size for the chosen bolt diameter |
-| 33 | `motor_output_hole_CSK_head_height` | lookup | `nuts_and_bolts_dimensions(bolt_dia=motor_output_hole_dia, bolt_type=CSK)` → bolt_head_height | motor_output_hole_dia | high | standard countersunk fastener size for the chosen bolt diameter |
-| 34 | `output_mounting_nut_thickness` | lookup | `nuts_and_bolts_dimensions(bolt_dia=output_mounting_hole_dia, bolt_type=socket_head)` → nut_thickness | output_mounting_hole_dia | high | standard socket-head fastener size for the chosen bolt diameter |
-| 35 | `output_mounting_nut_wrench_size` | lookup | `nuts_and_bolts_dimensions(bolt_dia=output_mounting_hole_dia, bolt_type=socket_head)` → nut_width_across_flats | output_mounting_hole_dia | high | standard socket-head fastener size for the chosen bolt diameter |
-| 36 | `case_mounting_wrench_size` | lookup | `nuts_and_bolts_dimensions(bolt_dia=case_mounting_hole_dia, bolt_type=socket_head)` → nut_width_across_flats | case_mounting_hole_dia | high | standard socket-head fastener size for the chosen bolt diameter |
-| 37 | `case_mounting_nut_thickness` | lookup | `nuts_and_bolts_dimensions(bolt_dia=case_mounting_hole_dia, bolt_type=socket_head)` → nut_thickness | case_mounting_hole_dia | high | standard socket-head fastener size for the chosen bolt diameter |
-| 38 | `ring_OD` | formula | `dp_r + 2 * ring_radial_thickness` | dp_r, ring_radial_thickness | high | ring gear outer diameter |
-| 39 | `planet_pin_socket_head_dia` | lookup | `nuts_and_bolts_dimensions(bolt_dia=planet_pin_bolt_dia, bolt_type=socket_head)` → bolt_head_dia | planet_pin_bolt_dia | high | standard socket-head fastener size for the chosen bolt diameter |
-| 40 | `planet_pin_bolt_wrench_size` | lookup | `nuts_and_bolts_dimensions(bolt_dia=planet_pin_bolt_dia, bolt_type=socket_head)` → nut_width_across_flats | planet_pin_bolt_dia | high | standard socket-head fastener size for the chosen bolt diameter |
-| 41 | `carrier_trapezoidal_support_hole_socket_head_dia` | lookup | `nuts_and_bolts_dimensions(bolt_dia=carrier_trapezoidal_support_hole_dia, bolt_type=socket_head)` → bolt_head_dia | carrier_trapezoidal_support_hole_dia | high | standard socket-head fastener size for the chosen bolt diameter |
-| 42 | `carrier_trapezoidal_support_hole_wrench_size` | lookup | `nuts_and_bolts_dimensions(bolt_dia=carrier_trapezoidal_support_hole_dia, bolt_type=socket_head)` → nut_width_across_flats | carrier_trapezoidal_support_hole_dia | high | standard socket-head fastener size for the chosen bolt diameter |
-| 43 | `sun_hub_dia` | formula | `motor_output_hole_PCD + motor_output_hole_dia + standard_clearance_1_5mm * 4` | motor_output_hole_PCD, motor_output_hole_dia, standard_clearance_1_5mm | high | sun coupler hub, sized to the motor's output holes |
-| 44 | `sun_central_bolt_socket_head_dia` | lookup | `nuts_and_bolts_dimensions(bolt_dia=sun_central_bolt_dia, bolt_type=socket_head)` → bolt_head_dia | sun_central_bolt_dia | high | standard socket-head fastener size for the chosen bolt diameter |
-| 45 | `fw_s_used` | formula | `fw_p + clearance_planet + sec_carrier_thickness + standard_clearance_1_5mm` | fw_p, clearance_planet, sec_carrier_thickness, standard_clearance_1_5mm | high | printed sun length: planet width plus the carrier and clearances |
+| 18 | `fw_s_calc` | stress rule | b = FOS x Ft x qe x qk / (gear_allowable_stress x module), with Ft = serviceFactor x motor_peak_torque / (num_planet x sun pitch radius), qe = 1 / sun-planet contact ratio, qk = curve fit in Ns (mitStressAnalysisMinFacewidth); fw_s_calc = b | module, Ns, Np, Nr, num_planet, pressure_angle, motor_peak_torque, gear_allowable_stress, FOS, serviceFactor | high | sun face width from the tooth-stress rule: fixed by the optimisation variables, the motor torque, the gear material and the safety factors, so the optimiser has no freedom over it (it takes the smallest width that passes, which is always optimal since width only adds mass). The printed sun uses fw_s_used |
+| 19 | `alpha_s` | formula | `(sqrt(dp_s**2 - db_s**2) / db_s) * 180 / pi - pressure_angle_rad * 180 / pi` | dp_s, db_s, pressure_angle_rad | high | involute angle used to draw the tooth |
+| 20 | `beta_s` | formula | `(360 / (4 * Ns) - alpha_s) * 2` | Ns, alpha_s | high | tooth angle used to draw the tooth |
+| 21 | `dp_p` | formula | `module * Np` | module, Np | high | pitch diameter |
+| 22 | `db_p` | formula | `dp_p * cos(pressure_angle_rad)` | dp_p, pressure_angle_rad | high | base-circle diameter |
+| 23 | `fw_p` | stress rule | b = FOS x Ft x qe x qk / (gear_allowable_stress x module), with Ft = serviceFactor x motor_peak_torque / (num_planet x sun pitch radius), qe = 1 / sun-planet contact ratio, qk = curve fit in Ns (mitStressAnalysisMinFacewidth); fw = max(b, 2 x planet_bearing_width + standard_clearance_1_5mm x 2/3) | module, Ns, Np, Nr, num_planet, pressure_angle, motor_peak_torque, gear_allowable_stress, FOS, serviceFactor, planet_bearing_width, standard_clearance_1_5mm | high | planet face width from the tooth-stress rule, at least room for the two planet bearings: fixed by the optimisation variables, the motor torque, the gear material and the safety factors |
+| 24 | `alpha_p` | formula | `(sqrt(dp_p**2 - db_p**2) / db_p) * 180 / pi - pressure_angle_rad * 180 / pi` | dp_p, db_p, pressure_angle_rad | high | involute angle used to draw the tooth |
+| 25 | `beta_p` | formula | `(360 / (4 * Np) - alpha_p) * 2` | Np, alpha_p | high | tooth angle used to draw the tooth |
+| 26 | `dp_r` | formula | `module * Nr` | module, Nr | high | pitch diameter |
+| 27 | `db_r` | formula | `dp_r * cos(pressure_angle_rad)` | dp_r, pressure_angle_rad | high | base-circle diameter |
+| 28 | `fw_r` | stress rule | b = FOS x Ft x qe x qk / (gear_allowable_stress x module), with Ft = serviceFactor x motor_peak_torque / (num_planet x sun pitch radius), qe = 1 / sun-planet contact ratio, qk = curve fit in Ns (mitStressAnalysisMinFacewidth); fw = max(b, 2 x planet_bearing_width + standard_clearance_1_5mm x 2/3) | module, Ns, Np, Nr, num_planet, pressure_angle, motor_peak_torque, gear_allowable_stress, FOS, serviceFactor, planet_bearing_width, standard_clearance_1_5mm | high | ring (= planet) face width from the tooth-stress rule, at least room for the two planet bearings: fixed by the optimisation variables, the motor torque, the gear material and the safety factors |
+| 29 | `alpha_r` | formula | `(sqrt(dp_r**2 - db_r**2) / db_r) * 180 / pi - pressure_angle_rad * 180 / pi` | dp_r, db_r, pressure_angle_rad | high | involute angle used to draw the tooth |
+| 30 | `beta_r` | formula | `(360 / (4 * Nr) + alpha_r) * 2` | Nr, alpha_r | high | tooth angle used to draw the tooth |
+| 31 | `case_dist` | formula | `sec_carrier_thickness + clearance_planet + sun_coupler_hub_thickness - case_mounting_surface_height` | sec_carrier_thickness, clearance_planet, sun_coupler_hub_thickness, case_mounting_surface_height | high | axial gap between the motor case and the gearbox case |
+| 32 | `bearing_mount_thickness` | formula | `output_mounting_hole_dia * bearing_mount_wall_bolt_dia_multiple if bearing_OD + output_mounting_hole_dia * (2 * bearing_mount_wall_bolt_dia_multiple) > Nr * module + 2 * h_b else ((Nr * module + 2 * h_b) - (bearing_OD + output_mounting_hole_dia * (2 * bearing_mount_wall_bolt_dia_multiple))) / 2 + output_mounting_hole_dia * bearing_mount_wall_bolt_dia_multiple + standard_clearance_1_5mm` | bearing_OD, output_mounting_hole_dia, bearing_mount_wall_bolt_dia_multiple, Nr, module, h_b, standard_clearance_1_5mm | high | wall around the output bearing: the configured number of output-bolt diameters on each side, or wider (plus a clearance) when the ring gear's teeth reach further out (the same rule is used for the mass) |
+| 33 | `output_mounting_PCD` | formula | `bearing_OD + bearing_mount_thickness` | bearing_OD, bearing_mount_thickness | high | output bolt circle |
+| 34 | `carrier_PCD` | formula | `(Np + Ns) * module` | Np, Ns, module | high | planet-centre circle (twice the centre distance) |
+| 35 | `motor_output_hole_CSK_OD` | lookup | `nuts_and_bolts_dimensions(bolt_dia=motor_output_hole_dia, bolt_type=CSK)` → bolt_head_dia | motor_output_hole_dia | high | standard countersunk fastener size for the chosen bolt diameter |
+| 36 | `motor_output_hole_CSK_head_height` | lookup | `nuts_and_bolts_dimensions(bolt_dia=motor_output_hole_dia, bolt_type=CSK)` → bolt_head_height | motor_output_hole_dia | high | standard countersunk fastener size for the chosen bolt diameter |
+| 37 | `output_mounting_nut_thickness` | lookup | `nuts_and_bolts_dimensions(bolt_dia=output_mounting_hole_dia, bolt_type=socket_head)` → nut_thickness | output_mounting_hole_dia | high | standard socket-head fastener size for the chosen bolt diameter |
+| 38 | `output_mounting_nut_wrench_size` | lookup | `nuts_and_bolts_dimensions(bolt_dia=output_mounting_hole_dia, bolt_type=socket_head)` → nut_width_across_flats | output_mounting_hole_dia | high | standard socket-head fastener size for the chosen bolt diameter |
+| 39 | `case_mounting_wrench_size` | lookup | `nuts_and_bolts_dimensions(bolt_dia=case_mounting_hole_dia, bolt_type=socket_head)` → nut_width_across_flats | case_mounting_hole_dia | high | standard socket-head fastener size for the chosen bolt diameter |
+| 40 | `case_mounting_nut_thickness` | lookup | `nuts_and_bolts_dimensions(bolt_dia=case_mounting_hole_dia, bolt_type=socket_head)` → nut_thickness | case_mounting_hole_dia | high | standard socket-head fastener size for the chosen bolt diameter |
+| 41 | `ring_OD` | formula | `dp_r + 2 * ring_radial_thickness` | dp_r, ring_radial_thickness | high | ring gear outer diameter |
+| 42 | `planet_pin_socket_head_dia` | lookup | `nuts_and_bolts_dimensions(bolt_dia=planet_pin_bolt_dia, bolt_type=socket_head)` → bolt_head_dia | planet_pin_bolt_dia | high | standard socket-head fastener size for the chosen bolt diameter |
+| 43 | `planet_pin_bolt_wrench_size` | lookup | `nuts_and_bolts_dimensions(bolt_dia=planet_pin_bolt_dia, bolt_type=socket_head)` → nut_width_across_flats | planet_pin_bolt_dia | high | standard socket-head fastener size for the chosen bolt diameter |
+| 44 | `carrier_trapezoidal_support_hole_socket_head_dia` | lookup | `nuts_and_bolts_dimensions(bolt_dia=carrier_trapezoidal_support_hole_dia, bolt_type=socket_head)` → bolt_head_dia | carrier_trapezoidal_support_hole_dia | high | standard socket-head fastener size for the chosen bolt diameter |
+| 45 | `carrier_trapezoidal_support_hole_wrench_size` | lookup | `nuts_and_bolts_dimensions(bolt_dia=carrier_trapezoidal_support_hole_dia, bolt_type=socket_head)` → nut_width_across_flats | carrier_trapezoidal_support_hole_dia | high | standard socket-head fastener size for the chosen bolt diameter |
+| 46 | `sun_hub_dia` | formula | `motor_output_hole_PCD + motor_output_hole_dia + standard_clearance_1_5mm * 4` | motor_output_hole_PCD, motor_output_hole_dia, standard_clearance_1_5mm | high | sun coupler hub, sized to the motor's output holes |
+| 47 | `sun_central_bolt_socket_head_dia` | lookup | `nuts_and_bolts_dimensions(bolt_dia=sun_central_bolt_dia, bolt_type=socket_head)` → bolt_head_dia | sun_central_bolt_dia | high | standard socket-head fastener size for the chosen bolt diameter |
+| 48 | `fw_s_used` | formula | `fw_p + clearance_planet + sec_carrier_thickness + standard_clearance_1_5mm` | fw_p, clearance_planet, sec_carrier_thickness, standard_clearance_1_5mm | high | printed sun length: planet width plus the carrier and clearances |
 
-## Used by the code, not written to the CAD file (23)
+## Used by the code, not written to the CAD file (27)
 
 | # | Variable | Sub-type | Source / formula | Depends on | Confidence | Why |
 |---|---|---|---|---|---|---|
@@ -184,18 +184,22 @@ CAD variables by confidence: high 109, medium 4, low 0
 | 9 | `pressure_angle_rad` | formula | `pressure_angle * pi / 180` | pressure_angle | high | pressure angle in radians (code attribute pressure_angle) |
 | 10 | `maxGearboxDiameter` | formula | `(MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR if motor_OD < SMALL_MOTOR_DIA_MM else MAX_GB_DIA_MULT_FACTOR) * motor_OD - 2 * ringRadialWidthMM` | MAX_GB_DIA_MULT_FACTOR, MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR, SMALL_MOTOR_DIA_MM, motor_OD, ringRadialWidthMM | high | largest gear diameter the optimiser may use (gearbox_runner max_diameter) |
 | 11 | `actuator_width` | formula | `motor_height + case_mounting_surface_height + standard_clearance_1_5mm + base_plate_thickness + case_dist + bearing_height + standard_clearance_1_5mm + fw_r + clearance_planet + bearing_retainer_thickness` | motor_height, case_mounting_surface_height, standard_clearance_1_5mm, base_plate_thickness, case_dist, bearing_height, fw_r, clearance_planet, bearing_retainer_thickness | high | axial width without the driver mount, written to the results CSV |
-| 12 | `GEAR_RATIO_MIN` | search bound | sspg_params.json → sspg_optimization_parameters → `GEAR_RATIO_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 13 | `GEAR_RATIO_MAX` | search bound | sspg_params.json → sspg_optimization_parameters → `GEAR_RATIO_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 14 | `GEAR_RATIO_STEP` | search bound | sspg_params.json → sspg_optimization_parameters → `GEAR_RATIO_STEP` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 15 | `MODULE_MIN` | search bound | sspg_params.json → sspg_optimization_parameters → `MODULE_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 16 | `MODULE_MAX` | search bound | sspg_params.json → sspg_optimization_parameters → `MODULE_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 17 | `NUM_PLANET_MIN` | search bound | sspg_params.json → sspg_optimization_parameters → `NUM_PLANET_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 18 | `NUM_PLANET_MAX` | search bound | sspg_params.json → sspg_optimization_parameters → `NUM_PLANET_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 19 | `NUM_TEETH_SUN_MIN` | search bound | sspg_params.json → sspg_optimization_parameters → `NUM_TEETH_SUN_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 20 | `NUM_TEETH_PLANET_MIN` | search bound | sspg_params.json → sspg_optimization_parameters → `NUM_TEETH_PLANET_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 21 | `MAX_GB_DIA_MULT_FACTOR` | search bound | sspg_params.json → sspg_optimization_parameters → `MAX_GB_DIA_MULT_FACTOR` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 22 | `MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR` | search bound | sspg_params.json → sspg_optimization_parameters → `MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 23 | `SMALL_MOTOR_DIA_MM` | search bound | sspg_params.json → sspg_optimization_parameters → `SMALL_MOTOR_DIA_MM` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 12 | `motor_peak_torque` | motor | motors.json → motors.<motor>.electrical → `peak_torque_Nm` |  | high | motor torque the gears are sized for (peak torque under the default rating setting); sets the face widths |
+| 13 | `gear_allowable_stress` | material | config.json → Material_properties.<gear material> → `maxAllowableStressMPa` |  | high | allowable tooth stress of the gear material, chosen with the material mode (3dp: PLA, metal: steel); sets the face widths |
+| 14 | `FOS` | safety factor | config.json → MIT_params → `FOS` |  | high | factor of safety in the tooth-stress rule |
+| 15 | `serviceFactor` | safety factor | config.json → MIT_params → `serviceFactor` |  | high | service factor on the motor torque in the tooth-stress rule |
+| 16 | `GEAR_RATIO_MIN` | search bound | sspg_params.json → sspg_optimization_parameters → `GEAR_RATIO_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 17 | `GEAR_RATIO_MAX` | search bound | sspg_params.json → sspg_optimization_parameters → `GEAR_RATIO_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 18 | `GEAR_RATIO_STEP` | search bound | sspg_params.json → sspg_optimization_parameters → `GEAR_RATIO_STEP` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 19 | `MODULE_MIN` | search bound | sspg_params.json → sspg_optimization_parameters → `MODULE_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 20 | `MODULE_MAX` | search bound | sspg_params.json → sspg_optimization_parameters → `MODULE_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 21 | `NUM_PLANET_MIN` | search bound | sspg_params.json → sspg_optimization_parameters → `NUM_PLANET_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 22 | `NUM_PLANET_MAX` | search bound | sspg_params.json → sspg_optimization_parameters → `NUM_PLANET_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 23 | `NUM_TEETH_SUN_MIN` | search bound | sspg_params.json → sspg_optimization_parameters → `NUM_TEETH_SUN_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 24 | `NUM_TEETH_PLANET_MIN` | search bound | sspg_params.json → sspg_optimization_parameters → `NUM_TEETH_PLANET_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 25 | `MAX_GB_DIA_MULT_FACTOR` | search bound | sspg_params.json → sspg_optimization_parameters → `MAX_GB_DIA_MULT_FACTOR` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 26 | `MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR` | search bound | sspg_params.json → sspg_optimization_parameters → `MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 27 | `SMALL_MOTOR_DIA_MM` | search bound | sspg_params.json → sspg_optimization_parameters → `SMALL_MOTOR_DIA_MM` |  | high | optimiser setting: limits of the search, not a part dimension |
 
 ## Config blocks SSPG doesn't read
 
