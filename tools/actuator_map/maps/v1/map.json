@@ -1,0 +1,176 @@
+{
+ "version": "v1",
+ "released": "2026-10-30",
+ "released_from_commit": "8fc8fb13d0341322e837cdd07af0bdbb36a3d6f6",
+ "source": {
+  "run": "full",
+  "commit": "a89b170e4f95c3814dc556f2419e6bd091bdfd6d",
+  "started": "2026-10-29T14:15:46+00:00"
+ },
+ "grid": {
+  "motors": [
+   "U8_Lite",
+   "U8_Lite_L",
+   "U8_II",
+   "U8_II_Lite",
+   "U8_II_PRO",
+   "U10_Plus_KV80",
+   "U10_II",
+   "MN5008_KV170",
+   "MN6007_II_KV160",
+   "MN7005_KV115",
+   "MN8012",
+   "MN8014",
+   "MN8017",
+   "MN1005_V2_KV90",
+   "MAD_M6C12_KV170",
+   "MAD_M6C10_KV150",
+   "MAD_M6C08_KV180",
+   "MAD_M6C06_KV140",
+   "MAD_M6C06_V3_KV160",
+   "MAD_1005_KV90",
+   "MAD_7005_KV115",
+   "MAD_8118_KV100",
+   "MAD_5008_KV170",
+   "MAD_5010_KV200",
+   "VT8008_SL_KV90",
+   "VT8015_SL",
+   "VT10005_SL",
+   "VT8020_PRO",
+   "RO100",
+   "RO80",
+   "RO60",
+   "RI100",
+   "RI80"
+  ],
+  "ratios": [
+   4.0,
+   5.0,
+   6.0,
+   7.0,
+   8.0,
+   9.0,
+   10.0,
+   11.0,
+   12.0,
+   13.0,
+   14.0,
+   15.0,
+   16.0,
+   17.0,
+   18.0,
+   19.0,
+   20.0,
+   21.0,
+   22.0,
+   23.0,
+   24.0,
+   25.0,
+   26.0,
+   27.0,
+   28.0,
+   29.0,
+   30.0
+  ],
+  "materials": [
+   "3dp",
+   "metal"
+  ]
+ },
+ "cases": {
+  "feasible": 3930,
+  "no design": 3494,
+  "error": 28
+ },
+ "settings": {
+  "format": 1,
+  "gains": {
+   "K_Mass": 1,
+   "K_Eff": -2,
+   "K_Width": 0.2,
+   "K_torque_shortfall": 10,
+   "K_Width_real": 0.05
+  },
+  "grid_step": 1.0,
+  "min_carried_fraction_for_best": 0.8,
+  "near_best_rel": 0.02,
+  "min_best_interval": 0.5,
+  "fit_error_flag_rel": 0.05
+ },
+ "known_issues": [
+  {
+   "id": "metal-overestimate",
+   "materials": [
+    "metal"
+   ],
+   "text": "Metal masses are overestimated: the metal mode reuses the 3D-printed shapes, the whole gearbox casing is weighed as steel, and planets are as wide as two planet bearings need. This favours compound types (CPG) in the metal map. See docs/metal_sspg_mass.md and ISSUES.md 'Material modes'."
+  },
+  {
+   "id": "bug13",
+   "types": [
+    "indspg"
+   ],
+   "text": "INDSPG raises instead of reporting 'no design' where it has none (ISSUES.md bug 13); those cases count as no design."
+  },
+  {
+   "id": "CAD6",
+   "types": [
+    "idspg"
+   ],
+   "text": "IDSPG stage-2 parts don't move in the CAD with smaller motors (RO80)."
+  },
+  {
+   "id": "CAD7",
+   "types": [
+    "inwpg_dependent"
+   ],
+   "text": "INWPG dependent output ring gear and bearing don't move in the CAD (RI80)."
+  },
+  {
+   "id": "reflected-inertia",
+   "text": "Reflected inertia is ratio^2 x rotor inertia only; the gears' inertia is not included. Framed motors' rotor inertias are estimates (+-30 %)."
+  }
+ ],
+ "warnings": [
+  {
+   "motor": "RO60",
+   "material": "3dp",
+   "text": "no design in any gearbox type at any swept ratio; not in the map"
+  },
+  {
+   "motor": "RO60",
+   "material": "metal",
+   "text": "no design in any gearbox type at any swept ratio; not in the map"
+  },
+  {
+   "motor": "RI80",
+   "material": "3dp",
+   "text": "no design at ratios 12"
+  },
+  {
+   "motor": "RI80",
+   "material": "metal",
+   "text": "no design at ratios 12"
+  },
+  {
+   "motor": "RO80",
+   "material": "3dp",
+   "text": "no design at ratios 9, 10, 26, 27, 28, 29, 30"
+  },
+  {
+   "motor": "RO80",
+   "material": "metal",
+   "text": "no design at ratios 9, 10, 26, 27, 28, 29, 30"
+  },
+  {
+   "motor": "RO100",
+   "material": "3dp",
+   "text": "the best type is torque-capped (< 80 % of peak) somewhere in the range; check flags['torque_capped'] / ['no_full_torque_design']"
+  },
+  {
+   "motor": "RO80",
+   "material": "3dp",
+   "text": "the best type is torque-capped (< 80 % of peak) somewhere in the range; check flags['torque_capped'] / ['no_full_torque_design']"
+  }
+ ]
+}
