@@ -295,13 +295,14 @@
    "attr": "clearance_motor_and_case",
    "category": "dependent",
    "subtype": "formula",
-   "formula": "5 if ring_OD < motor_OD else (ring_OD - motor_OD) / 2 + 5",
+   "formula": "clearance_motor_and_case_min if ring_OD < motor_OD else (ring_OD - motor_OD) / 2 + clearance_motor_and_case_min",
    "depends_on": [
     "ring_OD",
-    "motor_OD"
+    "motor_OD",
+    "clearance_motor_and_case_min"
    ],
-   "confidence": "medium",
-   "reason": "named a clearance, but computed: grows when the ring gear is wider than the motor; the 5 mm is a number hard-coded in the code, not a config value"
+   "confidence": "high",
+   "reason": "radial gap between the motor and the case: the configured minimum, or more when the ring gear is wider than the motor (the same rule is used for the case mass)"
   },
   {
    "name": "case_mounting_surface_height",
@@ -1670,6 +1671,19 @@
    },
    "confidence": "high",
    "reason": "extra bore when choosing the output bearing"
+  },
+  {
+   "name": "clearance_motor_and_case_min",
+   "attr": "clearance_motor_and_case_min",
+   "category": "fixed",
+   "subtype": "constraint constant",
+   "source": {
+    "file": "sspg_params.json",
+    "block": "sspg_3DP_design_parameters",
+    "key": "clearance_motor_and_case_min"
+   },
+   "confidence": "high",
+   "reason": "smallest radial gap between the motor and the case; sets clearance_motor_and_case (CAD) and the case mass"
   },
   {
    "name": "pressure_angle_rad",

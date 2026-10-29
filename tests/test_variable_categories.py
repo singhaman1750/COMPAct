@@ -78,7 +78,7 @@ def design(request, tmp_path_factory):
 def test_counts_and_one_category_each():
     names = [e["name"] for e in CAD]
     assert len(names) == 113 and len(set(names)) == 113
-    assert len(CODE) == 20 and not set(names) & {e["name"] for e in CODE}
+    assert len(CODE) == 21 and not set(names) & {e["name"] for e in CODE}
     assert Counter(e["category"] for e in CAD) == {"input": 18, "optimisation": 7, "fixed": 43, "dependent": 45}
     for e in CAD + CODE:
         assert e["category"] in CATEGORIES and e["confidence"] in SPEC["confidence"], e["name"]
@@ -204,3 +204,30 @@ def test_both_branches_of_the_two_case_rules_are_checked():
 def test_docs_page_is_up_to_date():
     page = (REPO / "docs" / "variables" / "sspg.md").read_text(encoding="utf-8")
     assert page == render(SPEC), "run: python tools/variables/render.py sspg"
+
+
+def test_motor_case_clearance_comes_from_the_config(monkeypatch, tmp_path):
+    """clearance_motor_and_case_min (config) drives both the CAD value and the case mass: raising it
+    changes clearance_motor_and_case and exactly the CAD variables that depend on it, and the mass."""
+    b = json.loads((BASELINE_DIR / "sspg__U8_Lite__6.5.json").read_text(encoding="utf-8"))
+    _, n, Ns, Np, Nr, module = b["opt_parameters"]
+
+    def run(clearance_min, folder):
+        actuator, _, _, onshape = write_files(monkeypatch, folder, "U8_Lite", "3dp", Ns, Np, Nr, module, n)
+        if clearance_min is not None:
+            actuator.design_params["clearance_motor_and_case_min"] = clearance_min
+            actuator.setVariables()
+            actuator.genEquationFile_editCADdirectly()
+            onshape = equation_lines((folder / "SSPG" / "sspg_equations_onshape.txt").read_text())
+        return dict((k, float(v)) for k, v in onshape), actuator.getMassKG_3DP()
+
+    (tmp_path / "a").mkdir(), (tmp_path / "b").mkdir()
+    base, base_mass = run(None, tmp_path / "a")
+    more, more_mass = run(7, tmp_path / "b")
+    assert base["clearance_motor_and_case"] == 5 and more["clearance_motor_and_case"] == 7   # ring gear < motor here
+    downstream = {"clearance_motor_and_case"}
+    for e in CAD:                                     # everything that depends on it, directly or not
+        if set(e.get("depends_on", [])) & downstream:
+            downstream.add(e["name"])
+    assert {k for k in base if base[k] != more[k]} == downstream
+    assert more_mass > base_mass

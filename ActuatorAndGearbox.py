@@ -2084,6 +2084,7 @@ class singleStagePlanetaryActuator:
         self.bearingIDClearanceMM                       = self.design_params["bearingIDClearanceMM"]
         self.clearance_sun_coupler_sec_carrier          = self.design_params["clearance_sun_coupler_sec_carrier"]          # 1.5
         self.ring_to_chamfer_clearance                  = self.design_params["ring_to_chamfer_clearance"]                  # 2
+        self.clearance_motor_and_case_min               = self.design_params["clearance_motor_and_case_min"]               # 5
         self.tight_clearance_3DP                        = self.design_params["tight_clearance_3DP"]        
         self.loose_clearance_3DP                        = self.design_params["loose_clearance_3DP"]
 
@@ -2198,10 +2199,10 @@ class singleStagePlanetaryActuator:
 
         # --- casing Motor and gearbox casing dimensions ---
         if self.ring_OD < self.motor_OD :
-            self.clearance_motor_and_case = 5 
+            self.clearance_motor_and_case = self.clearance_motor_and_case_min
         else :
-            self.clearance_motor_and_case = (self.ring_OD - self.motor_OD) / 2 + 5
-        
+            self.clearance_motor_and_case = (self.ring_OD - self.motor_OD) / 2 + self.clearance_motor_and_case_min
+
         self.Motor_case_ID = self.motor_OD + self.clearance_motor_and_case * 2
         self.motor_case_OD_base = self.motor_OD + self.clearance_motor_and_case * 2 + self.Motor_case_thickness * 2
 
@@ -3192,9 +3193,9 @@ class singleStagePlanetaryActuator:
         motor_OD = self.motorDiaMM
 
         if (ring_OD < motor_OD):
-            clearance_motor_and_case = 5
+            clearance_motor_and_case = self.clearance_motor_and_case_min
         else: 
-            clearance_motor_and_case = (ring_OD - motor_OD)/2 + 5
+            clearance_motor_and_case = (ring_OD - motor_OD)/2 + self.clearance_motor_and_case_min
 
         Motor_case_ID     = motor_OD + clearance_motor_and_case * 2
         motor_height      = self.motorLengthMM
