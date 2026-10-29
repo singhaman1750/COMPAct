@@ -511,6 +511,19 @@ report no design as for the other types.
 
 **Status:** open.
 
+### 14. Wide 3D-printed gears in INWPG with small inrunners
+
+**Description:** with 3D-printed (PLA) gears at peak torque, INWPG's planets come out very wide:
+golden cases RI100 ratio 20 — dependent 50 mm, independent 34 mm; RI80 — 60 mm and 66 mm (small
+planet `fw_p_s`), against a 24.5–26.5 mm stator. The Onshape models still build (the gearbox sits
+beside the motor, not inside it), so unlike ISSPG/ICPG this is not capped. Question for the INWPG
+designer: are such widths acceptable, or should INWPG also get a width limit?
+
+Related: IDSPG's stage 1 sits inside the stator; its gears fit today (RO100: 14.7 mm of 31.5), so no
+cap was added — add one like ISSPG's if a design ever exceeds it.
+
+**Status:** open — found 2026-10-29 while adding the ISSPG/ICPG width cap.
+
 ## CAD issues
 
 Problems in the CAD models (Onshape / SolidWorks), not in the Python code. Found while checking

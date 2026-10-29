@@ -507,6 +507,10 @@ class internalsingleStagePlanetaryActuator:
         #--------------------------------------------
         self.design_params = design_params
         self.motor_driver_params  = motor_driver_params
+        # set by mitStressAnalysisMinFacewidth: gear width allowed inside the stator, and the
+        # share of the motor's peak torque the (possibly capped) gears can carry
+        self.fw_limit_mm             = None
+        self.torque_carried_fraction = 1.0
 
         #--------------------------------------------
         # Independent parameters
@@ -1179,6 +1183,17 @@ class internalsingleStagePlanetaryActuator:
         bMin_planet_mitMM = bMin_planet_mit * 1000
         bMin_ring_mitMM   = bMin_ring_mit   * 1000
 
+        # The gears sit inside the frameless outrunner, so they must fit its stator height minus a
+        # margin. A wider design (3D-printed gears at peak torque) is capped there; the MIT width is
+        # proportional to the tooth force, so the capped gears carry limit / required of the torque.
+        self.fw_limit_mm             = self.motor.stator_height - self.design_params["gear_axial_margin_mm"]
+        self.torque_carried_fraction = 1.0
+        if bMin_ring_mit * 1000 > self.fw_limit_mm:
+            self.torque_carried_fraction = self.fw_limit_mm / (bMin_ring_mit * 1000)
+            bMin_sun_mit    *= self.torque_carried_fraction
+            bMin_planet_mit *= self.torque_carried_fraction
+            bMin_ring_mit   *= self.torque_carried_fraction
+
         self.planetaryGearbox.setfwSunMM    ( bMin_sun_mit    * 1000)
         self.planetaryGearbox.setfwPlanetMM ( bMin_planet_mit * 1000)
         self.planetaryGearbox.setfwRingMM   ( bMin_ring_mit   * 1000)
@@ -1833,12 +1848,13 @@ class optimizationInternalSingleStageActuator:
             
             peakTorque = round(Actuator.motor.getMaxMotorTorque()*Actuator.planetaryGearbox.gearRatio(), 3)
             Cost       = self.cost(Actuator = Actuator) 
-            Torque_Density = peakTorque / mass
+            Torque_Density = peakTorque * Actuator.torque_carried_fraction / mass  # torque the gears carry
             Outer_Bearing_mass = Actuator.output_bearing_mass
             Actuator_width = Actuator.actuator_width
             ## Don't delete the comment -- this is to verify if the Center distance and the PSC (should be all zero) are correct or not
             # print(iter,",", gearRatio,",",module,",", Ns,",", Np,",", Nr,",", numPlanet,",",  fwSunMM,",", fwPlanetMM,",", fwRingMM,",",Opt_PSC_sun,",", Opt_PSC_planet,",", Opt_PSC_ring,",", Opt_CD_SP, ",", Opt_CD_PR,",", mass,",", eff,",", peakTorque,",", Cost, ",", Torque_Density, ",", Outer_Bearing_mass, ",", Actuator_width)
-            print(iter,",", gearRatio,",",module,",", Ns,",", Np,",", Nr,",", numPlanet,",",  fwSunMM,",", fwPlanetMM,",", fwRingMM,",", mass,",", eff,",", peakTorque,",", Cost, ",", Torque_Density, ",", Outer_Bearing_mass, ",", Actuator_width)
+            Peak_torque_carried = round(peakTorque * Actuator.torque_carried_fraction, 3)
+            print(iter,",", gearRatio,",",module,",", Ns,",", Np,",", Nr,",", numPlanet,",",  fwSunMM,",", fwPlanetMM,",", fwRingMM,",", mass,",", eff,",", peakTorque,",", Cost, ",", Torque_Density, ",", Outer_Bearing_mass, ",", Actuator_width, ",", Actuator.torque_carried_fraction, ",", Peak_torque_carried, ",", Actuator.fw_limit_mm)
 
     @restores_stdout
     def optimizeActuator(self, Actuator=internalsingleStagePlanetaryActuator, UsePSCasVariable = 0, log = 0, csv = 1, gearRatioReq = 0, printOptParams = 1):
@@ -1900,7 +1916,7 @@ class optimizationInternalSingleStageActuator:
             elif csv:
                 # Printing the optimization iterations below
                 # print("iter, gearRatio, module, Ns, Np, Nr, numPlanet, fwSunMM, fwPlanetMM, fwRingMM, PSCs, PSCp, PSCr, CD_SP, CD_PR, mass, eff, peakTorque, Cost, Torque_Density, Outer_Bearing_mass, Actuator_width")
-                print("iter, gearRatio, module, Ns, Np, Nr, numPlanet, fwSunMM, fwPlanetMM, fwRingMM, mass, eff, peakTorque, Cost, Torque_Density, Outer_Bearing_mass, Actuator_width")
+                print("iter, gearRatio, module, Ns, Np, Nr, numPlanet, fwSunMM, fwPlanetMM, fwRingMM, mass, eff, peakTorque, Cost, Torque_Density, Outer_Bearing_mass, Actuator_width, Torque_carried_fraction, Peak_torque_carried, FW_limit_MM")
 
             while self.gearRatioIter <= self.GEAR_RATIO_MAX:
                 opt_done = 0
@@ -2000,6 +2016,11 @@ class optimizationInternalSingleStageActuator:
                 print(totalTime) 
 
         sys.stdout = sys.__stdout__
+        if opt_parameters and opt_actuator.torque_carried_fraction < 1:
+            print(f"Face width capped at {opt_actuator.fw_limit_mm:.1f} mm (stator height - gear_axial_margin_mm): "
+                  f"the gears carry {100 * opt_actuator.torque_carried_fraction:.0f} % of the motor's peak torque "
+                  f"({opt_actuator.torque_carried_fraction * opt_actuator.motor.getMaxMotorTorque():.2f} of "
+                  f"{opt_actuator.motor.getMaxMotorTorque():.2f} Nm)")
         return totalTime, opt_parameters
 
     def optimizeActuatorWithPSC(self, Actuator=internalsingleStagePlanetaryActuator, log=1, csv=0, printOptParams = 1):
@@ -2149,10 +2170,12 @@ class optimizationInternalSingleStageActuator:
         mass = Actuator.getMassKG_3DP()
         eff = Actuator.planetaryGearbox.getEfficiency()
         width = Actuator.planetaryGearbox.fwPlanetMM
+        torque_shortfall = 1 - Actuator.torque_carried_fraction  # 0 unless the face width was capped
         cost = (self.K_Mass    * mass 
                 + self.K_Eff   * eff 
                 + self.K_Width * width 
-                + K_gearRatio  * gearRatio_err)
+                + K_gearRatio  * gearRatio_err
+                + Actuator.design_params["K_torque_shortfall"] * torque_shortfall)
         return cost
 
 # ═══════════════════════════════════════════════════════════════════
