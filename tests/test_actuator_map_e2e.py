@@ -143,7 +143,10 @@ def test_release_copies_the_map_and_describes_it(run_dir, tmp_path, monkeypatch)
     monkeypatch.setattr(release, "MAPS_DIR", tmp_path)
     release.main(["--run", NAME, "--version", "vtest"])
     out = tmp_path / "vtest"
-    assert {p.name for p in out.iterdir()} == {"fits.json", "fits.md", "summary.md", "table_3dp.csv", "map.json", "README.md"}
+    assert {p.name for p in out.iterdir()} == {"fits.json", "fits.md", "summary.md", "table_3dp.csv", "map.json",
+                                               "README.md", "plots"}
+    assert sorted(p.name for p in (out / "plots").iterdir()) == sorted(
+        f"fit_overview_3dp_{q}.png" for q in release.PLOT_QUANTITIES)
     info = json.loads((out / "map.json").read_text(encoding="utf-8"))
     assert info["source"]["commit"] == json.loads((run_dir / "run.json").read_text())["commit"]
     assert info["cases"]["feasible"] == sum(1 for _ in (run_dir / "cases").rglob("*.json")

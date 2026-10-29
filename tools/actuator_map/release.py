@@ -92,7 +92,9 @@ def readme(version, meta, run, counts, warnings):
              "| `fits.md` | fit quality and best types per motor and material |",
              "| `summary.md` | best type at each swept ratio |",
              "| `table_<material>.csv` | every optimised design (one row per type and ratio) |",
-             "| `map.json` | where this map came from, its settings and warnings |", "",
+             "| `map.json` | where this map came from, its settings and warnings |",
+             "| `plots/fit_overview_<material>_<quantity>.png` | how well the fits follow the designs: every gearbox "
+             "type with one motor (`tools/actuator_map/plot_fit.py` draws these and single types) |", "",
              "## Source", "",
              f"- sweep run `{map_json_source(run)['run']}`, COMPAct commit `{run['commit']}`",
              f"- {len(run['motors'])} motors, ratios {run['ratios'][0]:g}-{run['ratios'][-1]:g} "
@@ -104,6 +106,26 @@ def readme(version, meta, run, counts, warnings):
     lines += ["", "## Warnings", ""]
     lines += [f"- {w['motor']} ({w['material']}): {w['text']}" for w in warnings]
     return "\n".join(lines) + "\n"
+
+
+PLOT_QUANTITIES = ("mass_kg", "width_with_driver_m", "efficiency")
+
+
+def write_plots(out, materials):
+    """Fit-quality overviews (every gearbox type, one motor each) in <release>/plots/; skipped
+    without matplotlib."""
+    try:
+        from tools.actuator_map import plot_fit
+    except ImportError:
+        print("matplotlib not installed: no plots")
+        return
+    from tools.actuator_map.map import ActuatorMap
+    amap = ActuatorMap(out)
+    (out / "plots").mkdir(exist_ok=True)
+    for material in materials:
+        for q in PLOT_QUANTITIES:
+            plot_fit.plot_overview(amap, material, out / "plots" / f"fit_overview_{material}_{q}.png", q)
+            plot_fit.plt.close("all")
 
 
 def map_json_source(run):
@@ -148,6 +170,7 @@ def main(argv=None):
     }
     (out / "map.json").write_text(json.dumps(map_json, indent=1) + "\n", encoding="utf-8")
     (out / "README.md").write_text(readme(args.version, meta, run, counts, warnings), encoding="utf-8")
+    write_plots(out, run["materials"])
     print(f"released {args.run} as {out}: {', '.join(FILES + tuple(tables))}, map.json, README.md "
           f"({len(warnings)} warnings)")
 

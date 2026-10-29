@@ -148,6 +148,21 @@ A ratio where no (allowed) type has designs raises `ValueError` (no extrapolatio
 `best_types(motor, material)` (intervals and switch ratios), `ranking(motor, ratio, material)`.
 All values are SI; speeds also in rpm. The gears' own inertia is not included yet.
 
+## Plot fit quality
+
+```bash
+python tools/actuator_map/plot_fit.py overview tools/actuator_map/maps/v1 3dp out.png            # mass
+python tools/actuator_map/plot_fit.py overview tools/actuator_map/maps/v1 metal out.png efficiency
+python tools/actuator_map/plot_fit.py type tools/actuator_map/maps/v1 U8_Lite 3dp dspg out.png    # mass, width, efficiency
+```
+
+Each panel: the designs (dots), the smooth fit (blue), the interp line (grey), a ±5 % band around
+the fit, designs more than 5 % off in red and piece breaks dashed; below it, the error at each
+design (fit − design, %). `overview` shows every gearbox type with one motor (U8_Lite, RO100,
+RI100); `type` shows one type with any quantities (`mass_kg`, `width_with_driver_m`,
+`width_body_m`, `dia_body_m`, `dia_widest_m`, `efficiency`, `torque_carried_fraction`). A
+release includes the overviews in `maps/<version>/plots/`.
+
 ## Release a map
 
 ```bash

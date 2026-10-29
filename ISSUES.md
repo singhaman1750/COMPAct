@@ -148,6 +148,23 @@ search; re-tune `K_Width` (per mm of whole actuator, not of gear); re-record eve
 
 **Status:** future — decided 2026-10-29 to use the map's second score for now.
 
+### Actuator map — better fits (future)
+
+The fit-quality plots of map v1 (`tools/actuator_map/plot_fit.py`, `maps/v1/plots/`) show three
+weaknesses of the fits (the designs and `method="interp"` are not affected):
+
+1. **End outliers bend the fit.** The first design of a type is often unusually heavy (RI100
+   INDSPG 9.5:1: 1,320 g vs ~1,030 g after it; RO100 IDSPG 7:1). The jump rule needs 3 designs on
+   each side, so it can't split them off. Fix: leave a first / last design far off the trend of the
+   rest out of the fit (keep it for interp).
+2. **Too-flat fits.** The lowest degree within 1 % of the *mean value* is chosen, so a real but
+   small trend can become a flat line (U8_Lite 3dp DSPG efficiency falls 93 → 90 %, fit d0), which
+   gives a zero slope to co-design. Fix: measure the tolerance against the data's spread.
+3. **Wiggle.** A cubic piece can bend between designs (RO100 IDSPG 7–16: a dip and a bump the
+   designs don't have). Fix: allow degree 3 only when it clearly beats degree 2.
+
+Each changes the fits, so it would be a new map release.
+
 ## Bugs
 
 ### 1. `bearings_discrete` — OD table vs ID table content differ
