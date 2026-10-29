@@ -12,7 +12,7 @@ pip install -r requirements-dev.txt
 pytest
 ```
 
-These check that every gearbox type in `gearbox_runner.GEARBOXES` names existing classes and config files, builds with one of its golden motors, has a results print layout in `actOpt.py`, and has a golden baseline. `tests/test_motors.py` checks `config_files/motors.json`. They also check that every config file is valid JSON. CI runs them on every push.
+These check that every gearbox type in `gearbox_runner.GEARBOXES` names existing classes and config files, builds with one of its golden motors, has a results print layout in `actOpt.py`, and has a golden baseline. `tests/test_motors.py` checks `config_files/motors.json`. They also check that every config file is valid JSON. `tests/test_actuator_map.py` checks the actuator-map tool (`tools/actuator_map/`): a few sweep cases must equal the plain optimiser's golden baselines, and its width/diameter formulas must match the Onshape measurements. CI runs them on every push.
 
 ## Golden-output check (under a minute)
 
