@@ -2137,6 +2137,7 @@ class singleStagePlanetaryActuator:
         self.planet_shaft_step_offset = self.design_params["planet_shaft_step_offset"] # 1  
         self.planet_bearing_OD        = self.design_params["planet_bearing_OD"] # 12 
         self.planet_bearing_width     = self.design_params["planet_bearing_width"] # 3.5
+        self.planet_bearing_gap       = self.design_params["planet_bearing_gap"] # 1.0
         self.planet_bore              = self.design_params["planet_bore"] # 10
 
         # --- bearing retainer dimensions ---
@@ -2964,8 +2965,8 @@ class singleStagePlanetaryActuator:
 
 
         #------------- Contraint in planet to accomodate its bearings------------------------------------------
-        if (bMin_planet_mit * 1000 < (self.planet_bearing_width*2 + self.standard_clearance_1_5mm * 2 / 3)) : 
-            bMin_planet_mit = (self.planet_bearing_width*2 + self.standard_clearance_1_5mm * 2 / 3) / 1000
+        if (bMin_planet_mit * 1000 < (self.planet_bearing_width*2 + self.planet_bearing_gap)) : 
+            bMin_planet_mit = (self.planet_bearing_width*2 + self.planet_bearing_gap) / 1000
             bMin_ring_mit = bMin_planet_mit # FT on both are same
 
         bMin_sun_mitMM    = bMin_sun_mit    * 1000

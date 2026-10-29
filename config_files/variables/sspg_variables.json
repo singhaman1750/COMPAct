@@ -560,7 +560,7 @@
    "attr": "fw_p",
    "category": "dependent",
    "subtype": "stress rule",
-   "rule": "b = FOS x Ft x qe x qk / (gear_allowable_stress x module), with Ft = serviceFactor x motor_peak_torque / (num_planet x sun pitch radius), qe = 1 / sun-planet contact ratio, qk = curve fit in Ns (mitStressAnalysisMinFacewidth); fw = max(b, 2 x planet_bearing_width + standard_clearance_1_5mm x 2/3)",
+   "rule": "b = FOS x Ft x qe x qk / (gear_allowable_stress x module), with Ft = serviceFactor x motor_peak_torque / (num_planet x sun pitch radius), qe = 1 / sun-planet contact ratio, qk = curve fit in Ns (mitStressAnalysisMinFacewidth); fw = max(b, 2 x planet_bearing_width + planet_bearing_gap)",
    "depends_on": [
     "module",
     "Ns",
@@ -573,7 +573,7 @@
     "FOS",
     "serviceFactor",
     "planet_bearing_width",
-    "standard_clearance_1_5mm"
+    "planet_bearing_gap"
    ],
    "confidence": "high",
    "reason": "planet face width from the tooth-stress rule, at least room for the two planet bearings: fixed by the optimisation variables, the motor torque, the gear material and the safety factors"
@@ -636,7 +636,7 @@
    "attr": "fw_r",
    "category": "dependent",
    "subtype": "stress rule",
-   "rule": "b = FOS x Ft x qe x qk / (gear_allowable_stress x module), with Ft = serviceFactor x motor_peak_torque / (num_planet x sun pitch radius), qe = 1 / sun-planet contact ratio, qk = curve fit in Ns (mitStressAnalysisMinFacewidth); fw = max(b, 2 x planet_bearing_width + standard_clearance_1_5mm x 2/3)",
+   "rule": "b = FOS x Ft x qe x qk / (gear_allowable_stress x module), with Ft = serviceFactor x motor_peak_torque / (num_planet x sun pitch radius), qe = 1 / sun-planet contact ratio, qk = curve fit in Ns (mitStressAnalysisMinFacewidth); fw = max(b, 2 x planet_bearing_width + planet_bearing_gap)",
    "depends_on": [
     "module",
     "Ns",
@@ -649,7 +649,7 @@
     "FOS",
     "serviceFactor",
     "planet_bearing_width",
-    "standard_clearance_1_5mm"
+    "planet_bearing_gap"
    ],
    "confidence": "high",
    "reason": "ring (= planet) face width from the tooth-stress rule, at least room for the two planet bearings: fixed by the optimisation variables, the motor torque, the gear material and the safety factors"
@@ -1721,6 +1721,19 @@
    },
    "confidence": "high",
    "reason": "bearing-mount wall per side, in output-bolt diameters; sets bearing_mount_thickness (CAD) and the bearing-holding structure mass"
+  },
+  {
+   "name": "planet_bearing_gap",
+   "attr": "planet_bearing_gap",
+   "category": "fixed",
+   "subtype": "constraint constant",
+   "source": {
+    "file": "sspg_params.json",
+    "block": "sspg_3DP_design_parameters",
+    "key": "planet_bearing_gap"
+   },
+   "confidence": "high",
+   "reason": "axial gap between the two bearings inside a planet; with them it sets the smallest planet (and ring) face width"
   },
   {
    "name": "pressure_angle_rad",
