@@ -65,9 +65,13 @@ cases without a design). Units are SI; speeds are also in rpm.
 | `rated_torque_out_Nm` | min(motor rated, fraction × motor peak) × ratio × efficiency |
 | `no_load_speed_out_*`, `rated_speed_out_*` | motor speed ÷ ratio (rad/s and rpm) |
 | `reflected_inertia_kgm2` | ratio² × motor rotor inertia (the gears' own inertia not yet included); `rotor_inertia_basis` says datasheet or estimate |
-| `compact_cost` | the optimiser's cost (width = planet face widths) |
-| `real_width_score` | K_Mass·mass + K_Eff·efficiency + K_Width_real·(width with driver, mm) + ratio error + K_torque_shortfall·(1 − fraction), gains from `cost.json` |
-| `best_by_compact_cost`, `best_by_real_width` | the lowest-score type of that motor, ratio and material |
+| `real_width_score` | **the map's rule:** K_Mass·mass + K_Eff·efficiency + K_Width_real·(width with driver, mm) + ratio error + K_torque_shortfall·(1 − fraction), gains from `cost.json` (K_Width_real 0.05) |
+| `compact_cost` | the optimiser's own cost (width = planet face widths), kept as a second rule |
+| `best_by_real_width`, `best_by_compact_cost` | the lowest-score type of that motor, ratio and material, by each rule |
+| `near_best_real_width`, `near_best_compact` | every type within 2 % of the best score (near-ties: the winner may flip between neighbouring ratios) |
+| `no_full_torque_design` | no type at this motor, ratio and material carries 80 % of the peak torque |
 | `torque_capped`, `geometry_approx`, `cad_issues` | gears carry < 100 % of peak torque; width approximate; open CAD issues of the type (ISSUES.md) |
 
-Capped designs may be chosen as best (their shortfall is in both scores); they are flagged.
+**Rules for "best"** (pilot review, 2026-10-29): a capped design can be best only if its gears carry
+at least 80 % of the peak torque (`MIN_CARRIED_FRACTION_FOR_BEST`); if no design does, the best of
+all is still given and the group is marked `no_full_torque_design`.

@@ -22,7 +22,13 @@ Two scores pick the best type at each (motor, ratio, material); lower is better:
     compact_cost      the optimiser's own cost (planet face widths for width)
     real_width_score  K_Mass*mass + K_Eff*efficiency + K_Width_real*(width with driver mount, mm)
                       + |ratio - requested| + K_torque_shortfall*(1 - torque_carried_fraction)
-Gains come from config_files/cost.json. Capped designs may win; they are flagged (torque_capped).
+Gains come from config_files/cost.json. The real-width score is the map's main rule; the
+optimiser's cost is kept as a second one. Rules for "best" (pilot review, 2026-10-29):
+  - a capped design can be best only if its gears carry >= MIN_CARRIED_FRACTION_FOR_BEST of the
+    peak torque; if no design of that motor/ratio/material does, the best of all is still given
+    and every row of the group is marked no_full_torque_design
+  - near_best_* lists every type whose score is within NEAR_BEST_REL of the best (near-ties, where
+    the winner can flip from one ratio to the next)
 """
 import argparse
 import csv
@@ -37,6 +43,8 @@ if str(REPO) not in sys.path:
     sys.path.insert(0, str(REPO))
 
 RUNS_DIR = REPO / "tools" / "actuator_map" / "runs"
+MIN_CARRIED_FRACTION_FOR_BEST = 0.8   # capped designs below this can't be best (if anything else exists)
+NEAR_BEST_REL = 0.02                  # near-best: score within 2 % of the best
 MATERIALS = ("3dp", "metal")
 RPM_TO_RAD_S = 2 * math.pi / 60
 
@@ -74,7 +82,8 @@ COLUMNS = (
     "torque_carried_fraction", "peak_torque_out_Nm", "rated_torque_out_Nm",
     "no_load_speed_out_rad_s", "rated_speed_out_rad_s", "no_load_speed_out_rpm", "rated_speed_out_rpm",
     "rotor_inertia_kgm2", "reflected_inertia_kgm2", "rotor_inertia_basis",
-    "compact_cost", "real_width_score", "best_by_compact_cost", "best_by_real_width",
+    "real_width_score", "compact_cost", "best_by_real_width", "best_by_compact_cost",
+    "near_best_real_width", "near_best_compact", "no_full_torque_design",
     "torque_capped", "geometry_approx", "cad_issues", "commit",
 )
 
@@ -127,8 +136,11 @@ def make_row(case, motor_entry, gains):
         "rotor_inertia_basis": mech.get("rotor_inertia_basis"),
         "compact_cost": case["cost"],
         "real_width_score": real_score,
-        "best_by_compact_cost": False,
         "best_by_real_width": False,
+        "best_by_compact_cost": False,
+        "near_best_real_width": "",
+        "near_best_compact": "",
+        "no_full_torque_design": False,
         "torque_capped": frac < 1,
         "geometry_approx": bool(case.get("geometry_notes")),
         "cad_issues": " ".join(OPEN_CAD_ISSUES.get(gb, [])),
@@ -136,16 +148,30 @@ def make_row(case, motor_entry, gains):
     }
 
 
+RULES = (("best_by_real_width", "near_best_real_width", "real_width_score"),
+         ("best_by_compact_cost", "near_best_compact", "compact_cost"))
+
+
 def mark_best(rows):
-    """Set best_by_* on the lowest-score row of each (motor, material, requested ratio)."""
+    """Per (motor, material, requested ratio): the best row by each rule, the near-best types and
+    whether any design carries at least MIN_CARRIED_FRACTION_FOR_BEST of the peak torque."""
     groups = defaultdict(list)
     for r in rows:
         groups[(r["motor"], r["material"], r["ratio_requested"])].append(r)
     for group in groups.values():
-        for flag, score in (("best_by_compact_cost", "compact_cost"), ("best_by_real_width", "real_width_score")):
-            scored = [r for r in group if r[score] is not None]
-            if scored:
-                min(scored, key=lambda r: (r[score], r["gb_type"]))[flag] = True
+        full = [r for r in group if r["torque_carried_fraction"] >= MIN_CARRIED_FRACTION_FOR_BEST]
+        for r in group:
+            r["no_full_torque_design"] = not full
+        for flag, near_col, score in RULES:
+            pool = [r for r in (full or group) if r[score] is not None]
+            if not pool:
+                continue
+            best = min(pool, key=lambda r: (r[score], r["gb_type"]))
+            best[flag] = True
+            limit = best[score] + NEAR_BEST_REL * abs(best[score])
+            near = " ".join(r["gb_type"] for r in sorted(pool, key=lambda r: (r[score], r["gb_type"])) if r[score] <= limit)
+            for r in group:
+                r[near_col] = near
     return rows
 
 
@@ -171,18 +197,21 @@ def write_csv(rows, path):
 
 def summary(cases, rows):
     lines = ["# Actuator map summary", "",
-             "Best type at each requested ratio (lowest score), by the optimiser's cost and by the",
-             "real-width score; `*` = the winner's gears are capped (carry < 100 % of peak torque).", ""]
+             "Best type at each requested ratio (lowest score): by the real-width score (the map's rule)",
+             "and by the optimiser's cost. `*` = the winner's gears are capped (carry < 100 % of peak",
+             f"torque); `~` = near-tie (another type within {NEAR_BEST_REL:.0%} of the best score); `!` = no design",
+             f"carries {MIN_CARRIED_FRACTION_FOR_BEST:.0%} of the peak torque, so a more capped one is given.", ""]
     by_mm = defaultdict(list)
     for r in rows:
         by_mm[(r["motor"], r["material"])].append(r)
     for (motor, material), rs in sorted(by_mm.items()):
         lines += [f"## {motor}, {material}", ""]
-        for flag, title in (("best_by_compact_cost", "compact cost"), ("best_by_real_width", "real width")):
+        for (flag, near_col, _), title in zip(RULES, ("real width", "compact cost")):
             winners = sorted((r for r in rs if r[flag]), key=lambda r: r["ratio_requested"])
             runs, prev = [], None
             for r in winners:
-                name = r["gb_type"] + ("*" if r["torque_capped"] else "")
+                name = (r["gb_type"] + ("*" if r["torque_capped"] else "") + ("~" if " " in r[near_col] else "")
+                        + ("!" if r["no_full_torque_design"] else ""))
                 if prev and prev[0] == name:
                     prev[2] = r["ratio_requested"]
                 else:

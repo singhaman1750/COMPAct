@@ -172,3 +172,26 @@ def test_table_best_rows_cad_flags_and_gear_columns():
 def test_every_gearbox_type_has_gear_columns():
     import gearbox_runner
     assert set(GEAR_VARS) == set(gearbox_runner.GEARBOXES)
+
+
+def test_best_needs_80_percent_torque_unless_nothing_has_it():
+    # capped 70 % design scores best but can't win while an 85 % one exists
+    cases = [fake_case("isspg_inside", 5.0, cost=1.0, fraction=0.70, width_drv=60.0),
+             fake_case("icpg", 5.0, cost=2.0, fraction=0.85, width_drv=75.0),
+             # ratio 6: nothing reaches 80 %, so the best of all is given and the group is flagged
+             fake_case("isspg_inside", 6.0, cost=1.0, fraction=0.55),
+             fake_case("icpg", 6.0, cost=2.0, fraction=0.50)]
+    rows = build_rows(cases, {"M": MOTOR}, GAINS_FOR_TABLE)
+    best5 = [r["gb_type"] for r in rows if r["ratio_requested"] == 5.0 and r["best_by_real_width"]]
+    best6 = [r for r in rows if r["ratio_requested"] == 6.0 and r["best_by_compact_cost"]]
+    assert best5 == ["icpg"]
+    assert [r["gb_type"] for r in best6] == ["isspg_inside"]
+    assert all(r["no_full_torque_design"] for r in rows if r["ratio_requested"] == 6.0)
+    assert not any(r["no_full_torque_design"] for r in rows if r["ratio_requested"] == 5.0)
+
+
+def test_near_best_lists_types_within_2_percent():
+    cases = [fake_case("dspg", 20.0, cost=3.00), fake_case("wpg", 20.0, cost=3.05),   # 1.7 % worse: near
+             fake_case("cpg", 20.0, cost=3.20)]                                         # 6.7 % worse: not
+    rows = build_rows(cases, {"M": MOTOR}, GAINS_FOR_TABLE)
+    assert {r["near_best_compact"] for r in rows} == {"dspg wpg"}
