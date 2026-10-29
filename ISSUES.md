@@ -81,6 +81,11 @@ metal case per gearbox type.
    clearances (e.g. `loose_clearance_3DP`) and can be thinner than printed ones. Metal mode needs
    its own design settings per gearbox; until then it reuses the 3D-printed shapes.
 
+SSPG analysis of both tasks (2026-10-29): [docs/metal_sspg_mass.md](docs/metal_sspg_mass.md).
+Mass breakdown for U8_Lite 6.5:1 and MN8014 6:1, the saving and confidence of each candidate
+change, and which changes would break the Onshape CAD. Task 1 alone saves about 240–290 g per
+design. Reproduce with `tools/metal_analysis/sspg_mass_whatif.py`.
+
 ### Unify per-gearbox settings (important — most items change results)
 
 Found while building the common runner (Phase 3a). The runner keeps every one of these
