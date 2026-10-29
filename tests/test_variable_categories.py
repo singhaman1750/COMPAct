@@ -92,8 +92,9 @@ def test_spec_lists_exactly_the_variables_the_code_writes(design):
     assert sorted({aliases.get(n, n) for n, _ in plain}) == sorted(e["name"] for e in CAD)
     assert len(plain) == len(onshape) + 1                                # "pressure angle" is written twice
     if baseline is not None:                                             # the golden design is reproduced
-        assert [(n, float(v)) for n, v in onshape] == pytest.approx(
-            [(n, float(v)) for n, v in equation_lines(baseline)], rel=1e-9)
+        expected = equation_lines(baseline)
+        assert [n for n, _ in onshape] == [n for n, _ in expected]
+        assert [float(v) for _, v in onshape] == pytest.approx([float(v) for _, v in expected], rel=1e-9)
 
 
 def test_every_dependency_is_classified():
