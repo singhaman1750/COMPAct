@@ -121,6 +121,19 @@ def test_every_dependency_is_classified():
             assert "source" in e, e["name"]
 
 
+def test_depends_on_lists_exactly_the_names_in_each_formula_and_lookup():
+    import ast
+    for e in CAD + CODE:
+        if "formula" in e:
+            exprs = [e["formula"]]
+        elif "lookup" in e:
+            exprs = [v for k, v in e["lookup"]["args"].items() if k != "bolt_type"]
+        else:
+            continue
+        used = {n.id for x in exprs for n in ast.walk(ast.parse(x, mode="eval")) if isinstance(n, ast.Name)}
+        assert used - {"cos", "sqrt", "pi"} == set(e["depends_on"]), e["name"]
+
+
 def test_every_config_key_is_accounted_for():
     params = json.loads((CONFIG / "sspg_params.json").read_text(encoding="utf-8"))
     used = {(s["block"], s["key"]) for e in CAD + CODE if (s := e.get("source", {})).get("file") == "sspg_params.json"}
