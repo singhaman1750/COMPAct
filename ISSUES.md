@@ -118,8 +118,30 @@ result-changing commit with re-recorded golden baselines.
    - ISSPG: no limit passed.
    The IDSPG line carries a `#TODO: this is correct and implement in other also`.
 
-**Status:** items 1 and 2 done; items 3 and 4 open — decide one value / rule per item, then
+5. ~~**Cost gains copied into five config files**~~ (and `K_torque_shortfall` into four params
+   files), all with the same values, so a gain changed in one file would have given that type a
+   different cost. **Done (2026-10-29):** every type reads one set from `config_files/cost.json`
+   (`K_Mass`, `K_Eff`, `K_Width`, `K_torque_shortfall`; plus `K_Width_real` for the actuator map);
+   `tests/test_cost_gains.py` keeps it that way. Same values, so results unchanged (golden 58/58).
+
+**Status:** items 1, 2 and 5 done; items 3 and 4 open — decide one value / rule per item, then
 change and re-record one item at a time.
+
+### Optimise with the real actuator width (future)
+
+The optimiser's cost uses `K_Width` × the planet face widths, not the actuator's length. Within one
+type that ranks designs almost the same (the real width is the planet widths plus fixed sizes and
+bearing heights), but between types it compares different things: one planet width for
+single-stage, two steps for compound/Wolfrom, both stages for double-stage; casings, bearings and
+the motor are not counted. The actuator map (`tools/actuator_map/`) therefore adds a second score
+with the real width (`K_Width_real` in `cost.json`) after the sweep.
+
+**To do it in the optimiser:** move the width formulas of `tools/actuator_map/geometry.py` (matched
+to Onshape) into each gearbox type's cost; make the CAD variables they need available during the
+search; re-tune `K_Width` (per mm of whole actuator, not of gear); re-record every golden baseline
+(every result changes). Overlaps with bug 15 (`actuator_width` vs the CAD). About 1–2 sessions.
+
+**Status:** future — decided 2026-10-29 to use the map's second score for now.
 
 ## Bugs
 

@@ -1,0 +1,10 @@
+{
+    "_help": "The one set of cost gains for every gearbox type (gearbox_runner.build reads it). The optimiser's cost is K_Mass*mass + K_Eff*efficiency + K_Width*(planet face widths) + |gear ratio - requested| (+ K_torque_shortfall*(1 - torque carried) for ISSPG, ICPG and INWPG, whose face width can be capped). K_Width_real is used only by the actuator map (tools/actuator_map): its second score uses the whole actuator's width, with the driver mount, instead of the planet face widths.",
+    "Cost_gain_parameters": {
+        "K_Mass": 1,
+        "K_Eff": -2,
+        "K_Width": 0.2,
+        "K_torque_shortfall": 10,
+        "K_Width_real": 0.05
+    }
+}
