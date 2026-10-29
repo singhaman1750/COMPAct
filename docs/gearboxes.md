@@ -36,7 +36,7 @@ The gearbox sits inside the rotor/stator of a frameless motor.
 | `idspg` | Internal double-stage | `ActuatorandGearbox_IDSPG` · `idspg_params.json` | factor × (motor OD + 2 × 1.5); stage 1: stator ID − 2 × ring-1 width | bug 7 (bearings counted twice); RO60 finds no design |
 
 **Gear width inside the motor (ISSPG, ICPG):** the gears sit inside the frameless outrunner, so
-their face width is capped at the motor's `stator_height` − `gear_axial_margin_mm` (3 mm; ICPG: both
+their face width is capped at the motor's `stator_height` − `gear_axial_margin_mm` (10 mm; ICPG: both
 planet steps + `planet_step_gap_mm`). PLA gears at peak torque often need more; then the width is
 capped and the torque derated — the run prints e.g. "the gears carry 50 % of the motor's peak
 torque", the CSV has `Torque_carried_fraction`, `Peak_torque_carried` and `FW_limit_MM`, and the

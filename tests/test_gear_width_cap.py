@@ -49,7 +49,8 @@ def test_too_wide_gears_are_capped_and_the_torque_derated(gb_type):
 
 @pytest.mark.parametrize("gb_type", sorted(CASES))
 def test_gears_that_fit_are_not_changed(gb_type):
-    actuator, width = CASES[gb_type]("metal")  # steel gears: well inside the stator
+    actuator, width = CASES[gb_type]("metal")  # steel gears at half the peak torque: well inside the stator
+    actuator.motor.maxMotorTorque *= 0.5
     actuator.updateFacewidth()
     assert actuator.torque_carried_fraction == 1.0
     assert width() < actuator.fw_limit_mm
