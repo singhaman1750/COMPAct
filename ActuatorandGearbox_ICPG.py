@@ -400,6 +400,10 @@ class internalcompoundPlanetaryActuator:
         self.MaxMotorAngVelRadPerSec = self.motor.getMaxMotorAngVelRadPerSec()
 
         self.design_params     = design_parameters
+        # set by mitStressAnalysisMinFacewidth: planet width allowed inside the stator, and the
+        # share of the motor's peak torque the (possibly capped) gears can carry
+        self.fw_limit_mm             = None
+        self.torque_carried_fraction = 1.0
         self.ringRadialWidthMM = self.internalcompoundPlanetaryGearbox.ringRadialWidthMM
         self.setVariables()
 
@@ -918,6 +922,21 @@ class internalcompoundPlanetaryActuator:
             if (bMin_planetSmall_mit * 1000 < (self.planet_bearing_width + self.standard_clearance_1_5mm * 1 / 3)):
                 bMin_planetSmall_mit = (self.planet_bearing_width + self.standard_clearance_1_5mm * 1 / 3) / 1000
             bMin_ring_mit = bMin_planetSmall_mit
+
+        # The gears sit inside the frameless outrunner: the two planet steps (big + small, with a gap)
+        # must fit its stator height minus a margin. A wider design (3D-printed gears at peak torque)
+        # is capped there; MIT widths are proportional to the tooth forces, so the capped gears carry
+        # the same fraction of the torque.
+        self.fw_limit_mm             = self.motor.stator_height - self.design_params["gear_axial_margin_mm"]
+        self.torque_carried_fraction = 1.0
+        planets_mm = (bMin_planetBig_mit + bMin_planetSmall_mit) * 1000
+        planet_gap = self.design_params["planet_step_gap_mm"]
+        if planets_mm + planet_gap > self.fw_limit_mm:
+            self.torque_carried_fraction = (self.fw_limit_mm - planet_gap) / planets_mm
+            bMin_sun_mit         *= self.torque_carried_fraction
+            bMin_planetBig_mit   *= self.torque_carried_fraction
+            bMin_planetSmall_mit *= self.torque_carried_fraction
+            bMin_ring_mit        *= self.torque_carried_fraction
 
         self.internalcompoundPlanetaryGearbox.setfwSunMM        (bMin_sun_mit         * 1000)
         self.internalcompoundPlanetaryGearbox.setfwPlanetBigMM  (bMin_planetBig_mit   * 1000)
@@ -1481,7 +1500,7 @@ class optimizationInternalCompoundPlanetaryActuator:
             peakTorque     = round(Actuator.motor.getMaxMotorTorque()
                                    * Actuator.internalcompoundPlanetaryGearbox.gearRatio(), 3)
             tooth_forces   = Actuator.getToothForces()
-            Torque_Density = round(peakTorque / mass, 3)
+            Torque_Density = round(peakTorque * Actuator.torque_carried_fraction / mass, 3)  # torque the gears carry
 
             if self.UsePSCasVariable == 1:
                 try:
@@ -1496,7 +1515,9 @@ class optimizationInternalCompoundPlanetaryActuator:
             print(iter_, ",", gearRatio, ",", moduleBig, ",", moduleSmall, ",", Ns, ",", NpBig, ",",
                   NpSmall, ",", Nr, ",", numPlanet, ",", fwSunMM, ",", fwPlanetBigMM, ",",
                   fwPlanetSmallMM, ",", fwRingMM, ",", mass, ",", eff, ",", peakTorque, ",",
-                  Cost, ",", Torque_Density, ",", Outer_Bearing_mass, ",", Actuator_width)
+                  Cost, ",", Torque_Density, ",", Outer_Bearing_mass, ",", Actuator_width, ",",
+                  Actuator.torque_carried_fraction, ",",
+                  round(peakTorque * Actuator.torque_carried_fraction, 3), ",", Actuator.fw_limit_mm)
 
     # ── Public entry point ─────────────────────────────────────────────────
     @restores_stdout
@@ -1555,7 +1576,8 @@ class optimizationInternalCompoundPlanetaryActuator:
             elif csv:
                 print("iter, gearRatio, moduleBig, moduleSmall, Ns, NpBig, NpSmall, Nr, numPlanet, "
                       "fwSunMM, fwPlanetBigMM, fwPanetSmallMM, fwRingMM, mass, eff, peakTorque, "
-                      "Cost, Torque_Density, Outer_Bearing_mass, Actuator_width")
+                      "Cost, Torque_Density, Outer_Bearing_mass, Actuator_width, "
+                      "Torque_carried_fraction, Peak_torque_carried, FW_limit_MM")
 
             gb = Actuator.internalcompoundPlanetaryGearbox  # shorthand
 
@@ -1674,6 +1696,11 @@ class optimizationInternalCompoundPlanetaryActuator:
                 print(totalTime)
 
         sys.stdout = sys.__stdout__
+        if opt_parameters and opt_actuator.torque_carried_fraction < 1:
+            print(f"Face width capped at {opt_actuator.fw_limit_mm:.1f} mm (stator height - gear_axial_margin_mm): "
+                  f"the gears carry {100 * opt_actuator.torque_carried_fraction:.0f} % of the motor's peak torque "
+                  f"({opt_actuator.torque_carried_fraction * opt_actuator.motor.getMaxMotorTorque():.2f} of "
+                  f"{opt_actuator.motor.getMaxMotorTorque():.2f} Nm)")
         return totalTime, opt_parameters
 
     # ── Brute-force search (with PSC variable) ─────────────────────────────
@@ -1830,7 +1857,9 @@ class optimizationInternalCompoundPlanetaryActuator:
         width = (Actuator.internalcompoundPlanetaryGearbox.fwPlanetBigMM
                  + Actuator.internalcompoundPlanetaryGearbox.fwPlanetSmallMM)
 
+        torque_shortfall = 1 - Actuator.torque_carried_fraction  # 0 unless the face width was capped
         return (self.K_Mass    * mass
                 + self.K_Eff   * eff
                 + self.K_Width * width
-                + K_gearRatio  * gearRatio_err)
+                + K_gearRatio  * gearRatio_err
+                + Actuator.design_params["K_torque_shortfall"] * torque_shortfall)
