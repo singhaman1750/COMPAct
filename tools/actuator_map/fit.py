@@ -39,7 +39,10 @@ if str(REPO) not in sys.path:
     sys.path.insert(0, str(REPO))
 
 from tools.actuator_map.table import (  # noqa: E402
-    MIN_CARRIED_FRACTION_FOR_BEST, RUNS_DIR, build_rows, load_cases, load_gains)
+    MIN_CARRIED_FRACTION_FOR_BEST, NEAR_BEST_REL, OPEN_CAD_ISSUES, RUNS_DIR, build_rows, load_cases, load_gains,
+    load_motors)
+
+FITS_FORMAT = 1  # bump when fits.json changes in a way map.py must know about
 
 QUANTITIES = ("mass_kg", "width_body_m", "width_with_driver_m", "dia_body_m", "dia_widest_m",
               "efficiency", "torque_carried_fraction", "compact_cost")
@@ -151,6 +154,8 @@ def fit_type(rows, grid_step):
     x = [r["ratio"] for r in rows]
     out = {"n_points": len(rows), "ratio_range": [min(x), max(x)],
            "valid_intervals": valid_intervals([(r["ratio_requested"], r["ratio"]) for r in rows], grid_step),
+           "cad_issues": OPEN_CAD_ISSUES.get(rows[0]["gb_type"], []),
+           "geometry_approx_ratios": sorted(r["ratio"] for r in rows if r["geometry_approx"]),
            "quantities": {}}
     for q in QUANTITIES:
         pts = [(r["ratio"], r[q]) for r in rows if r[q] is not None]
@@ -331,6 +336,23 @@ def plot(fits, gains, out_dir):
             plt.close(fig)
 
 
+def make_meta(run_name, commit, gains, grid_step, motor_names, motors=None):
+    """Everything map.py needs besides the fits: settings, gains and the motors' own values."""
+    motors = motors or load_motors()
+    motor_values = {}
+    for name in sorted(motor_names):
+        el, mech = motors[name]["electrical"], motors[name].get("mechanical", {})
+        motor_values[name] = {
+            "type": motors[name]["type"],
+            "peak_torque_Nm": el["peak_torque_Nm"], "rated_torque_Nm": el.get("rated_torque_Nm"),
+            "no_load_speed_rpm": el["no_load_speed_rpm"], "rated_speed_rpm": el.get("rated_speed_rpm"),
+            "rotor_inertia_kgm2": mech.get("rotor_inertia_kgm2"),
+            "rotor_inertia_basis": mech.get("rotor_inertia_basis")}
+    return {"format": FITS_FORMAT, "run": run_name, "commit": commit, "gains": gains, "grid_step": grid_step,
+            "min_carried_fraction_for_best": MIN_CARRIED_FRACTION_FOR_BEST, "near_best_rel": NEAR_BEST_REL,
+            "quantities": list(QUANTITIES), "motors": motor_values}
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--name", required=True, help="run folder under tools/actuator_map/runs/")
@@ -343,8 +365,7 @@ def main(argv=None):
     gains = load_gains()
     rows = build_rows(load_cases(run_dir))
     fits = build_fits(rows, grid_step, gains)
-    meta = {"run": args.name, "commit": run.get("commit"), "gains": gains, "grid_step": grid_step,
-            "min_carried_fraction_for_best": MIN_CARRIED_FRACTION_FOR_BEST, "quantities": list(QUANTITIES)}
+    meta = make_meta(args.name, run.get("commit"), gains, grid_step, fits.keys())
     (run_dir / "fits.json").write_text(json.dumps({"meta": meta, "motors": fits}, indent=1), encoding="utf-8")
     (run_dir / "fits.md").write_text(report(fits), encoding="utf-8")
     if not args.no_plots:

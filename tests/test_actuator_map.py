@@ -254,3 +254,72 @@ def test_best_between_grid_points_uses_the_80_percent_rule():
     only_capped = {"isspg_inside": _type([0.5], fraction=0.6), "icpg": _type([1.5], fraction=0.5)}
     assert best_type(only_capped, 6.3, GAINS_FOR_TABLE) == "isspg_inside"
     assert best_type(types, 31.0, GAINS_FOR_TABLE) is None             # outside every valid range
+
+
+# ---- the interface (tools/actuator_map/map.py) ------------------------------------------------
+
+import ast  # noqa: E402
+
+from tools.actuator_map.fit import build_fits, make_meta  # noqa: E402
+from tools.actuator_map.map import ActuatorMap  # noqa: E402
+
+
+@pytest.fixture()
+def small_map(tmp_path):
+    """A map from hand-made designs: a light short type at low ratios, a heavier one that wins later,
+    and a capped type that scores best but carries only 50 %."""
+    cases = []
+    for r in range(4, 13):
+        cases.append(fake_case("icpg", float(r), cost=1.0, mass=0.6 + 0.08 * r, width_drv=60 + 4 * r, eff=0.95 - 0.002 * r))
+        cases.append(fake_case("idspg", float(r), cost=1.5, mass=1.0 + 0.02 * r, width_drv=85 + 1 * r, eff=0.92))
+    for r in range(4, 8):
+        cases.append(fake_case("isspg_inside", float(r), cost=0.5, fraction=0.5, mass=0.4, width_drv=50, eff=0.96))
+    rows = build_rows(cases, {"M": MOTOR}, GAINS_FOR_TABLE)
+    fits = build_fits(rows, 1.0, GAINS_FOR_TABLE)
+    meta = make_meta("test", "abc", GAINS_FOR_TABLE, 1.0, ["M"], motors={"M": MOTOR})
+    (tmp_path / "fits.json").write_text(json.dumps({"meta": meta, "motors": fits}))
+    return ActuatorMap(tmp_path), rows
+
+
+def test_interface_interp_reproduces_the_table_at_a_design(small_map):
+    amap, rows = small_map
+    row = next(r for r in rows if r["gb_type"] == "idspg" and r["ratio_requested"] == 9.0)
+    a = amap.actuator("M", 9.0, "3dp", gb_type="idspg", method="interp")
+    for attr, col in (("mass", "mass_kg"), ("width", "width_with_driver_m"), ("efficiency", "efficiency"),
+                      ("peak_torque", "peak_torque_out_Nm"), ("rated_torque", "rated_torque_out_Nm"),
+                      ("no_load_speed", "no_load_speed_out_rad_s"), ("reflected_inertia", "reflected_inertia_kgm2")):
+        assert getattr(a, attr) == pytest.approx(row[col]), attr
+
+
+def test_interface_best_type_80_percent_rule_and_limits(small_map):
+    amap, _ = small_map
+    # the 50 % ISSPG has the lowest score at 5 but can't win while full-torque types exist
+    a = amap.actuator("M", 5.0, "3dp")
+    assert a.gb_type != "isspg_inside" and not a.flags["no_full_torque_design"]
+    assert amap.actuator("M", 5.0, "3dp", types=["isspg_inside"]).flags["no_full_torque_design"]
+    assert amap.actuator("M", 5.0, "3dp").gb_type == "icpg"     # short and light at low ratios
+    assert amap.actuator("M", 12.0, "3dp").gb_type == "idspg"   # icpg grows long and heavy
+    forced = amap.actuator("M", 12.0, "3dp", gb_type="icpg")
+    assert forced.gb_type == "icpg" and not forced.flags["best"]
+    with pytest.raises(ValueError):
+        amap.actuator("M", 13.5, "3dp")                          # outside the swept range
+    with pytest.raises(ValueError):
+        amap.actuator("M", 10.0, "3dp", gb_type="isspg_inside")  # that type stops at 7
+
+
+def test_interface_derivatives_match_finite_differences(small_map):
+    amap, _ = small_map
+    x, h = 8.3, 1e-5
+    a = amap.actuator("M", x, "3dp", gb_type="idspg", derivative=True)
+    lo, hi = (amap.actuator("M", x + s, "3dp", gb_type="idspg") for s in (-h, h))
+    for name, deriv in a.derivatives.items():
+        if deriv is not None:
+            assert deriv == pytest.approx((getattr(hi, name) - getattr(lo, name)) / (2 * h), rel=1e-4, abs=1e-6), name
+
+
+def test_map_py_is_standalone():
+    tree = ast.parse((REPO / "tools" / "actuator_map" / "map.py").read_text(encoding="utf-8"))
+    imported = {(n.module if isinstance(n, ast.ImportFrom) else a.name).split(".")[0]
+                for n in ast.walk(tree) if isinstance(n, (ast.Import, ast.ImportFrom))
+                for a in (n.names if isinstance(n, ast.Import) else [n])}
+    assert imported <= {"json", "math", "dataclasses", "pathlib", "numpy"}, imported
