@@ -13,7 +13,9 @@ Fitted quantities (against the design's real gear ratio): mass, widths, diameter
 torque-carried fraction and the optimiser's cost. Output torque, speed and reflected inertia are
 not fitted: they follow exactly from ratio, efficiency, fraction and the motor (see table.py).
 
-Model: a polynomial of degree 0-3, the lowest whose RMS error is within FIT_TOLERANCE (1 %) of the
+Model: in pieces where the designs jump (a step over 3x the usual step between neighbours that
+changes the level by more than JUMP_REL = 10 % for at least MIN_PIECE_POINTS = 3 designs; a lone
+outlier or a smooth steep rise is not a jump); each piece a polynomial of degree 0-3, the lowest whose RMS error is within FIT_TOLERANCE (1 %) of the
 quantity's mean value above the best degree's. At most (n-1)//2 for n points (4 points: a straight
 line), so a fit follows the trend instead of bending through every point. The designs are
 discrete (teeth, modules, bearings), so neighbouring ratios scatter around the trend; the data
@@ -45,32 +47,82 @@ FIT_TOLERANCE = 0.01   # extra RMS allowed for a lower degree, as a share of the
 MAX_DEGREE = 3
 SCAN_STEP = 0.01
 WORST_REL_ERROR = 0.05  # fits.md marks quantities whose largest error is above 5 %
+JUMP_REL = 0.10         # neighbouring designs differing by more than this start a new piece ...
+MIN_PIECE_POINTS = 3    # ... if both sides keep at least this many designs (a lone outlier is scatter)
+JUMP_STEP_FACTOR = 3    # ... and the step is this many times the usual step between neighbours
+NO_SPLIT = ("compact_cost",)  # can be near zero, so relative jumps mean nothing
 
 
 # ---- one quantity -------------------------------------------------------------------------------
 
-def fit_quantity(x, y):
-    """Polynomial fit of y(x); returns coef (low -> high, plain x), degree and errors."""
-    x, y = np.asarray(x, float), np.asarray(y, float)
+def fit_polynomial(x, y):
+    """One polynomial: the lowest degree within FIT_TOLERANCE of the best, at most (n-1)//2."""
     scale = max(float(np.mean(np.abs(y))), 1e-12)
     max_deg = max(0, min(MAX_DEGREE, (len(x) - 1) // 2))
     fits = []
     for deg in range(max_deg + 1):
         p = Polynomial.fit(x, y, deg).convert() if len(set(x)) > deg else Polynomial([float(np.mean(y))])
-        rms = float(np.sqrt(np.mean((p(x) - y) ** 2)))
-        fits.append((deg, p, rms))
+        fits.append((deg, p, float(np.sqrt(np.mean((p(x) - y) ** 2)))))
     best_rms = min(f[2] for f in fits)
-    deg, p, rms = next(f for f in fits if f[2] <= best_rms + FIT_TOLERANCE * scale)
-    err = p(x) - y
-    rel = np.abs(err) / np.maximum(np.abs(y), 1e-12)
-    return {"coef": [float(c) for c in p.coef], "degree": deg, "rms": rms, "rms_rel": rms / scale,
-            "max_abs": float(np.max(np.abs(err))), "max_rel": float(np.max(rel)),
+    deg, p, _ = next(f for f in fits if f[2] <= best_rms + FIT_TOLERANCE * scale)
+    return deg, p
+
+
+def find_breaks(x, y):
+    """Indices i where a new piece starts at i+1. A jump between neighbouring designs i, i+1 counts if
+      - the step is more than JUMP_STEP_FACTOR x the usual step (so a smooth, steep rise doesn't), and
+      - the level changes for good: the median of the MIN_PIECE_POINTS designs after it differs from
+        the median of those before it by more than JUMP_REL (so a lone odd design doesn't),
+    and every piece keeps at least MIN_PIECE_POINTS designs."""
+    n, k = len(y), MIN_PIECE_POINTS
+    steps = np.abs(np.diff(y))
+    usual = float(np.median(steps)) if len(steps) else 0.0
+    cuts = []
+    for i in range(n - 1):
+        start = cuts[-1] + 1 if cuts else 0
+        if i + 1 - start < k or n - (i + 1) < k:
+            continue
+        before, after = float(np.median(y[i + 1 - k:i + 1])), float(np.median(y[i + 1:i + 1 + k]))
+        if steps[i] > JUMP_STEP_FACTOR * usual and abs(after - before) > JUMP_REL * max(abs(before), 1e-12):
+            cuts.append(i)
+    return cuts
+
+
+def fit_quantity(x, y, split=True):
+    """Polynomial fit of y(x), in pieces where the designs jump. Returns the pieces (each with its
+    lowest ratio, coefficients low -> high in plain x, degree), the break ratios (half-way between
+    the two designs either side of a jump), errors over all points and the data points."""
+    x, y = np.asarray(x, float), np.asarray(y, float)
+    cuts = find_breaks(x, y) if split else []
+    bounds = [0] + [c + 1 for c in cuts] + [len(x)]
+    pieces, pred = [], np.empty_like(y)
+    for a, b in zip(bounds, bounds[1:]):
+        deg, p = fit_polynomial(x[a:b], y[a:b])
+        pieces.append({"from": float(x[a]), "coef": [float(c) for c in p.coef], "degree": deg})
+        pred[a:b] = p(x[a:b])
+    err = pred - y
+    scale = max(float(np.mean(np.abs(y))), 1e-12)
+    rms = float(np.sqrt(np.mean(err ** 2)))
+    return {"pieces": pieces, "breaks": [float((x[c] + x[c + 1]) / 2) for c in cuts],
+            "rms": rms, "rms_rel": rms / scale, "max_abs": float(np.max(np.abs(err))),
+            "max_rel": float(np.max(np.abs(err) / np.maximum(np.abs(y), 1e-12))),
             "x": [float(v) for v in x], "y": [float(v) for v in y]}
 
 
 def evaluate(fit, x):
-    value = float(Polynomial(fit["coef"])(x))
-    return value
+    """Value of a fit at ratio x: the piece whose range holds x (the first / last piece outside)."""
+    piece = fit["pieces"][sum(1 for b in fit.get("breaks", []) if x >= b)]
+    return float(Polynomial(piece["coef"])(x))
+
+
+def curve(fit, xs):
+    """Fit values on xs, with NaN at each break so a plot shows the step instead of a slope."""
+    ys = [evaluate(fit, x) for x in xs]
+    for b in fit.get("breaks", []):
+        i = int(np.searchsorted(xs, b))
+        if 0 < i < len(ys):
+            ys[i] = float("nan")
+    return ys
 
 
 def interpolate(fit, x):
@@ -103,7 +155,7 @@ def fit_type(rows, grid_step):
     for q in QUANTITIES:
         pts = [(r["ratio"], r[q]) for r in rows if r[q] is not None]
         if pts:
-            out["quantities"][q] = fit_quantity(*zip(*sorted(pts)))
+            out["quantities"][q] = fit_quantity(*zip(*sorted(pts)), split=q not in NO_SPLIT)
     return out
 
 
@@ -227,10 +279,11 @@ def report(fits):
                     if f is None:
                         cells.append("—")
                         continue
+                    deg = "+".join(f"d{pc['degree']}" for pc in f["pieces"])
                     if q == "compact_cost":
-                        cells.append(f"{f['rms']:.2f} / {f['max_abs']:.2f} (d{f['degree']})")
+                        cells.append(f"{f['rms']:.2f} / {f['max_abs']:.2f} ({deg})")
                         continue
-                    txt = f"{100 * f['rms_rel']:.1f} / {100 * f['max_rel']:.1f} % (d{f['degree']})"
+                    txt = f"{100 * f['rms_rel']:.1f} / {100 * f['max_rel']:.1f} % ({deg})"
                     cells.append(f"**{txt}**" if f["max_rel"] > WORST_REL_ERROR else txt)
                 lines.append(f"| {gb} | {tf['n_points']} | {tf['ratio_range'][0]:.1f}–{tf['ratio_range'][1]:.1f} | "
                              + " | ".join(cells) + " |")
@@ -252,13 +305,13 @@ def plot(fits, gains, out_dir):
                 for i, (gb, tf) in enumerate(e["types"].items()):
                     color = f"C{i}"
                     for lo, hi in tf["valid_intervals"]:
-                        xs = np.linspace(lo, hi, 60)
+                        xs = np.linspace(lo, hi, 200)
                         if q is None:
                             if "width_with_driver_m" not in tf["quantities"]:
                                 continue
                             ys = [real_width_score(fitted_values(tf, x), gains) for x in xs]
                         else:
-                            ys = [evaluate(tf["quantities"][q], x) * k for x in xs] if q in tf["quantities"] else []
+                            ys = [v * k for v in curve(tf["quantities"][q], xs)] if q in tf["quantities"] else []
                         if len(ys):
                             ax.plot(xs, ys, color=color, label=gb if lo == tf["valid_intervals"][0][0] else None)
                     if q is not None and q in tf["quantities"]:

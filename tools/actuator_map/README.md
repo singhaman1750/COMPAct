@@ -88,14 +88,18 @@ into the run folder:
 
 | File | Content |
 |---|---|
-| `fits.json` | per type: polynomial coefficients (plain ratio, low → high), degree, errors and the data points (for exact piecewise-linear interpolation); valid ratio intervals; per motor and material the best type over the ratio range and the switch ratios, by both rules |
-| `fits.md` | per type and quantity: typical (RMS) / largest error and degree; the best-type intervals; ratios where the fitted best differs from the table's |
+| `fits.json` | per type and quantity: the pieces (each from its first ratio, polynomial coefficients in the plain ratio, low → high, and degree), the break ratios between pieces, errors and the data points (for exact piecewise-linear interpolation); valid ratio intervals; per motor and material the best type over the ratio range and the switch ratios, by both rules |
+| `fits.md` | per type and quantity: typical (RMS) / largest error and the pieces' degrees (`d1+d1` = two straight pieces); the best-type intervals; ratios where the fitted best differs from the table's |
 | `plots/<motor>_<material>.png` | mass, width with driver, body diameter and real-width score vs ratio: points, fits, switch ratios |
 
-**Model:** the lowest polynomial degree (0–3) whose RMS error is within 1 % of the value above the
-best degree's, and at most (points − 1) ÷ 2 (4 points: a straight line). The designs are discrete
-(teeth, modules, bearings), so neighbouring ratios scatter around the trend (pilot: typically
-1–4 %, up to ~8 % for WPG mass); the fit follows the trend, the data points stay for exact
+**Model:** a quantity is split into pieces where its designs really jump: a step more than 3× the
+usual step between neighbouring designs that changes the level by more than 10 % for at least 3
+designs (a lone odd design or a smooth steep rise is not a jump; e.g. RI100 3dp INDSPG length,
+86 → 108 mm between ratio 25.5 and 26.8). Each piece gets the lowest polynomial degree (0–3) whose
+RMS error is within 1 % of the value above the best degree's, at most (points − 1) ÷ 2 (4 points: a
+straight line). So a quantity is smooth in pieces with a step where the designs step. The designs
+are discrete (teeth, modules, bearings), so neighbouring ratios still scatter around the trend
+(pilot: typically 1–4 %; capped INWPG's torque fraction ~10–14 %); the data points stay for exact
 interpolation.
 
 **Best type between swept ratios:** each type valid at that ratio gets the real-width score from
