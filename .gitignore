@@ -15,3 +15,6 @@ venv/
 
 # Personal Onshape model URLs (see Onshape_extension/onshape_models.example.json)
 Onshape_extension/onshape_models.json
+
+# Actuator-map sweep output; regenerate with tools/actuator_map/sweep.py
+tools/actuator_map/runs/
