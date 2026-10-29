@@ -112,3 +112,86 @@ def test_each_motor_type_gets_its_gearbox_types():
     assert types_for("framed_outrunner") == ["sspg", "cpg", "wpg", "dspg"]
     assert set(types_for("frameless_outrunner")) == {"isspg_inside", "isspg_compact", "icpg", "idspg"}
     assert len(types_for("frameless_inrunner")) == 7
+
+
+# ---- the map table (tools/actuator_map/table.py) ----------------------------------------------
+
+from tools.actuator_map.table import GEAR_VARS, build_rows, summary  # noqa: E402
+
+MOTOR = {"type": "frameless_outrunner",
+         "electrical": {"peak_torque_Nm": 12.0, "rated_torque_Nm": 4.0, "no_load_speed_rpm": 2400.0,
+                        "rated_speed_rpm": 2000.0},
+         "mechanical": {"rotor_inertia_kgm2": 1e-3, "rotor_inertia_basis": "datasheet"}}
+GAINS_FOR_TABLE = {"K_Mass": 1, "K_Eff": -2, "K_Width": 0.2, "K_torque_shortfall": 10, "K_Width_real": 0.05}
+
+
+def fake_case(gb_type, ratio, cost, fraction=1.0, width_drv=80.0, mass=1.0, eff=0.9, notes=()):
+    return {"gb_type": gb_type, "motor": "M", "material": "3dp", "ratio_requested": ratio, "feasible": True,
+            "error": None, "gear_ratio": ratio, "cost": cost, "mass_kg": mass, "efficiency": eff,
+            "torque_carried_fraction": fraction, "width_body_mm": width_drv - 9, "width_with_driver_mm": width_drv,
+            "dia_body_mm": 120.0, "dia_widest_mm": 130.0, "geometry_notes": list(notes), "commit": "abc",
+            "cad_vars": {"Ns": 20, "Np": 40, "Nr": 100, "module": 0.5, "num_planet": 3,
+                         "Np_b": 40, "Np_s": 30, "a1_Ns": 20, "a1_Np": 30, "a1_Nr": 80, "a1_module": 0.5,
+                         "a1_num_planet": 3, "a2_Ns": 25, "a2_Np": 35, "a2_Nr": 95, "a2_module": 0.8,
+                         "a2_num_planet": 4}}
+
+
+def test_table_formulas_and_capped_derating():
+    capped = fake_case("isspg_inside", 6.0, cost=5.0, fraction=0.5, width_drv=70.0)
+    (row,) = build_rows([capped], motors={"M": MOTOR}, gains=GAINS_FOR_TABLE)
+    assert row["peak_torque_out_Nm"] == pytest.approx(12.0 * 6 * 0.9 * 0.5)
+    # gears carry 0.5 x 12 = 6 N m >= rated 4, so the rated torque is not reduced
+    assert row["rated_torque_out_Nm"] == pytest.approx(4.0 * 6 * 0.9)
+    assert row["no_load_speed_out_rpm"] == pytest.approx(400.0)
+    assert row["rated_speed_out_rad_s"] == pytest.approx(2000 * 2 * 3.141592653589793 / 60 / 6)
+    assert row["reflected_inertia_kgm2"] == pytest.approx(36e-3)
+    assert row["width_with_driver_m"] == pytest.approx(0.070)
+    assert row["real_width_score"] == pytest.approx(1.0 - 2 * 0.9 + 0.05 * 70 + 0 + 10 * 0.5)
+    assert row["torque_capped"] and row["best_by_compact_cost"] and row["best_by_real_width"]
+    # capped below the rated torque: 0.25 x 12 = 3 N m < 4
+    (low,) = build_rows([fake_case("isspg_inside", 6.0, cost=5.0, fraction=0.25)], {"M": MOTOR}, GAINS_FOR_TABLE)
+    assert low["rated_torque_out_Nm"] == pytest.approx(3.0 * 6 * 0.9)
+
+
+def test_table_best_rows_cad_flags_and_gear_columns():
+    cases = [fake_case("idspg", 10.0, cost=3.0, width_drv=120.0),   # lowest compact cost, long
+             fake_case("icpg", 10.0, cost=4.0, width_drv=70.0, notes=["approx"]),  # shorter: wins real width
+             {**fake_case("isspg_inside", 10.0, cost=9.0), "feasible": False, "error": None}]
+    rows = {r["gb_type"]: r for r in build_rows(cases, {"M": MOTOR}, GAINS_FOR_TABLE)}
+    assert set(rows) == {"idspg", "icpg"}  # no-design cases are not rows
+    assert rows["idspg"]["best_by_compact_cost"] and not rows["icpg"]["best_by_compact_cost"]
+    assert rows["icpg"]["best_by_real_width"] and not rows["idspg"]["best_by_real_width"]
+    assert rows["idspg"]["cad_issues"] == "CAD6" and rows["icpg"]["cad_issues"] == ""
+    assert rows["icpg"]["geometry_approx"] and not rows["idspg"]["geometry_approx"]
+    assert (rows["idspg"]["ns"], rows["idspg"]["ns_2"], rows["idspg"]["n_planets_2"], rows["idspg"]["module_2"]) == (20, 25, 4, 0.8)
+    assert (rows["icpg"]["np"], rows["icpg"]["np_small"], rows["icpg"]["ns_2"]) == (40, 30, None)
+    text = summary(cases, list(rows.values()))
+    assert "10 idspg" in text and "10 icpg" in text and "| isspg_inside | 3dp | 1 | 0 |" in text
+
+
+def test_every_gearbox_type_has_gear_columns():
+    import gearbox_runner
+    assert set(GEAR_VARS) == set(gearbox_runner.GEARBOXES)
+
+
+def test_best_needs_80_percent_torque_unless_nothing_has_it():
+    # capped 70 % design scores best but can't win while an 85 % one exists
+    cases = [fake_case("isspg_inside", 5.0, cost=1.0, fraction=0.70, width_drv=60.0),
+             fake_case("icpg", 5.0, cost=2.0, fraction=0.85, width_drv=75.0),
+             # ratio 6: nothing reaches 80 %, so the best of all is given and the group is flagged
+             fake_case("isspg_inside", 6.0, cost=1.0, fraction=0.55),
+             fake_case("icpg", 6.0, cost=2.0, fraction=0.50)]
+    rows = build_rows(cases, {"M": MOTOR}, GAINS_FOR_TABLE)
+    best5 = [r["gb_type"] for r in rows if r["ratio_requested"] == 5.0 and r["best_by_real_width"]]
+    best6 = [r for r in rows if r["ratio_requested"] == 6.0 and r["best_by_compact_cost"]]
+    assert best5 == ["icpg"]
+    assert [r["gb_type"] for r in best6] == ["isspg_inside"]
+    assert all(r["no_full_torque_design"] for r in rows if r["ratio_requested"] == 6.0)
+    assert not any(r["no_full_torque_design"] for r in rows if r["ratio_requested"] == 5.0)
+
+
+def test_near_best_lists_types_within_2_percent():
+    cases = [fake_case("dspg", 20.0, cost=3.00), fake_case("wpg", 20.0, cost=3.05),   # 1.7 % worse: near
+             fake_case("cpg", 20.0, cost=3.20)]                                         # 6.7 % worse: not
+    rows = build_rows(cases, {"M": MOTOR}, GAINS_FOR_TABLE)
+    assert {r["near_best_compact"] for r in rows} == {"dspg wpg"}
