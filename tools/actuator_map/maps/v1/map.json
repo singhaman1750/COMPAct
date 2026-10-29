@@ -1,7 +1,7 @@
 {
  "version": "v1",
  "released": "2026-10-30",
- "released_from_commit": "8fc8fb13d0341322e837cdd07af0bdbb36a3d6f6",
+ "released_from_commit": "7dca4591c95ec836bed51ad0f388bda854456ece",
  "source": {
   "run": "full",
   "commit": "a89b170e4f95c3814dc556f2419e6bd091bdfd6d",

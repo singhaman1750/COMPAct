@@ -20,6 +20,7 @@ Optimise with the smooth fits (the default, with derivatives); read the final de
 | `summary.md` | best type at each swept ratio |
 | `table_<material>.csv` | every optimised design (one row per type and ratio) |
 | `map.json` | where this map came from, its settings and warnings |
+| `plots/fit_overview_<material>_<quantity>.png` | how well the fits follow the designs: every gearbox type with one motor (`tools/actuator_map/plot_fit.py` draws these and single types) |
 
 ## Source
 
