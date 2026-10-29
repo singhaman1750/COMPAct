@@ -522,7 +522,44 @@ designer: are such widths acceptable, or should INWPG also get a width limit?
 Related: IDSPG's stage 1 sits inside the stator; its gears fit today (RO100: 14.7 mm of 31.5), so no
 cap was added — add one like ISSPG's if a design ever exceeds it.
 
-**Status:** open — found 2026-10-29 while adding the ISSPG/ICPG width cap.
+**Fix (2026-10-29):** yes, INWPG gets a limit. Its planet stack (`fw_p_b` + `fw_p_s`, i.e. both ring
+widths + `clearance_planet`) is capped at `planet_stack_stator_heights` × `stator_height` (2 in both
+`inwpg_params_*.json`: 49 mm for RI100, 53 mm for RI80) and the torque derated, as for ISSPG/ICPG
+(same CSV columns, `K_torque_shortfall` 10). Before, 3D-printed designs were 2–7 stator heights
+long (RI80 dependent, ratio 40: 197 mm); metal designs are at most 1.3, so they don't change. Golden
+RI100 ratio 20: dependent now carries 56 % of the peak torque, independent 79 %.
+
+**Status:** INWPG resolved; the IDSPG stage-1 note stays open.
+
+### 15. `actuator_width` does not match the CAD in most frameless / inrunner types
+
+**Description:** the `Actuator_width` the optimiser writes to the results CSV is meant to be the
+actuator's length along the motor axis, but in most of these types it is not what the Onshape
+model ("Assembly 1") measures. Measured on 23 designs (found 2026-10-29 while defining the
+actuator-map widths); "CAD" is from the bottom of the motor casing to the top of the output
+bearing retainer, without the driver mount:
+
+| Type | Code − CAD | Seen with |
+|---|---|---|
+| ISSPG inside, INCPG independent, INDSPG | 0 | — |
+| ISSPG compact | −4.5 mm (casing reaches 4.5 mm round the driver mount) | RO100 6.5 |
+| ICPG | +1.95 mm | RO100 10, RO80 8 |
+| IDSPG | +0.8 / +2.05 mm | RO100 20, RO80 15 |
+| INCPG dependent | +2.75 / +1.25 mm (sec. carrier sits lower than the formula says) | RI100 10, RI80 8 |
+| INWPG dependent | −0.25 mm | RI100 20 |
+| INWPG independent | −10.75 / −13.25 mm | RI100 20, RI80 25 |
+| INSSPG type 1 and type 2 | not computed (CSV shows 0) | RI100 6.5, RI80 5 |
+
+The cost functions use the gear face widths, not `actuator_width`, so **the chosen designs are not
+affected** — only the CSV column is wrong. The actuator map (planned `tools/actuator_map/`) won't
+use it: it computes width and diameter from the Onshape equations file, with formulas checked
+against Onshape.
+
+**Probable fix:** make each type's `actuator_width` follow the CAD stack (the map's formulas show
+the terms), add it for INSSPG, and decide whether it should include the driver mount (the framed
+types' SSPG value doesn't: Onshape is 9 mm wider). Results CSV changes; designs don't.
+
+**Status:** open.
 
 ## CAD issues
 
@@ -677,3 +714,52 @@ defined by variables), then re-check Cylindrical 5 and 12 in the assembly. Try r
 as well.
 
 **Status:** open — for the INCPG model's designer.
+
+### CAD 6. IDSPG — stage-2 parts stay where they were when the motor gets smaller
+
+**Description:** after pushing a RO80 design, the casings and ring gears move to their new
+heights, but the **stage-1 bearing and retainer, the stage-2 carriers, planets and output bearing
+stay at their RO100 heights**. The stage-2 output bearing then sticks 6.7 mm out of the top of the
+housing (bearing top 66.8 mm, retainer 58.1–60.1 mm, from the stator bottom). No part-studio
+feature fails; the parts are just not moved, so the mates that place them seem to use fixed
+positions instead of the parts they sit on.
+
+**Seen with:** `python actOpt.py --motor RO80 --gb_type idspg --gr 15 --onshape` (found
+2026-10-29 while measuring widths for the actuator map). Design: stage 1 Ns1 32 / Np1 28 / Nr1 88,
+module 0.5, 3 planets; stage 2 Ns2 28 / Np2 28 / Nr2 84, module 1.1, 4 planets. The RO100 golden
+design (ratio 20) assembles correctly.
+
+**Reproduce without re-optimising:** the files are saved in
+[`docs/cad_issues/CAD6_idspg_RO80_gr15/`](docs/cad_issues/CAD6_idspg_RO80_gr15/):
+```bash
+python Onshape_extension/set_values.py --gb_type idspg --file docs/cad_issues/CAD6_idspg_RO80_gr15/idspg_equations_onshape.txt
+```
+
+**Probable fix:** in "Assembly 1", mate the stage-1 bearing, the stage-2 carrier group and the
+output bearing to faces of the ring gears / casing (or to mate connectors defined by variables),
+so they follow when heights change.
+
+**Status:** open — for the IDSPG model's designer.
+
+### CAD 7. INWPG dependent — output ring gear and output bearing stay where they were
+
+**Description:** after pushing a long RI80 design, the casing, carrier and planets move to their
+new heights, but the **output ring gear keeps its bottom at 65.0 mm and the output bearing at
+120.3–130.3 mm** (their positions in the RI100 ratio-20 design). The casing now ends at 160.4 mm,
+so both sit far below where they belong (the output ring's top is at 144.0 mm). No part-studio
+feature fails.
+
+**Seen with:** `python actOpt.py --motor RI80 --gb_type inwpg_dependent --gr 25 --onshape`
+(found 2026-10-29). Design: Ns 28, Np big 50, Np small 34, Nr big 128, Nr small 112, module 0.5,
+4 planets; planets 112.4 mm wide (see bug 14).
+
+**Reproduce without re-optimising:** the files are saved in
+[`docs/cad_issues/CAD7_inwpg_dependent_RI80_gr25/`](docs/cad_issues/CAD7_inwpg_dependent_RI80_gr25/):
+```bash
+python Onshape_extension/set_values.py --gb_type inwpg_dependent --file docs/cad_issues/CAD7_inwpg_dependent_RI80_gr25/inwpg_dependent_equations_onshape.txt
+```
+
+**Probable fix:** mate the output ring gear and output bearing to the top of the ring gearbox
+casing (as in INWPG independent, where they follow), not to fixed positions.
+
+**Status:** open — for the INWPG model's designer.

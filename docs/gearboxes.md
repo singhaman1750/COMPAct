@@ -57,6 +57,12 @@ RO100's rotor screws are M4 for now (bug 8, M4 vs M5 to be decided). ICPG's conf
 | `inwpg_independent` | Inrunner Wolfrom, independent | `ActuatorAndGearbox_INWPG_independent` · `inwpg_params_independent.json` | factor × motor Ø | as INCPG independent |
 | `indspg` | Inrunner double-stage | `ActuatorandGearbox_INDSPG` · `indspg_params.json` | factor × (stator wire OD − 2 × ring-2 width); stage 1: rotor ID − 4 × 1.5 | — |
 
+**INWPG planet length:** PLA gears at peak torque make INWPG's planets several stator heights
+long, so the planet stack (big + small step, `fw_p_b` + `fw_p_s` in the CAD) is capped at
+`planet_stack_stator_heights` × `stator_height` (2 → 49 mm for RI100, 53 mm for RI80), with the
+same torque derating, CSV columns and cost term as ISSPG/ICPG above. Metal gears stay well under
+it (at most 1.3 stator heights), so nothing changes there.
+
 INSSPG reads `insspg_motor_config.json`, INDSPG `indspg_motor_config.json`; the others `config.json`.
 
 ## Differences still to unify

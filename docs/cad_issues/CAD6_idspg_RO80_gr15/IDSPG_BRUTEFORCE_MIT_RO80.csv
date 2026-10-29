@@ -1,0 +1,18 @@
+Motor Parameters:
+maxMotorAngVelRPM, maxMotorAngVelRadPerSec, maxMotorTorque, maxMotorPower, motorMass, motorDia, motorLength
+5040 , 527.7875658030853 , 4.0 , 2111.150263212341 , 0.352 , 92.6 , 26.4
+ 
+Gear strength and size parameters:
+FOS, serviceFactor, stressAnalysisMethodName, maxGearBoxDia, maxGearAllowableStressMPa
+1.2 , 1.5 , MIT , 95.6 , 70
+ 
+Optimization Parameters:
+K_mass, K_Eff, MODULE_STAGE1_MIN, MODULE_STAGE1_MAX, MODULE_STAGE2_MIN, MODULE_STAGE2_MAX, NUM_PLANET_STAGE1_MIN, NUM_PLANET_STAGE1_MAX, NUM_PLANET_STAGE2_MIN, NUM_PLANET_STAGE2_MAX, NUM_TEETH_SUN_MIN, NUM_TEETH_PLANET_MIN, GEAR_RATIO_MIN, GEAR_RATIO_MAX, GEAR_RATIO_STEP
+1 , -2 , 0.5 , 0.7 , 0.8 , 1.4 , 3 , 7 , 4 , 7 , 18 , 28 , 4 , 45 , 1
+ 
+iter, gearRatio, module1, module2, Ns1, Np1, Nr1, numPlanet1, Ns2, Np2, Nr2, numPlanet2, fwSun1MM, fwPlanet1MM, fwRing1MM, fwSun2MM, fwPlanet2MM, fwRing2MM, mass, eff, peakTorque, Cost, Torque_Density, Outer_Bearing_mass_stg1, Outer_Bearing_mass_stg2, Actuator_width
+33 , 15.0 , 0.5 , 1.1 , 32 , 28 , 88 , 3 , 28 , 28 , 84 , 4 , 13.393 , 13.393 , 13.393 , 9.31 , 9.31 , 9.31 , 0.999 , 0.903 , 60.0 , 3.7333620637112856 , 60.06006006006006 , 0.045 , 0.161 , 74.76002567865453
+
+
+Running Time (sec)
+0.1801605224609375
