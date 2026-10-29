@@ -78,7 +78,7 @@ def design(request, tmp_path_factory):
 def test_counts_and_one_category_each():
     names = [e["name"] for e in CAD]
     assert len(names) == 113 and len(set(names)) == 113
-    assert len(CODE) == 22 and not set(names) & {e["name"] for e in CODE}
+    assert len(CODE) == 23 and not set(names) & {e["name"] for e in CODE}
     assert Counter(e["category"] for e in CAD) == {"input": 18, "optimisation": 7, "fixed": 43, "dependent": 45}
     for e in CAD + CODE:
         assert e["category"] in CATEGORIES and e["confidence"] in SPEC["confidence"], e["name"]
@@ -259,3 +259,42 @@ def test_case_mounting_hole_overlap_comes_from_the_config(monkeypatch, tmp_path)
     assert downstream == {"case_mounting_hole_shift", "case_mounting_PCD", "Motor_case_OD_max"}
     assert {k for k in base if base[k] != more[k]} == downstream
     assert more_mass == base_mass
+
+
+def test_bearing_mount_wall_multiple_comes_from_the_config(monkeypatch, tmp_path):
+    """bearing_mount_wall_bolt_dia_multiple (config) drives both the CAD value and the mass. On a
+    design where the bearing plus its bolts is wider than the ring gear, raising it from 2 to 3 turns
+    the wall from 2 to 3 output-bolt diameters and changes exactly the CAD variables downstream of it."""
+    for name in GOLDEN:   # a design in the first branch of the rule
+        b = json.loads((BASELINE_DIR / f"{name}.json").read_text(encoding="utf-8"))
+        if b.get("material", "3dp") != "3dp":
+            continue
+        _, n, Ns, Np, Nr, module = b["opt_parameters"]
+        (tmp_path / name).mkdir()
+        actuator, *_ = write_files(monkeypatch, tmp_path / name, b["motor"], "3dp", Ns, Np, Nr, module, n)
+        if actuator.bearing_mount_thickness == actuator.output_mounting_hole_dia * 2:
+            break
+    else:
+        pytest.fail("no golden SSPG design in the first branch of the bearing-mount rule")
+
+    def run(multiple, folder):
+        folder.mkdir()
+        actuator, _, _, onshape = write_files(monkeypatch, folder, b["motor"], "3dp", Ns, Np, Nr, module, n)
+        if multiple is not None:
+            actuator.design_params["bearing_mount_wall_bolt_dia_multiple"] = multiple
+            actuator.setVariables()
+            actuator.genEquationFile_editCADdirectly()
+            onshape = equation_lines((folder / "SSPG" / "sspg_equations_onshape.txt").read_text())
+        return dict((k, float(v)) for k, v in onshape), actuator.getMassKG_3DP()
+
+    base, base_mass = run(None, tmp_path / "a")
+    more, more_mass = run(3, tmp_path / "b")
+    d = base["output_mounting_hole_dia"]
+    assert (base["bearing_mount_thickness"], more["bearing_mount_thickness"]) == (2 * d, 3 * d)
+    downstream = {"bearing_mount_thickness"}
+    for e in CAD:
+        if set(e.get("depends_on", [])) & downstream:
+            downstream.add(e["name"])
+    assert downstream == {"bearing_mount_thickness", "output_mounting_PCD"}
+    assert {k for k in base if base[k] != more[k]} == downstream
+    assert more_mass > base_mass

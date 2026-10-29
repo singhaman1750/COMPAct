@@ -23,11 +23,11 @@ Confidence:
 |---|---|---|
 | Input | 18 | 0 |
 | Optimisation | 7 | 0 |
-| Fixed | 43 | 19 |
+| Fixed | 43 | 20 |
 | Dependent | 45 | 3 |
-| **Total** | **113** | **22** |
+| **Total** | **113** | **23** |
 
-CAD variables by confidence: high 108, medium 5, low 0
+CAD variables by confidence: high 109, medium 4, low 0
 
 ## To review (not high confidence)
 
@@ -35,7 +35,6 @@ CAD variables by confidence: high 108, medium 5, low 0
 - `fw_s_calc` (Optimisation, medium): sun face width from the tooth-stress rule (motor peak torque, FOS, gear material). Not searched by the loop but set by the optimiser for each design. The printed sun uses fw_s_used
 - `fw_p` (Optimisation, medium): planet face width from the tooth-stress rule (motor peak torque, FOS, gear material), at least 2 x planet_bearing_width + standard_clearance_1_5mm x 2/3. Set by the optimiser for each design
 - `fw_r` (Optimisation, medium): ring (= planet) face width from the tooth-stress rule (motor peak torque, FOS, gear material), at least 2 x planet_bearing_width + standard_clearance_1_5mm x 2/3. Set by the optimiser for each design
-- `bearing_mount_thickness` (Dependent, medium): two-case rule: a fixed wall when the bearing is wider than the ring gear, otherwise wide enough to cover the ring gear; the factors 2 and 4 are hard-coded
 
 ## Input (18)
 
@@ -152,7 +151,7 @@ CAD variables by confidence: high 108, medium 5, low 0
 | 26 | `alpha_r` | formula | `(sqrt(dp_r**2 - db_r**2) / db_r) * 180 / pi - pressure_angle_rad * 180 / pi` | dp_r, db_r, pressure_angle_rad | high | involute angle used to draw the tooth |
 | 27 | `beta_r` | formula | `(360 / (4 * Nr) + alpha_r) * 2` | Nr, alpha_r | high | tooth angle used to draw the tooth |
 | 28 | `case_dist` | formula | `sec_carrier_thickness + clearance_planet + sun_coupler_hub_thickness - case_mounting_surface_height` | sec_carrier_thickness, clearance_planet, sun_coupler_hub_thickness, case_mounting_surface_height | high | axial gap between the motor case and the gearbox case |
-| 29 | `bearing_mount_thickness` | formula | `output_mounting_hole_dia * 2 if bearing_OD + output_mounting_hole_dia * 4 > Nr * module + 2 * h_b else ((Nr * module + 2 * h_b) - (bearing_OD + output_mounting_hole_dia * 4)) / 2 + output_mounting_hole_dia * 2 + standard_clearance_1_5mm` | bearing_OD, output_mounting_hole_dia, Nr, module, h_b, standard_clearance_1_5mm | medium | two-case rule: a fixed wall when the bearing is wider than the ring gear, otherwise wide enough to cover the ring gear; the factors 2 and 4 are hard-coded |
+| 29 | `bearing_mount_thickness` | formula | `output_mounting_hole_dia * bearing_mount_wall_bolt_dia_multiple if bearing_OD + output_mounting_hole_dia * (2 * bearing_mount_wall_bolt_dia_multiple) > Nr * module + 2 * h_b else ((Nr * module + 2 * h_b) - (bearing_OD + output_mounting_hole_dia * (2 * bearing_mount_wall_bolt_dia_multiple))) / 2 + output_mounting_hole_dia * bearing_mount_wall_bolt_dia_multiple + standard_clearance_1_5mm` | bearing_OD, output_mounting_hole_dia, bearing_mount_wall_bolt_dia_multiple, Nr, module, h_b, standard_clearance_1_5mm | high | wall around the output bearing: the configured number of output-bolt diameters on each side, or wider (plus a clearance) when the ring gear's teeth reach further out (the same rule is used for the mass) |
 | 30 | `output_mounting_PCD` | formula | `bearing_OD + bearing_mount_thickness` | bearing_OD, bearing_mount_thickness | high | output bolt circle |
 | 31 | `carrier_PCD` | formula | `(Np + Ns) * module` | Np, Ns, module | high | planet-centre circle (twice the centre distance) |
 | 32 | `motor_output_hole_CSK_OD` | lookup | `nuts_and_bolts_dimensions(bolt_dia=motor_output_hole_dia, bolt_type=CSK)` → bolt_head_dia | motor_output_hole_dia | high | standard countersunk fastener size for the chosen bolt diameter |
@@ -170,7 +169,7 @@ CAD variables by confidence: high 108, medium 5, low 0
 | 44 | `sun_central_bolt_socket_head_dia` | lookup | `nuts_and_bolts_dimensions(bolt_dia=sun_central_bolt_dia, bolt_type=socket_head)` → bolt_head_dia | sun_central_bolt_dia | high | standard socket-head fastener size for the chosen bolt diameter |
 | 45 | `fw_s_used` | formula | `fw_p + clearance_planet + sec_carrier_thickness + standard_clearance_1_5mm` | fw_p, clearance_planet, sec_carrier_thickness, standard_clearance_1_5mm | high | printed sun length: planet width plus the carrier and clearances |
 
-## Used by the code, not written to the CAD file (22)
+## Used by the code, not written to the CAD file (23)
 
 | # | Variable | Sub-type | Source / formula | Depends on | Confidence | Why |
 |---|---|---|---|---|---|---|
@@ -181,21 +180,22 @@ CAD variables by confidence: high 108, medium 5, low 0
 | 5 | `bearingIDClearanceMM` | constraint constant | sspg_params.json → sspg_3DP_design_parameters → `bearingIDClearanceMM` |  | high | extra bore when choosing the output bearing |
 | 6 | `clearance_motor_and_case_min` | constraint constant | sspg_params.json → sspg_3DP_design_parameters → `clearance_motor_and_case_min` |  | high | smallest radial gap between the motor and the case; sets clearance_motor_and_case (CAD) and the case mass |
 | 7 | `case_mounting_hole_wall_overlap` | constraint constant | sspg_params.json → sspg_3DP_design_parameters → `case_mounting_hole_wall_overlap` |  | high | how far the case mounting holes cut into the case wall (0 = the hole just touches the wall); sets case_mounting_hole_shift |
-| 8 | `pressure_angle_rad` | formula | `pressure_angle * pi / 180` | pressure_angle | high | pressure angle in radians (code attribute pressure_angle) |
-| 9 | `maxGearboxDiameter` | formula | `(MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR if motor_OD < SMALL_MOTOR_DIA_MM else MAX_GB_DIA_MULT_FACTOR) * motor_OD - 2 * ringRadialWidthMM` | MAX_GB_DIA_MULT_FACTOR, MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR, SMALL_MOTOR_DIA_MM, motor_OD, ringRadialWidthMM | high | largest gear diameter the optimiser may use (gearbox_runner max_diameter) |
-| 10 | `actuator_width` | formula | `motor_height + case_mounting_surface_height + standard_clearance_1_5mm + base_plate_thickness + case_dist + bearing_height + standard_clearance_1_5mm + fw_r + clearance_planet + bearing_retainer_thickness` | motor_height, case_mounting_surface_height, standard_clearance_1_5mm, base_plate_thickness, case_dist, bearing_height, fw_r, clearance_planet, bearing_retainer_thickness | high | axial width without the driver mount, written to the results CSV |
-| 11 | `GEAR_RATIO_MIN` | search bound | sspg_params.json → sspg_optimization_parameters → `GEAR_RATIO_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 12 | `GEAR_RATIO_MAX` | search bound | sspg_params.json → sspg_optimization_parameters → `GEAR_RATIO_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 13 | `GEAR_RATIO_STEP` | search bound | sspg_params.json → sspg_optimization_parameters → `GEAR_RATIO_STEP` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 14 | `MODULE_MIN` | search bound | sspg_params.json → sspg_optimization_parameters → `MODULE_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 15 | `MODULE_MAX` | search bound | sspg_params.json → sspg_optimization_parameters → `MODULE_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 16 | `NUM_PLANET_MIN` | search bound | sspg_params.json → sspg_optimization_parameters → `NUM_PLANET_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 17 | `NUM_PLANET_MAX` | search bound | sspg_params.json → sspg_optimization_parameters → `NUM_PLANET_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 18 | `NUM_TEETH_SUN_MIN` | search bound | sspg_params.json → sspg_optimization_parameters → `NUM_TEETH_SUN_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 19 | `NUM_TEETH_PLANET_MIN` | search bound | sspg_params.json → sspg_optimization_parameters → `NUM_TEETH_PLANET_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 20 | `MAX_GB_DIA_MULT_FACTOR` | search bound | sspg_params.json → sspg_optimization_parameters → `MAX_GB_DIA_MULT_FACTOR` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 21 | `MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR` | search bound | sspg_params.json → sspg_optimization_parameters → `MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 22 | `SMALL_MOTOR_DIA_MM` | search bound | sspg_params.json → sspg_optimization_parameters → `SMALL_MOTOR_DIA_MM` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 8 | `bearing_mount_wall_bolt_dia_multiple` | constraint constant | sspg_params.json → sspg_3DP_design_parameters → `bearing_mount_wall_bolt_dia_multiple` |  | high | bearing-mount wall per side, in output-bolt diameters; sets bearing_mount_thickness (CAD) and the bearing-holding structure mass |
+| 9 | `pressure_angle_rad` | formula | `pressure_angle * pi / 180` | pressure_angle | high | pressure angle in radians (code attribute pressure_angle) |
+| 10 | `maxGearboxDiameter` | formula | `(MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR if motor_OD < SMALL_MOTOR_DIA_MM else MAX_GB_DIA_MULT_FACTOR) * motor_OD - 2 * ringRadialWidthMM` | MAX_GB_DIA_MULT_FACTOR, MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR, SMALL_MOTOR_DIA_MM, motor_OD, ringRadialWidthMM | high | largest gear diameter the optimiser may use (gearbox_runner max_diameter) |
+| 11 | `actuator_width` | formula | `motor_height + case_mounting_surface_height + standard_clearance_1_5mm + base_plate_thickness + case_dist + bearing_height + standard_clearance_1_5mm + fw_r + clearance_planet + bearing_retainer_thickness` | motor_height, case_mounting_surface_height, standard_clearance_1_5mm, base_plate_thickness, case_dist, bearing_height, fw_r, clearance_planet, bearing_retainer_thickness | high | axial width without the driver mount, written to the results CSV |
+| 12 | `GEAR_RATIO_MIN` | search bound | sspg_params.json → sspg_optimization_parameters → `GEAR_RATIO_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 13 | `GEAR_RATIO_MAX` | search bound | sspg_params.json → sspg_optimization_parameters → `GEAR_RATIO_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 14 | `GEAR_RATIO_STEP` | search bound | sspg_params.json → sspg_optimization_parameters → `GEAR_RATIO_STEP` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 15 | `MODULE_MIN` | search bound | sspg_params.json → sspg_optimization_parameters → `MODULE_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 16 | `MODULE_MAX` | search bound | sspg_params.json → sspg_optimization_parameters → `MODULE_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 17 | `NUM_PLANET_MIN` | search bound | sspg_params.json → sspg_optimization_parameters → `NUM_PLANET_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 18 | `NUM_PLANET_MAX` | search bound | sspg_params.json → sspg_optimization_parameters → `NUM_PLANET_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 19 | `NUM_TEETH_SUN_MIN` | search bound | sspg_params.json → sspg_optimization_parameters → `NUM_TEETH_SUN_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 20 | `NUM_TEETH_PLANET_MIN` | search bound | sspg_params.json → sspg_optimization_parameters → `NUM_TEETH_PLANET_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 21 | `MAX_GB_DIA_MULT_FACTOR` | search bound | sspg_params.json → sspg_optimization_parameters → `MAX_GB_DIA_MULT_FACTOR` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 22 | `MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR` | search bound | sspg_params.json → sspg_optimization_parameters → `MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 23 | `SMALL_MOTOR_DIA_MM` | search bound | sspg_params.json → sspg_optimization_parameters → `SMALL_MOTOR_DIA_MM` |  | high | optimiser setting: limits of the search, not a part dimension |
 
 ## Config blocks SSPG doesn't read
 

@@ -2108,6 +2108,7 @@ class singleStagePlanetaryActuator:
         self.air_flow_hole_offset                     = self.design_params["air_flow_hole_offset"] # 3
         self.central_hole_offset_from_motor_mount_PCD = self.design_params["central_hole_offset_from_motor_mount_PCD"] # 5
         self.output_mounting_hole_dia                 = self.design_params["output_mounting_hole_dia"] # 4
+        self.bearing_mount_wall_bolt_dia_multiple     = self.design_params["bearing_mount_wall_bolt_dia_multiple"] # 2
         self.output_mounting_nut_depth                = self.design_params["output_mounting_nut_depth"] # 3
         self.Motor_case_OD_base_to_chamfer            = self.design_params["Motor_case_OD_base_to_chamfer"] # 5
         self.pattern_offset_from_motor_case_OD_base   = self.design_params["pattern_offset_from_motor_case_OD_base"] # 3 
@@ -2227,12 +2228,12 @@ class singleStagePlanetaryActuator:
         self.bearing_OD     = Bearings.getBearingODMM()
         self.bearing_height = Bearings.getBearingWidthMM()
 
-        outer_check = self.bearing_OD + self.output_mounting_hole_dia * 4
+        outer_check = self.bearing_OD + self.output_mounting_hole_dia * (2 * self.bearing_mount_wall_bolt_dia_multiple)
         inner_check = self.Nr * self.module + 2 * self.h_b
         if outer_check > inner_check:
-            self.bearing_mount_thickness = self.output_mounting_hole_dia * 2
+            self.bearing_mount_thickness = self.output_mounting_hole_dia * self.bearing_mount_wall_bolt_dia_multiple
         else:
-            self.bearing_mount_thickness = ((inner_check - outer_check) / 2) + self.output_mounting_hole_dia * 2 + self.standard_clearance_1_5mm
+            self.bearing_mount_thickness = ((inner_check - outer_check) / 2) + self.output_mounting_hole_dia * self.bearing_mount_wall_bolt_dia_multiple + self.standard_clearance_1_5mm
 
         self.output_mounting_PCD = self.bearing_OD + self.bearing_mount_thickness
         self.carrier_PCD         = (self.Np + self.Ns) * self.module
@@ -3226,11 +3227,11 @@ class singleStagePlanetaryActuator:
         bearing_height = WidthBearingMM    
         bearing_mass   = BearingMassKG      
 
-        if ((bearing_OD + output_mounting_hole_dia * 4) > (Nr * module + 2 * h_b)):
-            bearing_mount_thickness  = output_mounting_hole_dia * 2
+        if ((bearing_OD + output_mounting_hole_dia * (2 * self.bearing_mount_wall_bolt_dia_multiple)) > (Nr * module + 2 * h_b)):
+            bearing_mount_thickness  = output_mounting_hole_dia * self.bearing_mount_wall_bolt_dia_multiple
         else:
-            bearing_mount_thickness = ((((Nr * module + 2 * h_b) - (bearing_OD + output_mounting_hole_dia * 4))/2) 
-                                    + output_mounting_hole_dia * 2 + standard_clearance_1_5mm)        
+            bearing_mount_thickness = ((((Nr * module + 2 * h_b) - (bearing_OD + output_mounting_hole_dia * (2 * self.bearing_mount_wall_bolt_dia_multiple)))/2) 
+                                    + output_mounting_hole_dia * self.bearing_mount_wall_bolt_dia_multiple + standard_clearance_1_5mm)        
 
         bearing_holding_structure_OD     = bearing_OD + bearing_mount_thickness * 2
         bearing_holding_structure_ID     = bearing_OD
