@@ -5,8 +5,8 @@ describes them. Bug and issue numbers refer to [`ISSUES.md`](../ISSUES.md).
 
 All types share: MIT stress analysis, a brute-force search over teeth, module and planets near the
 requested ratio, a cost that combines mass, efficiency, width and a penalty for missing the ratio
-(gains `K_Mass`, `K_Eff`, `K_Width` in the config file), and materials from
-`config_files/config.json` (see the README's material modes).
+(gains `K_Mass`, `K_Eff`, `K_Width` — one set for every type, in `config_files/cost.json`), and
+materials from `config_files/config.json` (see the README's material modes).
 
 ## Framed outrunner motors
 
@@ -40,7 +40,7 @@ their face width is capped at the motor's `stator_height` − `gear_axial_margin
 3 mm; ICPG counts both planet steps + `planet_step_gap_mm`). PLA gears at peak torque often need more; then the width is
 capped and the torque derated — the run prints e.g. "the gears carry 50 % of the motor's peak
 torque", the CSV has `Torque_carried_fraction`, `Peak_torque_carried` and `FW_limit_MM`, and the
-cost adds `K_torque_shortfall` × (1 − fraction). Metal gears normally fit, so nothing changes there.
+cost adds `K_torque_shortfall` (`cost.json`) × (1 − fraction). Metal gears normally fit, so nothing changes there.
 
 RO100's rotor screws are M4 for now (bug 8, M4 vs M5 to be decided). ICPG's config file is
 `motor_config.json`, IDSPG's `idspg_motor_config.json`; the others use `config.json`.

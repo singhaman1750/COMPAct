@@ -53,10 +53,5 @@
         "External_designs": {
             "ringRadialWidthMM": 5.0
         }
-    },
-    "Cost_gain_parameters":{
-        "K_Mass": 1,
-        "K_Eff": -2,
-        "K_Width": 0.2
     }
 }

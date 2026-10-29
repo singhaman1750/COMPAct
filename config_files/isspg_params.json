@@ -80,7 +80,6 @@
         "input_bearing_width"   : 5,
         "motor_case_thickness"  : 2.5,
         "actuactor_mount_hole_dia": 4,
-        "gear_axial_margin_mm": 10.0,
-        "K_torque_shortfall": 10
+        "gear_axial_margin_mm": 10.0
     }
 }
