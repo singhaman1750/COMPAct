@@ -14,6 +14,8 @@ with changed values (see [Reproduce](#reproduce)).
   - U8_Lite 6.5:1 metal: 1,224 → **979 g**; the optimiser now picks module 0.5, 25/56/137
     (ratio 6.48) instead of module 0.6, 23/52/127 (the metal golden baseline was re-recorded).
   - With the ring steel, a thinner ring wall (#9) now saves about 20 g.
+- **CPG done too (2026-10-30):** the same split (steel ring of the mass model's 5 mm thickness);
+  U8_Lite 10:1 metal 1,032 → 802 g with a new gear set.
 - The other changes (#2–#8) are still open, and #1 is still open for the other gearbox types.
 - The tables below are the analysis **before** change #1. `tools/metal_analysis/sspg_mass_whatif.py`
   now starts from the code with #1 in it.

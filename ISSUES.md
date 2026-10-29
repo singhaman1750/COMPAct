@@ -79,7 +79,8 @@ metal case per gearbox type.
    overestimates the mass. **SSPG done (2026-10-30):** only the ring (ring pitch circle to
    `ring_OD`, `fw_r + clearance_planet` long) is steel, the rest of the casing aluminium
    (`ring_mass` + `gearbox_housing_mass` = `gearbox_casing_mass`); 3dp bit-identical; MN8014 6:1
-   metal 1,357 → 1,067 g. Open for the other types; then re-run the metal map.
+   metal 1,357 → 1,067 g. **CPG done (2026-10-30):** the same split; U8_Lite 10:1 metal 1,032 → 802 g
+(new gear set). Open for the other types; then re-run the metal map.
 2. **Separate thicknesses and clearances for metal mode.** Metal parts don't need the 3D-printing
    clearances (e.g. `loose_clearance_3DP`) and can be thinner than printed ones. Metal mode needs
    its own design settings per gearbox; until then it reuses the 3D-printed shapes.
@@ -660,6 +661,31 @@ The actuator-map sweep (2026-10-29, ratios 4–30) found no design for RO60 in a
 gear sizes, possibly a constraint or motor-data problem. The released map v1 leaves RO60 out.
 
 **Status:** open.
+
+### 17. CPG — the mass model and the CAD use different ring thicknesses
+
+The CPG mass model always uses `ringRadialWidthMM` (5 mm) for the ring, while the CAD
+(`compoundPlanetaryActuator.setVariables`) grows the ring to the output bearing when the bearing is
+larger: `ring_radial_thickness = (bearing_OD + 2 x 1.5 - Nr x module) / 2` (4 of the 6 golden CPG
+designs: 6.9-7.0 mm). So the mass model's ring OD, fillet and (in metal mode) steel ring are smaller
+than the CAD's. Found 2026-10-30 while splitting the metal casing (the steel ring follows the mass
+model's 5 mm for now). Fixing it changes 3dp results.
+
+**Status:** open.
+
+### 18. CPG — the CAD draws the ring and the small planet with the big module
+
+`compoundPlanetaryActuator.setVariables` sets `self.module = moduleBig` and uses it for every gear,
+including the ring and the small planet, which mesh with the small module (`dp_r`, `dp_p_s`, the ring
+thickness rule and `ring_OD`); the CAD file has one `module` variable. The mass model uses
+`moduleSmall` for them. No effect today: the geometric constraint
+`(Ns + Np_big) x m_big == (Nr - Np_small) x m_small` is an exact float comparison, so in practice
+only equal modules pass (all 844 CPG designs of the full actuator-map sweep have equal modules).
+It matters as soon as unequal modules are allowed. Plan: use `moduleSmall` for the ring-side values
+in the code (values unchanged today); allowing unequal modules would also need a second module
+variable in the CAD file and the Onshape model.
+
+**Status:** open, plan proposed 2026-10-30.
 
 ## CAD issues
 
