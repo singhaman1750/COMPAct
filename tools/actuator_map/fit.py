@@ -24,6 +24,8 @@ points are kept for exact piecewise-linear interpolation.
 Best type at any ratio: each type valid there gets the real-width score from its fitted values
 (table.py's formula, ratio error 0), the 80 % torque rule is applied, and the lowest wins. Switch
 ratios are where that winner changes (scanned in SCAN_STEP steps, then refined by bisection).
+Slivers, best-type intervals shorter than MIN_BEST_INTERVAL between near-tied types, are merged
+into the neighbour (merge_slivers); the unmerged intervals are kept as best_<rule>_raw.
 """
 import argparse
 import json
@@ -49,6 +51,8 @@ QUANTITIES = ("mass_kg", "width_body_m", "width_with_driver_m", "dia_body_m", "d
 FIT_TOLERANCE = 0.01   # extra RMS allowed for a lower degree, as a share of the mean value
 MAX_DEGREE = 3
 SCAN_STEP = 0.01
+MIN_BEST_INTERVAL = 0.5   # a best-type interval shorter than this is a sliver: merged into a near-tied neighbour
+FIT_ERROR_FLAG_REL = 0.05 # map.py flags a fitted quantity whose largest error at the designs is above this
 WORST_REL_ERROR = 0.05  # fits.md marks quantities whose largest error is above 5 %
 JUMP_REL = 0.10         # neighbouring designs differing by more than this start a new piece ...
 MIN_PIECE_POINTS = 3    # ... if both sides keep at least this many designs (a lone outlier is scatter)
@@ -232,6 +236,71 @@ def switch_points(types, gains, lo, hi, rule="real_width"):
     return keep, switches
 
 
+def _fitted_score(tf, x, gains, rule):
+    """(score, carried fraction) of one type at x, or None if it can't be scored there."""
+    if not is_valid(tf, x):
+        return None
+    v = fitted_values(tf, x)
+    if rule == "real_width":
+        if "width_with_driver_m" not in v:
+            return None
+        return real_width_score(v, gains), v.get("torque_carried_fraction", 1.0)
+    return v["compact_cost"], v.get("torque_carried_fraction", 1.0)
+
+
+def merge_slivers(types, intervals, gains, rule="real_width"):
+    """Best-type intervals without slivers: an interval shorter than MIN_BEST_INTERVAL goes to a
+    neighbouring type that is valid over all of it, scores within NEAR_BEST_REL of it at its middle,
+    and doesn't fall below the 80 % torque rule where the sliver's type meets it. Shortest slivers
+    go first. Returns the intervals and the switch ratios between them."""
+    ivs = [list(iv) for iv in intervals]
+    while True:
+        slivers = sorted((iv[1] - iv[0], i) for i, iv in enumerate(ivs)
+                         if iv[1] - iv[0] < MIN_BEST_INTERVAL and iv[2] != "none")
+        for _, i in slivers:
+            lo, hi, gb = ivs[i]
+            mid = (lo + hi) / 2
+            own = _fitted_score(types[gb], mid, gains, rule)
+            options = []
+            for j in (i - 1, i + 1):
+                if not 0 <= j < len(ivs) or ivs[j][2] == "none":
+                    continue
+                nb = types[ivs[j][2]]
+                if not all(is_valid(nb, x) for x in (lo, mid, hi)):
+                    continue
+                score, fraction = _fitted_score(nb, mid, gains, rule) or (None, None)
+                if score is None or score > own[0] + NEAR_BEST_REL * abs(own[0]):
+                    continue
+                if own[1] >= MIN_CARRIED_FRACTION_FOR_BEST > fraction:
+                    continue
+                options.append((score, j))
+            if options:
+                j = min(options)[1]
+                ivs[j] = [min(ivs[j][0], lo), max(ivs[j][1], hi), ivs[j][2]]
+                del ivs[i]
+                merged = [ivs[0]]                       # join neighbours that now have the same type
+                for iv in ivs[1:]:
+                    if iv[2] == merged[-1][2] and abs(iv[0] - merged[-1][1]) < 1e-9:
+                        merged[-1] = [merged[-1][0], iv[1], iv[2]]
+                    else:
+                        merged.append(iv)
+                ivs = merged
+                break
+        else:
+            break
+    switches = [{"ratio": a[1], "from": a[2], "to": b[2]} for a, b in zip(ivs, ivs[1:])
+                if a[2] != "none" and b[2] != "none" and abs(a[1] - b[0]) < 1e-9]
+    return ivs, switches
+
+
+def best_in(intervals, x):
+    """The type of the best-type interval holding x (None outside them or in a 'none' interval)."""
+    for i, (lo, hi, gb) in enumerate(intervals):
+        if lo - 1e-9 <= x < hi or (i == len(intervals) - 1 and x <= hi + 1e-9):
+            return None if gb == "none" else gb
+    return None
+
+
 # ---- whole run ----------------------------------------------------------------------------------
 
 def build_fits(rows, grid_step, gains):
@@ -246,14 +315,17 @@ def build_fits(rows, grid_step, gains):
         hi = max(r["ratio_requested"] for rs in by_type.values() for r in rs)
         entry = {"types": types}
         for rule in ("real_width", "compact"):
-            intervals, switches = switch_points(types, gains, lo, hi, rule)
+            raw, _ = switch_points(types, gains, lo, hi, rule)
+            intervals, switches = merge_slivers(types, raw, gains, rule)
             entry[f"best_{rule}"] = intervals
             entry[f"switches_{rule}"] = switches
+            entry[f"best_{rule}_raw"] = raw            # before slivers were merged
         # where the fitted best differs from the table's winner at a swept ratio
+        best = entry["best_real_width"]
         table_best = {(r["ratio_requested"]): r["gb_type"] for rs in by_type.values() for r in rs if r["best_by_real_width"]}
         entry["differs_from_table"] = [
-            {"ratio": req, "table": t, "fitted": best_type(types, req, gains)}
-            for req, t in sorted(table_best.items()) if best_type(types, req, gains) not in (t, None)]
+            {"ratio": req, "table": t, "fitted": best_in(best, req)}
+            for req, t in sorted(table_best.items()) if best_in(best, req) not in (t, None)]
         result.setdefault(motor, {})[material] = entry
     return result
 
@@ -350,6 +422,7 @@ def make_meta(run_name, commit, gains, grid_step, motor_names, motors=None):
             "rotor_inertia_basis": mech.get("rotor_inertia_basis")}
     return {"format": FITS_FORMAT, "run": run_name, "commit": commit, "gains": gains, "grid_step": grid_step,
             "min_carried_fraction_for_best": MIN_CARRIED_FRACTION_FOR_BEST, "near_best_rel": NEAR_BEST_REL,
+            "min_best_interval": MIN_BEST_INTERVAL, "fit_error_flag_rel": FIT_ERROR_FLAG_REL,
             "quantities": list(QUANTITIES), "motors": motor_values}
 
 

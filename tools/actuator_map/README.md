@@ -104,8 +104,12 @@ interpolation.
 
 **Best type between swept ratios:** each type valid at that ratio gets the real-width score from
 its fitted values, the 80 % torque rule is applied, and the lowest wins; the type switches where
-the score curves cross (e.g. U8_Lite 3dp: CPG → WPG at 13.7). Output torque, speed and reflected
-inertia are not fitted: they follow exactly from the ratio, efficiency, fraction and the motor.
+the score curves cross (e.g. U8_Lite 3dp: CPG → WPG at 13.7). Where two types are near-tied the
+winner can flip over very short ranges (e.g. CPG for 4–4.04, then SSPG), so a best-type interval
+shorter than 0.5 is merged into a neighbour that is valid over it, scores within 2 % and doesn't
+break the 80 % rule; `fits.json` keeps the unmerged intervals as `best_<rule>_raw`. Output torque,
+speed and reflected inertia are not fitted: they follow exactly from the ratio, efficiency,
+fraction and the motor.
 
 ## Use the map
 
@@ -133,7 +137,27 @@ a.flags                          # torque_capped, no_full_torque_design, near_be
 | `method="interp"` | linear between the swept designs of the type (exact at the designs) instead of the smooth fits |
 | `derivative=True` | `a.derivatives`: d(value)/d(ratio) of every value (exact within a fit piece) |
 
+**Fit or interp?** The fits are smooth trends, which a gradient-based co-design optimiser needs.
+Where neighbouring designs scatter (e.g. small-motor WPG masses: 595 g at 19:1, 837 g at 20:1) a
+fit can be several % off a single design, while interp follows every design but its slope jumps
+at each one. `a.flags["fit_error_high"]` lists the quantities whose fit is more than 5 % off at
+some design. Optimise with the fits, then read the final design with `method="interp"`.
+
 A ratio where no (allowed) type has designs raises `ValueError` (no extrapolation). Helpers:
 `motors()`, `materials(motor)`, `types(motor, material)`, `covered(motor, material)`,
 `best_types(motor, material)` (intervals and switch ratios), `ranking(motor, ratio, material)`.
 All values are SI; speeds also in rpm. The gears' own inertia is not included yet.
+
+## Release a map
+
+```bash
+python tools/actuator_map/table.py --name full
+python tools/actuator_map/fit.py --name full
+python tools/actuator_map/release.py --run full --version v1
+```
+
+Copies `fits.json`, `fits.md`, `summary.md` and the tables into `tools/actuator_map/maps/<version>/`
+(committed; the case files and plots stay in the gitignored run folder) and writes `map.json`
+(the sweep's commit, the grid, case counts, settings, known issues, and warnings such as motors or
+ratios without designs) and a README. Released maps: `maps/v1/` (33 motors, ratios 4–30, 3dp and
+metal; metal masses are overestimated, see its README).

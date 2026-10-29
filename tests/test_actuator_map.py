@@ -323,3 +323,46 @@ def test_map_py_is_standalone():
                 for n in ast.walk(tree) if isinstance(n, (ast.Import, ast.ImportFrom))
                 for a in (n.names if isinstance(n, ast.Import) else [n])}
     assert imported <= {"json", "math", "dataclasses", "pathlib", "numpy"}, imported
+
+
+# ---- slivers and fit-error flags (release v1) ---------------------------------------------------
+
+from tools.actuator_map.fit import best_in, merge_slivers  # noqa: E402
+
+
+def const_type(lo, hi, mass, fraction=1.0, width=0.05, eff=0.9):
+    """A type with constant fitted values, valid on [lo, hi]."""
+    const = lambda v: {"pieces": [{"from": lo, "coef": [v], "degree": 0}], "breaks": []}  # noqa: E731
+    return {"valid_intervals": [[lo, hi]], "quantities": {
+        "mass_kg": const(mass), "width_with_driver_m": const(width), "efficiency": const(eff),
+        "torque_carried_fraction": const(fraction), "compact_cost": const(mass)}}
+
+
+def test_sliver_between_near_ties_is_merged():
+    types = {"a": const_type(4, 10, 1.00), "b": const_type(4, 10, 0.99)}   # b 1 % better on its sliver
+    ivs, switches = merge_slivers(types, [[4, 6, "a"], [6, 6.3, "b"], [6.3, 10, "a"]], GAINS_FOR_TABLE)
+    assert ivs == [[4, 10, "a"]] and switches == []
+    assert best_in(ivs, 6.1) == "a" and best_in(ivs, 10) == "a" and best_in(ivs, 10.5) is None
+
+
+def test_sliver_is_kept_when_it_really_wins_or_the_80_percent_rule_decides():
+    clear_win = {"a": const_type(4, 10, 1.00), "b": const_type(4, 10, 0.80)}  # b 20 % better: not a near-tie
+    raw = [[4, 6, "a"], [6, 6.3, "b"], [6.3, 10, "a"]]
+    assert merge_slivers(clear_win, raw, GAINS_FOR_TABLE)[0] == raw
+    capped = {"a": const_type(4, 10, 0.99, fraction=0.5), "b": const_type(4, 10, 1.00)}  # a is capped
+    assert merge_slivers(capped, [[4, 6, "a"], [6, 6.3, "b"], [6.3, 10, "a"]], GAINS_FOR_TABLE)[0][1] == [6, 6.3, "b"]
+    not_valid = {"a": const_type(4, 6, 1.00), "b": const_type(6, 10, 0.99), "c": const_type(6.3, 10, 1.0)}
+    assert merge_slivers(not_valid, [[4, 6, "a"], [6, 6.3, "b"], [6.3, 10, "c"]], GAINS_FOR_TABLE)[0][1] == [6, 6.3, "b"]
+
+
+def test_interface_follows_the_merged_best_types_and_flags_big_fit_errors(small_map, tmp_path):
+    amap, _ = small_map
+    for lo, hi, gb in amap.best_types("M", "3dp")[0]:
+        assert amap.actuator("M", (lo + hi) / 2, "3dp").gb_type == gb
+    data = json.loads((amap_path := tmp_path / "fits.json").read_text())
+    tf = data["motors"]["M"]["3dp"]["types"]["idspg"]["quantities"]
+    tf["mass_kg"]["max_rel"], tf["width_with_driver_m"]["max_rel"] = 0.12, 0.01
+    amap_path.write_text(json.dumps(data))
+    flagged = ActuatorMap(tmp_path).actuator("M", 9.0, "3dp", gb_type="idspg")
+    assert "mass_kg" in flagged.flags["fit_error_high"] and "width_with_driver_m" not in flagged.flags["fit_error_high"]
+    assert ActuatorMap(tmp_path).actuator("M", 9.0, "3dp", gb_type="idspg", method="interp").flags["fit_error_high"] == []

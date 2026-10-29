@@ -588,6 +588,15 @@ types' SSPG value doesn't: Onshape is 9 mm wider). Results CSV changes; designs 
 
 **Status:** open.
 
+### 16. RO60 — no design in any gearbox type
+
+The actuator-map sweep (2026-10-29, ratios 4–30) found no design for RO60 in any of its four types
+(ISSPG compact / inside, ICPG, IDSPG), in 3dp and metal; the golden baselines for RO60 also record
+"no design". Not investigated: possibly the motor is too small for the minimum teeth counts and
+gear sizes, possibly a constraint or motor-data problem. The released map v1 leaves RO60 out.
+
+**Status:** open.
+
 ## CAD issues
 
 Problems in the CAD models (Onshape / SolidWorks), not in the Python code. Found while checking

@@ -18,6 +18,14 @@ reflected inertia are computed from the motor (values stored in fits.json):
 The best type at a ratio: every type valid there gets the real-width score from its fitted values,
 a type whose gears carry less than 80 % of the peak torque is only chosen if no type carries 80 %,
 and the lowest score wins (rule="compact_cost": the optimiser's own cost instead).
+Where two types are near-tied, the winner can flip over very short ratio ranges; fit.py merges
+such slivers (shorter than 0.5) into the neighbour, and the best type follows those merged
+intervals (flags["near_best"] still lists every type within 2 % of the best score).
+
+Fits are smooth trends: where neighbouring designs scatter (e.g. small-motor WPG masses), a fit
+can be several % off a single design. flags["fit_error_high"] lists the quantities whose fit is
+more than 5 % off at some design; optimise with the fits, and read the final design with
+method="interp".
 
 method="fit" (default) uses the smooth fits (polynomial pieces, differentiable within a piece);
 method="interp" interpolates linearly between the swept designs of the chosen type (exact at the
@@ -136,6 +144,21 @@ class ActuatorMap:
                 merged.append([lo, hi])
         return merged
 
+    def _best_in(self, motor, material, rule, x):
+        """Type of fit.py's best-type interval holding x (None if outside or in a gap)."""
+        intervals = self._entry(motor, material)[f"best_{'real_width' if rule == 'real_width' else 'compact'}"]
+        for i, (lo, hi, gb) in enumerate(intervals):
+            if lo - 1e-9 <= x < hi or (i == len(intervals) - 1 and x <= hi + 1e-9):
+                return None if gb == "none" else gb
+        return None
+
+    def _fit_error_high(self, type_fit):
+        """Fitted quantities of this type whose largest error at the designs is above the flag level:
+        there the fit is only a trend through scattered designs (cross-check with method='interp')."""
+        limit = self.meta.get("fit_error_flag_rel", 0.05)
+        return sorted(q for q, f in type_fit["quantities"].items()
+                      if q != "compact_cost" and f.get("max_rel", 0.0) > limit)
+
     def best_types(self, motor, material, rule="real_width"):
         """[[from, to, type], ...] over the swept range, and the switch ratios (from fit.py)."""
         e = self._entry(motor, material)
@@ -209,13 +232,16 @@ class ActuatorMap:
             raise ValueError("method must be 'fit' or 'interp'")
         ratio = float(ratio)
         ranking = self.ranking(motor, ratio, material, types, rule)
+        best = ranking[0][1] if ranking else None
+        if not types:  # follow fit.py's best-type intervals (slivers between near-ties merged)
+            best = self._best_in(motor, material, rule, ratio) or best
         if gb_type is None:
             if not ranking:
                 ranges = ", ".join(f"{lo:.2f}-{hi:.2f}" for lo, hi in self.covered(motor, material, None))
                 if types:
                     ranges += f" (any type; allowed types: {', '.join(types)})"
                 raise ValueError(f"{motor} {material}: no design at ratio {ratio:g}; map covers {ranges}")
-            gb_type = ranking[0][1]
+            gb_type = best
         tf = self._type(motor, material, gb_type)
         if not self._valid(tf, ratio):
             ranges = ", ".join(f"{lo:.2f}-{hi:.2f}" for lo, hi in tf["valid_intervals"])
@@ -247,7 +273,8 @@ class ActuatorMap:
             "cad_issues": tf.get("cad_issues", []),
             "geometry_approx": any(abs(r - ratio) <= self.meta.get("grid_step", 1.0) for r in tf.get("geometry_approx_ratios", [])),
             "rotor_inertia_basis": m.get("rotor_inertia_basis"),
-            "method": method, "rule": rule, "best": gb_type == (ranking[0][1] if ranking else None),
+            "fit_error_high": self._fit_error_high(tf) if method == "fit" else [],
+            "method": method, "rule": rule, "best": gb_type == best,
         }
         act = Actuator(
             motor=motor, material=material, gb_type=gb_type, ratio=ratio,
