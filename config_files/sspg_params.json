@@ -85,6 +85,7 @@
         "sun_central_bolt_dia"                                   : 5,
         "case_mounting_surface_height"                           : 4,
         "case_mounting_hole_dia"                                 : 3,
+        "case_mounting_hole_wall_overlap"                        : 0.5,
         "case_mounting_bolt_depth"                               : 4.5,
         "case_mounting_nut_clearance"                            : 2,
         "base_plate_thickness"                                   : 4,

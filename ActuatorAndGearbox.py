@@ -2101,6 +2101,7 @@ class singleStagePlanetaryActuator:
         # --- casing Motor and gearbox casing dimensions ---
         self.case_mounting_surface_height             = self.design_params["case_mounting_surface_height"] # 4
         self.case_mounting_hole_dia                   = self.design_params["case_mounting_hole_dia"] # 3
+        self.case_mounting_hole_wall_overlap          = self.design_params["case_mounting_hole_wall_overlap"] # 0.5
         self.case_mounting_bolt_depth                 = self.design_params["case_mounting_bolt_depth"] # 4.5
         self.base_plate_thickness                     = self.design_params["base_plate_thickness"] # 4
         self.Motor_case_thickness                     = self.design_params["Motor_case_thickness"] # 2.5
@@ -2208,7 +2209,7 @@ class singleStagePlanetaryActuator:
 
         self.case_dist = self.sec_carrier_thickness + self.clearance_planet + self.sun_coupler_hub_thickness - self.case_mounting_surface_height
 
-        self.case_mounting_hole_shift = self.case_mounting_hole_dia / 2 - 0.5
+        self.case_mounting_hole_shift = self.case_mounting_hole_dia / 2 - self.case_mounting_hole_wall_overlap
         self.case_mounting_PCD = self.motor_case_OD_base + self.case_mounting_hole_shift * 2
 
         case_mounting_hole_bolt = nuts_and_bolts_dimensions(bolt_dia=self.case_mounting_hole_dia, bolt_type="socket_head")
