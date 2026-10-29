@@ -5,9 +5,9 @@
 ### Testing
 
 **Status: done.** Details and commands are in [tests/README.md](tests/README.md).
-- **Fast tests** (`pytest`, about 2 s): every gearbox type builds, the config and motor files are
-  valid, the Onshape push works against a fake Onshape, and the README/docs commands and links are
-  correct. CI runs them on every push (`.github/workflows/checks.yml`).
+- **Fast tests** (`pytest`, about 5 s): every gearbox type builds, the config and motor files are
+  valid, the Onshape push works against a fake Onshape, the README/docs commands and links are
+  correct, and the actuator-map sweep equals the plain optimiser. CI runs them on every push (`.github/workflows/checks.yml`).
 - **Golden-output check** (`tests/golden/golden.py`, 58 cases, about 30 s): every gearbox type
   with its golden motors, plus one metal case per type. It compares the chosen design, the CAD
   equations files and the results CSVs with recorded baselines. Run it before merging any change;
