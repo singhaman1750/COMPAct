@@ -45,14 +45,19 @@ def test_sweep_case_equals_the_plain_optimiser(case_name):
     b = baseline(case_name)
     r = run_case(b["gb_type"], b["motor"], b["gear_ratio"], b.get("material", "3dp"))
     assert r["feasible"] and r["same_cad_file"]
+    # Baselines were recorded on Windows; other platforms (CI runs Linux) can differ in the last
+    # floating-point digit, so values are compared with the golden check's tolerance (values_match).
     assert values_match(b["opt_parameters"], r["opt_parameters"])
-    assert r["cad_vars"] == baseline_cad_vars(b)
+    expected_vars = baseline_cad_vars(b)
+    assert expected_vars.keys() == r["cad_vars"].keys()
+    assert values_match(expected_vars, r["cad_vars"]),         [k for k in expected_vars if not values_match(expected_vars[k], r["cad_vars"][k])]
     csv = baseline_csv_values(b)
-    assert float(csv["gearRatio"]) == pytest.approx(r["gear_ratio"], rel=1e-12)
-    assert float(csv["mass"]) == round(r["mass_kg"], 3)
-    assert float(csv["eff"]) == round(r["efficiency"], 3)
+    assert values_match(float(csv["gearRatio"]), r["gear_ratio"])
+    # the CSV keeps 3 decimals; allow a last-digit rounding difference
+    assert float(csv["mass"]) == pytest.approx(r["mass_kg"], abs=1e-3)
+    assert float(csv["eff"]) == pytest.approx(r["efficiency"], abs=1e-3)
     if "Torque_carried_fraction" in csv:
-        assert float(csv["Torque_carried_fraction"]) == pytest.approx(r["torque_carried_fraction"], rel=1e-12)
+        assert values_match(float(csv["Torque_carried_fraction"]), r["torque_carried_fraction"])
 
 
 def test_no_design_is_reported_not_raised():
