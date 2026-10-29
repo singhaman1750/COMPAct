@@ -2084,6 +2084,7 @@ class singleStagePlanetaryActuator:
         self.bearingIDClearanceMM                       = self.design_params["bearingIDClearanceMM"]
         self.clearance_sun_coupler_sec_carrier          = self.design_params["clearance_sun_coupler_sec_carrier"]          # 1.5
         self.ring_to_chamfer_clearance                  = self.design_params["ring_to_chamfer_clearance"]                  # 2
+        self.clearance_motor_and_case_min               = self.design_params["clearance_motor_and_case_min"]               # 5
         self.tight_clearance_3DP                        = self.design_params["tight_clearance_3DP"]        
         self.loose_clearance_3DP                        = self.design_params["loose_clearance_3DP"]
 
@@ -2100,12 +2101,14 @@ class singleStagePlanetaryActuator:
         # --- casing Motor and gearbox casing dimensions ---
         self.case_mounting_surface_height             = self.design_params["case_mounting_surface_height"] # 4
         self.case_mounting_hole_dia                   = self.design_params["case_mounting_hole_dia"] # 3
+        self.case_mounting_hole_wall_overlap          = self.design_params["case_mounting_hole_wall_overlap"] # 0.5
         self.case_mounting_bolt_depth                 = self.design_params["case_mounting_bolt_depth"] # 4.5
         self.base_plate_thickness                     = self.design_params["base_plate_thickness"] # 4
         self.Motor_case_thickness                     = self.design_params["Motor_case_thickness"] # 2.5
         self.air_flow_hole_offset                     = self.design_params["air_flow_hole_offset"] # 3
         self.central_hole_offset_from_motor_mount_PCD = self.design_params["central_hole_offset_from_motor_mount_PCD"] # 5
         self.output_mounting_hole_dia                 = self.design_params["output_mounting_hole_dia"] # 4
+        self.bearing_mount_wall_bolt_dia_multiple     = self.design_params["bearing_mount_wall_bolt_dia_multiple"] # 2
         self.output_mounting_nut_depth                = self.design_params["output_mounting_nut_depth"] # 3
         self.Motor_case_OD_base_to_chamfer            = self.design_params["Motor_case_OD_base_to_chamfer"] # 5
         self.pattern_offset_from_motor_case_OD_base   = self.design_params["pattern_offset_from_motor_case_OD_base"] # 3 
@@ -2134,6 +2137,7 @@ class singleStagePlanetaryActuator:
         self.planet_shaft_step_offset = self.design_params["planet_shaft_step_offset"] # 1  
         self.planet_bearing_OD        = self.design_params["planet_bearing_OD"] # 12 
         self.planet_bearing_width     = self.design_params["planet_bearing_width"] # 3.5
+        self.planet_bearing_gap       = self.design_params["planet_bearing_gap"] # 1.0
         self.planet_bore              = self.design_params["planet_bore"] # 10
 
         # --- bearing retainer dimensions ---
@@ -2198,16 +2202,16 @@ class singleStagePlanetaryActuator:
 
         # --- casing Motor and gearbox casing dimensions ---
         if self.ring_OD < self.motor_OD :
-            self.clearance_motor_and_case = 5 
+            self.clearance_motor_and_case = self.clearance_motor_and_case_min
         else :
-            self.clearance_motor_and_case = (self.ring_OD - self.motor_OD) / 2 + 5
-        
+            self.clearance_motor_and_case = (self.ring_OD - self.motor_OD) / 2 + self.clearance_motor_and_case_min
+
         self.Motor_case_ID = self.motor_OD + self.clearance_motor_and_case * 2
         self.motor_case_OD_base = self.motor_OD + self.clearance_motor_and_case * 2 + self.Motor_case_thickness * 2
 
         self.case_dist = self.sec_carrier_thickness + self.clearance_planet + self.sun_coupler_hub_thickness - self.case_mounting_surface_height
 
-        self.case_mounting_hole_shift = self.case_mounting_hole_dia / 2 - 0.5
+        self.case_mounting_hole_shift = self.case_mounting_hole_dia / 2 - self.case_mounting_hole_wall_overlap
         self.case_mounting_PCD = self.motor_case_OD_base + self.case_mounting_hole_shift * 2
 
         case_mounting_hole_bolt = nuts_and_bolts_dimensions(bolt_dia=self.case_mounting_hole_dia, bolt_type="socket_head")
@@ -2225,12 +2229,12 @@ class singleStagePlanetaryActuator:
         self.bearing_OD     = Bearings.getBearingODMM()
         self.bearing_height = Bearings.getBearingWidthMM()
 
-        outer_check = self.bearing_OD + self.output_mounting_hole_dia * 4
+        outer_check = self.bearing_OD + self.output_mounting_hole_dia * (2 * self.bearing_mount_wall_bolt_dia_multiple)
         inner_check = self.Nr * self.module + 2 * self.h_b
         if outer_check > inner_check:
-            self.bearing_mount_thickness = self.output_mounting_hole_dia * 2
+            self.bearing_mount_thickness = self.output_mounting_hole_dia * self.bearing_mount_wall_bolt_dia_multiple
         else:
-            self.bearing_mount_thickness = ((inner_check - outer_check) / 2) + self.output_mounting_hole_dia * 2 + self.standard_clearance_1_5mm
+            self.bearing_mount_thickness = ((inner_check - outer_check) / 2) + self.output_mounting_hole_dia * self.bearing_mount_wall_bolt_dia_multiple + self.standard_clearance_1_5mm
 
         self.output_mounting_PCD = self.bearing_OD + self.bearing_mount_thickness
         self.carrier_PCD         = (self.Np + self.Ns) * self.module
@@ -2961,8 +2965,8 @@ class singleStagePlanetaryActuator:
 
 
         #------------- Contraint in planet to accomodate its bearings------------------------------------------
-        if (bMin_planet_mit * 1000 < (self.planet_bearing_width*2 + self.standard_clearance_1_5mm * 2 / 3)) : 
-            bMin_planet_mit = (self.planet_bearing_width*2 + self.standard_clearance_1_5mm * 2 / 3) / 1000
+        if (bMin_planet_mit * 1000 < (self.planet_bearing_width*2 + self.planet_bearing_gap)) : 
+            bMin_planet_mit = (self.planet_bearing_width*2 + self.planet_bearing_gap) / 1000
             bMin_ring_mit = bMin_planet_mit # FT on both are same
 
         bMin_sun_mitMM    = bMin_sun_mit    * 1000
@@ -3192,9 +3196,9 @@ class singleStagePlanetaryActuator:
         motor_OD = self.motorDiaMM
 
         if (ring_OD < motor_OD):
-            clearance_motor_and_case = 5
+            clearance_motor_and_case = self.clearance_motor_and_case_min
         else: 
-            clearance_motor_and_case = (ring_OD - motor_OD)/2 + 5
+            clearance_motor_and_case = (ring_OD - motor_OD)/2 + self.clearance_motor_and_case_min
 
         Motor_case_ID     = motor_OD + clearance_motor_and_case * 2
         motor_height      = self.motorLengthMM
@@ -3224,11 +3228,11 @@ class singleStagePlanetaryActuator:
         bearing_height = WidthBearingMM    
         bearing_mass   = BearingMassKG      
 
-        if ((bearing_OD + output_mounting_hole_dia * 4) > (Nr * module + 2 * h_b)):
-            bearing_mount_thickness  = output_mounting_hole_dia * 2
+        if ((bearing_OD + output_mounting_hole_dia * (2 * self.bearing_mount_wall_bolt_dia_multiple)) > (Nr * module + 2 * h_b)):
+            bearing_mount_thickness  = output_mounting_hole_dia * self.bearing_mount_wall_bolt_dia_multiple
         else:
-            bearing_mount_thickness = ((((Nr * module + 2 * h_b) - (bearing_OD + output_mounting_hole_dia * 4))/2) 
-                                    + output_mounting_hole_dia * 2 + standard_clearance_1_5mm)        
+            bearing_mount_thickness = ((((Nr * module + 2 * h_b) - (bearing_OD + output_mounting_hole_dia * (2 * self.bearing_mount_wall_bolt_dia_multiple)))/2) 
+                                    + output_mounting_hole_dia * self.bearing_mount_wall_bolt_dia_multiple + standard_clearance_1_5mm)        
 
         bearing_holding_structure_OD     = bearing_OD + bearing_mount_thickness * 2
         bearing_holding_structure_ID     = bearing_OD
