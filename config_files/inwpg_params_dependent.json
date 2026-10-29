@@ -93,7 +93,9 @@
         "magnet_mount_thickness"                             : 2,
         "magnet_pattern_bulge_dia"                           : 3,
         "magnet_pattern_bulge_number"                        : 8,
-        "magnet_mount_height"                                : 2
+        "magnet_mount_height"                                : 2,
+        "planet_stack_stator_heights"                        : 2.0,
+        "K_torque_shortfall"                                 : 10
 
     }
 }

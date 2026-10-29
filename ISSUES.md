@@ -522,7 +522,14 @@ designer: are such widths acceptable, or should INWPG also get a width limit?
 Related: IDSPG's stage 1 sits inside the stator; its gears fit today (RO100: 14.7 mm of 31.5), so no
 cap was added — add one like ISSPG's if a design ever exceeds it.
 
-**Status:** open — found 2026-10-29 while adding the ISSPG/ICPG width cap.
+**Fix (2026-10-29):** yes, INWPG gets a limit. Its planet stack (`fw_p_b` + `fw_p_s`, i.e. both ring
+widths + `clearance_planet`) is capped at `planet_stack_stator_heights` × `stator_height` (2 in both
+`inwpg_params_*.json`: 49 mm for RI100, 53 mm for RI80) and the torque derated, as for ISSPG/ICPG
+(same CSV columns, `K_torque_shortfall` 10). Before, 3D-printed designs were 2–7 stator heights
+long (RI80 dependent, ratio 40: 197 mm); metal designs are at most 1.3, so they don't change. Golden
+RI100 ratio 20: dependent now carries 56 % of the peak torque, independent 79 %.
+
+**Status:** INWPG resolved; the IDSPG stage-1 note stays open.
 
 ## CAD issues
 
