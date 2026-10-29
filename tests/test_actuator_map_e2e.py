@@ -135,3 +135,24 @@ def test_map_flags_and_limits_on_real_designs(amap, run_dir):
     assert amap.actuator(MOTOR, 8.5, MATERIAL).gb_type == "icpg"          # the only type past 7
     with pytest.raises(ValueError):
         amap.actuator(MOTOR, 10.5, MATERIAL)                               # outside the sweep
+
+
+def test_release_copies_the_map_and_describes_it(run_dir, tmp_path, monkeypatch):
+    from tools.actuator_map import release
+    monkeypatch.setattr(release, "RUNS_DIR", run_dir.parent)
+    monkeypatch.setattr(release, "MAPS_DIR", tmp_path)
+    release.main(["--run", NAME, "--version", "vtest"])
+    out = tmp_path / "vtest"
+    assert {p.name for p in out.iterdir()} == {"fits.json", "fits.md", "summary.md", "table_3dp.csv", "map.json",
+                                               "README.md", "plots"}
+    assert sorted(p.name for p in (out / "plots").iterdir()) == sorted(
+        f"fit_overview_3dp_{q}.png" for q in release.PLOT_QUANTITIES)
+    info = json.loads((out / "map.json").read_text(encoding="utf-8"))
+    assert info["source"]["commit"] == json.loads((run_dir / "run.json").read_text())["commit"]
+    assert info["cases"]["feasible"] == sum(1 for _ in (run_dir / "cases").rglob("*.json")
+                                            if json.loads(_.read_text())["feasible"])
+    assert info["settings"]["min_best_interval"] == 0.5 and info["known_issues"]
+    released, original = ActuatorMap(out), ActuatorMap(run_dir)
+    assert vars(released.actuator(MOTOR, 5.5, MATERIAL)) == vars(original.actuator(MOTOR, 5.5, MATERIAL))
+    with pytest.raises(SystemExit):
+        release.main(["--run", NAME, "--version", "vtest"])          # no silent overwrite

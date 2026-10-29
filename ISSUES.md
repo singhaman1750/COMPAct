@@ -148,6 +148,23 @@ search; re-tune `K_Width` (per mm of whole actuator, not of gear); re-record eve
 
 **Status:** future — decided 2026-10-29 to use the map's second score for now.
 
+### Actuator map — better fits (future)
+
+The fit-quality plots of map v1 (`tools/actuator_map/plot_fit.py`, `maps/v1/plots/`) show three
+weaknesses of the fits (the designs and `method="interp"` are not affected):
+
+1. **End outliers bend the fit.** The first design of a type is often unusually heavy (RI100
+   INDSPG 9.5:1: 1,320 g vs ~1,030 g after it; RO100 IDSPG 7:1). The jump rule needs 3 designs on
+   each side, so it can't split them off. Fix: leave a first / last design far off the trend of the
+   rest out of the fit (keep it for interp).
+2. **Too-flat fits.** The lowest degree within 1 % of the *mean value* is chosen, so a real but
+   small trend can become a flat line (U8_Lite 3dp DSPG efficiency falls 93 → 90 %, fit d0), which
+   gives a zero slope to co-design. Fix: measure the tolerance against the data's spread.
+3. **Wiggle.** A cubic piece can bend between designs (RO100 IDSPG 7–16: a dip and a bump the
+   designs don't have). Fix: allow degree 3 only when it clearly beats degree 2.
+
+Each changes the fits, so it would be a new map release.
+
 ## Bugs
 
 ### 1. `bearings_discrete` — OD table vs ID table content differ
@@ -585,6 +602,15 @@ against Onshape.
 **Probable fix:** make each type's `actuator_width` follow the CAD stack (the map's formulas show
 the terms), add it for INSSPG, and decide whether it should include the driver mount (the framed
 types' SSPG value doesn't: Onshape is 9 mm wider). Results CSV changes; designs don't.
+
+**Status:** open.
+
+### 16. RO60 — no design in any gearbox type
+
+The actuator-map sweep (2026-10-29, ratios 4–30) found no design for RO60 in any of its four types
+(ISSPG compact / inside, ICPG, IDSPG), in 3dp and metal; the golden baselines for RO60 also record
+"no design". Not investigated: possibly the motor is too small for the minimum teeth counts and
+gear sizes, possibly a constraint or motor-data problem. The released map v1 leaves RO60 out.
 
 **Status:** open.
 
