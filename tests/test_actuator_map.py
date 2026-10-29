@@ -195,3 +195,62 @@ def test_near_best_lists_types_within_2_percent():
              fake_case("cpg", 20.0, cost=3.20)]                                         # 6.7 % worse: not
     rows = build_rows(cases, {"M": MOTOR}, GAINS_FOR_TABLE)
     assert {r["near_best_compact"] for r in rows} == {"dspg wpg"}
+
+
+# ---- fits over the gear ratio (tools/actuator_map/fit.py) -------------------------------------
+
+import numpy as np  # noqa: E402
+
+from tools.actuator_map.fit import best_type, evaluate, fit_quantity, switch_points, valid_intervals  # noqa: E402
+
+
+def test_fit_picks_the_lowest_degree_that_fits():
+    x = np.arange(4, 31, 1.0)
+    quad = fit_quantity(x, 1 + 0.5 * x + 0.02 * x ** 2)
+    (piece,) = quad["pieces"]
+    assert piece["degree"] == 2 and np.allclose(piece["coef"], [1, 0.5, 0.02]) and quad["breaks"] == []
+    assert fit_quantity(x, np.full_like(x, 0.1))["pieces"][0]["degree"] == 0
+    # 4 points allow at most a straight line (no bending through every point)
+    assert fit_quantity([4, 5, 6, 7], [0.49, 0.55, 0.60, 0.58])["pieces"][0]["degree"] <= 1
+
+
+def test_fit_splits_at_a_real_jump_but_not_at_a_lone_outlier():
+    x = np.arange(10, 31, 1.0)
+    y = np.where(x < 26, 66.5 + 0.74 * x, 10.6 + 3.6 * x)   # INDSPG-like length: jumps between 25 and 26
+    f = fit_quantity(x, y)
+    assert f["breaks"] == [25.5] and len(f["pieces"]) == 2 and f["max_rel"] < 1e-9
+    assert evaluate(f, 25.0) == pytest.approx(66.5 + 0.74 * 25)
+    assert evaluate(f, 27.0) == pytest.approx(10.6 + 3.6 * 27)
+    spike = np.full_like(x, 1.0)
+    spike[8] = 1.3                                            # one odd design: scatter, no split
+    assert fit_quantity(x, spike)["breaks"] == []
+
+
+def test_valid_intervals_follow_gaps_and_requested_ratios():
+    # designs at requested 4-6 and 9-10 (none at 7, 8); real ratio 9.9 for request 10
+    pts = [(4, 4.0), (5, 5.0), (6, 6.1), (9, 9.0), (10, 9.9)]
+    assert valid_intervals(pts, 1.0) == [[4.0, 6.1], [9.0, 10.0]]
+
+
+def _type(mass, width_mm=80.0, fraction=1.0, lo=4.0, hi=30.0):
+    def q(coef):
+        return {"pieces": [{"from": lo, "coef": coef, "degree": len(coef) - 1}], "breaks": []}
+    return {"valid_intervals": [[lo, hi]],
+            "quantities": {"mass_kg": q(mass), "efficiency": q([0.9]), "width_with_driver_m": q([width_mm / 1000]),
+                           "torque_carried_fraction": q([fraction]), "compact_cost": q(mass)}}
+
+
+def test_switch_where_fitted_scores_cross():
+    # same efficiency and width: the score difference is the mass difference, equal at ratio 10
+    types = {"cpg": _type([1.0, 0.1]), "dspg": _type([2.0])}
+    intervals, switches = switch_points(types, GAINS_FOR_TABLE, 4.0, 30.0)
+    assert [iv[2] for iv in intervals] == ["cpg", "dspg"]
+    assert switches[0]["ratio"] == pytest.approx(10.0, abs=1e-3)
+
+
+def test_best_between_grid_points_uses_the_80_percent_rule():
+    types = {"isspg_inside": _type([0.5], fraction=0.6), "icpg": _type([1.5], fraction=0.9)}
+    assert best_type(types, 6.3, GAINS_FOR_TABLE) == "icpg"          # 60 % can't win while 90 % exists
+    only_capped = {"isspg_inside": _type([0.5], fraction=0.6), "icpg": _type([1.5], fraction=0.5)}
+    assert best_type(only_capped, 6.3, GAINS_FOR_TABLE) == "isspg_inside"
+    assert best_type(types, 31.0, GAINS_FOR_TABLE) is None             # outside every valid range
