@@ -43,3 +43,31 @@ continues where it stopped (use a new `--name` to start again).
 Width and diameter come from `geometry.py`: formulas over the CAD variables, matched to the
 Onshape models. The optimiser's own `actuator_width` is not used for the frameless and inrunner
 types (ISSUES.md, bug 15).
+
+## Build the table
+
+```bash
+python tools/actuator_map/table.py --name pilot
+```
+
+Reads the run's case files, `config_files/motors.json` and `config_files/cost.json`, and writes
+into the run folder `table_3dp.csv`, `table_metal.csv` (one row per motor, requested ratio and
+gearbox type with a design) and `summary.md` (best type per ratio, where it changes, ratio ranges,
+cases without a design). Units are SI; speeds are also in rpm.
+
+| Columns | Meaning |
+|---|---|
+| `ratio_requested`, `ratio` | asked for; the design's real ratio |
+| `ns, np, np_small, nr, nr_small, module, n_planets` | teeth, module and planets (stage 1); `np_small`/`nr_small` for compound and Wolfrom |
+| `ns_2 … n_planets_2` | stage 2 of DSPG, IDSPG, INDSPG |
+| `mass_kg`, `width_body_m`, `width_with_driver_m`, `dia_body_m`, `dia_widest_m` | whole actuator |
+| `peak_torque_out_Nm` | motor peak × ratio × efficiency × `torque_carried_fraction` |
+| `rated_torque_out_Nm` | min(motor rated, fraction × motor peak) × ratio × efficiency |
+| `no_load_speed_out_*`, `rated_speed_out_*` | motor speed ÷ ratio (rad/s and rpm) |
+| `reflected_inertia_kgm2` | ratio² × motor rotor inertia (the gears' own inertia not yet included); `rotor_inertia_basis` says datasheet or estimate |
+| `compact_cost` | the optimiser's cost (width = planet face widths) |
+| `real_width_score` | K_Mass·mass + K_Eff·efficiency + K_Width_real·(width with driver, mm) + ratio error + K_torque_shortfall·(1 − fraction), gains from `cost.json` |
+| `best_by_compact_cost`, `best_by_real_width` | the lowest-score type of that motor, ratio and material |
+| `torque_capped`, `geometry_approx`, `cad_issues` | gears carry < 100 % of peak torque; width approximate; open CAD issues of the type (ISSUES.md) |
+
+Capped designs may be chosen as best (their shortfall is in both scores); they are flagged.
