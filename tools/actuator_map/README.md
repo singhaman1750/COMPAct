@@ -106,3 +106,34 @@ interpolation.
 its fitted values, the 80 % torque rule is applied, and the lowest wins; the type switches where
 the score curves cross (e.g. U8_Lite 3dp: CPG → WPG at 13.7). Output torque, speed and reflected
 inertia are not fitted: they follow exactly from the ratio, efficiency, fraction and the motor.
+
+## Use the map
+
+`map.py` is standalone (numpy and one `fits.json`, which also holds the motors' values, the gains
+and the rules), so it can be copied into a co-design project together with a map folder.
+
+```python
+from tools.actuator_map.map import ActuatorMap
+
+amap = ActuatorMap("tools/actuator_map/runs/pilot")    # a run folder or a released map folder
+a = amap.actuator("U8_Lite", 14.6, "3dp")
+a.gb_type                        # 'wpg'  (best type at this ratio)
+a.mass, a.width, a.dia           # 0.837 kg, 0.101 m (with driver mount), 0.115 m
+a.peak_torque, a.rated_torque    # 34.0 N m, 9.0 N m at the output
+a.no_load_speed                  # rad/s at the output (a.no_load_speed_rpm in rpm)
+a.reflected_inertia              # ratio^2 x rotor inertia, kg m^2
+a.flags                          # torque_capped, no_full_torque_design, near_best, cad_issues, ...
+```
+
+| Argument | Meaning |
+|---|---|
+| `gb_type="dspg"` | that type at this ratio instead of the best |
+| `types=["cpg", "dspg"]` | only these types may be best |
+| `rule="compact_cost"` | best by the optimiser's own cost instead of the real-width score |
+| `method="interp"` | linear between the swept designs of the type (exact at the designs) instead of the smooth fits |
+| `derivative=True` | `a.derivatives`: d(value)/d(ratio) of every value (exact within a fit piece) |
+
+A ratio where no (allowed) type has designs raises `ValueError` (no extrapolation). Helpers:
+`motors()`, `materials(motor)`, `types(motor, material)`, `covered(motor, material)`,
+`best_types(motor, material)` (intervals and switch ratios), `ranking(motor, ratio, material)`.
+All values are SI; speeds also in rpm. The gears' own inertia is not included yet.
