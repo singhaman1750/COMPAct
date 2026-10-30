@@ -5,7 +5,7 @@ import json
 
 import pytest
 
-from variable_helpers import BASELINE_DIR, GEARBOXES, SPECS, equation_lines, golden_design, write_design
+from variable_helpers import BASELINE_DIR, GEARBOXES, SPECS, downstream_of, equation_lines, golden_design, write_design
 
 CAD = SPECS["sspg"]["cad_variables"]
 GOLDEN = GEARBOXES["sspg"].golden()
@@ -47,10 +47,7 @@ def test_motor_case_clearance_comes_from_the_config(monkeypatch, tmp_path):
     base, base_mass = run(None, tmp_path / "a")
     more, more_mass = run(7, tmp_path / "b")
     assert base["clearance_motor_and_case"] == 5 and more["clearance_motor_and_case"] == 7   # ring gear < motor here
-    downstream = {"clearance_motor_and_case"}
-    for e in CAD:                                     # everything that depends on it, directly or not
-        if set(e.get("depends_on", [])) & downstream:
-            downstream.add(e["name"])
+    downstream = downstream_of("sspg", "clearance_motor_and_case")
     assert {k for k in base if base[k] != more[k]} == downstream
     assert more_mass > base_mass
 
@@ -74,10 +71,7 @@ def test_case_mounting_hole_overlap_comes_from_the_config(monkeypatch, tmp_path)
     base, base_mass = run(None, tmp_path / "a")
     more, more_mass = run(1.0, tmp_path / "b")
     assert more["case_mounting_hole_shift"] == pytest.approx(base["case_mounting_hole_shift"] - 0.5)
-    downstream = {"case_mounting_hole_shift"}
-    for e in CAD:
-        if set(e.get("depends_on", [])) & downstream:
-            downstream.add(e["name"])
+    downstream = downstream_of("sspg", "case_mounting_hole_shift")
     assert downstream == {"case_mounting_hole_shift", "case_mounting_PCD", "Motor_case_OD_max"}
     assert {k for k in base if base[k] != more[k]} == downstream
     assert more_mass == base_mass
@@ -113,10 +107,7 @@ def test_bearing_mount_wall_multiple_comes_from_the_config(monkeypatch, tmp_path
     more, more_mass = run(3, tmp_path / "b")
     d = base["output_mounting_hole_dia"]
     assert (base["bearing_mount_thickness"], more["bearing_mount_thickness"]) == (2 * d, 3 * d)
-    downstream = {"bearing_mount_thickness"}
-    for e in CAD:
-        if set(e.get("depends_on", [])) & downstream:
-            downstream.add(e["name"])
+    downstream = downstream_of("sspg", "bearing_mount_thickness")
     assert downstream == {"bearing_mount_thickness", "output_mounting_PCD"}
     assert {k for k in base if base[k] != more[k]} == downstream
     assert more_mass > base_mass
@@ -155,10 +146,7 @@ def test_stress_rule_widths_follow_what_they_depend_on(monkeypatch, tmp_path, wh
     minimum = 2 * act.planet_bearing_width + act.planet_bearing_gap
     for fw in ("fw_p", "fw_r"):
         assert more[fw] == pytest.approx(max(2 * base["fw_s_calc"], minimum), rel=1e-12)
-    downstream = {what}
-    for e in CAD:
-        if set(e.get("depends_on", [])) & downstream:
-            downstream.add(e["name"])
+    downstream = downstream_of("sspg", what)
     changed = {k for k in base if base[k] != more[k]}
     assert "fw_s_calc" in changed and changed <= downstream
 
@@ -184,9 +172,6 @@ def test_planet_bearing_gap_comes_from_the_config(monkeypatch, tmp_path):
     base, more = run(None, tmp_path / "a"), run(3.0, tmp_path / "b")
     assert base["fw_p"] == base["fw_r"] == 8.0 and base["fw_s_calc"] < 8.0      # at the bearing minimum
     assert more["fw_p"] == more["fw_r"] == 10.0 and more["fw_s_calc"] == base["fw_s_calc"]
-    downstream = {"planet_bearing_gap"}
-    for e in CAD:
-        if set(e.get("depends_on", [])) & downstream:
-            downstream.add(e["name"])
+    downstream = downstream_of("sspg", "planet_bearing_gap")
     changed = {k for k in base if base[k] != more[k]}
     assert {"fw_p", "fw_r", "fw_s_used"} <= changed <= downstream

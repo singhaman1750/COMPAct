@@ -112,3 +112,16 @@ def golden_design(name):
     gb = b["gb_type"]
     (text,) = [t for p, t in b["cad_files"].items() if p.endswith(f"{GEARBOXES[gb].cad_file}_onshape.txt")]
     return gb, b["motor"], b.get("material", "3dp"), GEARBOXES[gb].from_opt(b["opt_parameters"]), text
+
+
+def downstream_of(gb, *names):
+    """Every variable that depends on any of `names`, directly or through others (plus `names`)."""
+    spec = SPECS[gb]
+    found, grew = set(names), True
+    while grew:
+        grew = False
+        for e in spec["cad_variables"] + spec["code_only"]:
+            if e["name"] not in found and set(e.get("depends_on", [])) & found:
+                found.add(e["name"])
+                grew = True
+    return found
