@@ -75,7 +75,7 @@ GEARBOXES = {
         branches=_branches_single),
     "cpg": Gearbox(
         "cpg", "CPG", "cpg_equations", "compoundPlanetaryGearbox",
-        counts={"input": 18, "optimisation": 5, "fixed": 42, "dependent": 54}, code_only=30,
+        counts={"input": 18, "optimisation": 5, "fixed": 42, "dependent": 54}, code_only=31,
         set_gears=_set_cpg,
         from_opt=lambda p: (p[2], p[3], p[4], p[5], p[6], p[7], p[1]),   # [gr, n, Ns, Np_b, Np_s, Nr, m_b, m_s]
         extra=[("MAD_M6C12_KV170", (18, 70, 30, 118, 1.0, 1.0, 3)), ("U8_Lite", (30, 30, 30, 90, 0.5, 0.5, 3)),

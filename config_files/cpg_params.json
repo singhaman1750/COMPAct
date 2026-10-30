@@ -55,6 +55,7 @@
         "planet_shaft_step_offset"                               : 1,
         "planet_bearing_OD"                                      : 12,
         "planet_bearing_width"                                   : 3.5,
+        "planet_bearing_gap"                                     : 1.0,
         "planet_bore"                                            : 10,
         "sun_shaft_bearing_ID"                                   : 8,
         "sun_shaft_bearing_OD"                                   : 16,

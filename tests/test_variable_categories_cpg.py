@@ -168,3 +168,29 @@ def test_ring_wall_minimum_comes_from_the_config(monkeypatch, tmp_path):
     assert more["ring_OD"] == pytest.approx(base["ring_OD"] + 2)
     changed = {k for k in base if base[k] != more[k]}
     assert changed == downstream_of("cpg", "ringRadialWidthMM") & set(base) == {"ring_radial_thickness", "ring_OD"}
+
+
+def test_planet_bearing_gap_comes_from_the_config(monkeypatch, tmp_path):
+    """planet_bearing_gap (config) sets the smallest planet widths: each planet gear holds one bearing
+    and gets half the gap. On the metal golden design both gears sit at that minimum
+    (3.5 + 1.0 / 2 = 4.0 mm); a 3.0 mm gap makes fw_p_b = fw_r = 5.0, leaves fw_s_calc alone and
+    changes nothing outside the downstream chain."""
+    _, motor, material, gears, _ = golden_design("cpg__U8_Lite__10__metal")
+
+    def run(gap, folder):
+        folder.mkdir()
+        actuator, _, _, onshape = write_design(monkeypatch, folder, "cpg", motor, material, gears)
+        if gap is not None:
+            actuator.design_params["planet_bearing_gap"] = gap
+            actuator.setVariables()
+            actuator.updateFacewidth()
+            actuator.setVariables()
+            actuator.genEquationFile_editCADdirectly()
+            onshape = equation_lines((folder / "CPG" / "cpg_equations_onshape.txt").read_text())
+        return {n: float(x) for n, x in onshape}
+
+    base, more = run(None, tmp_path / "a"), run(3.0, tmp_path / "b")
+    assert base["fw_p_b"] == base["fw_r"] == 4.0 and base["fw_s_calc"] < 4.0        # at the bearing minimum
+    assert more["fw_p_b"] == more["fw_r"] == 5.0 and more["fw_s_calc"] == base["fw_s_calc"]
+    changed = {k for k in base if base[k] != more[k]}
+    assert {"fw_p_b", "fw_r", "fw_p_s", "fw_s_used", "case_dist"} <= changed <= downstream_of("cpg", "planet_bearing_gap")

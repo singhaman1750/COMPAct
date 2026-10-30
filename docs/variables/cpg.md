@@ -23,16 +23,11 @@ Confidence:
 |---|---|---|
 | Input | 18 | 2 |
 | Optimisation | 5 | 1 |
-| Fixed | 42 | 23 |
+| Fixed | 42 | 24 |
 | Dependent | 54 | 4 |
-| **Total** | **119** | **30** |
+| **Total** | **119** | **31** |
 
-CAD variables by confidence: high 117, medium 2, low 0
-
-## To review (not high confidence)
-
-- `fw_r` (Dependent, medium): ring width = small-planet stress width (b2, raised to the planet-bearing minimum like fw_p_b); the planet-bearing minimum has hard-coded factors 2/3 and 1/3 of standard_clearance_1_5mm (SSPG uses planet_bearing_gap)
-- `fw_p_b` (Dependent, medium): big-planet width from the tooth-stress rule (b1, raised to the planet-bearing minimum when the two planets together are too short for their bearings); the planet-bearing minimum has hard-coded factors 2/3 and 1/3 of standard_clearance_1_5mm (SSPG uses planet_bearing_gap)
+CAD variables by confidence: high 119, medium 0, low 0
 
 ## Rules shared by every gearbox
 
@@ -131,7 +126,7 @@ From `config_files/variables/rules.json`; the test holds every gearbox's file to
 | 4 | `clr_tip_root` | formula | `h_f - h_a` | h_f, h_a | high | tip-root clearance from addendum and dedendum |
 | 5 | `dp_s` | formula | `module * Ns` | module, Ns | high | pitch diameter |
 | 6 | `db_s` | formula | `dp_s * cos(pressure_angle_rad)` | dp_s, pressure_angle_rad | high | base-circle diameter |
-| 7 | `fw_s_calc` | stress rule | two stress widths, b = FOS x Ft x qe x qk / (gear_allowable_stress x module): b1 for the sun - big planet mesh (module, Ft from serviceFactor x motor_peak_torque at the sun, qe from the sun-planet contact ratio, qk from Ns) and b2 for the small planet - ring mesh (module_s, qk from Np_s); then, if b1 + b2 < 2 x planet_bearing_width + standard_clearance_1_5mm x 2/3, each planet is raised to at least planet_bearing_width + standard_clearance_1_5mm x 1/3 (mitStressAnalysisMinFacewidth); fw_s_calc = b1 | module, module_s, Ns, Np_b, Np_s, Nr, num_planet, pressure_angle, motor_peak_torque, gear_allowable_stress, FOS, serviceFactor | high | sun face width from the tooth-stress rule of the sun - big planet mesh (b1): fixed by the optimisation variables, the motor torque, the gear material and the safety factors. The printed sun uses fw_s_used |
+| 7 | `fw_s_calc` | stress rule | two stress widths, b = FOS x Ft x qe x qk / (gear_allowable_stress x module): b1 for the sun - big planet mesh (module, Ft from serviceFactor x motor_peak_torque at the sun, qe from the sun-planet contact ratio, qk from Ns) and b2 for the small planet - ring mesh (module_s, qk from Np_s); then, if b1 + b2 < 2 x planet_bearing_width + planet_bearing_gap, each planet gear is raised to at least planet_bearing_width + planet_bearing_gap / 2 (one bearing per gear, half the gap each; mitStressAnalysisMinFacewidth); fw_s_calc = b1 | module, module_s, Ns, Np_b, Np_s, Nr, num_planet, pressure_angle, motor_peak_torque, gear_allowable_stress, FOS, serviceFactor | high | sun face width from the tooth-stress rule of the sun - big planet mesh (b1): fixed by the optimisation variables, the motor torque, the gear material and the safety factors. The printed sun uses fw_s_used |
 | 8 | `alpha_s` | formula | `(sqrt(dp_s**2 - db_s**2) / db_s) * 180 / pi - pressure_angle_rad * 180 / pi` | dp_s, db_s, pressure_angle_rad | high | involute angle used to draw the tooth |
 | 9 | `beta_s` | formula | `(360 / (4 * Ns) - alpha_s) * 2` | Ns, alpha_s | high | tooth angle used to draw the tooth |
 | 10 | `dp_p_b` | formula | `module * Np_b` | module, Np_b | high | big-planet pitch diameter |
@@ -142,7 +137,7 @@ From `config_files/variables/rules.json`; the test holds every gearbox's file to
 | 15 | `h_f` | formula | `1.25 * module` | module | high | dedendum, standard proportion of the module |
 | 16 | `dp_r` | formula | `module_s * Nr` | module_s, Nr | high | ring pitch diameter (small module) |
 | 17 | `db_r` | formula | `dp_r * cos(pressure_angle_rad)` | dp_r, pressure_angle_rad | high | base-circle diameter |
-| 18 | `fw_r` | stress rule | two stress widths, b = FOS x Ft x qe x qk / (gear_allowable_stress x module): b1 for the sun - big planet mesh (module, Ft from serviceFactor x motor_peak_torque at the sun, qe from the sun-planet contact ratio, qk from Ns) and b2 for the small planet - ring mesh (module_s, qk from Np_s); then, if b1 + b2 < 2 x planet_bearing_width + standard_clearance_1_5mm x 2/3, each planet is raised to at least planet_bearing_width + standard_clearance_1_5mm x 1/3 (mitStressAnalysisMinFacewidth); fw_r = b2 (raised) | module, module_s, Ns, Np_b, Np_s, Nr, num_planet, pressure_angle, motor_peak_torque, gear_allowable_stress, FOS, serviceFactor, planet_bearing_width, standard_clearance_1_5mm | medium | ring width = small-planet stress width (b2, raised to the planet-bearing minimum like fw_p_b); the planet-bearing minimum has hard-coded factors 2/3 and 1/3 of standard_clearance_1_5mm (SSPG uses planet_bearing_gap) |
+| 18 | `fw_r` | stress rule | two stress widths, b = FOS x Ft x qe x qk / (gear_allowable_stress x module): b1 for the sun - big planet mesh (module, Ft from serviceFactor x motor_peak_torque at the sun, qe from the sun-planet contact ratio, qk from Ns) and b2 for the small planet - ring mesh (module_s, qk from Np_s); then, if b1 + b2 < 2 x planet_bearing_width + planet_bearing_gap, each planet gear is raised to at least planet_bearing_width + planet_bearing_gap / 2 (one bearing per gear, half the gap each; mitStressAnalysisMinFacewidth); fw_r = b2 (raised) | module, module_s, Ns, Np_b, Np_s, Nr, num_planet, pressure_angle, motor_peak_torque, gear_allowable_stress, FOS, serviceFactor, planet_bearing_width, planet_bearing_gap | high | ring width = small-planet stress width (b2, raised to the planet-bearing minimum like fw_p_b) |
 | 19 | `alpha_r` | formula | `(sqrt(dp_r**2 - db_r**2) / db_r) * 180 / pi - pressure_angle_rad * 180 / pi` | dp_r, db_r, pressure_angle_rad | high | involute angle used to draw the tooth |
 | 20 | `beta_r` | formula | `(360 / (4 * Nr) + alpha_r) * 2` | Nr, alpha_r | high | tooth angle used to draw the tooth |
 | 21 | `bearing_ID` | lookup | `bearings_discrete(idRequiredMM=module * (Ns + Np_b) + bearingIDClearanceMM)` → getBearingIDMM | module, Ns, Np_b, bearingIDClearanceMM | high | smallest catalogue bearing whose bore fits around the sun and big planets (bearings_discrete) |
@@ -174,13 +169,13 @@ From `config_files/variables/rules.json`; the test holds every gearbox's file to
 | 47 | `fw_s_used` | formula | `fw_p_s + fw_p_b + clearance_planet + sec_carrier_thickness + standard_clearance_1_5mm` | fw_p_s, fw_p_b, clearance_planet, sec_carrier_thickness, standard_clearance_1_5mm | high | printed sun length: both planet widths plus the carrier and clearances |
 | 48 | `motor_output_hole_CSK_OD` | lookup | `nuts_and_bolts_dimensions(bolt_dia=motor_output_hole_dia, bolt_type=CSK)` → bolt_head_dia | motor_output_hole_dia | high | standard countersunk fastener size for the chosen bolt diameter |
 | 49 | `motor_output_hole_CSK_head_height` | lookup | `nuts_and_bolts_dimensions(bolt_dia=motor_output_hole_dia, bolt_type=CSK)` → bolt_head_height | motor_output_hole_dia | high | standard countersunk fastener size for the chosen bolt diameter |
-| 50 | `fw_p_b` | stress rule | two stress widths, b = FOS x Ft x qe x qk / (gear_allowable_stress x module): b1 for the sun - big planet mesh (module, Ft from serviceFactor x motor_peak_torque at the sun, qe from the sun-planet contact ratio, qk from Ns) and b2 for the small planet - ring mesh (module_s, qk from Np_s); then, if b1 + b2 < 2 x planet_bearing_width + standard_clearance_1_5mm x 2/3, each planet is raised to at least planet_bearing_width + standard_clearance_1_5mm x 1/3 (mitStressAnalysisMinFacewidth); fw_p_b = b1 (raised) | module, module_s, Ns, Np_b, Np_s, Nr, num_planet, pressure_angle, motor_peak_torque, gear_allowable_stress, FOS, serviceFactor, planet_bearing_width, standard_clearance_1_5mm | medium | big-planet width from the tooth-stress rule (b1, raised to the planet-bearing minimum when the two planets together are too short for their bearings); the planet-bearing minimum has hard-coded factors 2/3 and 1/3 of standard_clearance_1_5mm (SSPG uses planet_bearing_gap) |
+| 50 | `fw_p_b` | stress rule | two stress widths, b = FOS x Ft x qe x qk / (gear_allowable_stress x module): b1 for the sun - big planet mesh (module, Ft from serviceFactor x motor_peak_torque at the sun, qe from the sun-planet contact ratio, qk from Ns) and b2 for the small planet - ring mesh (module_s, qk from Np_s); then, if b1 + b2 < 2 x planet_bearing_width + planet_bearing_gap, each planet gear is raised to at least planet_bearing_width + planet_bearing_gap / 2 (one bearing per gear, half the gap each; mitStressAnalysisMinFacewidth); fw_p_b = b1 (raised) | module, module_s, Ns, Np_b, Np_s, Nr, num_planet, pressure_angle, motor_peak_torque, gear_allowable_stress, FOS, serviceFactor, planet_bearing_width, planet_bearing_gap | high | big-planet width from the tooth-stress rule (b1, raised to the planet-bearing minimum when the two planet gears together are too short for their two bearings) |
 | 51 | `dp_p_s` | formula | `module_s * Np_s` | module_s, Np_s | high | small-planet pitch diameter (small module) |
 | 52 | `db_p_s` | formula | `dp_p_s * cos(pressure_angle_rad)` | dp_p_s, pressure_angle_rad | high | base-circle diameter |
 | 53 | `alpha_p_s` | formula | `(sqrt(dp_p_s**2 - db_p_s**2) / db_p_s) * 180 / pi - pressure_angle_rad * 180 / pi` | dp_p_s, db_p_s, pressure_angle_rad | high | involute angle used to draw the tooth |
 | 54 | `beta_p_s` | formula | `(360 / (4 * Np_s) - alpha_p_s) * 2` | Np_s, alpha_p_s | high | tooth angle used to draw the tooth |
 
-## Used by the code, not written to the CAD file (30)
+## Used by the code, not written to the CAD file (31)
 
 | # | Variable | Sub-type | Source / formula | Depends on | Confidence | Why |
 |---|---|---|---|---|---|---|
@@ -197,23 +192,24 @@ From `config_files/variables/rules.json`; the test holds every gearbox's file to
 | 11 | `clearance_motor_and_case_min` | clearance | cpg_params.json → cpg_3DP_design_parameters → `clearance_motor_and_case_min` |  | high | smallest radial gap between the motor and the case; sets clearance_motor_and_case (CAD) and the case mass |
 | 12 | `case_mounting_hole_wall_overlap` | clearance | cpg_params.json → cpg_3DP_design_parameters → `case_mounting_hole_wall_overlap` |  | high | how far the case mounting holes cut into the case wall (0 = the hole just touches the wall); sets case_mounting_hole_shift |
 | 13 | `bearing_mount_wall_bolt_dia_multiple` | wall thickness | cpg_params.json → cpg_3DP_design_parameters → `bearing_mount_wall_bolt_dia_multiple` |  | high | bearing-mount wall per side, in output-bolt diameters; sets bearing_mount_thickness (CAD) and the bearing-holding structure mass |
-| 14 | `output_mounting_hole_num` | fastener size | cpg_params.json → cpg_3DP_design_parameters → `output_mounting_hole_num` |  | high | number of output mounting holes: read from the config but not used by the code or written to the CAD file |
-| 15 | `module_s` | module | optimiser (`optimizationCompoundPlanetaryActuator`) |  | high | the small module (small planet, ring): searched by the optimiser loop, but not in the CAD file (which has one module; ISSUES bug 18) |
-| 16 | `h_b_s` | formula | `1.25 * module_s` | module_s | high | ring tooth depth (small module), used by the bearing-mount rule |
-| 17 | `maxGearboxDiameter` | formula | `(MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR if motor_OD < SMALL_MOTOR_DIA_MM else MAX_GB_DIA_MULT_FACTOR) * motor_OD` | MAX_GB_DIA_MULT_FACTOR, MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR, SMALL_MOTOR_DIA_MM, motor_OD | high | largest gearbox diameter the optimiser may use (gearbox_runner max_diameter; unlike SSPG, without subtracting the ring wall) |
-| 18 | `actuator_width` | formula | `fw_r + clearance_planet + bearing_height + clearance_planet + case_dist + bearing_retainer_thickness + motor_height + case_mounting_surface_height + standard_clearance_1_5mm + base_plate_thickness` | fw_r, clearance_planet, bearing_height, case_dist, bearing_retainer_thickness, motor_height, case_mounting_surface_height, standard_clearance_1_5mm, base_plate_thickness | high | axial width without the driver mount, written to the results CSV |
-| 19 | `GEAR_RATIO_MIN` | search bound | cpg_params.json → cpg_optimization_parameters → `GEAR_RATIO_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 20 | `GEAR_RATIO_MAX` | search bound | cpg_params.json → cpg_optimization_parameters → `GEAR_RATIO_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 21 | `GEAR_RATIO_STEP` | search bound | cpg_params.json → cpg_optimization_parameters → `GEAR_RATIO_STEP` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 22 | `MODULE_MIN` | search bound | cpg_params.json → cpg_optimization_parameters → `MODULE_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 23 | `MODULE_MAX` | search bound | cpg_params.json → cpg_optimization_parameters → `MODULE_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 24 | `NUM_PLANET_MIN` | search bound | cpg_params.json → cpg_optimization_parameters → `NUM_PLANET_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 25 | `NUM_PLANET_MAX` | search bound | cpg_params.json → cpg_optimization_parameters → `NUM_PLANET_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 26 | `NUM_TEETH_SUN_MIN` | search bound | cpg_params.json → cpg_optimization_parameters → `NUM_TEETH_SUN_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 27 | `NUM_TEETH_PLANET_MIN` | search bound | cpg_params.json → cpg_optimization_parameters → `NUM_TEETH_PLANET_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 28 | `MAX_GB_DIA_MULT_FACTOR` | search bound | cpg_params.json → cpg_optimization_parameters → `MAX_GB_DIA_MULT_FACTOR` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 29 | `MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR` | search bound | cpg_params.json → cpg_optimization_parameters → `MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 30 | `SMALL_MOTOR_DIA_MM` | search bound | cpg_params.json → cpg_optimization_parameters → `SMALL_MOTOR_DIA_MM` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 14 | `planet_bearing_gap` | clearance | cpg_params.json → cpg_3DP_design_parameters → `planet_bearing_gap` |  | high | axial gap between the two planet bearings (one in each planet gear); with them it sets the smallest planet widths |
+| 15 | `output_mounting_hole_num` | fastener size | cpg_params.json → cpg_3DP_design_parameters → `output_mounting_hole_num` |  | high | number of output mounting holes: read from the config but not used by the code or written to the CAD file |
+| 16 | `module_s` | module | optimiser (`optimizationCompoundPlanetaryActuator`) |  | high | the small module (small planet, ring): searched by the optimiser loop, but not in the CAD file (which has one module; ISSUES bug 18) |
+| 17 | `h_b_s` | formula | `1.25 * module_s` | module_s | high | ring tooth depth (small module), used by the bearing-mount rule |
+| 18 | `maxGearboxDiameter` | formula | `(MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR if motor_OD < SMALL_MOTOR_DIA_MM else MAX_GB_DIA_MULT_FACTOR) * motor_OD` | MAX_GB_DIA_MULT_FACTOR, MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR, SMALL_MOTOR_DIA_MM, motor_OD | high | largest gearbox diameter the optimiser may use (gearbox_runner max_diameter; unlike SSPG, without subtracting the ring wall) |
+| 19 | `actuator_width` | formula | `fw_r + clearance_planet + bearing_height + clearance_planet + case_dist + bearing_retainer_thickness + motor_height + case_mounting_surface_height + standard_clearance_1_5mm + base_plate_thickness` | fw_r, clearance_planet, bearing_height, case_dist, bearing_retainer_thickness, motor_height, case_mounting_surface_height, standard_clearance_1_5mm, base_plate_thickness | high | axial width without the driver mount, written to the results CSV |
+| 20 | `GEAR_RATIO_MIN` | search bound | cpg_params.json → cpg_optimization_parameters → `GEAR_RATIO_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 21 | `GEAR_RATIO_MAX` | search bound | cpg_params.json → cpg_optimization_parameters → `GEAR_RATIO_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 22 | `GEAR_RATIO_STEP` | search bound | cpg_params.json → cpg_optimization_parameters → `GEAR_RATIO_STEP` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 23 | `MODULE_MIN` | search bound | cpg_params.json → cpg_optimization_parameters → `MODULE_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 24 | `MODULE_MAX` | search bound | cpg_params.json → cpg_optimization_parameters → `MODULE_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 25 | `NUM_PLANET_MIN` | search bound | cpg_params.json → cpg_optimization_parameters → `NUM_PLANET_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 26 | `NUM_PLANET_MAX` | search bound | cpg_params.json → cpg_optimization_parameters → `NUM_PLANET_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 27 | `NUM_TEETH_SUN_MIN` | search bound | cpg_params.json → cpg_optimization_parameters → `NUM_TEETH_SUN_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 28 | `NUM_TEETH_PLANET_MIN` | search bound | cpg_params.json → cpg_optimization_parameters → `NUM_TEETH_PLANET_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 29 | `MAX_GB_DIA_MULT_FACTOR` | search bound | cpg_params.json → cpg_optimization_parameters → `MAX_GB_DIA_MULT_FACTOR` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 30 | `MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR` | search bound | cpg_params.json → cpg_optimization_parameters → `MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 31 | `SMALL_MOTOR_DIA_MM` | search bound | cpg_params.json → cpg_optimization_parameters → `SMALL_MOTOR_DIA_MM` |  | high | optimiser setting: limits of the search, not a part dimension |
 
 ## Config blocks CPG doesn't read
 
