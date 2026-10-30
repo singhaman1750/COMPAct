@@ -745,6 +745,30 @@ ratios 5 / 10 are bug 13 and happen without the fix too).
 **Status:** temporary fix done; full fix open: compute these values in the mass functions from the
 current design (as SSPG, CPG, DSPG and INCPG do), then remove the refresh line (the test stays).
 
+### 20. IDSPG stage 2 — the ring bearing step has a negative volume
+
+**Description:** in `ActuatorandGearbox_IDSPG.py`, `getMassKG_3DP_stg2()` adds
+```python
+ring_bearing_step_volume = np.pi * ((bearing_support_OD*0.5)**2 - (ring_OD*0.5)**2) * (standard_clearance_1_5mm) * 1e-9
+```
+with `bearing_support_OD = bearing_OD + 2 × (a2_bearing_retainer_nut_wrench_size + 1.5)` and
+`ring_OD = Nr × module + 2 × ring_radial_thickness`. When the stage-2 ring is larger than the bearing support
+the volume is negative and the mass model subtracts it. Both golden designs (RO100 20:1) have it:
+
+| Golden design | `ring_OD` | `bearing_support_OD` | Volume | Mass |
+|---|---|---|---|---|
+| 3dp | 123.4 | 114.0 | −2.63 cm³ | −3 g (PLA) |
+| metal | 108.4 | 102.9 | −1.37 cm³ | −11 g before the metal split, −4 g after (aluminium) |
+
+**Reproduce:** weigh either golden design and read `ring_bearing_step_volume` in `getMassKG_3DP_stg2()`.
+
+**Probable fix:** the step joins the ring to the bearing support, so its volume should be the annulus
+between the smaller and the larger of the two diameters, or zero when the ring is outside the support
+(check the IDSPG Onshape model for which). Changes IDSPG masses slightly (both golden cases).
+
+**Status:** open (found 2026-10-31 during the IDSPG metal-mode review; not changed by the metal split,
+which weighs the step as aluminium).
+
 ## CAD issues
 
 Problems in the CAD models (Onshape / SolidWorks), not in the Python code. Found while checking

@@ -1668,8 +1668,8 @@ class internaldoubleStagePlanetaryActuator:
         #------------------------------------
         # density of materials
         #------------------------------------
-        density_gears     = self.internaldoubleStagePlanetaryGearbox.densityGears      # gears; the ring gear (and its casing) counts as a gear
-        density_structure = self.internaldoubleStagePlanetaryGearbox.densityStructure  # motor case, carriers, retainers, holders
+        density_gears     = self.internaldoubleStagePlanetaryGearbox.densityGears      # gears and the ring gears' rings
+        density_structure = self.internaldoubleStagePlanetaryGearbox.densityStructure  # motor case, ring housing, carriers, retainers
 
         #------------------------------------
         # Face Width
@@ -1767,7 +1767,19 @@ class internaldoubleStagePlanetaryActuator:
         pattern_bulge_vol = np.pi * (((self.Rotor_OD+motor_casing_thickness*2+standard_clearance_1_5mm*4)*0.5)**2 - ((self.Rotor_OD+standard_clearance_1_5mm*4)*0.5)**2) * (standard_clearance_1_5mm*2) * 1e-9
 
         ring_gear_total_volume = ring_gear_volume + bearing_step_volume + bearing_step_volume2 + ring_gear_top_support_volume + pattern_bulge_vol
-        ring_gear_mass = ring_gear_total_volume * density_gears
+
+        # Only the ring gear itself (ring PCD to PCD + 2 x ring1RadialWidthMM, the same length as ring_gear_volume)
+        # is gear material; the rest out to the stator bore, the bearing steps, the top support and the pattern
+        # bulge are structure: steel ring, aluminium housing in metal mode. The stage-1 search keeps
+        # ring PCD <= Stator_ID - 2 x ring1RadialWidthMM, so the steel ring lies inside ring_gear_volume.
+        ring_gear_steel_OD     = min(ring_ID + 2*self.ring1RadialWidthMM, ring_OD)
+        ring_gear_steel_volume = np.pi * ((ring_gear_steel_OD*0.5)**2 - (ring_ID*0.5)**2) * (ringFwUsedMM+standard_clearance_1_5mm) * 1e-9
+        ring_gear_steel_mass   = ring_gear_steel_volume * density_gears
+        if density_gears == density_structure:  # one material (3D printed): the original sum, bit-identical
+            ring_gear_mass = ring_gear_total_volume * density_gears
+        else:
+            ring_gear_mass = ring_gear_steel_mass + (ring_gear_total_volume - ring_gear_steel_volume) * density_structure
+        ring_housing_mass = ring_gear_mass - ring_gear_steel_mass
 
         #--------------------------------------
         # Mass: idspg_motor_casing
@@ -1853,7 +1865,19 @@ class internaldoubleStagePlanetaryActuator:
 
         
         sun_volume       = sun_hub_volume + sun_gear_volume + sun_shaft_volume - sun_central_bolt_hole_volume + sun_carrier_bearing_shaft_step_volume+sun_bottom_casing_bearing_support_volume
-        sun_mass         = sun_volume * density_gears
+
+        # Only the sun gear and the shaft pieces machined with it (shaft, carrier-bearing step, bottom bearing
+        # support) are gear material; the hub disc that couples the sun to the rotor is structure: steel sun,
+        # aluminium hub in metal mode. The central bolt hole runs through both, so each loses its share.
+        sun_hub_bolt_hole_volume = sun_central_bolt_hole_volume * sun_coupler_hub_thickness / (fw_s_used + sun_coupler_hub_thickness)
+        sun_hub_net_volume       = sun_hub_volume - sun_hub_bolt_hole_volume
+        sun_steel_volume         = sun_volume - sun_hub_net_volume
+        sun_steel_mass           = sun_steel_volume * density_gears
+        if density_gears == density_structure:  # one material (3D printed): the original sum, bit-identical
+            sun_mass = sun_volume * density_gears
+        else:
+            sun_mass = sun_steel_mass + sun_hub_net_volume * density_structure
+        sun_hub_mass = sun_mass - sun_steel_mass
 
         #--------------------------------------
         # Mass: idspg_planet
@@ -1900,9 +1924,13 @@ class internaldoubleStagePlanetaryActuator:
 
         #----------------------------------------
         self.ring_gear_mass_stg1               = ring_gear_mass
+        self.ring_gear_steel_mass_stg1         = ring_gear_steel_mass
+        self.ring_housing_mass_stg1            = ring_housing_mass
         self.motor_casing_mass_stg1             = motor_casing_mass
         self.carrier_mass_stg1                 = carrier_stg1_mass
         self.sun_mass_stg1                     = sun_mass
+        self.sun_steel_mass_stg1               = sun_steel_mass
+        self.sun_hub_mass_stg1                 = sun_hub_mass
         self.sec_carrier_mass_stg1             = sec_carrier_mass
         self.planet_mass_stg1                  = planet_mass
         self.planet_bearing_combined_mass_stg1 = planet_bearing_combined_mass
@@ -1943,8 +1971,8 @@ class internaldoubleStagePlanetaryActuator:
         #------------------------------------
         # density of materials
         #------------------------------------
-        density_gears     = self.internaldoubleStagePlanetaryGearbox.densityGears      # gears; the ring gear (and its casing) counts as a gear
-        density_structure = self.internaldoubleStagePlanetaryGearbox.densityStructure  # motor case, carriers, retainers, holders
+        density_gears     = self.internaldoubleStagePlanetaryGearbox.densityGears      # gears and the ring gears' rings
+        density_structure = self.internaldoubleStagePlanetaryGearbox.densityStructure  # motor case, ring housing, carriers, retainers
 
         #------------------------------------
         # Face Width
@@ -2042,7 +2070,17 @@ class internaldoubleStagePlanetaryActuator:
         ring_gear_bearing_support_volume = np.pi * ((bearing_support_OD*0.5)**2 - (bearing_OD*0.5)**2) * (bearing_height+standard_clearance_1_5mm) * 1e-9
 
         total_ring_gear_volume = ring_gear_volume + ring_gear_casing_support_volume + ring_bearing_step_volume + ring_gear_bearing_support_volume
-        ring_gear_mass = total_ring_gear_volume * density_gears
+
+        # Only the ring gear (ring PCD to ring_OD = PCD + 2 x ring_radial_thickness, ringFwUsedMM + 1.5 long) is
+        # gear material; the casing support, bearing step and bearing support are structure: steel ring,
+        # aluminium housing in metal mode.
+        ring_gear_steel_mass = ring_gear_volume * density_gears
+        if density_gears == density_structure:  # one material (3D printed): the original sum, bit-identical
+            ring_gear_mass = total_ring_gear_volume * density_gears
+        else:
+            ring_gear_mass = ring_gear_steel_mass + (ring_gear_casing_support_volume + ring_bearing_step_volume
+                                                     + ring_gear_bearing_support_volume) * density_structure
+        ring_housing_mass = ring_gear_mass - ring_gear_steel_mass
 
 
         
@@ -2117,6 +2155,8 @@ class internaldoubleStagePlanetaryActuator:
         #----------------------------------------
         self.carrier_mass_stg2                 = carrier_mass
         self.ring_gear_mass_stg2               = ring_gear_mass
+        self.ring_gear_steel_mass_stg2         = ring_gear_steel_mass
+        self.ring_housing_mass_stg2            = ring_housing_mass
         self.sec_carrier_mass_stg2             = sec_carrier_mass
         self.planet_mass_stg2                  = planet_mass
         self.planet_bearing_combined_mass_stg2 = planet_bearing_combined_mass
@@ -2150,7 +2190,11 @@ class internaldoubleStagePlanetaryActuator:
         print("motor_casing_mass_stg1 :", 1000 * self.motor_casing_mass_stg1 )
         print("carrier_mass_stg1 :", 1000 * self.carrier_mass_stg1 )
         print("ring_gear_mass_stg1 :", 1000 * self.ring_gear_mass_stg1 )
+        print("  ring_gear_steel_mass_stg1 :", 1000 * self.ring_gear_steel_mass_stg1 )
+        print("  ring_housing_mass_stg1 :", 1000 * self.ring_housing_mass_stg1 )
         print("sun_mass_stg1 :", 1000 * self.sun_mass_stg1 )
+        print("  sun_steel_mass_stg1 :", 1000 * self.sun_steel_mass_stg1 )
+        print("  sun_hub_mass_stg1 :", 1000 * self.sun_hub_mass_stg1 )
         print("sec_carrier_mass_stg1 :", 1000 * self.sec_carrier_mass_stg1 )
         print("planet_mass_stg1 :", 1000 * self.planet_mass_stg1)
         print("planet_bearing_combined_mass_stg1 :", 1000 * self.planet_bearing_combined_mass_stg1 )
@@ -2158,6 +2202,8 @@ class internaldoubleStagePlanetaryActuator:
         print("bearing_mass_stg1 :", 1000 * self.bearing_mass_stg1 )
         print("bearing_retainer_mass_stg1 :", 1000 * self.bearing_retainer_mass_stg1)
         print("ring_gear_mass_stg2 :", 1000 * self.ring_gear_mass_stg2 )
+        print("  ring_gear_steel_mass_stg2 :", 1000 * self.ring_gear_steel_mass_stg2 )
+        print("  ring_housing_mass_stg2 :", 1000 * self.ring_housing_mass_stg2 )
         print("carrier_mass_stg2 :", 1000 * self.carrier_mass_stg2 )
         print("sec_carrier_mass_stg2 :", 1000 * self.sec_carrier_mass_stg2 )
         print("planet_mass_stg2 :", 1000 * self.planet_mass_stg2)
