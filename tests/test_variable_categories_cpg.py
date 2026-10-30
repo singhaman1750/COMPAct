@@ -145,3 +145,26 @@ def test_bearing_mount_wall_multiple_comes_from_the_config(monkeypatch, tmp_path
     assert changed == downstream_of("cpg", "bearing_mount_thickness") & set(base) \
         == {"bearing_mount_thickness", "output_mounting_PCD"}
     assert more_mass > base_mass
+
+
+def test_ring_wall_minimum_comes_from_the_config(monkeypatch, tmp_path):
+    """ringRadialWidthMM (config) is the CAD's minimum ring wall too: on a design where the ring is
+    already wider than the output bearing (the minimum branch), raising it from 5 to 6 mm changes
+    ring_radial_thickness and ring_OD and nothing else in the CAD file."""
+    _, motor, material, gears, _ = golden_design("cpg__MAD_M6C12_KV170__10")
+
+    def run(wall, folder):
+        folder.mkdir()
+        actuator, _, _, onshape = write_design(monkeypatch, folder, "cpg", motor, material, gears)
+        if wall is not None:
+            actuator.ringRadialWidthMM = wall
+            actuator.setVariables()
+            actuator.genEquationFile_editCADdirectly()
+            onshape = equation_lines((folder / "CPG" / "cpg_equations_onshape.txt").read_text())
+        return {n: float(x) for n, x in onshape}
+
+    base, more = run(None, tmp_path / "a"), run(6, tmp_path / "b")
+    assert (base["ring_radial_thickness"], more["ring_radial_thickness"]) == (5, 6)
+    assert more["ring_OD"] == pytest.approx(base["ring_OD"] + 2)
+    changed = {k for k in base if base[k] != more[k]}
+    assert changed == downstream_of("cpg", "ringRadialWidthMM") & set(base) == {"ring_radial_thickness", "ring_OD"}

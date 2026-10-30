@@ -3647,8 +3647,8 @@ class compoundPlanetaryActuator:
         self.output_mounting_PCD = self.bearing_OD + self.bearing_mount_thickness
 
         # IIF: ring_radial_thickness
-        if self.Nr * self.module_s + 5 * 2 > self.bearing_OD:
-            self.ring_radial_thickness = 5
+        if self.Nr * self.module_s + self.ringRadialWidthMM * 2 > self.bearing_OD:
+            self.ring_radial_thickness = self.ringRadialWidthMM
         else:
             self.ring_radial_thickness = (self.bearing_OD + self.standard_clearance_1_5mm * 2 - self.Nr * self.module_s) / 2
 

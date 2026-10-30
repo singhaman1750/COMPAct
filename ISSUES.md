@@ -671,7 +671,13 @@ designs: 6.9-7.0 mm). So the mass model's ring OD, fillet and (in metal mode) st
 than the CAD's. Found 2026-10-30 while splitting the metal casing (the steel ring follows the mass
 model's 5 mm for now). Fixing it changes 3dp results.
 
-**Status:** open.
+2026-10-30: the CAD rule's hard-coded 5 mm (twice) now reads `ringRadialWidthMM` (written as the
+integer 5 in `cpg_params.json` so the CAD file text is unchanged), so the CAD, the mass model and
+the optimiser's outer-diameter check share one minimum ring wall. The mismatch itself (the mass
+model never grows the ring to the bearing) is still open: planned as a separate PR that changes
+CPG results (3dp and metal; golden re-record).
+
+**Status:** open (planned).
 
 ### 18. CPG — the CAD draws the ring and the small planet with the big module
 

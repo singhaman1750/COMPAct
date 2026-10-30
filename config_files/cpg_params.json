@@ -35,7 +35,7 @@
         "SMALL_MOTOR_DIA_MM"                 : 80
     },
     "cpg_3DP_design_parameters":{
-        "ringRadialWidthMM"                                      : 5.0,
+        "ringRadialWidthMM"                                      : 5,
         "planetMinDistanceMM"                                    : 5.0,
         "sCarrierExtrusionDiaMM"                                 : 8.0,
         "sCarrierExtrusionClearanceMM"                           : 1.0,

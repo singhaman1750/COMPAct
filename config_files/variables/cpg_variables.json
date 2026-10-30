@@ -778,15 +778,16 @@
    "attr": "ring_radial_thickness",
    "category": "dependent",
    "subtype": "formula",
-   "formula": "5 if Nr * module_s + 5 * 2 > bearing_OD else (bearing_OD + standard_clearance_1_5mm * 2 - Nr * module_s) / 2",
+   "formula": "ringRadialWidthMM if Nr * module_s + ringRadialWidthMM * 2 > bearing_OD else (bearing_OD + standard_clearance_1_5mm * 2 - Nr * module_s) / 2",
    "depends_on": [
     "Nr",
     "module_s",
+    "ringRadialWidthMM",
     "bearing_OD",
     "standard_clearance_1_5mm"
    ],
-   "confidence": "medium",
-   "reason": "ring gear wall: 5 mm, or thicker so the ring reaches the output bearing; the 5 is hard-coded twice and the mass model always uses ringRadialWidthMM (ISSUES bug 17). In SSPG it is a fixed config value"
+   "confidence": "high",
+   "reason": "ring gear wall: the configured minimum (ringRadialWidthMM), or thicker so the ring reaches the output bearing. The mass model always uses the minimum (ISSUES bug 17). In SSPG it is a fixed config value"
   },
   {
    "name": "ring_OD",
@@ -1712,14 +1713,14 @@
    "name": "ringRadialWidthMM",
    "attr": "ringRadialWidthMM",
    "category": "fixed",
-   "subtype": "constraint constant",
+   "subtype": "wall thickness",
    "source": {
     "file": "cpg_params.json",
     "block": "cpg_3DP_design_parameters",
     "key": "ringRadialWidthMM"
    },
-   "confidence": "medium",
-   "reason": "ring wall used by the gearbox's outer-diameter check and the mass model; the CAD's ring_radial_thickness does not use it (hard-coded 5 mm, ISSUES bug 17)"
+   "confidence": "high",
+   "reason": "minimum ring gear wall, shared by the CAD's ring_radial_thickness rule, the mass model and the gearbox's outer-diameter check"
   },
   {
    "name": "planetMinDistanceMM",

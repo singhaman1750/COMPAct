@@ -27,14 +27,12 @@ Confidence:
 | Dependent | 54 | 4 |
 | **Total** | **119** | **30** |
 
-CAD variables by confidence: high 116, medium 3, low 0
+CAD variables by confidence: high 117, medium 2, low 0
 
 ## To review (not high confidence)
 
 - `fw_r` (Dependent, medium): ring width = small-planet stress width (b2, raised to the planet-bearing minimum like fw_p_b); the planet-bearing minimum has hard-coded factors 2/3 and 1/3 of standard_clearance_1_5mm (SSPG uses planet_bearing_gap)
-- `ring_radial_thickness` (Dependent, medium): ring gear wall: 5 mm, or thicker so the ring reaches the output bearing; the 5 is hard-coded twice and the mass model always uses ringRadialWidthMM (ISSUES bug 17). In SSPG it is a fixed config value
 - `fw_p_b` (Dependent, medium): big-planet width from the tooth-stress rule (b1, raised to the planet-bearing minimum when the two planets together are too short for their bearings); the planet-bearing minimum has hard-coded factors 2/3 and 1/3 of standard_clearance_1_5mm (SSPG uses planet_bearing_gap)
-- `ringRadialWidthMM` (Fixed, medium): ring wall used by the gearbox's outer-diameter check and the mass model; the CAD's ring_radial_thickness does not use it (hard-coded 5 mm, ISSUES bug 17)
 
 ## Rules shared by every gearbox
 
@@ -162,7 +160,7 @@ From `config_files/variables/rules.json`; the test holds every gearbox's file to
 | 33 | `output_mounting_nut_wrench_size` | lookup | `nuts_and_bolts_dimensions(bolt_dia=output_mounting_hole_dia, bolt_type=socket_head)` → nut_width_across_flats | output_mounting_hole_dia | high | standard socket-head fastener size for the chosen bolt diameter |
 | 34 | `output_mounting_nut_thickness` | lookup | `nuts_and_bolts_dimensions(bolt_dia=output_mounting_hole_dia, bolt_type=socket_head)` → nut_thickness | output_mounting_hole_dia | high | standard socket-head fastener size for the chosen bolt diameter |
 | 35 | `case_mounting_hole_allen_socket_dia` | lookup | `nuts_and_bolts_dimensions(bolt_dia=case_mounting_hole_dia, bolt_type=socket_head)` → bolt_head_dia | case_mounting_hole_dia | high | standard socket-head fastener size for the chosen bolt diameter |
-| 36 | `ring_radial_thickness` | formula | `5 if Nr * module_s + 5 * 2 > bearing_OD else (bearing_OD + standard_clearance_1_5mm * 2 - Nr * module_s) / 2` | Nr, module_s, bearing_OD, standard_clearance_1_5mm | medium | ring gear wall: 5 mm, or thicker so the ring reaches the output bearing; the 5 is hard-coded twice and the mass model always uses ringRadialWidthMM (ISSUES bug 17). In SSPG it is a fixed config value |
+| 36 | `ring_radial_thickness` | formula | `ringRadialWidthMM if Nr * module_s + ringRadialWidthMM * 2 > bearing_OD else (bearing_OD + standard_clearance_1_5mm * 2 - Nr * module_s) / 2` | Nr, module_s, ringRadialWidthMM, bearing_OD, standard_clearance_1_5mm | high | ring gear wall: the configured minimum (ringRadialWidthMM), or thicker so the ring reaches the output bearing. The mass model always uses the minimum (ISSUES bug 17). In SSPG it is a fixed config value |
 | 37 | `ring_OD` | formula | `Nr * module_s + ring_radial_thickness * 2` | Nr, module_s, ring_radial_thickness | high | ring gear outer diameter (small module) |
 | 38 | `case_mounting_wrench_size` | lookup | `nuts_and_bolts_dimensions(bolt_dia=case_mounting_hole_dia, bolt_type=socket_head)` → nut_width_across_flats | case_mounting_hole_dia | high | standard socket-head fastener size for the chosen bolt diameter |
 | 39 | `case_mounting_nut_thickness` | lookup | `nuts_and_bolts_dimensions(bolt_dia=case_mounting_hole_dia, bolt_type=socket_head)` → nut_thickness | case_mounting_hole_dia | high | standard socket-head fastener size for the chosen bolt diameter |
@@ -186,7 +184,7 @@ From `config_files/variables/rules.json`; the test holds every gearbox's file to
 
 | # | Variable | Sub-type | Source / formula | Depends on | Confidence | Why |
 |---|---|---|---|---|---|---|
-| 1 | `ringRadialWidthMM` | constraint constant | cpg_params.json → cpg_3DP_design_parameters → `ringRadialWidthMM` |  | medium | ring wall used by the gearbox's outer-diameter check and the mass model; the CAD's ring_radial_thickness does not use it (hard-coded 5 mm, ISSUES bug 17) |
+| 1 | `ringRadialWidthMM` | wall thickness | cpg_params.json → cpg_3DP_design_parameters → `ringRadialWidthMM` |  | high | minimum ring gear wall, shared by the CAD's ring_radial_thickness rule, the mass model and the gearbox's outer-diameter check |
 | 2 | `planetMinDistanceMM` | constraint constant | cpg_params.json → cpg_3DP_design_parameters → `planetMinDistanceMM` |  | high | minimum gap between neighbouring planets; only in the old interference check, which CPG doesn't call |
 | 3 | `sCarrierExtrusionDiaMM` | constraint constant | cpg_params.json → cpg_3DP_design_parameters → `sCarrierExtrusionDiaMM` |  | high | carrier extrusion diameter in the planet-interference constraint |
 | 4 | `sCarrierExtrusionClearanceMM` | constraint constant | cpg_params.json → cpg_3DP_design_parameters → `sCarrierExtrusionClearanceMM` |  | high | clearance in the planet-interference constraint |
