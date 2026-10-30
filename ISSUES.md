@@ -769,6 +769,36 @@ between the smaller and the larger of the two diameters, or zero when the ring i
 **Status:** open (found 2026-10-31 during the IDSPG metal-mode review; not changed by the metal split,
 which weighs the step as aluminium).
 
+### 21. INDSPG — negative volumes in the stage-1 ring housing; unused stage-2 volumes
+
+**Description:** in `ActuatorandGearbox_INDSPG.py`:
+1. **Stage 1, `bearing_support_vol3`** is the annulus from `ring_ID + loose_clearance_3DP + 4 × 1.5` (outer)
+   to `bearing1_ID − 3 × 1.5` (inner), written as `π × h × (inner² − outer²)`; the outer diameter is the
+   larger one in all three golden designs, so the volume is negative:
+
+   | Golden design | "outer" (ring side) | "inner" (bearing side) | `bearing_support_vol3` |
+   |---|---|---|---|
+   | RI100 3dp | 44.8 | 33.6 | −2.07 cm³ |
+   | RI80 3dp | 41.3 | 33.6 | −1.36 cm³ |
+   | RI100 metal | 41.3 | 33.6 | −1.36 cm³ |
+2. **Stage 1, `step_above_rotor_vol`:** the height `step_above_rotor` (a sum and difference of face width,
+   rotor, stator and carrier heights) is negative on the RI100 metal design (−0.42 mm → −0.71 cm³);
+   positive on the 3dp designs (13.7 / 13.3 mm).
+3. **Stage 2:** `ring_gear_chamfer_volume`, `ring_gear_casing_support_vol` (bolt bosses) and
+   `ring_bearing_step_VOL` are computed but not added to `total_ring_gear_volume`.
+4. **Stage 2, possible overlap:** `ring_gear_casing_support_volume` and `ring_casing_step_volume` start at
+   `ring_ID + 3`, inside the ring's OD (`ring_ID + 2 × ring_radial_thickness`); double counting if they sit
+   at the ring teeth's height (needs the CAD).
+
+**Reproduce:** weigh the golden designs and read the locals of `getMassKG_3DP_stg1` / `_stg2`.
+
+**Probable fix:** check each piece against the INDSPG Onshape model: swap the diameters (or drop the piece)
+for 1, clamp the height at zero (or rethink the formula) for 2, add or delete the unused volumes in 3.
+Changes INDSPG masses (all golden cases for 1).
+
+**Status:** open (found 2026-10-31 during the INDSPG metal-mode review; the metal split leaves these
+volumes as they are and weighs them as aluminium).
+
 ## CAD issues
 
 Problems in the CAD models (Onshape / SolidWorks), not in the Python code. Found while checking
