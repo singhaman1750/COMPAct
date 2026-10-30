@@ -671,7 +671,13 @@ designs: 6.9-7.0 mm). So the mass model's ring OD, fillet and (in metal mode) st
 than the CAD's. Found 2026-10-30 while splitting the metal casing (the steel ring follows the mass
 model's 5 mm for now). Fixing it changes 3dp results.
 
-**Status:** open.
+2026-10-30: the CAD rule's hard-coded 5 mm (twice) now reads `ringRadialWidthMM` (written as the
+integer 5 in `cpg_params.json` so the CAD file text is unchanged), so the CAD, the mass model and
+the optimiser's outer-diameter check share one minimum ring wall. The mismatch itself (the mass
+model never grows the ring to the bearing) is still open: planned as a separate PR that changes
+CPG results (3dp and metal; golden re-record).
+
+**Status:** open (planned).
 
 ### 18. CPG — the CAD draws the ring and the small planet with the big module
 
@@ -681,11 +687,17 @@ thickness rule and `ring_OD`); the CAD file has one `module` variable. The mass 
 `moduleSmall` for them. No effect today: the geometric constraint
 `(Ns + Np_big) x m_big == (Nr - Np_small) x m_small` is an exact float comparison, so in practice
 only equal modules pass (all 844 CPG designs of the full actuator-map sweep have equal modules).
-It matters as soon as unequal modules are allowed. Plan: use `moduleSmall` for the ring-side values
-in the code (values unchanged today); allowing unequal modules would also need a second module
-variable in the CAD file and the Onshape model.
+It matters as soon as unequal modules are allowed.
 
-**Status:** open, plan proposed 2026-10-30.
+**Code fixed (2026-10-30, option A):** the class now has `module_b` (sun, big planet) and
+`module_s` (small planet, ring) instead of `module`; `dp_r`, `dp_p_s`, the bearing-mount check,
+the ring-thickness rule and `ring_OD` use `module_s` (with `h_b_s`). The CAD file still writes one
+`"module"` (= `module_b`), so the Onshape interface is unchanged; golden check unchanged
+(`tests/test_cpg_modules.py` checks unequal modules by hand).
+
+**Status:** option A done; option B open: actually allowing unequal modules needs a tolerance in
+the geometric constraint and a second module (and tooth heights) in the CAD file and the Onshape
+model.
 
 ## CAD issues
 

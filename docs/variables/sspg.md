@@ -34,7 +34,7 @@ CAD variables by confidence: high 113, medium 0, low 0
 From `config_files/variables/rules.json`; the test holds every gearbox's file to them.
 
 - names matching `^Nr[0-9]*$` are **Dependent / implicit constraint**: ring-gear teeth are implicitly constrained: the coaxial geometric constraint (e.g. Nr = Ns + 2 x Np) fixes them once the sun and planet teeth are chosen, so the optimiser sets them instead of searching them
-- names matching `^fw_(s_calc|p|r)$` are **Dependent / stress rule**: gear face widths follow from the tooth-stress rule: the optimisation variables, the motor torque, the gear material and the safety factors fix them, and the optimiser always takes the smallest width that passes
+- names matching `^fw_(s_calc|p|p_b|r)$` are **Dependent / stress rule**: gear face widths follow from the tooth-stress rule: the optimisation variables, the motor torque, the gear material and the safety factors fix them, and the optimiser always takes the smallest width that passes (widths that are a formula of another width, e.g. CPG's fw_p_s = fw_r + clearance_planet, are dependent / formula)
 
 ## Input (18)
 
