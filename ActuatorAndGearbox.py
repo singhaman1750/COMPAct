@@ -3448,7 +3448,8 @@ class compoundPlanetaryActuator:
         self.Np_s       = self.compoundPlanetaryGearbox.NpSmall
         self.Nr         = self.Ns + self.Np_b + self.Np_s
         self.num_planet = self.compoundPlanetaryGearbox.numPlanet
-        self.module     = self.compoundPlanetaryGearbox.moduleBig
+        self.module_b   = self.compoundPlanetaryGearbox.moduleBig     # sun and big planet
+        self.module_s   = self.compoundPlanetaryGearbox.moduleSmall   # small planet and ring
 
         #------------------------------------------------------
         # Indepent Constant variables
@@ -3545,30 +3546,31 @@ class compoundPlanetaryActuator:
         # Gear 
         #---------------------------------------------------
         # --- Gear Profile ---
-        self.h_a          = 1 * self.module
-        self.h_b          = 1.25 * self.module
-        self.h_f          = 1.25 * self.module
+        self.h_a          = 1 * self.module_b
+        self.h_b          = 1.25 * self.module_b
+        self.h_b_s        = 1.25 * self.module_s   # ring tooth depth (small module); not in the CAD file
+        self.h_f          = 1.25 * self.module_b
         self.clr_tip_root = self.h_f - self.h_a
 
-        self.dp_s      = self.module * self.Ns
+        self.dp_s      = self.module_b * self.Ns
         self.db_s      = self.dp_s * np.cos((self.pressure_angle))
         self.alpha_s   = (np.sqrt(self.dp_s ** 2 - self.db_s ** 2) / self.db_s) * 180 / np.pi - self.pressure_angle_deg
         self.beta_s    = (360 / (4 * self.Ns) - self.alpha_s) * 2
         self.fw_s_calc = self.compoundPlanetaryGearbox.fwSunMM
 
-        self.dp_p_b    = self.module * self.Np_b
+        self.dp_p_b    = self.module_b * self.Np_b
         self.db_p_b    = self.dp_p_b * np.cos((self.pressure_angle))
         self.alpha_p_b = (np.sqrt(self.dp_p_b ** 2 - self.db_p_b ** 2) / self.db_p_b) * 180 / np.pi - self.pressure_angle_deg
         self.beta_p_b  = (360 / (4 * self.Np_b) - self.alpha_p_b) * 2
         self.fw_p_b    = self.compoundPlanetaryGearbox.fwPlanetBigMM
         
-        self.dp_r    = self.module * self.Nr
+        self.dp_r    = self.module_s * self.Nr
         self.db_r    = self.dp_r * np.cos((self.pressure_angle))
         self.alpha_r = (np.sqrt(self.dp_r ** 2 - self.db_r ** 2) / self.db_r) * 180 / np.pi - self.pressure_angle_deg
         self.beta_r  = (360 / (4 * self.Nr) + self.alpha_r) * 2
         self.fw_r    = self.compoundPlanetaryGearbox.fwRingMM
 
-        self.dp_p_s    = self.module * self.Np_s
+        self.dp_p_s    = self.module_s * self.Np_s
         self.db_p_s    = self.dp_p_s * np.cos((self.pressure_angle))
         self.alpha_p_s = (np.sqrt(self.dp_p_s ** 2 - self.db_p_s ** 2) / self.db_p_s) * 180 / np.pi - self.pressure_angle_deg
         self.beta_p_s  = (360 / (4 * self.Np_s) - self.alpha_p_s) * 2
@@ -3593,14 +3595,14 @@ class compoundPlanetaryActuator:
         self.sun_hub_dia = self.motor_output_hole_PCD + self.motor_output_hole_dia + self.standard_clearance_1_5mm * 4
 
         #----------------------- Bearings------------------------------------
-        IdrequiredMM = self.module * (self.Ns + self.Np_b) + self.bearingIDClearanceMM
+        IdrequiredMM = self.module_b * (self.Ns + self.Np_b) + self.bearingIDClearanceMM
         Bearings            = bearings_discrete(IdrequiredMM)
         self.bearing_ID     = Bearings.getBearingIDMM()
         self.bearing_OD     = Bearings.getBearingODMM()
         self.bearing_height = Bearings.getBearingWidthMM()
 
         #------------------- Carrier & Sec Carrier-----------------------------
-        self.carrier_PCD = (self.Np_b + self.Ns) * self.module
+        self.carrier_PCD = (self.Np_b + self.Ns) * self.module_b
         
         carrier_trapezoidal_support_hole = nuts_and_bolts_dimensions(bolt_dia=self.carrier_trapezoidal_support_hole_dia, bolt_type="socket_head")
 
@@ -3623,10 +3625,10 @@ class compoundPlanetaryActuator:
         self.case_mounting_hole_shift = self.case_mounting_hole_dia / 2 - 0.5
 
         # IIF: clearance_motor_and_case
-        if (self.Ns + self.Np_b * 2) * self.module < self.motor_OD:
+        if (self.Ns + self.Np_b * 2) * self.module_b < self.motor_OD:
             self.clearance_motor_and_case = 5
         else:
-            self.clearance_motor_and_case = ((self.Ns + self.Np_b * 2) * self.module - self.motor_OD) * 0.5 + 5
+            self.clearance_motor_and_case = ((self.Ns + self.Np_b * 2) * self.module_b - self.motor_OD) * 0.5 + 5
 
         self.Motor_case_ID = self.motor_OD + self.clearance_motor_and_case * 2
         self.motor_case_OD_base = self.motor_OD + self.clearance_motor_and_case * 2 + self.Motor_case_thickness * 2
@@ -3634,20 +3636,20 @@ class compoundPlanetaryActuator:
         self.Motor_case_OD_max = self.case_mounting_PCD + self.case_mounting_hole_allen_socket_dia + self.clearance_case_mount_holes_shell_thickness * 2
 
         # IIF: bearing_mount_thickness
-        if (self.bearing_OD + self.output_mounting_hole_dia * 4) > (self.Nr * self.module + 2 * self.h_b):
+        if (self.bearing_OD + self.output_mounting_hole_dia * 4) > (self.Nr * self.module_s + 2 * self.h_b_s):
             self.bearing_mount_thickness = self.output_mounting_hole_dia * 2
         else:
-            self.bearing_mount_thickness = ((self.Nr * self.module + 2 * self.h_b - (self.bearing_OD + self.output_mounting_hole_dia * 4)) / 2) + self.output_mounting_hole_dia * 2 + self.standard_clearance_1_5mm
+            self.bearing_mount_thickness = ((self.Nr * self.module_s + 2 * self.h_b_s - (self.bearing_OD + self.output_mounting_hole_dia * 4)) / 2) + self.output_mounting_hole_dia * 2 + self.standard_clearance_1_5mm
 
         self.output_mounting_PCD = self.bearing_OD + self.bearing_mount_thickness
 
         # IIF: ring_radial_thickness
-        if self.Nr * self.module + 5 * 2 > self.bearing_OD:
+        if self.Nr * self.module_s + 5 * 2 > self.bearing_OD:
             self.ring_radial_thickness = 5
         else:
-            self.ring_radial_thickness = (self.bearing_OD + self.standard_clearance_1_5mm * 2 - self.Nr * self.module) / 2
+            self.ring_radial_thickness = (self.bearing_OD + self.standard_clearance_1_5mm * 2 - self.Nr * self.module_s) / 2
 
-        self.ring_OD = self.Nr * self.module + self.ring_radial_thickness * 2
+        self.ring_OD = self.Nr * self.module_s + self.ring_radial_thickness * 2
         self.fw_s_used = self.fw_p_s + self.fw_p_b + self.clearance_planet + self.sec_carrier_thickness + self.standard_clearance_1_5mm #TODO: Move to bottom
 
         #-----
@@ -3674,7 +3676,7 @@ class compoundPlanetaryActuator:
                     f'"Np_s"= {self.Np_s}\n',
                     f'"Nr"= {self.Nr}\n',
                     f'"num_planet"= {self.num_planet}\n',
-                    f'"module"= {self.module}\n',
+                    f'"module"= {self.module_b}\n',
                     f'"motor_OD"= {self.motor_OD}\n',
                     f'"motor_height"= {self.motor_height}\n',
                     f'"pressure_angle"= {self.pressure_angle_deg}\n',
@@ -3802,7 +3804,7 @@ class compoundPlanetaryActuator:
                     f'"Np_s"= {self.Np_s}\n',
                     f'"Nr"= {self.Nr}\n',
                     f'"num_planet"= {self.num_planet}\n',
-                    f'"module"= {self.module}\n',
+                    f'"module"= {self.module_b}\n',
                     f'"motor_OD"= {self.motor_OD}\n',
                     f'"motor_height"= {self.motor_height}\n',
                     f'"pressure_angle"= {self.pressure_angle_deg}\n',
@@ -3932,7 +3934,7 @@ class compoundPlanetaryActuator:
                     f'"Np_s"= {self.Np_s}\n',
                     f'"Nr"= {self.Nr}\n',
                     f'"num_planet"= {self.num_planet}\n',
-                    f'"module"= {self.module}\n',
+                    f'"module"= {self.module_b}\n',
                     f'"motor_OD"= {self.motor_OD}\n',
                     f'"motor_height"= {self.motor_height}\n',
                     f'"pressure_angle"= {self.pressure_angle_deg}\n',
@@ -4059,7 +4061,7 @@ class compoundPlanetaryActuator:
                     f'"Np_s"= {self.Np_s}\n',
                     f'"Nr"= {self.Nr}\n',
                     f'"num_planet"= {self.num_planet}\n',
-                    f'"module"= {self.module}\n',
+                    f'"module"= {self.module_b}\n',
                     f'"motor_OD"= {self.motor_OD}\n',
                     f'"motor_height"= {self.motor_height}\n',
                     f'"pressure_angle"= {self.pressure_angle_deg}\n',
