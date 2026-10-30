@@ -46,6 +46,7 @@ lie inside the mass model's ring volume (checked by a test).
 | DSPG | U8_Lite 20:1 | 1,743 → 1,241 g (same gear sets) |
 | INSSPG type 1 | RI100 6.5:1 | 1,861 → 1,524 g (same gear set) |
 | INSSPG type 2 | RI100 6.5:1 | 1,616 → 1,304 g (same gear set; ring housing still the older formula, ISSUES bug 4) |
+| WPG | U8_Lite 20:1 | 1,748 → 1,238 g (new gear set 56/48/36/152/140; the old set would be 1,167 g but costs more: ratio 19.91, wider gears) |
 
 ## Overview of the 13 remaining types
 
@@ -93,16 +94,26 @@ inrunner rotor hubs / couplers (`densityAluminum`, `densityRotor`).
 
 ## Per type
 
-### WPG (`ActuatorAndGearbox.py`, `wolfromPlanetaryActuator.getMassKG_3DP`, from L6251)
-- **At gear density:** `gearbox_casing_mass` (L6476-6480) = bearing-holding structure + spacer wall for
-  ring 2 + case-mounting structure + **ring gear 1**; `small_ring_mass` (L6533) = small-ring annulus +
-  small-ring bearing structure + output-bearing structure.
-- **Rings:** big ring 1: pitch `Nr1 × module1`, mass-model OD `bearing_ID + 1.5 × 4` (thick), length
-  `ring1FwMM`. Small (output) ring 2: pitch `Nr2 × module2`, OD `+ 2 × module2 + 2 × small_ring_case_thickness`,
-  length `ring2FwMM + carrier + step + clearance`.
-- **Steel:** ring 1 annulus (pitch + 2 × wall, wall = decision 2) × `ring1FwMM`; ring 2 annulus × `ring2FwMM`.
-- **Note:** the CAD / mass mismatches found in the classification plan (motor-case gap, bearing-mount
-  ring term) are not touched here.
+### WPG (`ActuatorAndGearbox.py`, `wolfromPlanetaryActuator.getMassKG_3DP`) — done
+- **Ring 1 (fixed) in `gearbox_casing_mass`:** steel = the mass model's `ring_gear1` piece (pitch
+  `Nr1 × module1` to `ring_gear1_OD = bearing_ID + 4 × 1.5`, `ring1FwMM` long); bearing holder, spacer
+  wall and case mounting are aluminium. `spacer_wall_for_ring2_*` renamed `spacer_wall_for_ring1_*` (it is
+  built on ring 1's OD; mass model only, not in the CAD).
+- **Ring 2 (output) `small_ring_mass`:** the annulus (pitch to `+ 2 × module2 + 2 × small_ring_case_thickness`)
+  is split by height: `small_ring_gear` (`ring2FwMM`) is steel, `small_ring_carrier_wall`
+  (`carrier_thickness + carrier_bearing_step_width + clearance_planet`) aluminium; the end wall (inner carrier
+  bearing seat) and the output-bearing sleeve are aluminium.
+- Stored: `ring_gear1_mass`, `gearbox_housing_mass`, `small_ring_gear_mass`, `small_ring_housing_mass`. Not
+  printed: WPG copies `print_mass_of_parts_3DP` into its results file, and new rows would change the 3dp results.
+- **Open notes (not changed here):**
+  - Ring 1's mass-model OD is `bearing_ID + 6` (81 mm on the golden design); the CAD (`ring_OD_b`) and the
+    motor-case sizing use pitch + 2 × `ring_radial_thickness` (84 mm). For a large Np1 − Np2 the ring-1 wall
+    could reach zero or go negative (not checked).
+  - End-wall height in the mass model is inner bearing width + step (8.5 mm); the CAD has
+    `small_ring_output_wall_thickness` = 5. The annulus and the end wall may overlap axially.
+  - Unused: `ring1_ID`, `ringFwUsedMM`, `small_ring_gear_casing_thickness`, `Ring1OuterRadiusMM`, `Ring2OuterRadiusMM`.
+  - The search weighs each design with attributes left from the last `setVariables()` call (e.g. the motor
+    case), so a design's mass during the search differs from its re-run mass by ~10 g.
 
 ### DSPG (`ActuatorAndGearbox.py`, `getMassKG_3DP_stg1` L8621, `_stg2` L8913)
 - **Exactly the SSPG pattern, per stage:** `gearbox_casing_mass = (ring + bearing holder + case mounting

@@ -258,3 +258,78 @@ def test_insspg_3dp_ring_is_unchanged(gb_type):
 def test_insspg_metal_optimum_gets_lighter(gb_type):
     """The re-recorded metal golden designs (same gear sets): type 1 1,861 -> 1,524 g, type 2 1,616 -> 1,304 g."""
     assert build_insspg(gb_type, "metal").getMassKG_3DP() == pytest.approx(INSSPG_METAL_DESIGNS[gb_type][1], abs=0.001)
+
+
+# ---- WPG -----------------------------------------------------------------------------------------
+# Two rings: ring gear 1 (fixed, in gearbox_casing_mass) and ring gear 2 (the output ring, small_ring_mass).
+# Designs (U8_Lite, 20:1): Ns, Np big, Np small, Nr big, Nr small, module, planets.
+WPG_OLD_METAL_DESIGN = (36, 56, 36, 148, 128, 0.5, 4)   # the metal golden design before the split
+WPG_NEW_METAL_DESIGN = (56, 48, 36, 152, 140, 0.5, 4)   # re-recorded: lower cost (ratio 20.0, narrower gears)
+
+
+def build_wpg(material, design=WPG_OLD_METAL_DESIGN):
+    actuator, _ = gearbox_runner.build("wpg", "U8_Lite", material)
+    gb = actuator.wolfromPlanetaryGearbox
+    Ns, Np1, Np2, Nr1, Nr2, module, n = design
+    gb.setNs(Ns), gb.setNpBig(Np1), gb.setNpSmall(Np2), gb.setNrBig(Nr1), gb.setNrSmall(Nr2)
+    gb.setModuleBig(module), gb.setModuleSmall(module), gb.setNumPlanet(n)
+    actuator.updateFacewidth()
+    actuator.setVariables()
+    actuator.getMassKG_3DP()
+    return actuator
+
+
+def wpg_ring_volumes_m3(a):
+    """The two steel rings: ring gear 1 from its PCD to bearing_ID + 6 (the mass model's ring_gear1_OD),
+    fw_r_b long; ring gear 2 from its PCD to + 2 x module + 2 x small_ring_case_thickness, fw_r_s long."""
+    gb = a.wolfromPlanetaryGearbox
+    pcd1, pcd2 = gb.NrBig * gb.moduleBig, gb.NrSmall * gb.moduleSmall
+    ring1 = math.pi / 4 * ((a.bearing_ID + 4 * a.standard_clearance_1_5mm) ** 2 - pcd1 ** 2) * gb.fwRingBigMM
+    od2 = pcd2 + 2 * gb.moduleSmall + 2 * a.small_ring_case_thickness
+    ring2 = math.pi / 4 * (od2 ** 2 - pcd2 ** 2) * gb.fwRingSmallMM
+    return ring1 * 1e-9, ring2 * 1e-9
+
+
+def wpg_whole_volumes_m3(a):
+    """The whole casing and small-ring volumes, from the mass model run with one density for everything."""
+    gb = a.wolfromPlanetaryGearbox
+    densities = gb.densityGears, gb.densityStructure
+    gb.densityStructure = gb.densityGears
+    try:
+        a.getMassKG_3DP()
+        return a.gearbox_casing_mass / gb.densityGears, a.small_ring_mass / gb.densityGears
+    finally:
+        gb.densityGears, gb.densityStructure = densities
+        a.getMassKG_3DP()
+
+
+def test_wpg_metal_rings_are_steel_and_the_housings_aluminium():
+    a = build_wpg("metal")
+    gb = a.wolfromPlanetaryGearbox
+    assert (gb.densityGears, gb.densityStructure) == (7850, 2700)
+    ring1, ring2 = wpg_ring_volumes_m3(a)
+    casing, small_ring = wpg_whole_volumes_m3(a)
+    assert 0 < ring1 < casing and 0 < ring2 < small_ring
+    assert a.ring_gear1_mass == pytest.approx(ring1 * 7850, rel=1e-9)
+    assert a.gearbox_housing_mass == pytest.approx((casing - ring1) * 2700, rel=1e-9)
+    assert a.gearbox_casing_mass == pytest.approx(a.ring_gear1_mass + a.gearbox_housing_mass, rel=1e-12)
+    assert a.small_ring_gear_mass == pytest.approx(ring2 * 7850, rel=1e-9)
+    assert a.small_ring_housing_mass == pytest.approx((small_ring - ring2) * 2700, rel=1e-9)
+    assert a.small_ring_mass == pytest.approx(a.small_ring_gear_mass + a.small_ring_housing_mass, rel=1e-12)
+
+
+def test_wpg_3dp_rings_are_unchanged():
+    a = build_wpg("3dp")
+    gb = a.wolfromPlanetaryGearbox
+    assert gb.densityGears == gb.densityStructure
+    ring1, ring2 = wpg_ring_volumes_m3(a)
+    assert a.ring_gear1_mass == pytest.approx(ring1 * gb.densityGears, rel=1e-12)
+    assert a.small_ring_gear_mass == pytest.approx(ring2 * gb.densityGears, rel=1e-12)
+    assert a.gearbox_housing_mass > 0 and a.small_ring_housing_mass > 0
+
+
+def test_wpg_metal_optimum_gets_lighter():
+    """The old metal golden gear set drops from 1,748 g to 1,167 g; the re-recorded optimum
+    (56/48/36/152/140) is 1,238 g."""
+    assert build_wpg("metal").getMassKG_3DP() == pytest.approx(1.167, abs=0.001)
+    assert build_wpg("metal", WPG_NEW_METAL_DESIGN).getMassKG_3DP() == pytest.approx(1.238, abs=0.001)
