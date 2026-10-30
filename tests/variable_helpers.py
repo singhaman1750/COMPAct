@@ -58,6 +58,12 @@ def _branches_single(a):
             "bearing wider than ring": a.bearing_OD + a.output_mounting_hole_dia * 4 > a.Nr * a.module + 2 * a.h_b}
 
 
+def _branches_cpg(a):
+    return {"big planets wider than motor": (a.Ns + a.Np_b * 2) * a.module_b >= a.motor_OD,
+            "bearing wider than ring": a.bearing_OD + a.output_mounting_hole_dia * 4 > a.Nr * a.module_s + 2 * a.h_b_s,
+            "ring grown to the bearing": not a.Nr * a.module_s + 5 * 2 > a.bearing_OD}
+
+
 GEARBOXES = {
     "sspg": Gearbox(
         "sspg", "SSPG", "sspg_equations", "planetaryGearbox",
@@ -67,6 +73,15 @@ GEARBOXES = {
         extra=[("U8_Lite", (20, 40, 100, 1.2, 3)), ("MAD_M6C12_KV170", (18, 30, 78, 0.5, 3)),
                ("VT8020_PRO", (30, 60, 150, 1.0, 4))],
         branches=_branches_single),
+    "cpg": Gearbox(
+        "cpg", "CPG", "cpg_equations", "compoundPlanetaryGearbox",
+        counts={"input": 18, "optimisation": 5, "fixed": 42, "dependent": 54}, code_only=27,
+        set_gears=_set_cpg,
+        from_opt=lambda p: (p[2], p[3], p[4], p[5], p[6], p[7], p[1]),   # [gr, n, Ns, Np_b, Np_s, Nr, m_b, m_s]
+        extra=[("MAD_M6C12_KV170", (18, 70, 30, 118, 1.0, 1.0, 3)), ("U8_Lite", (30, 30, 30, 90, 0.5, 0.5, 3)),
+               ("VT8020_PRO", (24, 40, 26, 90, 1.2, 1.2, 3)),
+               ("U10_Plus_KV80", (18, 24, 60, 102, 1.0, 1.0, 3))],   # made up: ring wider than bearing + bolts
+        branches=_branches_cpg),
 }
 # only gearboxes whose spec exists are tested
 SPECS = {gb: load(gb) for gb in GEARBOXES if (CONFIG / "variables" / f"{gb}_variables.json").is_file()}
