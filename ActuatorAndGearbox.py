@@ -3532,6 +3532,7 @@ class compoundPlanetaryActuator:
         self.air_flow_hole_offset = self.design_params["air_flow_hole_offset"] # 3
 
         self.output_mounting_hole_dia  = self.design_params["output_mounting_hole_dia"]  # 4
+        self.bearing_mount_wall_bolt_dia_multiple = self.design_params["bearing_mount_wall_bolt_dia_multiple"] # 2
         self.output_mounting_nut_depth = self.design_params["output_mounting_nut_depth"] # 3
         self.output_mounting_hole_num  = self.design_params["output_mounting_hole_num"]  # 4
 
@@ -3638,10 +3639,10 @@ class compoundPlanetaryActuator:
         self.Motor_case_OD_max = self.case_mounting_PCD + self.case_mounting_hole_allen_socket_dia + self.clearance_case_mount_holes_shell_thickness * 2
 
         # IIF: bearing_mount_thickness
-        if (self.bearing_OD + self.output_mounting_hole_dia * 4) > (self.Nr * self.module_s + 2 * self.h_b_s):
-            self.bearing_mount_thickness = self.output_mounting_hole_dia * 2
+        if (self.bearing_OD + self.output_mounting_hole_dia * (2 * self.bearing_mount_wall_bolt_dia_multiple)) > (self.Nr * self.module_s + 2 * self.h_b_s):
+            self.bearing_mount_thickness = self.output_mounting_hole_dia * self.bearing_mount_wall_bolt_dia_multiple
         else:
-            self.bearing_mount_thickness = ((self.Nr * self.module_s + 2 * self.h_b_s - (self.bearing_OD + self.output_mounting_hole_dia * 4)) / 2) + self.output_mounting_hole_dia * 2 + self.standard_clearance_1_5mm
+            self.bearing_mount_thickness = ((self.Nr * self.module_s + 2 * self.h_b_s - (self.bearing_OD + self.output_mounting_hole_dia * (2 * self.bearing_mount_wall_bolt_dia_multiple))) / 2) + self.output_mounting_hole_dia * self.bearing_mount_wall_bolt_dia_multiple + self.standard_clearance_1_5mm
 
         self.output_mounting_PCD = self.bearing_OD + self.bearing_mount_thickness
 
@@ -4628,11 +4629,11 @@ class compoundPlanetaryActuator:
         bearing_height = WidthBearingMM    
         bearing_mass   = BearingMassKG      
 
-        if ((bearing_OD + output_mounting_hole_dia * 4) > (Nr * module2 + 2 * h_b2)):
-            bearing_mount_thickness  = output_mounting_hole_dia * 2
+        if ((bearing_OD + output_mounting_hole_dia * (2 * self.bearing_mount_wall_bolt_dia_multiple)) > (Nr * module2 + 2 * h_b2)):
+            bearing_mount_thickness  = output_mounting_hole_dia * self.bearing_mount_wall_bolt_dia_multiple
         else:
-            bearing_mount_thickness = ((((Nr * module2 + 2 * h_b2) - (bearing_OD + output_mounting_hole_dia * 4))/2) 
-                                    + output_mounting_hole_dia * 2 + standard_clearance_1_5mm)        
+            bearing_mount_thickness = ((((Nr * module2 + 2 * h_b2) - (bearing_OD + output_mounting_hole_dia * (2 * self.bearing_mount_wall_bolt_dia_multiple)))/2) 
+                                    + output_mounting_hole_dia * self.bearing_mount_wall_bolt_dia_multiple + standard_clearance_1_5mm)        
 
         bearing_holding_structure_OD     = bearing_OD + bearing_mount_thickness * 2
         bearing_holding_structure_ID     = bearing_OD

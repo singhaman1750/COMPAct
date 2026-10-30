@@ -517,17 +517,18 @@
    "attr": "bearing_mount_thickness",
    "category": "dependent",
    "subtype": "formula",
-   "formula": "output_mounting_hole_dia * 2 if bearing_OD + output_mounting_hole_dia * 4 > Nr * module_s + 2 * h_b_s else ((Nr * module_s + 2 * h_b_s) - (bearing_OD + output_mounting_hole_dia * 4)) / 2 + output_mounting_hole_dia * 2 + standard_clearance_1_5mm",
+   "formula": "output_mounting_hole_dia * bearing_mount_wall_bolt_dia_multiple if bearing_OD + output_mounting_hole_dia * (2 * bearing_mount_wall_bolt_dia_multiple) > Nr * module_s + 2 * h_b_s else ((Nr * module_s + 2 * h_b_s) - (bearing_OD + output_mounting_hole_dia * (2 * bearing_mount_wall_bolt_dia_multiple))) / 2 + output_mounting_hole_dia * bearing_mount_wall_bolt_dia_multiple + standard_clearance_1_5mm",
    "depends_on": [
     "output_mounting_hole_dia",
+    "bearing_mount_wall_bolt_dia_multiple",
     "bearing_OD",
     "Nr",
     "module_s",
     "h_b_s",
     "standard_clearance_1_5mm"
    ],
-   "confidence": "medium",
-   "reason": "two-case rule: a wall of two bolt diameters when the bearing is wider than the ring gear, otherwise wide enough to cover the ring teeth; the factors 2 and 4 are hard-coded (also in the mass code; SSPG uses bearing_mount_wall_bolt_dia_multiple)"
+   "confidence": "high",
+   "reason": "wall around the output bearing: the configured number of output-bolt diameters on each side, or wider (plus a clearance) when the ring gear's teeth reach further out (the same rule is used for the mass)"
   },
   {
    "name": "case_mounting_hole_dia",
@@ -1861,6 +1862,19 @@
    },
    "confidence": "high",
    "reason": "how far the case mounting holes cut into the case wall (0 = the hole just touches the wall); sets case_mounting_hole_shift"
+  },
+  {
+   "name": "bearing_mount_wall_bolt_dia_multiple",
+   "attr": "bearing_mount_wall_bolt_dia_multiple",
+   "category": "fixed",
+   "subtype": "wall thickness",
+   "source": {
+    "file": "cpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "bearing_mount_wall_bolt_dia_multiple"
+   },
+   "confidence": "high",
+   "reason": "bearing-mount wall per side, in output-bolt diameters; sets bearing_mount_thickness (CAD) and the bearing-holding structure mass"
   },
   {
    "name": "output_mounting_hole_num",

@@ -110,3 +110,38 @@ def test_case_mounting_hole_overlap_comes_from_the_config(monkeypatch, tmp_path)
     assert changed == downstream_of("cpg", "case_mounting_hole_shift") & set(base) \
         == {"case_mounting_hole_shift", "case_mounting_PCD", "Motor_case_OD_max"}
     assert more_mass == base_mass
+
+
+def test_bearing_mount_wall_multiple_comes_from_the_config(monkeypatch, tmp_path):
+    """bearing_mount_wall_bolt_dia_multiple (config) drives both the CAD value and the mass. On a
+    design where the bearing plus its bolts is wider than the ring gear, raising it from 2 to 3 turns
+    the wall from 2 to 3 output-bolt diameters and changes exactly the CAD variables downstream of it."""
+    for name in GEARBOXES["cpg"].golden():   # a 3dp design in the first branch of the rule
+        _, motor, material, gears, _ = golden_design(name)
+        if material != "3dp":
+            continue
+        (tmp_path / name).mkdir()
+        actuator, *_ = write_design(monkeypatch, tmp_path / name, "cpg", motor, material, gears)
+        if actuator.bearing_mount_thickness == actuator.output_mounting_hole_dia * 2:
+            break
+    else:
+        pytest.fail("no golden CPG design in the first branch of the bearing-mount rule")
+
+    def run(multiple, folder):
+        folder.mkdir()
+        actuator, _, _, onshape = write_design(monkeypatch, folder, "cpg", motor, material, gears)
+        if multiple is not None:
+            actuator.design_params["bearing_mount_wall_bolt_dia_multiple"] = multiple
+            actuator.setVariables()
+            actuator.genEquationFile_editCADdirectly()
+            onshape = equation_lines((folder / "CPG" / "cpg_equations_onshape.txt").read_text())
+        return {n: float(x) for n, x in onshape}, actuator.getMassKG_3DP()
+
+    base, base_mass = run(None, tmp_path / "a")
+    more, more_mass = run(3, tmp_path / "b")
+    d = base["output_mounting_hole_dia"]
+    assert (base["bearing_mount_thickness"], more["bearing_mount_thickness"]) == (2 * d, 3 * d)
+    changed = {k for k in base if base[k] != more[k]}
+    assert changed == downstream_of("cpg", "bearing_mount_thickness") & set(base) \
+        == {"bearing_mount_thickness", "output_mounting_PCD"}
+    assert more_mass > base_mass
