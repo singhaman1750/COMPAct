@@ -698,3 +698,67 @@ def test_isspg_metal_optimum_gets_lighter(gb_type):
     """The re-recorded metal golden designs (same gear set): compact 2,117 -> 1,702 g, inside 2,192 -> 1,782 g
     (rings: 1,939 / 2,025 g; then the sun hub as aluminium)."""
     assert build_isspg(gb_type, "metal").getMassKG_3DP() == pytest.approx(ISSPG_METAL[gb_type], abs=0.001)
+
+
+# ---- INCPG ---------------------------------------------------------------------------------------
+# The ring piece runs out to the bearing holder / case mounting; only pitch -> the code's ring_OD
+# (pitch + module + 2 x ringRadialWidthMM) is steel. The sun hub (and the magnet-carrying journal / shaft)
+# is aluminium. Golden metal design (RI100, 10:1) for both: Ns, Np big, Np small, Nr, modules, planets.
+INCPG_METAL = {"incpg_dependent": 1.320, "incpg_independent": 1.423}
+
+
+def build_incpg(gb_type, material):
+    actuator, _ = gearbox_runner.build(gb_type, "RI100", material)
+    gb = actuator.inrunnerCompoundPlanetaryGearbox
+    gb.setNs(21), gb.setNpBig(54), gb.setNpSmall(30), gb.setNr(105)
+    gb.setModuleBig(0.6), gb.setModuleSmall(0.6), gb.setNumPlanet(3)
+    actuator.updateFacewidth()
+    actuator.getMassKG_3DP()
+    return actuator
+
+
+def incpg_whole_volumes_m3(a):
+    """The whole casing and sun volumes, from the mass model run with one density for everything."""
+    gb = a.inrunnerCompoundPlanetaryGearbox
+    densities = gb.densityGears, gb.densityStructure
+    gb.densityStructure = gb.densityGears
+    try:
+        a.getMassKG_3DP()
+        return a.gearbox_casing_mass / gb.densityGears, a.sun_mass / gb.densityGears
+    finally:
+        gb.densityGears, gb.densityStructure = densities
+        a.getMassKG_3DP()
+
+
+@pytest.mark.parametrize("gb_type", INCPG_METAL)
+def test_incpg_metal_ring_and_sun_split(gb_type):
+    a = build_incpg(gb_type, "metal")
+    gb = a.inrunnerCompoundPlanetaryGearbox
+    assert (gb.densityGears, gb.densityStructure) == (7850, 2700)
+    pcd = gb.Nr * gb.moduleSmall
+    ring = math.pi / 4 * ((pcd + gb.moduleSmall + 2 * a.ringRadialWidthMM) ** 2 - pcd ** 2) * (gb.fwRingMM + a.standard_clearance_1_5mm) * 1e-9
+    casing, sun = incpg_whole_volumes_m3(a)
+    assert 0 < ring < casing
+    assert a.ring_gear_mass == pytest.approx(ring * 7850, rel=1e-9)
+    assert a.gearbox_housing_mass == pytest.approx((casing - ring) * 2700, rel=1e-9)
+    assert a.gearbox_casing_mass == pytest.approx(a.ring_gear_mass + a.gearbox_housing_mass, rel=1e-12)
+    steel = a.sun_steel_mass / 7850
+    assert 0 < steel < sun
+    assert a.sun_hub_mass == pytest.approx((sun - steel) * 2700, rel=1e-9)
+
+
+@pytest.mark.parametrize("gb_type", INCPG_METAL)
+def test_incpg_3dp_is_unchanged(gb_type):
+    a = build_incpg(gb_type, "3dp")
+    gb = a.inrunnerCompoundPlanetaryGearbox
+    assert gb.densityGears == gb.densityStructure
+    pcd = gb.Nr * gb.moduleSmall
+    ring = math.pi / 4 * ((pcd + gb.moduleSmall + 2 * a.ringRadialWidthMM) ** 2 - pcd ** 2) * (gb.fwRingMM + a.standard_clearance_1_5mm) * 1e-9
+    assert a.ring_gear_mass == pytest.approx(ring * gb.densityGears, rel=1e-12)
+    assert a.gearbox_housing_mass > 0 and a.sun_hub_mass > 0
+
+
+@pytest.mark.parametrize("gb_type", INCPG_METAL)
+def test_incpg_metal_optimum_gets_lighter(gb_type):
+    """The re-recorded metal golden designs (same gear set): dependent 1,776 -> 1,320 g, independent 1,848 -> 1,423 g."""
+    assert build_incpg(gb_type, "metal").getMassKG_3DP() == pytest.approx(INCPG_METAL[gb_type], abs=0.001)
