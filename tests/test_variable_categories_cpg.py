@@ -86,3 +86,27 @@ def test_motor_case_clearance_comes_from_the_config(monkeypatch, tmp_path):
     assert changed == {"clearance_motor_and_case", "Motor_case_ID", "motor_case_OD_base", "case_mounting_PCD",
                        "Motor_case_OD_max"}
     assert more_mass > base_mass
+
+
+def test_case_mounting_hole_overlap_comes_from_the_config(monkeypatch, tmp_path):
+    """case_mounting_hole_wall_overlap (config) sets case_mounting_hole_shift: raising it by 0.5 lowers
+    the shift by 0.5 and changes exactly the CAD variables downstream of it; the mass doesn't use it."""
+    _, motor, material, gears, _ = golden_design("cpg__U8_Lite__10")
+
+    def run(overlap, folder):
+        folder.mkdir()
+        actuator, _, _, onshape = write_design(monkeypatch, folder, "cpg", motor, material, gears)
+        if overlap is not None:
+            actuator.design_params["case_mounting_hole_wall_overlap"] = overlap
+            actuator.setVariables()
+            actuator.genEquationFile_editCADdirectly()
+            onshape = equation_lines((folder / "CPG" / "cpg_equations_onshape.txt").read_text())
+        return {n: float(x) for n, x in onshape}, actuator.getMassKG_3DP()
+
+    base, base_mass = run(None, tmp_path / "a")
+    more, more_mass = run(1.0, tmp_path / "b")
+    assert more["case_mounting_hole_shift"] == pytest.approx(base["case_mounting_hole_shift"] - 0.5)
+    changed = {k for k in base if base[k] != more[k]}
+    assert changed == downstream_of("cpg", "case_mounting_hole_shift") & set(base) \
+        == {"case_mounting_hole_shift", "case_mounting_PCD", "Motor_case_OD_max"}
+    assert more_mass == base_mass

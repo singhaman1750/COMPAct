@@ -3524,6 +3524,7 @@ class compoundPlanetaryActuator:
         # --- Casings ---
         self.case_mounting_surface_height = self.design_params["case_mounting_surface_height"] # 4
         self.case_mounting_hole_dia       = self.design_params["case_mounting_hole_dia"] # 3
+        self.case_mounting_hole_wall_overlap = self.design_params["case_mounting_hole_wall_overlap"] # 0.5
         self.case_mounting_bolt_depth     = self.design_params["case_mounting_bolt_depth"] # 4.5
 
         self.base_plate_thickness = self.design_params["base_plate_thickness"] # 4
@@ -3623,7 +3624,7 @@ class compoundPlanetaryActuator:
         self.output_mounting_nut_wrench_size = output_mounting_hole_bolt.nut_width_across_flats # 7
 
         self.case_dist = self.sec_carrier_thickness + self.clearance_planet * 2 + self.sun_coupler_hub_thickness + self.fw_p_b - self.case_mounting_surface_height
-        self.case_mounting_hole_shift = self.case_mounting_hole_dia / 2 - 0.5
+        self.case_mounting_hole_shift = self.case_mounting_hole_dia / 2 - self.case_mounting_hole_wall_overlap
 
         # IIF: clearance_motor_and_case
         if (self.Ns + self.Np_b * 2) * self.module_b < self.motor_OD:
