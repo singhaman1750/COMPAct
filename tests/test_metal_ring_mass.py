@@ -199,8 +199,8 @@ def test_dspg_metal_optimum_gets_lighter():
 # the optimum here, only its mass. "ring_mass" is the whole ring housing in INSSPG; its steel part is
 # ring_gear_mass. Type 2 still uses the older ring-housing formula (ISSUES bug 4); the split is the
 # same either way.
-INSSPG_METAL_DESIGNS = {"insspg_type_1": ((24, 54, 132, 0.6, 3), 1.524),
-                        "insspg_type_2": ((25, 56, 137, 0.5, 3), 1.304)}
+INSSPG_METAL_DESIGNS = {"insspg_type_1": ((24, 54, 132, 0.6, 3), 1.499),
+                        "insspg_type_2": ((25, 56, 137, 0.5, 3), 1.274)}
 
 
 def build_insspg(gb_type, material):
@@ -256,7 +256,8 @@ def test_insspg_3dp_ring_is_unchanged(gb_type):
 
 @pytest.mark.parametrize("gb_type", INSSPG_METAL_DESIGNS)
 def test_insspg_metal_optimum_gets_lighter(gb_type):
-    """The re-recorded metal golden designs (same gear sets): type 1 1,861 -> 1,524 g, type 2 1,616 -> 1,304 g."""
+    """The re-recorded metal golden designs (same gear sets): type 1 1,861 -> 1,499 g, type 2 1,616 -> 1,274 g
+    (ring split: 1,524 / 1,304 g; then the sun hub as aluminium)."""
     assert build_insspg(gb_type, "metal").getMassKG_3DP() == pytest.approx(INSSPG_METAL_DESIGNS[gb_type][1], abs=0.001)
 
 
@@ -339,8 +340,8 @@ def test_wpg_metal_optimum_gets_lighter():
 # As WPG: ring gear 1 (fixed, in gearbox_casing_mass) and ring gear 2 (the output ring, small_ring_mass).
 # Golden metal designs (RI100, 20:1): Ns, Np big, Nr big, Np small, Nr small, module big, module small,
 # planets (the order of tests/test_fresh_design_state.py); the split does not change the optimum here.
-INWPG_METAL = {"inwpg_dependent": ((18, 36, 90, 21, 75, 0.8, 0.8, 3), 1.718),
-               "inwpg_independent": ((54, 30, 114, 24, 108, 0.6, 0.6, 6), 1.854)}
+INWPG_METAL = {"inwpg_dependent": ((18, 36, 90, 21, 75, 0.8, 0.8, 3), 1.673),
+               "inwpg_independent": ((54, 30, 114, 24, 108, 0.6, 0.6, 6), 1.802)}
 
 
 def build_inwpg(gb_type, material):
@@ -406,8 +407,8 @@ def test_inwpg_3dp_rings_are_unchanged(gb_type):
 
 @pytest.mark.parametrize("gb_type", INWPG_METAL)
 def test_inwpg_metal_optimum_gets_lighter(gb_type):
-    """The re-recorded metal golden designs (same gear sets): dependent 2,410 -> 1,718 g,
-    independent 2,517 -> 1,854 g."""
+    """The re-recorded metal golden designs (same gear sets): dependent 2,410 -> 1,673 g,
+    independent 2,517 -> 1,802 g (rings: 1,718 / 1,854 g; then the sun hub as aluminium)."""
     assert build_inwpg(gb_type, "metal").getMassKG_3DP() == pytest.approx(INWPG_METAL[gb_type][1], abs=0.001)
 
 
@@ -824,3 +825,42 @@ def test_icpg_3dp_is_unchanged():
 def test_icpg_metal_optimum_gets_lighter():
     """The re-recorded metal golden design (same gear set): 2,714 -> 2,125 g."""
     assert build_icpg("metal").getMassKG_3DP() == pytest.approx(2.125, abs=0.001)
+
+
+# ---- Sun hubs: INSSPG and INWPG ------------------------------------------------------------------
+# The rotor-coupler hub (and the INSSPG bottom part / the INWPG magnet carrier) is aluminium, the rest of the
+# sun steel. The two parts add up to the whole sun volume; in 3D-printed mode the sun is unchanged.
+def _sun_whole_volume_m3(a, gb):
+    densities = gb.densityGears, gb.densityStructure
+    gb.densityStructure = gb.densityGears
+    try:
+        a.getMassKG_3DP()
+        return a.sun_mass / gb.densityGears
+    finally:
+        gb.densityGears, gb.densityStructure = densities
+        a.getMassKG_3DP()
+
+
+SUN_HUB_CASES = [("insspg_type_1", build_insspg, "planetaryGearbox"), ("insspg_type_2", build_insspg, "planetaryGearbox"),
+                 ("inwpg_dependent", build_inwpg, "inrunnerWolfromPlanetaryGearbox"),
+                 ("inwpg_independent", build_inwpg, "inrunnerWolfromPlanetaryGearbox")]
+
+
+@pytest.mark.parametrize("gb_type, build, gearbox", SUN_HUB_CASES, ids=[c[0] for c in SUN_HUB_CASES])
+def test_metal_sun_is_steel_and_its_hub_aluminium(gb_type, build, gearbox):
+    a = build(gb_type, "metal")
+    gb = getattr(a, gearbox)
+    whole = _sun_whole_volume_m3(a, gb)
+    steel, hub = a.sun_steel_mass / 7850, a.sun_hub_mass / 2700
+    assert 0 < steel < whole and hub > 0
+    assert steel + hub == pytest.approx(whole, rel=1e-9)
+    hub_disc = math.pi / 4 * a.sun_hub_dia ** 2 * a.sun_coupler_hub_thickness * 1e-9 if gb_type.startswith("insspg") else 0
+    assert hub > hub_disc * 0.99      # at least the hub disc is aluminium
+
+
+@pytest.mark.parametrize("gb_type, build, gearbox", SUN_HUB_CASES, ids=[c[0] for c in SUN_HUB_CASES])
+def test_3dp_sun_is_unchanged(gb_type, build, gearbox):
+    a = build(gb_type, "3dp")
+    gb = getattr(a, gearbox)
+    assert a.sun_mass == pytest.approx(_sun_whole_volume_m3(a, gb) * gb.densityGears, rel=1e-12)
+    assert a.sun_mass == pytest.approx(a.sun_steel_mass + a.sun_hub_mass, rel=1e-12)

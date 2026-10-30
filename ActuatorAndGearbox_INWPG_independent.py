@@ -2335,7 +2335,7 @@ class inrunnerWolfromPlanetaryActuator:
         # Density
         #-----------------------------------------
         density_gears     = self.inrunnerWolfromPlanetaryGearbox.densityGears      # gears and the ring gears' rings
-        density_structure = self.inrunnerWolfromPlanetaryGearbox.densityStructure  # motor case, gearbox housing, carriers, retainers
+        density_structure = self.inrunnerWolfromPlanetaryGearbox.densityStructure  # motor case, gearbox housing, carriers, retainers, sun hub
         density_aluminum     = self.inrunnerWolfromPlanetaryGearbox.densityAluminum
 
         #-----------------------------------------
@@ -2600,7 +2600,20 @@ class inrunnerWolfromPlanetaryActuator:
                                 *(fw_s_used+sun_shaft_height+sun_magnet_mount_shaft_height+sun_coupler_hub_thickness))* 1e-9
 
         sun_volume       = sun_hub_volume + sun_gear_volume + sun_shaft_volume + sun_magnet_mount_shaft_volume - central_bolt_volume
-        sun_mass         = sun_volume * density_gears
+
+        # Only the sun gear (with the wider step below the teeth) and the sun bearing shaft are gear material; the hub
+        # that couples the sun to the rotor and the magnet mount shaft (it carries the encoder magnet) are structure:
+        # steel sun, aluminium hub in metal mode. The central bolt hole runs through all four pieces, so each loses
+        # its share by length.
+        sun_bolt_length  = fw_s_used + sun_shaft_height + sun_magnet_mount_shaft_height + sun_coupler_hub_thickness
+        sun_steel_volume = (sun_gear_volume + sun_shaft_volume
+                            - central_bolt_volume * (fw_s_used + sun_shaft_height) / sun_bolt_length)
+        sun_steel_mass   = sun_steel_volume * density_gears
+        if density_gears == density_structure:  # one material (3D printed): the original sum, bit-identical
+            sun_mass = sun_volume * density_gears
+        else:
+            sun_mass = sun_steel_mass + (sun_volume - sun_steel_volume) * density_structure
+        sun_hub_mass = sun_mass - sun_steel_mass
 
         #--------------------------------------
         # Mass: inwpg_planet
@@ -2702,6 +2715,8 @@ class inrunnerWolfromPlanetaryActuator:
         self.small_ring_housing_mass            = small_ring_housing_mass
         self.carrier_mass                       = carrier_mass
         self.sun_mass                           = sun_mass
+        self.sun_steel_mass                     = sun_steel_mass
+        self.sun_hub_mass                       = sun_hub_mass
         self.sec_carrier_mass                   = sec_carrier_mass
         self.planet_mass                        = planet_mass
         self.rotor_hub_mass                     = rotor_hub_mass

@@ -56,6 +56,7 @@ lie inside the mass model's ring volume (checked by a test).
 | INCPG dependent | RI100 10:1 | 1,776 → 1,320 g (same gear set; ring and sun hub) |
 | INCPG independent | RI100 10:1 | 1,848 → 1,423 g (same gear set; ring and sun hub) |
 | ICPG | RO100 10:1 | 2,714 → 2,125 g (same gear set; ring and sun hub) |
+| Sun hubs: INSSPG 1 / 2, INWPG dep / indep | (golden metal) | 1,524 → 1,499 / 1,304 → 1,274 / 1,718 → 1,673 / 1,854 → 1,802 g |
 
 ## Overview of the 13 remaining types
 
@@ -210,12 +211,24 @@ inrunner rotor hubs / couplers (`densityAluminum`, `densityRotor`).
 5. **INWPG dependent / independent** → 6. **ISSPG compact / inside** → 7. **ICPG** → 8. **IDSPG** →
 9. **INDSPG**. Types with the existing ring volume come first; the thick-ring types need decision 1.
 
-## Follow-up: sun hubs (all types)
+## Sun hubs
 
-Every type weighs its whole sun at gear density, including the hub that couples it to the motor rotor
-(SSPG, CPG, WPG, DSPG, INWPG, INSSPG). IDSPG and INDSPG stage 1, ISSPG, INCPG and ICPG now
-weigh that hub as aluminium (the Ø84 × 4 mm hub was 174 g of its 224 g sun on the golden design). The
-other types keep the all-steel sun until the same split is applied to them, one rule for all.
+Every type used to weigh its whole sun at gear density, including the hub that couples it to the motor rotor.
+Rule now: the sun gear and the shaft pieces machined with it (bearing seats) are steel; the rotor-coupler hub
+and the parts that carry the encoder magnet are aluminium; a central bolt hole is shared by length.
+
+| Type | Sun in metal mode | Golden metal sun |
+|---|---|---|
+| IDSPG (stage 1) | hub aluminium; gear and shaft pieces steel | 224 → 110 g |
+| INDSPG (stage 1) | hub aluminium; gear and shaft steel | 50 → 27 g |
+| ISSPG compact / inside | hub (minus recess) aluminium, inside: magnet holder aluminium; gear, shaft (compact: input-bearing journal) steel | 388 → ~150 / 387 → ~144 g |
+| INCPG / INWPG dependent | hub and rotor-bottom journal (magnet) aluminium; gear, shaft, rotor-top journal steel | 104 → 60 / 118 → ~73 g |
+| INCPG / INWPG independent | hub and magnet mount shaft aluminium; gear (with its step) and shaft steel | 101 → 50 / 212 → ~160 g |
+| INSSPG type 1 / 2 | hub and bottom part aluminium; gear, shaft and upper support steel | 85 → ~61 / 101 → ~71 g |
+| ICPG | base flange (hub, seats the bottom-casing bearing) aluminium; teeth and support bulge steel | 383 → 159 g |
+| **SSPG, CPG, WPG, DSPG** | **kept all steel (decided 2026-10-31):** the motor-coupler hub is small (Ø33 × 4 mm, ~17–19 g) | unchanged |
+
+The second sun of the double-stage types (inside the stage-1 carrier) stays steel.
 
 ## After all types
 
