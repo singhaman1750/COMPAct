@@ -699,6 +699,52 @@ the ring-thickness rule and `ring_OD` use `module_s` (with `h_b_s`). The CAD fil
 the geometric constraint and a second module (and tooth heights) in the CAD file and the Onshape
 model.
 
+### 19. The search weighs designs with values left over from the last best design
+
+**Description:** in five types the mass function reads design-dependent values from `self` that only
+`setVariables()` sets. During the optimiser search `setVariables()` runs only when a new best design is
+found (inside `genEquationFile_editCADdirectly()` / `genEquationFile()`), so every other candidate is
+weighed with the values of the **last best design** (or the constructor's defaults before the first best),
+not its own. A design's mass therefore depends on the search order. The masses reported for the winning
+design are right only where the winner is re-weighed after its own `setVariables()`.
+
+| Type | Stale values read by the mass function | Mass error seen (search vs own `setVariables()`) |
+|---|---|---|
+| WPG (`ActuatorAndGearbox.py`) | `gear_casing_big_ring_to_bearing_dist` (spacer-wall height), `sun_hub_dia` | 38 of 38 designs checked, up to 47 g |
+| IDSPG (`ActuatorandGearbox_IDSPG.py`) | `a1_ring_gear_relation`, `fw_p1`, `fw_p2`, `fw_s1_used`, `fw_s2_used`, `carrier_PCD2` | 150 of 150, up to 257 g |
+| INDSPG (`ActuatorandGearbox_INDSPG.py`) | `Ns1`, `module1`, `fw_p1`, `fw_p2`, `fw_s2_used`, `carrier_PCD2`, `bearing2_OD`, `bearing2_height`, `ring_gear_casing_support_height` | 150 of 150, up to 123 g |
+| INWPG dependent / independent | `output_bearing_ID`, `output_bearing_width` | 18 of 29 / 29 of 41, up to 17 g |
+
+No difference in SSPG, CPG, DSPG, ISSPG (both), ICPG, INSSPG (both) or INCPG (both) on their golden
+cases.
+
+**Effect on results:** re-running the affected golden cases with every design weighed after its own
+`setVariables()` (an approximation of the fix) gives the same optimum in 11 of 12 cases (WPG U8_Lite
+3dp / metal, WPG MN8014, IDSPG RO100 3dp / metal, INDSPG RI100 / RI80 3dp, INWPG dependent /
+independent RI100 3dp / metal). **INDSPG RI100 metal changes:** 19/26/71 + 27/30/87 → 21/24/69 +
+27/36/99 (Ns/Np/Nr per stage, modules 0.5 / 0.6).
+
+**Reproduce:** wrap `getMassKG_3DP` during `optimizeActuator` and, for each call, compare its mass with
+the mass of a deep copy after `copy.setVariables()` (scratch script used for the table above).
+
+**Probable fix:** compute those values inside the mass function from the current design (the same
+formulas `setVariables()` uses, or a shared helper), or call the part of `setVariables()` that sets them
+before weighing. The CAD output does not change; masses during the search do, so affected golden cases
+may need re-recording (INDSPG RI100 metal at least).
+
+**Temporary fix (2026-10-30):** the five `updateFacewidth()` functions end with `self.setVariables()`,
+as ISSPG, ICPG and INSSPG already do, so every candidate is weighed with its own values.
+`tests/test_fresh_design_state.py` weighs a design after another one and compares it with a freshly
+built actuator (fails without the fix in all five types). Golden: INDSPG RI100 metal has a new optimum
+(19/26/71 + 27/30/87 → 21/24/69 + 27/36/99; mass 1.988 → 2.032 kg, eff 0.891 → 0.895, Cost 4.193 →
+4.042); IDSPG RO100 metal and INDSPG RI100 3dp change only the `iter` count (47 → 41, 63 → 62).
+Search time: IDSPG about +50 %, INDSPG about +33 %, WPG / INWPG unchanged. A 156-case sweep of the
+five types (9 motors, ratios 5–30, both materials) ran without new errors (the 6 INDSPG errors at
+ratios 5 / 10 are bug 13 and happen without the fix too).
+
+**Status:** temporary fix done; full fix open: compute these values in the mass functions from the
+current design (as SSPG, CPG, DSPG and INCPG do), then remove the refresh line (the test stays).
+
 ## CAD issues
 
 Problems in the CAD models (Onshape / SolidWorks), not in the Python code. Found while checking

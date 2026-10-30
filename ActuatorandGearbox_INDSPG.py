@@ -1531,6 +1531,7 @@ class inrunnerdoubleStageActuator:
             self.mitStressAnalysisMinFacewidth()
         self.fw_r1 = self.inrunnerdoubleStagePlanetaryGearbox.Stage1.fwRingMM
         self.fw_r2 = self.inrunnerdoubleStagePlanetaryGearbox.Stage2.fwRingMM      # update the face width of ring gear in stage 1 & 2
+        self.setVariables()  # refresh the derived values the mass model reads (ISSUES bug 19; temporary until the mass is computed from the design)
 
     def getMassKG_3DP_stg1(self):
         module    = self.inrunnerdoubleStagePlanetaryGearbox.Stage1.module

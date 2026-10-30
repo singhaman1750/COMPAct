@@ -1651,6 +1651,7 @@ class internaldoubleStagePlanetaryActuator:
             self.AGMAStressAnalysisMinFacewidth()
         elif self.stressAnalysisMethodName == "MIT":
             self.mitStressAnalysisMinFacewidth()
+        self.setVariables()  # refresh the derived values the mass model reads (ISSUES bug 19; temporary until the mass is computed from the design)
 
     def getMassKG_3DP_stg1(self):
         module    = self.internaldoubleStagePlanetaryGearbox.Stage1.module

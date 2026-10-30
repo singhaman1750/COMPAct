@@ -112,8 +112,8 @@ inrunner rotor hubs / couplers (`densityAluminum`, `densityRotor`).
   - End-wall height in the mass model is inner bearing width + step (8.5 mm); the CAD has
     `small_ring_output_wall_thickness` = 5. The annulus and the end wall may overlap axially.
   - Unused: `ring1_ID`, `ringFwUsedMM`, `small_ring_gear_casing_thickness`, `Ring1OuterRadiusMM`, `Ring2OuterRadiusMM`.
-  - The search weighs each design with attributes left from the last `setVariables()` call (e.g. the motor
-    case), so a design's mass during the search differs from its re-run mass by ~10 g.
+  - The search weighs each design with `gear_casing_big_ring_to_bearing_dist` left from the last best
+    design: ISSUES bug 19 (also IDSPG, INDSPG, INWPG).
 
 ### DSPG (`ActuatorAndGearbox.py`, `getMassKG_3DP_stg1` L8621, `_stg2` L8913)
 - **Exactly the SSPG pattern, per stage:** `gearbox_casing_mass = (ring + bearing holder + case mounting
