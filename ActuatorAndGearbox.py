@@ -6261,8 +6261,8 @@ class wolfromPlanetaryActuator:
         #----------------------------------
         # Density of Materials
         #----------------------------------
-        density_gears     = self.wolfromPlanetaryGearbox.densityGears      # gears; the ring gear (and its casing) counts as a gear
-        density_structure = self.wolfromPlanetaryGearbox.densityStructure  # motor case, carriers, retainers, holders
+        density_gears     = self.wolfromPlanetaryGearbox.densityGears      # gears and the ring gears' rings
+        density_structure = self.wolfromPlanetaryGearbox.densityStructure  # motor case, gearbox housing, carriers, retainers
 
         #----------------------------------
         # Diameter and Radius
@@ -6421,7 +6421,7 @@ class wolfromPlanetaryActuator:
         # ---
         # Mass of the gearbox casign includes the mass of:
         # 1. Bearing holding structure
-        # 2. Spacer wall for ring-2
+        # 2. Spacer wall for ring-1
         # 3. Ring gear-1
         # 4. Case mounting structure
         #-------------------------------------------------------
@@ -6452,13 +6452,13 @@ class wolfromPlanetaryActuator:
         ring_gear1_volume = np.pi * (((ring_gear1_OD*0.5)**2) - 
                                      ((ring_gear1_ID*0.5)**2)) * ring_gear1_height * 1e-9
 
-        # --- Spacer wall for ring-2 --- 
-        spacer_wall_for_ring2_ID     = ring_gear1_OD
-        spacer_wall_for_ring2_OD     = spacer_wall_for_ring2_ID + gearbox_casing_thickness * 2
-        spacer_wall_for_ring2_height = gear_casing_big_ring_to_bearing_dist + ring1FwMM + clearance_planet
+        # --- Spacer wall for ring-1 --- 
+        spacer_wall_for_ring1_ID     = ring_gear1_OD
+        spacer_wall_for_ring1_OD     = spacer_wall_for_ring1_ID + gearbox_casing_thickness * 2
+        spacer_wall_for_ring1_height = gear_casing_big_ring_to_bearing_dist + ring1FwMM + clearance_planet
 
-        spacer_wall_for_ring2_volume = np.pi * (((spacer_wall_for_ring2_OD*0.5)**2) - 
-                                                ((spacer_wall_for_ring2_ID*0.5)**2)) * spacer_wall_for_ring2_height * 1e-9
+        spacer_wall_for_ring1_volume = np.pi * (((spacer_wall_for_ring1_OD*0.5)**2) - 
+                                                ((spacer_wall_for_ring1_ID*0.5)**2)) * spacer_wall_for_ring1_height * 1e-9
 
         # --- Case mounting structure --- 
         case_dist = (sec_carrier_thickness 
@@ -6473,11 +6473,21 @@ class wolfromPlanetaryActuator:
         case_mounting_structure_volume  = np.pi * (((case_mounting_structure_OD*0.5)**2) - 
                                                     ((case_mounting_structure_ID*0.5)**2)) * case_mounting_structure_height * 1e-9
         
-        gearbox_casing_mass = (bearing_holding_structure_volume
-                               + spacer_wall_for_ring2_volume
-                               + case_mounting_structure_volume 
-                               #+ large_fillet_volume
-                               + ring_gear1_volume) * density_gears
+        # Only ring gear 1 (ring PCD to ring_gear1_OD, ring1FwMM long) is gear material; the rest of the
+        # casing (bearing holder, spacer wall for ring 1, case mounting) is structure: steel ring,
+        # aluminium housing in metal mode.
+        ring_gear1_mass = ring_gear1_volume * density_gears
+        if density_gears == density_structure:  # one material (3D printed): the original sum, bit-identical
+            gearbox_casing_mass = (bearing_holding_structure_volume
+                                   + spacer_wall_for_ring1_volume
+                                   + case_mounting_structure_volume 
+                                   #+ large_fillet_volume
+                                   + ring_gear1_volume) * density_gears
+        else:
+            gearbox_casing_mass = ring_gear1_mass + (bearing_holding_structure_volume
+                                                     + spacer_wall_for_ring1_volume
+                                                     + case_mounting_structure_volume) * density_structure
+        gearbox_housing_mass = gearbox_casing_mass - ring_gear1_mass
 
         #-------------------------------------------------------
         # wpg_motor
@@ -6517,6 +6527,10 @@ class wolfromPlanetaryActuator:
         small_ring_ID     = module2 * (Nr2) 
         small_ring_height = ring2FwMM + carrier_thickness + carrier_bearing_step_width + clearance_planet
 
+        # The annulus in two parts with the same ID / OD: the toothed ring gear 2 and the wall around the carrier
+        small_ring_gear_height         = ring2FwMM
+        small_ring_carrier_wall_height = carrier_thickness + carrier_bearing_step_width + clearance_planet
+
         small_ring_bearing_structure_OD = small_ring_OD
         small_ring_bearing_structure_ID = carrier_small_ring_inner_bearing_OD
         small_ring_bearing_structure_height = carrier_small_ring_inner_bearing_height + carrier_bearing_step_width
@@ -6530,7 +6544,22 @@ class wolfromPlanetaryActuator:
                             + np.pi * (((output_bearing_structure_OD*0.5)**2) - ((output_bearing_structure_ID*0.5)**2)) * output_bearing_structure_height
                             ) * 1e-9
 
-        small_ring_mass = small_ring_volume * density_gears
+        small_ring_gear_volume              = np.pi * (((small_ring_OD*0.5)**2) - ((small_ring_ID)*0.5)**2) * small_ring_gear_height * 1e-9
+        small_ring_carrier_wall_volume      = np.pi * (((small_ring_OD*0.5)**2) - ((small_ring_ID)*0.5)**2) * small_ring_carrier_wall_height * 1e-9
+        small_ring_bearing_structure_volume = np.pi * (((small_ring_bearing_structure_OD*0.5)**2) - ((small_ring_bearing_structure_ID*0.5)**2)) * small_ring_bearing_structure_height * 1e-9
+        output_bearing_structure_volume     = np.pi * (((output_bearing_structure_OD*0.5)**2) - ((output_bearing_structure_ID*0.5)**2)) * output_bearing_structure_height * 1e-9
+
+        # Only ring gear 2 (ring PCD to small_ring_OD, ring2FwMM long) is gear material; the carrier wall,
+        # the end wall (inner carrier bearing seat) and the output-bearing sleeve are structure: steel
+        # ring, aluminium housing in metal mode.
+        small_ring_gear_mass = small_ring_gear_volume * density_gears
+        if density_gears == density_structure:  # one material (3D printed): the original sum, bit-identical
+            small_ring_mass = small_ring_volume * density_gears
+        else:
+            small_ring_mass = small_ring_gear_mass + (small_ring_carrier_wall_volume
+                                                      + small_ring_bearing_structure_volume
+                                                      + output_bearing_structure_volume) * density_structure
+        small_ring_housing_mass = small_ring_mass - small_ring_gear_mass
 
         #-------------------------------------------------------
         # wpg_sun_shaft_bearing
@@ -6583,6 +6612,8 @@ class wolfromPlanetaryActuator:
         self.carrier_small_ring_inner_bearing_mass = carrier_small_ring_inner_bearing_mass
         self.carrier_mass                          = carrier_mass
         self.gearbox_casing_mass                   = gearbox_casing_mass
+        self.ring_gear1_mass                       = ring_gear1_mass
+        self.gearbox_housing_mass                  = gearbox_housing_mass
         self.bearing_mass                          = bearing_mass
         self.Motor_case_mass                       = Motor_case_mass
         self.motor_mass                            = motor_mass
@@ -6590,6 +6621,8 @@ class wolfromPlanetaryActuator:
         self.planet_mass                           = planet_mass
         self.sec_carrier_mass                      = sec_carrier_mass
         self.small_ring_mass                       = small_ring_mass
+        self.small_ring_gear_mass                  = small_ring_gear_mass
+        self.small_ring_housing_mass               = small_ring_housing_mass
         self.sun_shaft_bearing_mass                = sun_shaft_bearing_mass
         self.sun_mass                              = sun_mass
         self.Actuator_mass_without_bearing           = Actuator_mass_without_bearing
