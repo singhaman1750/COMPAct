@@ -333,3 +333,77 @@ def test_wpg_metal_optimum_gets_lighter():
     (56/48/36/152/140) is 1,238 g."""
     assert build_wpg("metal").getMassKG_3DP() == pytest.approx(1.167, abs=0.001)
     assert build_wpg("metal", WPG_NEW_METAL_DESIGN).getMassKG_3DP() == pytest.approx(1.238, abs=0.001)
+
+
+# ---- INWPG ---------------------------------------------------------------------------------------
+# As WPG: ring gear 1 (fixed, in gearbox_casing_mass) and ring gear 2 (the output ring, small_ring_mass).
+# Golden metal designs (RI100, 20:1): Ns, Np big, Nr big, Np small, Nr small, module big, module small,
+# planets (the order of tests/test_fresh_design_state.py); the split does not change the optimum here.
+INWPG_METAL = {"inwpg_dependent": ((18, 36, 90, 21, 75, 0.8, 0.8, 3), 1.718)}
+
+
+def build_inwpg(gb_type, material):
+    sys.path.insert(0, str(REPO / "tests"))
+    from test_fresh_design_state import set_design
+    actuator, _ = gearbox_runner.build(gb_type, "RI100", material)
+    set_design(actuator, gb_type, INWPG_METAL[gb_type][0])
+    actuator.updateFacewidth()
+    actuator.getMassKG_3DP()
+    return actuator
+
+
+def inwpg_ring_volumes_m3(a):
+    """The two steel rings: ring gear 1 from its PCD to + 2 x module + 2 x ringRadialWidthMMBig (the code's
+    ring_OD), fw_r_b long; ring gear 2 from its PCD to + 2 x module + 2 x ringRadialWidthMMSmall, fw_r_s long."""
+    gb = a.inrunnerWolfromPlanetaryGearbox
+    m = gb.moduleBig
+    pcd1, pcd2 = gb.NrBig * m, gb.NrSmall * m
+    ring1 = math.pi / 4 * ((pcd1 + 2 * m + 2 * a.ring1RadialWidthMM) ** 2 - pcd1 ** 2) * gb.fwRingBigMM
+    ring2 = math.pi / 4 * ((pcd2 + 2 * m + 2 * a.small_ring_radial_width) ** 2 - pcd2 ** 2) * gb.fwRingSmallMM
+    return ring1 * 1e-9, ring2 * 1e-9
+
+
+def inwpg_whole_volumes_m3(a):
+    """The whole casing and small-ring volumes, from the mass model run with one density for everything."""
+    gb = a.inrunnerWolfromPlanetaryGearbox
+    densities = gb.densityGears, gb.densityStructure
+    gb.densityStructure = gb.densityGears
+    try:
+        a.getMassKG_3DP()
+        return a.gearbox_casing_mass / gb.densityGears, a.small_ring_mass / gb.densityGears
+    finally:
+        gb.densityGears, gb.densityStructure = densities
+        a.getMassKG_3DP()
+
+
+@pytest.mark.parametrize("gb_type", INWPG_METAL)
+def test_inwpg_metal_rings_are_steel_and_the_housings_aluminium(gb_type):
+    a = build_inwpg(gb_type, "metal")
+    gb = a.inrunnerWolfromPlanetaryGearbox
+    assert (gb.densityGears, gb.densityStructure) == (7850, 2700)
+    ring1, ring2 = inwpg_ring_volumes_m3(a)
+    casing, small_ring = inwpg_whole_volumes_m3(a)
+    assert 0 < ring1 < casing and 0 < ring2 < small_ring
+    assert a.ring_gear1_mass == pytest.approx(ring1 * 7850, rel=1e-9)
+    assert a.gearbox_housing_mass == pytest.approx((casing - ring1) * 2700, rel=1e-9)
+    assert a.gearbox_casing_mass == pytest.approx(a.ring_gear1_mass + a.gearbox_housing_mass, rel=1e-12)
+    assert a.small_ring_gear_mass == pytest.approx(ring2 * 7850, rel=1e-9)
+    assert a.small_ring_housing_mass == pytest.approx((small_ring - ring2) * 2700, rel=1e-9)
+    assert a.small_ring_mass == pytest.approx(a.small_ring_gear_mass + a.small_ring_housing_mass, rel=1e-12)
+
+
+@pytest.mark.parametrize("gb_type", INWPG_METAL)
+def test_inwpg_3dp_rings_are_unchanged(gb_type):
+    a = build_inwpg(gb_type, "3dp")
+    gb = a.inrunnerWolfromPlanetaryGearbox
+    assert gb.densityGears == gb.densityStructure
+    ring1, ring2 = inwpg_ring_volumes_m3(a)
+    assert a.ring_gear1_mass == pytest.approx(ring1 * gb.densityGears, rel=1e-12)
+    assert a.small_ring_gear_mass == pytest.approx(ring2 * gb.densityGears, rel=1e-12)
+    assert a.gearbox_housing_mass > 0 and a.small_ring_housing_mass > 0
+
+
+@pytest.mark.parametrize("gb_type", INWPG_METAL)
+def test_inwpg_metal_optimum_gets_lighter(gb_type):
+    """The re-recorded metal golden design (same gear set): dependent 2,410 -> 1,718 g."""
+    assert build_inwpg(gb_type, "metal").getMassKG_3DP() == pytest.approx(INWPG_METAL[gb_type][1], abs=0.001)
