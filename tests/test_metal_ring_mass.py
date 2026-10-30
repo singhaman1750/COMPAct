@@ -762,3 +762,65 @@ def test_incpg_3dp_is_unchanged(gb_type):
 def test_incpg_metal_optimum_gets_lighter(gb_type):
     """The re-recorded metal golden designs (same gear set): dependent 1,776 -> 1,320 g, independent 1,848 -> 1,423 g."""
     assert build_incpg(gb_type, "metal").getMassKG_3DP() == pytest.approx(INCPG_METAL[gb_type], abs=0.001)
+
+
+# ---- ICPG ----------------------------------------------------------------------------------------
+# Already split by name (density_steel / density_alum). The ring's teeth piece reaches the stator bore; only
+# pitch -> min(pitch + 2 x ringRadialWidthMM, bore) over the teeth length is steel. The sun's base flange (the
+# rotor-coupler hub, which also seats the bottom-casing bearing) is aluminium; teeth and support bulge steel.
+# Golden metal design (RO100, 10:1): Ns, Np big, Np small, Nr, module, planets; the split keeps the optimum.
+def build_icpg(material):
+    actuator, _ = gearbox_runner.build("icpg", "RO100", material)
+    gb = actuator.internalcompoundPlanetaryGearbox
+    gb.setNs(18), gb.setNpBig(49), gb.setNpSmall(29), gb.setNr(96)
+    gb.setModuleBig(0.6), gb.setModuleSmall(0.6), gb.setNumPlanet(3)
+    actuator.updateFacewidth()
+    actuator.getMassKG_3DP()
+    return actuator
+
+
+def icpg_ring_steel_volume_m3(a):
+    pcd = a.Nr * a.module
+    od = min(pcd + 2 * a.ringRadialWidthMM, a.stator_ID)
+    teeth_length = (a.fw_r + 2 * a.standard_clearance_1_5mm
+                    - (a.fw_s_used - a.rotor_bottom_thickness - a.stator_height - a.ring_gear_thickness_mounting_casing))
+    return math.pi / 4 * (od ** 2 - pcd ** 2) * teeth_length * 1e-9
+
+
+def icpg_whole_volumes_m3(a):
+    gb = a.internalcompoundPlanetaryGearbox
+    densities = gb.densityGears, gb.densityStructure
+    gb.densityStructure = gb.densityGears
+    try:
+        a.getMassKG_3DP()
+        return a.ring_gear_mass_kg / gb.densityGears, a.sun_gear_mass_kg / gb.densityGears
+    finally:
+        gb.densityGears, gb.densityStructure = densities
+        a.getMassKG_3DP()
+
+
+def test_icpg_metal_ring_and_sun_split():
+    a = build_icpg("metal")
+    gb = a.internalcompoundPlanetaryGearbox
+    assert (gb.densityGears, gb.densityStructure) == (7850, 2700)
+    ring, (ring_whole, sun_whole) = icpg_ring_steel_volume_m3(a), icpg_whole_volumes_m3(a)
+    assert 0 < ring < ring_whole
+    assert a.ring_steel_mass_kg == pytest.approx(ring * 7850, rel=1e-9)
+    assert a.ring_housing_mass_kg == pytest.approx((ring_whole - ring) * 2700, rel=1e-9)
+    assert a.ring_gear_mass_kg == pytest.approx(a.ring_steel_mass_kg + a.ring_housing_mass_kg, rel=1e-12)
+    sun_steel = a.sun_steel_mass_kg / 7850
+    assert 0 < sun_steel < sun_whole
+    assert a.sun_hub_mass_kg == pytest.approx((sun_whole - sun_steel) * 2700, rel=1e-9)
+
+
+def test_icpg_3dp_is_unchanged():
+    a = build_icpg("3dp")
+    gb = a.internalcompoundPlanetaryGearbox
+    assert gb.densityGears == gb.densityStructure
+    assert a.ring_steel_mass_kg == pytest.approx(icpg_ring_steel_volume_m3(a) * gb.densityGears, rel=1e-12)
+    assert a.ring_housing_mass_kg > 0 and a.sun_hub_mass_kg > 0
+
+
+def test_icpg_metal_optimum_gets_lighter():
+    """The re-recorded metal golden design (same gear set): 2,714 -> 2,125 g."""
+    assert build_icpg("metal").getMassKG_3DP() == pytest.approx(2.125, abs=0.001)

@@ -1064,8 +1064,8 @@ class internalcompoundPlanetaryActuator:
         """
         self.setVariables()  # refresh all derived parameters
 
-        density_steel = self.internalcompoundPlanetaryGearbox.densityGears     # kg/m³ steel
-        density_alum  = self.internalcompoundPlanetaryGearbox.densityStructure  # kg/m³ aluminium
+        density_steel = self.internalcompoundPlanetaryGearbox.densityGears     # kg/m³ steel: gears, the ring gear's ring
+        density_alum  = self.internalcompoundPlanetaryGearbox.densityStructure  # kg/m³ aluminium: casing, carriers, ring housing, sun hub
 
         # ── Face widths converted from mm to m ─────────────────────────────
         fw_sun_m          = self.fw_s_used / 1000
@@ -1257,8 +1257,30 @@ class internalcompoundPlanetaryActuator:
         # 8. COMPONENT MASSES
         # ══════════════════════════════════════════════════════════════════
         planet_mass       = self.num_planet * vol_planet_net  * density_steel
-        sun_gear_mass     = vol_sun_net                       * density_steel
-        ring_gear_mass    = vol_ring_net                      * density_steel
+
+        # Only the sun teeth and the support bulge (sec-carrier bearing seat) are gear material; the base flange that
+        # couples the sun to the rotor (minus its pocket) is structure: steel sun, aluminium hub in metal mode. The
+        # central bore runs through the teeth and the flange, so each loses its share by length.
+        vol_sun_steel  = vol_sun_teeth + vol_sun_support_bulge - vol_sun_bore * fw_sun_m / fw_sun_total_m
+        sun_steel_mass = vol_sun_steel * density_steel
+        if density_steel == density_alum:  # one material (3D printed): the original product, bit-identical
+            sun_gear_mass = vol_sun_net * density_steel
+        else:
+            sun_gear_mass = sun_steel_mass + (vol_sun_net - vol_sun_steel) * density_alum
+        sun_hub_mass = sun_gear_mass - sun_steel_mass
+
+        # Only the ring gear itself (ring PCD to PCD + 2 x ringRadialWidthMM, clipped at the stator bore, over the
+        # teeth length) is gear material; the rest of the teeth piece out to the stator bore, the mounting flange,
+        # bearing support, middle section and bolt bosses are structure: steel ring, aluminium housing in metal
+        # mode. The search only limits the big-planet envelope to the bore, hence the clip.
+        r_ring_steel_outer = min(r_ring_pitch + self.ringRadialWidthMM / 1000, r_ring_outer)
+        vol_ring_steel     = math.pi * fw_ring_teeth_m * (r_ring_steel_outer**2 - r_ring_pitch**2)
+        ring_steel_mass    = vol_ring_steel * density_steel
+        if density_steel == density_alum:  # one material (3D printed): the original product, bit-identical
+            ring_gear_mass = vol_ring_net * density_steel
+        else:
+            ring_gear_mass = ring_steel_mass + (vol_ring_net - vol_ring_steel) * density_alum
+        ring_housing_mass = ring_gear_mass - ring_steel_mass
         sec_carrier_mass  = vol_sec_carrier_net               * density_alum
         carrier_mass      = vol_carrier_net                   * density_alum
         motor_casing_mass = vol_casing_net                    * density_alum
@@ -1277,7 +1299,11 @@ class internalcompoundPlanetaryActuator:
         # Store per-component masses for printVolumeAndMassParameters()
         self.planet_mass_kg       = planet_mass
         self.sun_gear_mass_kg     = sun_gear_mass
+        self.sun_steel_mass_kg    = sun_steel_mass
+        self.sun_hub_mass_kg      = sun_hub_mass
         self.ring_gear_mass_kg    = ring_gear_mass
+        self.ring_steel_mass_kg   = ring_steel_mass
+        self.ring_housing_mass_kg = ring_housing_mass
         self.sec_carrier_mass_kg  = sec_carrier_mass
         self.carrier_mass_kg      = carrier_mass
         self.motor_casing_mass_kg = motor_casing_mass
@@ -1313,8 +1339,10 @@ class internalcompoundPlanetaryActuator:
     def printVolumeAndMassParameters(self):
         print("── Mass Breakdown (kg) ─────────────────────────────────")
         print("Sun Gear:         ", round(self.sun_gear_mass_kg,     4))
+        print("  steel / hub:    ", round(self.sun_steel_mass_kg,    4), "/", round(self.sun_hub_mass_kg, 4))
         print("Planets:          ", round(self.planet_mass_kg,       4))
         print("Ring Gear:        ", round(self.ring_gear_mass_kg,    4))
+        print("  steel / housing:", round(self.ring_steel_mass_kg,   4), "/", round(self.ring_housing_mass_kg, 4))
         print("Main Carrier:     ", round(self.carrier_mass_kg,      4))
         print("Secondary Carrier:", round(self.sec_carrier_mass_kg,  4))
         print("Motor Casing:     ", round(self.motor_casing_mass_kg, 4))
