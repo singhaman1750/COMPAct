@@ -61,3 +61,28 @@ def test_stress_rule_widths_follow_what_they_depend_on(monkeypatch, tmp_path, wh
     assert more["fw_p_s"] == pytest.approx(more["fw_r"] + more["clearance_planet"], rel=1e-12)
     changed = {k for k in base if base[k] != more[k]}
     assert {"fw_s_calc", "fw_p_b", "fw_r", "fw_p_s", "fw_s_used", "case_dist"} <= changed <= downstream_of("cpg", what)
+
+
+def test_motor_case_clearance_comes_from_the_config(monkeypatch, tmp_path):
+    """clearance_motor_and_case_min (config) drives both the CAD value and the case mass: raising it
+    changes clearance_motor_and_case and exactly the CAD variables downstream of it, and the mass."""
+    _, motor, material, gears, _ = golden_design("cpg__U8_Lite__10")
+
+    def run(clearance_min, folder):
+        folder.mkdir()
+        actuator, _, _, onshape = write_design(monkeypatch, folder, "cpg", motor, material, gears)
+        if clearance_min is not None:
+            actuator.design_params["clearance_motor_and_case_min"] = clearance_min
+            actuator.setVariables()
+            actuator.genEquationFile_editCADdirectly()
+            onshape = equation_lines((folder / "CPG" / "cpg_equations_onshape.txt").read_text())
+        return {n: float(x) for n, x in onshape}, actuator.getMassKG_3DP()
+
+    base, base_mass = run(None, tmp_path / "a")
+    more, more_mass = run(7, tmp_path / "b")
+    assert base["clearance_motor_and_case"] == 5 and more["clearance_motor_and_case"] == 7   # planets < motor here
+    changed = {k for k in base if base[k] != more[k]}
+    assert changed == downstream_of("cpg", "clearance_motor_and_case") & set(base)
+    assert changed == {"clearance_motor_and_case", "Motor_case_ID", "motor_case_OD_base", "case_mounting_PCD",
+                       "Motor_case_OD_max"}
+    assert more_mass > base_mass

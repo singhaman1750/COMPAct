@@ -639,15 +639,16 @@
    "attr": "clearance_motor_and_case",
    "category": "dependent",
    "subtype": "formula",
-   "formula": "5 if (Ns + Np_b * 2) * module < motor_OD else ((Ns + Np_b * 2) * module - motor_OD) * 0.5 + 5",
+   "formula": "clearance_motor_and_case_min if (Ns + Np_b * 2) * module < motor_OD else ((Ns + Np_b * 2) * module - motor_OD) * 0.5 + clearance_motor_and_case_min",
    "depends_on": [
     "Ns",
     "Np_b",
     "module",
-    "motor_OD"
+    "motor_OD",
+    "clearance_motor_and_case_min"
    ],
-   "confidence": "medium",
-   "reason": "named a clearance, but computed: grows when the big planets reach wider than the motor; the 5 mm is hard-coded (also in the mass code; SSPG uses clearance_motor_and_case_min)"
+   "confidence": "high",
+   "reason": "radial gap between the motor and the case: the configured minimum, or more when the big planets reach wider than the motor (the same rule is used for the case mass)"
   },
   {
    "name": "Motor_case_thickness",
@@ -1833,6 +1834,19 @@
    },
    "confidence": "high",
    "reason": "service factor on the motor torque in the tooth-stress rule"
+  },
+  {
+   "name": "clearance_motor_and_case_min",
+   "attr": "clearance_motor_and_case_min",
+   "category": "fixed",
+   "subtype": "clearance",
+   "source": {
+    "file": "cpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "clearance_motor_and_case_min"
+   },
+   "confidence": "high",
+   "reason": "smallest radial gap between the motor and the case; sets clearance_motor_and_case (CAD) and the case mass"
   },
   {
    "name": "output_mounting_hole_num",
