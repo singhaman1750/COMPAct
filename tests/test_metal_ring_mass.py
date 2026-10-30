@@ -594,3 +594,107 @@ def test_indspg_3dp_is_unchanged():
 def test_indspg_metal_optimum_gets_lighter():
     """The re-recorded metal golden design (same gear sets): 2,032 -> 1,445 g."""
     assert build_indspg("metal").getMassKG_3DP() == pytest.approx(1.445, abs=0.001)
+
+
+# ---- ISSPG ---------------------------------------------------------------------------------------
+# The ring housing reaches the stator bore; only pitch -> pitch + 2 x module + 2 x ring_stator_case_thickness
+# (the ring maxRingGearOD() allows) is steel. Golden metal design (RO100, 6.5:1) for both types:
+# Ns, Np, Nr, module, planets; the split keeps the optimum.
+ISSPG_METAL = {"isspg_compact": 1.702, "isspg_inside": 1.782}
+ISSPG_METAL_DESIGN = (24, 54, 132, 0.5, 3)
+
+
+def build_isspg(gb_type, material):
+    actuator, _ = gearbox_runner.build(gb_type, "RO100", material)
+    gb = actuator.planetaryGearbox
+    Ns, Np, Nr, module, n = ISSPG_METAL_DESIGN
+    gb.setNs(Ns), gb.setNp(Np), gb.setNr(Nr), gb.setModule(module), gb.setNumPlanet(n)
+    actuator.updateFacewidth()
+    actuator.getMassKG_3DP()
+    return actuator
+
+
+def isspg_ring_steel_volume_m3(a, gb_type):
+    gb = a.planetaryGearbox
+    pcd = gb.Nr * gb.module
+    od = pcd + 2 * gb.module + 2 * a.ring_stator_case_thickness
+    assert od <= a.stator_ID                         # maxRingGearOD() keeps it inside the bore
+    length = gb.fwRingMM + (a.clearance_planet if gb_type == "isspg_compact" else 0)
+    return math.pi / 4 * (od ** 2 - pcd ** 2) * length * 1e-9
+
+
+def isspg_ring_housing_volume_m3(a):
+    gb = a.planetaryGearbox
+    densities = gb.densityGears, gb.densityStructure
+    gb.densityStructure = gb.densityGears
+    try:
+        a.getMassKG_3DP()
+        return a.ring_mass / gb.densityGears
+    finally:
+        gb.densityGears, gb.densityStructure = densities
+        a.getMassKG_3DP()
+
+
+@pytest.mark.parametrize("gb_type", ISSPG_METAL)
+def test_isspg_metal_ring_is_steel_and_the_housing_aluminium(gb_type):
+    a = build_isspg(gb_type, "metal")
+    gb = a.planetaryGearbox
+    assert (gb.densityGears, gb.densityStructure) == (7850, 2700)
+    ring, whole = isspg_ring_steel_volume_m3(a, gb_type), isspg_ring_housing_volume_m3(a)
+    assert 0 < ring < whole
+    assert a.ring_gear_steel_mass == pytest.approx(ring * 7850, rel=1e-9)
+    assert a.ring_housing_mass == pytest.approx((whole - ring) * 2700, rel=1e-9)
+    assert a.ring_mass == pytest.approx(a.ring_gear_steel_mass + a.ring_housing_mass, rel=1e-12)
+
+
+@pytest.mark.parametrize("gb_type", ISSPG_METAL)
+def test_isspg_3dp_ring_is_unchanged(gb_type):
+    a = build_isspg(gb_type, "3dp")
+    gb = a.planetaryGearbox
+    assert gb.densityGears == gb.densityStructure
+    assert a.ring_gear_steel_mass == pytest.approx(isspg_ring_steel_volume_m3(a, gb_type) * gb.densityGears, rel=1e-12)
+    assert a.ring_housing_mass > 0
+
+
+def isspg_sun_steel_volume_m3(a, gb_type):
+    """The steel part of the sun: gear + sun-1 bearing shaft (+ the input-bearing journal in compact), each
+    minus the central bolt hole over its length. The hub (minus its recess) and, in inside, the encoder
+    magnet holder are aluminium."""
+    gb = a.planetaryGearbox
+    pieces = [(gb.Ns * gb.module, a.fw_s_used), (a.sun1_bearing_ID, a.sun1_bearing_width + a.bearing_step_width)]
+    if gb_type == "isspg_compact":
+        pieces.append((a.input_bearing_ID, a.input_bearing_width + a.bearing_step_width))
+    solid = sum(d ** 2 * h for d, h in pieces)
+    bolt = a.sun_central_bolt_dia ** 2 * sum(h for _, h in pieces)
+    return math.pi / 4 * (solid - bolt) * 1e-9
+
+
+@pytest.mark.parametrize("gb_type", ISSPG_METAL)
+def test_isspg_metal_sun_is_steel_and_its_hub_aluminium(gb_type):
+    a = build_isspg(gb_type, "metal")
+    gb = a.planetaryGearbox
+    densities = gb.densityGears, gb.densityStructure
+    gb.densityStructure = gb.densityGears
+    a.getMassKG_3DP()
+    whole = a.sun_mass / gb.densityGears
+    gb.densityGears, gb.densityStructure = densities
+    a.getMassKG_3DP()
+    steel = isspg_sun_steel_volume_m3(a, gb_type)
+    assert 0 < steel < whole
+    assert a.sun_steel_mass == pytest.approx(steel * 7850, rel=1e-9)
+    assert a.sun_hub_mass == pytest.approx((whole - steel) * 2700, rel=1e-9)
+
+
+@pytest.mark.parametrize("gb_type", ISSPG_METAL)
+def test_isspg_3dp_sun_is_unchanged(gb_type):
+    a = build_isspg(gb_type, "3dp")
+    gb = a.planetaryGearbox
+    assert a.sun_steel_mass == pytest.approx(isspg_sun_steel_volume_m3(a, gb_type) * gb.densityGears, rel=1e-12)
+    assert a.sun_hub_mass > 0
+
+
+@pytest.mark.parametrize("gb_type", ISSPG_METAL)
+def test_isspg_metal_optimum_gets_lighter(gb_type):
+    """The re-recorded metal golden designs (same gear set): compact 2,117 -> 1,702 g, inside 2,192 -> 1,782 g
+    (rings: 1,939 / 2,025 g; then the sun hub as aluminium)."""
+    assert build_isspg(gb_type, "metal").getMassKG_3DP() == pytest.approx(ISSPG_METAL[gb_type], abs=0.001)
