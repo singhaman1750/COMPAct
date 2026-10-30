@@ -1865,7 +1865,19 @@ class internaldoubleStagePlanetaryActuator:
 
         
         sun_volume       = sun_hub_volume + sun_gear_volume + sun_shaft_volume - sun_central_bolt_hole_volume + sun_carrier_bearing_shaft_step_volume+sun_bottom_casing_bearing_support_volume
-        sun_mass         = sun_volume * density_gears
+
+        # Only the sun gear and the shaft pieces machined with it (shaft, carrier-bearing step, bottom bearing
+        # support) are gear material; the hub disc that couples the sun to the rotor is structure: steel sun,
+        # aluminium hub in metal mode. The central bolt hole runs through both, so each loses its share.
+        sun_hub_bolt_hole_volume = sun_central_bolt_hole_volume * sun_coupler_hub_thickness / (fw_s_used + sun_coupler_hub_thickness)
+        sun_hub_net_volume       = sun_hub_volume - sun_hub_bolt_hole_volume
+        sun_steel_volume         = sun_volume - sun_hub_net_volume
+        sun_steel_mass           = sun_steel_volume * density_gears
+        if density_gears == density_structure:  # one material (3D printed): the original sum, bit-identical
+            sun_mass = sun_volume * density_gears
+        else:
+            sun_mass = sun_steel_mass + sun_hub_net_volume * density_structure
+        sun_hub_mass = sun_mass - sun_steel_mass
 
         #--------------------------------------
         # Mass: idspg_planet
@@ -1917,6 +1929,8 @@ class internaldoubleStagePlanetaryActuator:
         self.motor_casing_mass_stg1             = motor_casing_mass
         self.carrier_mass_stg1                 = carrier_stg1_mass
         self.sun_mass_stg1                     = sun_mass
+        self.sun_steel_mass_stg1               = sun_steel_mass
+        self.sun_hub_mass_stg1                 = sun_hub_mass
         self.sec_carrier_mass_stg1             = sec_carrier_mass
         self.planet_mass_stg1                  = planet_mass
         self.planet_bearing_combined_mass_stg1 = planet_bearing_combined_mass
@@ -2179,6 +2193,8 @@ class internaldoubleStagePlanetaryActuator:
         print("  ring_gear_steel_mass_stg1 :", 1000 * self.ring_gear_steel_mass_stg1 )
         print("  ring_housing_mass_stg1 :", 1000 * self.ring_housing_mass_stg1 )
         print("sun_mass_stg1 :", 1000 * self.sun_mass_stg1 )
+        print("  sun_steel_mass_stg1 :", 1000 * self.sun_steel_mass_stg1 )
+        print("  sun_hub_mass_stg1 :", 1000 * self.sun_hub_mass_stg1 )
         print("sec_carrier_mass_stg1 :", 1000 * self.sec_carrier_mass_stg1 )
         print("planet_mass_stg1 :", 1000 * self.planet_mass_stg1)
         print("planet_bearing_combined_mass_stg1 :", 1000 * self.planet_bearing_combined_mass_stg1 )

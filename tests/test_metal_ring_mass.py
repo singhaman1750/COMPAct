@@ -477,6 +477,39 @@ def test_idspg_3dp_ring_is_unchanged(stage):
     assert getattr(a, f"ring_housing_mass_stg{stage}") > 0
 
 
+def idspg_sun1_hub_volume_m3(a):
+    """The stage-1 sun's coupler hub (aluminium in metal mode): a disc of the hub diameter, minus its
+    share of the central bolt hole (the hole runs through the sun gear and the hub)."""
+    hub_dia = a.rotor_mount_hole_PCD + a.rotor_mount_hole_dia + 4 * a.standard_clearance_1_5mm
+    t, fw = a.sun_coupler_hub_thickness1, a.fw_s1_used
+    hub = math.pi / 4 * hub_dia ** 2 * t
+    bolt_share = math.pi / 4 * a.sun_central_bolt_dia1 ** 2 * (fw + t) * t / (fw + t)
+    return (hub - bolt_share) * 1e-9
+
+
+def test_idspg_metal_stage1_sun_is_steel_and_its_hub_aluminium():
+    a = build_idspg("metal")
+    gb = a.internaldoubleStagePlanetaryGearbox
+    densities = gb.densityGears, gb.densityStructure
+    gb.densityStructure = gb.densityGears
+    a.getMassKG_3DP()
+    whole = a.sun_mass_stg1 / gb.densityGears
+    gb.densityGears, gb.densityStructure = densities
+    a.getMassKG_3DP()
+    hub = idspg_sun1_hub_volume_m3(a)
+    assert 0 < hub < whole
+    assert a.sun_hub_mass_stg1 == pytest.approx(hub * 2700, rel=1e-9)
+    assert a.sun_steel_mass_stg1 == pytest.approx((whole - hub) * 7850, rel=1e-9)
+    assert a.sun_mass_stg1 == pytest.approx(a.sun_steel_mass_stg1 + a.sun_hub_mass_stg1, rel=1e-12)
+
+
+def test_idspg_3dp_stage1_sun_is_unchanged():
+    a = build_idspg("3dp")
+    gb = a.internaldoubleStagePlanetaryGearbox
+    assert a.sun_hub_mass_stg1 == pytest.approx(idspg_sun1_hub_volume_m3(a) * gb.densityGears, rel=1e-12)
+
+
 def test_idspg_metal_optimum_gets_lighter():
-    """The re-recorded metal golden design (same gear sets): 3,003 -> 2,543 g."""
-    assert build_idspg("metal").getMassKG_3DP() == pytest.approx(2.543, abs=0.001)
+    """The re-recorded metal golden design (same gear sets): 3,003 -> 2,429 g (rings 2,543 g, plus the
+    stage-1 sun hub as aluminium)."""
+    assert build_idspg("metal").getMassKG_3DP() == pytest.approx(2.429, abs=0.001)
