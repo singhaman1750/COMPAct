@@ -1777,8 +1777,8 @@ class inrunnerCompoundPlanetaryActuator:
         #-----------------------------------------
         # Density
         #-----------------------------------------
-        density_gears     = self.inrunnerCompoundPlanetaryGearbox.densityGears      # gears; the ring gear (and its casing) counts as a gear
-        density_structure = self.inrunnerCompoundPlanetaryGearbox.densityStructure  # motor case, carriers, retainers, holders
+        density_gears     = self.inrunnerCompoundPlanetaryGearbox.densityGears      # gears and the ring gear's ring
+        density_structure = self.inrunnerCompoundPlanetaryGearbox.densityStructure  # motor case, gearbox housing, carriers, retainers, sun hub
         density_aluminum     = self.inrunnerCompoundPlanetaryGearbox.densityAluminum
 
         #-----------------------------------------
@@ -1940,7 +1940,17 @@ class inrunnerCompoundPlanetaryActuator:
 
     
         gearbox_casing_volume = ring_volume + bearing_holding_structure_volume + case_mounting_structure_volume + case_mounting_plate_volume  - ring_casing_chamfer_volume + gearbox_casing_bottom_volume# + large_fillet_volume(accomated in the air vents in motor casing) 
-        gearbox_casing_mass = gearbox_casing_volume * density_gears
+
+        # Only the ring gear itself (ring PCD to ring_OD = PCD + module + 2 x ringRadialWidthMM, ringFwUsedMM long; inside
+        # ring_volume, which runs out to the bearing holder / case mounting) is gear material; the rest of the casing is
+        # structure: steel ring, aluminium housing in metal mode.
+        ring_gear_volume = np.pi * (((min(ring_OD, ring_OD_used)*0.5)**2) - ((ring_ID)*0.5)**2) * ringFwUsedMM * 1e-9
+        ring_gear_mass   = ring_gear_volume * density_gears
+        if density_gears == density_structure:  # one material (3D printed): the original sum, bit-identical
+            gearbox_casing_mass = gearbox_casing_volume * density_gears
+        else:
+            gearbox_casing_mass = ring_gear_mass + (gearbox_casing_volume - ring_gear_volume) * density_structure
+        gearbox_housing_mass = gearbox_casing_mass - ring_gear_mass
 
         #----------------------------------
         # Mass: cpg_carrier
@@ -1987,7 +1997,21 @@ class inrunnerCompoundPlanetaryActuator:
                                 *(fw_s_used+sun_shaft_height+sun_rotor_top_bearing_structure_height+sun_coupler_hub_thickness+sun_rotor_bottom_bearing_structure_height))* 1e-9
 
         sun_volume       = sun_hub_volume + sun_rotor_top_bearing_structure_volume+ sun_gear_volume + sun_shaft_volume + sun_rotor_bottom_bearing_structure_volume - central_bolt_volume
-        sun_mass         = sun_volume * density_gears
+
+        # Only the sun gear and the shaft pieces machined with it (sun bearing shaft, rotor-top bearing journal) are gear
+        # material; the hub that couples the sun to the rotor and the rotor-bottom journal (it carries the encoder
+        # magnet) are structure: steel sun, aluminium hub in metal mode. The central bolt hole runs through all five
+        # pieces, so each loses its share by length.
+        sun_bolt_length  = (fw_s_used + sun_shaft_height + sun_rotor_top_bearing_structure_height
+                            + sun_coupler_hub_thickness + sun_rotor_bottom_bearing_structure_height)
+        sun_steel_volume = (sun_gear_volume + sun_shaft_volume + sun_rotor_top_bearing_structure_volume
+                            - central_bolt_volume * (fw_s_used + sun_shaft_height + sun_rotor_top_bearing_structure_height) / sun_bolt_length)
+        sun_steel_mass   = sun_steel_volume * density_gears
+        if density_gears == density_structure:  # one material (3D printed): the original sum, bit-identical
+            sun_mass = sun_volume * density_gears
+        else:
+            sun_mass = sun_steel_mass + (sun_volume - sun_steel_volume) * density_structure
+        sun_hub_mass = sun_mass - sun_steel_mass
 
         #--------------------------------------
         # Mass: incpg_planet
@@ -2081,8 +2105,12 @@ class inrunnerCompoundPlanetaryActuator:
 
         self.motor_case_mass                    = motor_case_mass
         self.gearbox_casing_mass                = gearbox_casing_mass
+        self.ring_gear_mass                     = ring_gear_mass
+        self.gearbox_housing_mass               = gearbox_housing_mass
         self.carrier_mass                       = carrier_mass
         self.sun_mass                           = sun_mass
+        self.sun_steel_mass                     = sun_steel_mass
+        self.sun_hub_mass                       = sun_hub_mass
         self.sec_carrier_mass                   = sec_carrier_mass
         self.planet_mass                        = planet_mass
         self.rotor_hub_mass                     = rotor_hub_mass

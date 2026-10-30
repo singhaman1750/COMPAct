@@ -53,6 +53,8 @@ lie inside the mass model's ring volume (checked by a test).
 | INDSPG | RI100 20:1 | 2,032 → 1,445 g (same gear sets; rings and the stage-1 sun hub) |
 | ISSPG compact | RO100 6.5:1 | 2,117 → 1,702 g (same gear set; ring 1,939 g, then the sun hub) |
 | ISSPG inside | RO100 6.5:1 | 2,192 → 1,782 g (same gear set; ring 2,025 g, then the sun hub) |
+| INCPG dependent | RI100 10:1 | 1,776 → 1,320 g (same gear set; ring and sun hub) |
+| INCPG independent | RI100 10:1 | 1,848 → 1,423 g (same gear set; ring and sun hub) |
 
 ## Overview of the 13 remaining types
 
@@ -165,13 +167,15 @@ inrunner rotor hubs / couplers (`densityAluminum`, `densityRotor`).
 - **Steel:** the existing `ring_gear_volume` in every branch.
 - **Note:** ISSUES bugs 4 / 10 live in these functions; not touched.
 
-### INCPG dependent / independent (`ActuatorAndGearbox_INCPG_*.py`, `getMassKG_3DP`)
-- **At gear density:** `gearbox_casing_mass = (ring + bearing holder + case mounting + mounting plate
-  − chamfer + casing bottom) × density_gears` (dependent L1942-1943).
-- **Ring:** pitch `Nr × module2` to **`ring_OD_used`** = the bearing-holder or mounting OD (thick,
-  L1910-1914), length `fw_r + 1.5`.
-- **Steel:** pitch + 2 × wall (`ring_radial_thickness`, already in the code: `ring_OD = Nr·module2 +
-  module2 + 2 × ring_radial_thickness`), the rest aluminium.
+### INCPG dependent / independent (`ActuatorAndGearbox_INCPG_*.py`, `getMassKG_3DP`) — done
+- **Ring:** `ring_volume` runs from the pitch circle to `ring_OD_used` (bearing holder or case mounting OD).
+  Steel = pitch to the code's `ring_OD = pitch + module + 2 × ringRadialWidthMM` (3), `fwRingMM + 1.5` long; the
+  rest of the casing is aluminium. New `ring_gear_mass` / `gearbox_housing_mass`.
+- **Sun:** dependent — gear, sun bearing shaft and rotor-top bearing journal steel; hub and rotor-bottom journal
+  (carries the encoder magnet) aluminium. Independent — gear (with the wider step below the teeth) and sun bearing
+  shaft steel; hub and magnet mount shaft aluminium. Central bolt hole shared by length. New `sun_steel_mass` /
+  `sun_hub_mass`.
+- Stored, not printed (the parts printout goes into the results file).
 
 ### INDSPG (`ActuatorandGearbox_INDSPG.py`, `getMassKG_3DP_stg1` / `_stg2`) — done
 - **Stage 1:** `ring_gear_volume` runs from the pitch circle to the rotor bore (`rotor_ID − 2 × loose_clearance_3DP`).
@@ -202,7 +206,7 @@ inrunner rotor hubs / couplers (`densityAluminum`, `densityRotor`).
 ## Follow-up: sun hubs (all types)
 
 Every type weighs its whole sun at gear density, including the hub that couples it to the motor rotor
-(SSPG, CPG, WPG, DSPG, INCPG, INWPG, INSSPG; ICPG as `density_steel`). IDSPG and INDSPG stage 1 and ISSPG now
+(SSPG, CPG, WPG, DSPG, INWPG, INSSPG; ICPG as `density_steel`). IDSPG and INDSPG stage 1, ISSPG and INCPG now
 weigh that hub as aluminium (the Ø84 × 4 mm hub was 174 g of its 224 g sun on the golden design). The
 other types keep the all-steel sun until the same split is applied to them, one rule for all.
 
