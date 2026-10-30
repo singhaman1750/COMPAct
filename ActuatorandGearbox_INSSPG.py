@@ -772,6 +772,8 @@ class singleStagePlanetaryActuator:
         print("gearbox_casing_mass:      ", round(1000 * getattr(self, 'gearbox_casing_mass', 0), 2))
         print("carrier_mass:             ", round(1000 * getattr(self, 'carrier_mass', 0), 2))
         print("sun_mass:                 ", round(1000 * getattr(self, 'sun_mass', 0), 2))
+        print("  sun_steel_mass:         ", round(1000 * getattr(self, 'sun_steel_mass', 0), 2))
+        print("  sun_hub_mass:           ", round(1000 * getattr(self, 'sun_hub_mass', 0), 2))
         print("sec_carrier_mass:         ", round(1000 * getattr(self, 'sec_carrier_mass', 0), 2))
         print("planet_mass:              ", round(1000 * getattr(self, 'planet_mass', 0), 2))
         print("planet_bearing_mass:      ", round(1000 * getattr(self, 'planet_bearing_combined_mass', 0), 2))
@@ -991,7 +993,7 @@ class singleStagePlanetaryActuator:
         numPlanet = self.planetaryGearbox.numPlanet
 
         density_gears     = self.planetaryGearbox.densityGears      # gears and the ring gear's ring
-        density_structure = self.planetaryGearbox.densityStructure  # motor case, ring housing, carriers, retainers
+        density_structure = self.planetaryGearbox.densityStructure  # motor case, ring housing, carriers, retainers, sun hub
 
         sunFwM    = self.planetaryGearbox.fwSunMM * 0.001
         planetFwM = self.planetaryGearbox.fwPlanetMM * 0.001
@@ -1068,7 +1070,16 @@ class singleStagePlanetaryActuator:
 
         
         sun_volume       = sun_hub_volume + sun_gear_volume + sun_shaft_volume + sun_uper_support_volume + sun_bottom_part_volume
-        sun_mass         = sun_volume * density_gears
+
+        # Only the sun gear, its shaft and the upper support machined with it are gear material; the hub that couples
+        # the sun to the rotor and the bottom part are structure: steel sun, aluminium hub in metal mode.
+        sun_steel_volume = sun_gear_volume + sun_shaft_volume + sun_uper_support_volume
+        sun_steel_mass   = sun_steel_volume * density_gears
+        if density_gears == density_structure:  # one material (3D printed): the original sum, bit-identical
+            sun_mass = sun_volume * density_gears
+        else:
+            sun_mass = sun_steel_mass + (sun_volume - sun_steel_volume) * density_structure
+        sun_hub_mass = sun_mass - sun_steel_mass
 
         ##--------planet_gear_volume------------##
 
@@ -1203,6 +1214,8 @@ class singleStagePlanetaryActuator:
         self.Motor_case_mass              = Motor_case_mass
         self.carrier_mass                 = carrier_mass
         self.sun_mass                     = sun_mass
+        self.sun_steel_mass               = sun_steel_mass
+        self.sun_hub_mass                 = sun_hub_mass
         self.sec_carrier_mass             = sec_carrier_mass
         self.planet_mass                  = planet_mass
         self.planet_bearing_combined_mass = planet_bearing_combined_mass
@@ -1237,7 +1250,7 @@ class singleStagePlanetaryActuator:
         numPlanet = self.planetaryGearbox.numPlanet
 
         density_gears     = self.planetaryGearbox.densityGears      # gears and the ring gear's ring
-        density_structure = self.planetaryGearbox.densityStructure  # motor case, ring housing, carriers, retainers
+        density_structure = self.planetaryGearbox.densityStructure  # motor case, ring housing, carriers, retainers, sun hub
 
         sunFwM    = self.planetaryGearbox.fwSunMM * 0.001
         planetFwM = self.planetaryGearbox.fwPlanetMM * 0.001
@@ -1314,7 +1327,16 @@ class singleStagePlanetaryActuator:
         sun_bottom_part_volume = np.pi*(self.Rotor_height+self.stator_bottom_step_height_)*((14/2)** - (self.sun_central_bolt_socket_head_dia/2)**2)*1e-9 + np.pi * (standard_clearance_1_5mm*4)*((14/2+standard_clearance_1_5mm)**2-(14/2)**2)*1e-9
         
         sun_volume       = sun_hub_volume + sun_gear_volume + sun_shaft_volume + sun_uper_support_volume + sun_bottom_part_volume
-        sun_mass         = sun_volume * density_gears
+
+        # Only the sun gear, its shaft and the upper support machined with it are gear material; the hub that couples
+        # the sun to the rotor and the bottom part are structure: steel sun, aluminium hub in metal mode.
+        sun_steel_volume = sun_gear_volume + sun_shaft_volume + sun_uper_support_volume
+        sun_steel_mass   = sun_steel_volume * density_gears
+        if density_gears == density_structure:  # one material (3D printed): the original sum, bit-identical
+            sun_mass = sun_volume * density_gears
+        else:
+            sun_mass = sun_steel_mass + (sun_volume - sun_steel_volume) * density_structure
+        sun_hub_mass = sun_mass - sun_steel_mass
 
         ##--------planet_gear_volume------------##
 
@@ -1445,6 +1467,8 @@ class singleStagePlanetaryActuator:
         self.Motor_case_mass              = Motor_case_mass
         self.carrier_mass                 = carrier_mass
         self.sun_mass                     = sun_mass
+        self.sun_steel_mass               = sun_steel_mass
+        self.sun_hub_mass                 = sun_hub_mass
         self.sec_carrier_mass             = sec_carrier_mass
         self.planet_mass                  = planet_mass
         self.planet_bearing_combined_mass = planet_bearing_combined_mass

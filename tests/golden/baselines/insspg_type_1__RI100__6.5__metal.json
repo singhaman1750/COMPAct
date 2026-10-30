@@ -15,19 +15,19 @@
   54,
   132,
   0.6,
-  1.5236260734650056,
+  1.4992197469976136,
   0.16,
-  0.0849284802275696,
+  0.060522153760177555,
   0.04684501690717304,
   0.24241820306029016,
   0.0924658933873189,
   0.024581281762270465,
   0.26427725402606034,
-  0.8836260734650058,
+  0.8592197469976137,
   0.01441991027997715
  ],
  "results_files": {
   "results_BruteForce_RI100/SSPG_BRUTEFORCE_MIT_RI100_insspg_type_1_Motor_Params_metal.csv": "Motor Parameters:\nmaxMotorAngVelRPM,maxMotorAngVelRadPerSec,maxMotorTorque,maxMotorPower,motorMass,motorDia,motorLength\n4368,457.41589036267385,4.95,2264.208657295236,0.5,104,24.5\n\nGear strength and size parameters:\nFOS,serviceFactor,stressAnalysisMethodName,maxGearBoxDia,maxGearAllowableStressMPa\n1.2,1.5,MIT,95.1,400\n\nOptimization Parameters:\nK_mass, K_Eff, K_Width, MODULE_MIN, MODULE_MAX, NUM_PLANET_MIN, NUM_PLANET_MAX, NUM_TEETH_SUN_MIN, NUM_TEETH_PLANET_MIN, GEAR_RATIO_MIN, GEAR_RATIO_MAX, GEAR_RATIO_STEP\n1,-2,0.2,0.5,1.2,3,7,18,28,4.0,15,0.1\n",
-  "results_BruteForce_RI100/SSPG_BRUTEFORCE_MIT_RI100_insspg_type_1_metal.csv": "iter, gearRatio, module, Ns, Np, Nr, numPlanet, fwSunMM, fwPlanetMM, fwRingMM, mass, eff, peakTorque, Cost, Torque_Density, Outer_Bearing_mass, Actuator_width\n2,6.5,0.6,24,54,132,3,2.86,8.0,8.0,1.524,0.957,32.175,1.2101116016129043,21.112204724409448,0.16,0\n\n"
+  "results_BruteForce_RI100/SSPG_BRUTEFORCE_MIT_RI100_insspg_type_1_metal.csv": "iter, gearRatio, module, Ns, Np, Nr, numPlanet, fwSunMM, fwPlanetMM, fwRingMM, mass, eff, peakTorque, Cost, Torque_Density, Outer_Bearing_mass, Actuator_width\n2,6.5,0.6,24,54,132,3,2.86,8.0,8.0,1.499,0.957,32.175,1.1857052751455124,21.464309539693126,0.16,0\n\n"
  }
 }
