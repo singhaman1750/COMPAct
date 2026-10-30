@@ -8633,8 +8633,8 @@ class doubleStagePlanetaryActuator:
         #------------------------------------
         # density of materials
         #------------------------------------
-        density_gears     = self.doubleStagePlanetaryGearbox.densityGears      # gears; the ring gear (and its casing) counts as a gear
-        density_structure = self.doubleStagePlanetaryGearbox.densityStructure  # motor case, carriers, retainers, holders
+        density_gears     = self.doubleStagePlanetaryGearbox.densityGears      # gears and the ring gear's ring
+        density_structure = self.doubleStagePlanetaryGearbox.densityStructure  # motor case, gearbox housing, carriers, retainers
 
         #------------------------------------
         # Face Width
@@ -8791,7 +8791,15 @@ class doubleStagePlanetaryActuator:
         large_fillet_height = ringFwMM
         large_fillet_volume = 0.5 * (np.pi * (((large_fillet_OD*0.5)**2) - ((large_fillet_ID)*0.5)**2) * large_fillet_height) * 1e-9
 
-        gearbox_casing_mass = (ring_volume + bearing_holding_structure_volume + case_mounting_structure_volume + large_fillet_volume) * density_gears
+        # Only the ring (ring PCD to ring_OD, ringFwUsedMM long) is gear material; the rest of the
+        # casing (bearing holder, case mounting, fillet) is structure: steel ring, aluminium housing
+        # in metal mode.
+        ring_mass = ring_volume * density_gears
+        if density_gears == density_structure:  # one material (3D printed): the original sum, bit-identical
+            gearbox_casing_mass = (ring_volume + bearing_holding_structure_volume + case_mounting_structure_volume + large_fillet_volume) * density_gears
+        else:
+            gearbox_casing_mass = ring_mass + (bearing_holding_structure_volume + case_mounting_structure_volume + large_fillet_volume) * density_structure
+        gearbox_housing_mass = gearbox_casing_mass - ring_mass
 
         #----------------------------------
         # Mass: dspg_carrier
@@ -8884,6 +8892,8 @@ class doubleStagePlanetaryActuator:
 
         self.Motor_case_mass_stg1              = Motor_case_mass
         self.gearbox_casing_mass_stg1          = gearbox_casing_mass
+        self.ring_mass_stg1                    = ring_mass
+        self.gearbox_housing_mass_stg1         = gearbox_housing_mass
         self.carrier_mass_stg1                 = carrier_stg1_mass
         self.sun_mass_stg1                     = sun_mass
         self.sec_carrier_mass_stg1             = sec_carrier_mass
@@ -8925,8 +8935,8 @@ class doubleStagePlanetaryActuator:
         #------------------------------------
         # density of materials
         #------------------------------------
-        density_gears     = self.doubleStagePlanetaryGearbox.densityGears      # gears; the ring gear (and its casing) counts as a gear
-        density_structure = self.doubleStagePlanetaryGearbox.densityStructure  # motor case, carriers, retainers, holders
+        density_gears     = self.doubleStagePlanetaryGearbox.densityGears      # gears and the ring gear's ring
+        density_structure = self.doubleStagePlanetaryGearbox.densityStructure  # motor case, gearbox housing, carriers, retainers
 
         #------------------------------------
         # Face Width
@@ -9061,7 +9071,15 @@ class doubleStagePlanetaryActuator:
         large_fillet_height = ringFwMM
         large_fillet_volume = 0.5 * (np.pi * (((large_fillet_OD*0.5)**2) - ((large_fillet_ID)*0.5)**2) * large_fillet_height) * 1e-9
 
-        gearbox_casing_mass = (ring_volume + bearing_holding_structure_volume + case_mounting_structure_volume + large_fillet_volume) * density_gears
+        # Only the ring (ring PCD to ring_OD, ringFwUsedMM long) is gear material; the rest of the
+        # casing (bearing holder, case mounting, fillet) is structure: steel ring, aluminium housing
+        # in metal mode.
+        ring_mass = ring_volume * density_gears
+        if density_gears == density_structure:  # one material (3D printed): the original sum, bit-identical
+            gearbox_casing_mass = (ring_volume + bearing_holding_structure_volume + case_mounting_structure_volume + large_fillet_volume) * density_gears
+        else:
+            gearbox_casing_mass = ring_mass + (bearing_holding_structure_volume + case_mounting_structure_volume + large_fillet_volume) * density_structure
+        gearbox_housing_mass = gearbox_casing_mass - ring_mass
 
         #----------------------------------
         # Mass: dspg_carrier
@@ -9123,6 +9141,8 @@ class doubleStagePlanetaryActuator:
         bearing_retainer_mass   = bearing_retainer_volume * density_structure
 
         self.gearbox_casing_mass_stg2          = gearbox_casing_mass
+        self.ring_mass_stg2                    = ring_mass
+        self.gearbox_housing_mass_stg2         = gearbox_housing_mass
         self.carrier_mass_stg2                 = carrier_mass
         self.sec_carrier_mass_stg2             = sec_carrier_mass
         self.planet_mass_stg2                  = planet_mass
@@ -9154,6 +9174,8 @@ class doubleStagePlanetaryActuator:
         print("motorMassKG :", 1000 * self.motorMassKG )
         print("Motor_case_mass_stg1 :", 1000 * self.Motor_case_mass_stg1 )
         print("gearbox_casing_mass_stg1 :", 1000 * self.gearbox_casing_mass_stg1 )
+        print("  ring_mass_stg1 :", 1000 * self.ring_mass_stg1 )
+        print("  gearbox_housing_mass_stg1 :", 1000 * self.gearbox_housing_mass_stg1 )
         print("carrier_mass_stg1 :", 1000 * self.carrier_mass_stg1 )
         print("sun_mass_stg1 :", 1000 * self.sun_mass_stg1 )
         print("sec_carrier_mass_stg1 :", 1000 * self.sec_carrier_mass_stg1 )
@@ -9163,6 +9185,8 @@ class doubleStagePlanetaryActuator:
         print("bearing_mass_stg1 :", 1000 * self.bearing_mass_stg1 )
         print("bearing_retainer_mass_stg1 :", 1000 * self.bearing_retainer_mass_stg1)
         print("gearbox_casing_mass_stg2 :", 1000 * self.gearbox_casing_mass_stg2 )
+        print("  ring_mass_stg2 :", 1000 * self.ring_mass_stg2 )
+        print("  gearbox_housing_mass_stg2 :", 1000 * self.gearbox_housing_mass_stg2 )
         print("carrier_mass_stg2 :", 1000 * self.carrier_mass_stg2 )
         print("sec_carrier_mass_stg2 :", 1000 * self.sec_carrier_mass_stg2 )
         print("planet_mass_stg2 :", 1000 * self.planet_mass_stg2)

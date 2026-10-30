@@ -128,3 +128,67 @@ def test_cpg_3dp_casing_is_unchanged():
 def test_cpg_metal_optimum_gets_lighter():
     """The re-recorded metal golden design: 21/54/30/105, module 0.5, at 802 g (1,032 g before)."""
     assert build_cpg("metal", (21, 54, 30, 105, 0.5, 3)).getMassKG_3DP() == pytest.approx(0.802, abs=0.001)
+
+
+# ---- DSPG ----------------------------------------------------------------------------------------
+# The metal golden design (U8_Lite, 20:1), per stage: Ns, Np, Nr, module, planets. The split does not
+# change the optimum here, only its mass.
+DSPG_METAL_DESIGN = ((33, 45, 123, 0.5, 3), (27, 30, 87, 0.6, 3))
+
+
+def build_dspg(material, design=DSPG_METAL_DESIGN):
+    actuator, _ = gearbox_runner.build("dspg", "U8_Lite", material)
+    gb = actuator.doubleStagePlanetaryGearbox
+    for stage, (Ns, Np, Nr, module, n) in zip((gb.Stage1, gb.Stage2), design):
+        stage.setNs(Ns), stage.setNp(Np), stage.setNr(Nr), stage.setModule(module), stage.setNumPlanet(n)
+    actuator.updateFacewidth()
+    actuator.getMassKG_3DP()
+    return actuator
+
+
+def dspg_ring_volume_m3(a, stage):
+    """The steel ring of one stage: ring PCD (Nr x module) to + 2 x ring_radial_thickness, fw_r + clearance_planet long."""
+    s = getattr(a.doubleStagePlanetaryGearbox, f"Stage{stage}")
+    ring_id = s.Nr * s.module
+    ring_od = ring_id + 2 * a.ring_radial_thickness
+    return math.pi / 4 * (ring_od ** 2 - ring_id ** 2) * (s.fwRingMM + a.clearance_planet) * 1e-9
+
+
+def dspg_casing_volume_m3(a, stage):
+    """The whole casing volume of one stage, from the mass model run with one density for everything."""
+    gb = a.doubleStagePlanetaryGearbox
+    densities = gb.densityGears, gb.densityStructure
+    gb.densityStructure = gb.densityGears
+    try:
+        a.getMassKG_3DP()
+        return getattr(a, f"gearbox_casing_mass_stg{stage}") / gb.densityGears
+    finally:
+        gb.densityGears, gb.densityStructure = densities
+        a.getMassKG_3DP()
+
+
+@pytest.mark.parametrize("stage", [1, 2])
+def test_dspg_metal_ring_is_steel_and_the_housing_aluminium(stage):
+    a = build_dspg("metal")
+    gb = a.doubleStagePlanetaryGearbox
+    assert (gb.densityGears, gb.densityStructure) == (7850, 2700)
+    ring, casing = dspg_ring_volume_m3(a, stage), dspg_casing_volume_m3(a, stage)
+    assert 0 < ring < casing
+    assert getattr(a, f"ring_mass_stg{stage}") == pytest.approx(ring * 7850, rel=1e-9)
+    assert getattr(a, f"gearbox_housing_mass_stg{stage}") == pytest.approx((casing - ring) * 2700, rel=1e-9)
+    assert getattr(a, f"gearbox_casing_mass_stg{stage}") == pytest.approx(
+        getattr(a, f"ring_mass_stg{stage}") + getattr(a, f"gearbox_housing_mass_stg{stage}"), rel=1e-12)
+
+
+@pytest.mark.parametrize("stage", [1, 2])
+def test_dspg_3dp_casing_is_unchanged(stage):
+    a = build_dspg("3dp")
+    gb = a.doubleStagePlanetaryGearbox
+    assert gb.densityGears == gb.densityStructure
+    assert getattr(a, f"ring_mass_stg{stage}") == pytest.approx(dspg_ring_volume_m3(a, stage) * gb.densityGears, rel=1e-12)
+    assert getattr(a, f"gearbox_housing_mass_stg{stage}") > 0
+
+
+def test_dspg_metal_optimum_gets_lighter():
+    """The re-recorded metal golden design (same gear sets) at 1,241 g, against 1,743 g before the split."""
+    assert build_dspg("metal").getMassKG_3DP() == pytest.approx(1.241, abs=0.001)

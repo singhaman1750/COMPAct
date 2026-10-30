@@ -43,6 +43,7 @@ lie inside the mass model's ring volume (checked by a test).
 |---|---|---|
 | SSPG | U8_Lite 6.5:1 | 1,224 → 979 g (new gear set) |
 | CPG | U8_Lite 10:1 | 1,032 → 802 g (new gear set) |
+| DSPG | U8_Lite 20:1 | 1,743 → 1,241 g (same gear sets) |
 
 ## Overview of the 13 remaining types
 
@@ -86,8 +87,7 @@ inrunner rotor hubs / couplers (`densityAluminum`, `densityRotor`).
    face width + clearance), per type.
 4. **Wolfrom output ring** (WPG, INWPG ×2): its volume also holds bearing seats and the output-bearing
    structure; only its toothed annulus becomes steel.
-5. **PR grouping:** one PR per type (as SSPG / CPG), per family (framed / frameless outrunner /
-   inrunner), or one PR for all 13.
+5. **PR grouping:** decided: one PR per type (as SSPG / CPG).
 
 ## Per type
 
