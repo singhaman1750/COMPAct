@@ -409,3 +409,74 @@ def test_inwpg_metal_optimum_gets_lighter(gb_type):
     """The re-recorded metal golden designs (same gear sets): dependent 2,410 -> 1,718 g,
     independent 2,517 -> 1,854 g."""
     assert build_inwpg(gb_type, "metal").getMassKG_3DP() == pytest.approx(INWPG_METAL[gb_type][1], abs=0.001)
+
+
+# ---- IDSPG ---------------------------------------------------------------------------------------
+# Stage 1's ring housing reaches the stator bore; only pitch -> pitch + 2 x ring1RadialWidthMM is steel (the
+# stage-1 search keeps that inside the bore). Stage 2's ring_gear_volume is the steel ring (as DSPG).
+# Golden metal design (RO100, 20:1), per stage: Ns, Np, Nr, module, planets; the split keeps the optimum.
+IDSPG_METAL_DESIGN = ((30, 45, 120, 0.5, 3), (41, 41, 123, 0.8, 4))
+
+
+def build_idspg(material):
+    sys.path.insert(0, str(REPO / "tests"))
+    from test_fresh_design_state import set_design
+    actuator, _ = gearbox_runner.build("idspg", "RO100", material)
+    set_design(actuator, "idspg", IDSPG_METAL_DESIGN)
+    actuator.updateFacewidth()
+    actuator.getMassKG_3DP()
+    return actuator
+
+
+def idspg_steel_volumes_m3(a):
+    gb = a.internaldoubleStagePlanetaryGearbox
+    s1, s2 = gb.Stage1, gb.Stage2
+    pcd1, pcd2 = s1.Nr * s1.module, s2.Nr * s2.module
+    od1 = pcd1 + 2 * a.ring1RadialWidthMM
+    assert od1 <= a.Stator_ID                       # inside the stator bore, as the search guarantees
+    ring1 = math.pi / 4 * (od1 ** 2 - pcd1 ** 2) * (s1.fwRingMM + 0.5 * a.clearance_planet + a.standard_clearance_1_5mm)
+    ring2 = math.pi / 4 * ((pcd2 + 2 * a.ring_radial_thickness) ** 2 - pcd2 ** 2) \
+        * (s2.fwRingMM + a.clearance_planet + a.standard_clearance_1_5mm)
+    return ring1 * 1e-9, ring2 * 1e-9
+
+
+def idspg_ring_housing_volumes_m3(a):
+    """Each stage's whole ring-housing volume, from the mass model run with one density for everything."""
+    gb = a.internaldoubleStagePlanetaryGearbox
+    densities = gb.densityGears, gb.densityStructure
+    gb.densityStructure = gb.densityGears
+    try:
+        a.getMassKG_3DP()
+        return a.ring_gear_mass_stg1 / gb.densityGears, a.ring_gear_mass_stg2 / gb.densityGears
+    finally:
+        gb.densityGears, gb.densityStructure = densities
+        a.getMassKG_3DP()
+
+
+@pytest.mark.parametrize("stage", [1, 2])
+def test_idspg_metal_ring_is_steel_and_the_housing_aluminium(stage):
+    a = build_idspg("metal")
+    gb = a.internaldoubleStagePlanetaryGearbox
+    assert (gb.densityGears, gb.densityStructure) == (7850, 2700)
+    ring = idspg_steel_volumes_m3(a)[stage - 1]
+    whole = idspg_ring_housing_volumes_m3(a)[stage - 1]
+    assert 0 < ring < whole
+    assert getattr(a, f"ring_gear_steel_mass_stg{stage}") == pytest.approx(ring * 7850, rel=1e-9)
+    assert getattr(a, f"ring_housing_mass_stg{stage}") == pytest.approx((whole - ring) * 2700, rel=1e-9)
+    assert getattr(a, f"ring_gear_mass_stg{stage}") == pytest.approx(
+        getattr(a, f"ring_gear_steel_mass_stg{stage}") + getattr(a, f"ring_housing_mass_stg{stage}"), rel=1e-12)
+
+
+@pytest.mark.parametrize("stage", [1, 2])
+def test_idspg_3dp_ring_is_unchanged(stage):
+    a = build_idspg("3dp")
+    gb = a.internaldoubleStagePlanetaryGearbox
+    assert gb.densityGears == gb.densityStructure
+    ring = idspg_steel_volumes_m3(a)[stage - 1]
+    assert getattr(a, f"ring_gear_steel_mass_stg{stage}") == pytest.approx(ring * gb.densityGears, rel=1e-12)
+    assert getattr(a, f"ring_housing_mass_stg{stage}") > 0
+
+
+def test_idspg_metal_optimum_gets_lighter():
+    """The re-recorded metal golden design (same gear sets): 3,003 -> 2,543 g."""
+    assert build_idspg("metal").getMassKG_3DP() == pytest.approx(2.543, abs=0.001)

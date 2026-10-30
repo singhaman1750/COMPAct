@@ -49,6 +49,7 @@ lie inside the mass model's ring volume (checked by a test).
 | WPG | U8_Lite 20:1 | 1,748 → 1,238 g (new gear set 56/48/36/152/140; the old set would be 1,167 g but costs more: ratio 19.91, wider gears) |
 | INWPG dependent | RI100 20:1 | 2,410 → 1,718 g (same gear set) |
 | INWPG independent | RI100 20:1 | 2,517 → 1,854 g (same gear set) |
+| IDSPG | RO100 20:1 | 3,003 → 2,543 g (same gear sets) |
 
 ## Overview of the 13 remaining types
 
@@ -135,12 +136,14 @@ inrunner rotor hubs / couplers (`densityAluminum`, `densityRotor`).
   **`stator_ID`**) + mounting flange + bearing support + middle section + 6 bolt bosses (L1187-1215).
 - **Steel:** the teeth annulus pitch + 2 × wall over `fw_ring_teeth_m`; the rest of `vol_ring_net` aluminium.
 
-### IDSPG (`ActuatorandGearbox_IDSPG.py`, `_stg1` L1655, `_stg2` L1930)
-- **Stage 1:** `ring_gear_mass = (ring_gear_volume (pitch to Stator_ID) + bearing steps + top support +
-  pattern bulges) × density_gears` (L1758-1769).
-- **Stage 2:** `ring_gear_mass = (ring_gear_volume (pitch + 2 × ring_radial_thickness) + casing support
-  + bearing step + bearing support) × density_gears` (L2026-2044).
-- **Steel:** stage 1 pitch + 2 × wall (decision 1, 2); stage 2 the existing `ring_gear_volume`.
+### IDSPG (`ActuatorandGearbox_IDSPG.py`, `getMassKG_3DP_stg1` / `_stg2`) — done
+- **Stage 1:** `ring_gear_volume` runs from the pitch circle to the stator bore. Steel = pitch to pitch +
+  2 × `ring1RadialWidthMM` (the minimum wall the stage-1 search keeps: ring PCD ≤ `Stator_ID` − 2 × it), same
+  length; the rest out to the bore, the bearing steps, the top support and the pattern bulge are aluminium.
+- **Stage 2:** the existing `ring_gear_volume` (pitch + 2 × `ring_radial_thickness`) is steel, as DSPG; casing
+  support, bearing step and bearing support are aluminium.
+- New `ring_gear_steel_mass_stg1/2` and `ring_housing_mass_stg1/2`, printed under `ring_gear_mass_stg1/2`.
+- **Open:** ISSUES bug 20 (stage-2 bearing step has a negative volume).
 
 ### INSSPG type 1 / type 2 (`ActuatorandGearbox_INSSPG.py`, `_getMassKG_3DP_type1` L1218, `_type2` L982)
 - **At gear density:** `ring_mass = ring_vol_net × density_gears`, in **three branches** per type (bearing
