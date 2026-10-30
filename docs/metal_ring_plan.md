@@ -44,6 +44,8 @@ lie inside the mass model's ring volume (checked by a test).
 | SSPG | U8_Lite 6.5:1 | 1,224 → 979 g (new gear set) |
 | CPG | U8_Lite 10:1 | 1,032 → 802 g (new gear set) |
 | DSPG | U8_Lite 20:1 | 1,743 → 1,241 g (same gear sets) |
+| INSSPG type 1 | RI100 6.5:1 | 1,861 → 1,524 g (same gear set) |
+| INSSPG type 2 | RI100 6.5:1 | 1,616 → 1,304 g (same gear set; ring housing still the older formula, ISSUES bug 4) |
 
 ## Overview of the 13 remaining types
 
