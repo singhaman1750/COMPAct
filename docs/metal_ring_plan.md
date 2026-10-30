@@ -51,6 +51,8 @@ lie inside the mass model's ring volume (checked by a test).
 | INWPG independent | RI100 20:1 | 2,517 → 1,854 g (same gear set) |
 | IDSPG | RO100 20:1 | 3,003 → 2,429 g (same gear sets; rings 2,543 g, plus the stage-1 sun hub as aluminium) |
 | INDSPG | RI100 20:1 | 2,032 → 1,445 g (same gear sets; rings and the stage-1 sun hub) |
+| ISSPG compact | RO100 6.5:1 | 2,117 → 1,939 g (same gear set) |
+| ISSPG inside | RO100 6.5:1 | 2,192 → 2,025 g (same gear set) |
 
 ## Overview of the 13 remaining types
 
@@ -125,11 +127,13 @@ inrunner rotor hubs / couplers (`densityAluminum`, `densityRotor`).
   length `ringFwMM + clearance_planet` (L8749-8783, L9013-9053).
 - **Steel:** the existing `ring_volume` of each stage (no thick-ring decision needed).
 
-### ISSPG compact / inside (`ActuatorAndGearbox_ISSPG_compact.py` / `_inside.py`, `getMassKG_3DP`)
-- **At gear density:** `ring_mass = (ring_gear + bearing-holding structure + ring-stator structure + ring hub) × density_gears` (compact L1492).
-- **Ring:** pitch `Nr × module` to **`stator_ID`** (thick), length `ringFwMM + clearance_planet` (L1462-1485).
-- **Steel:** pitch + 2 × wall (decision 1, 2) × that length; the rest aluminium. Inside: the same code
-  at its own lines.
+### ISSPG compact / inside (`ActuatorAndGearbox_ISSPG_compact.py` / `_inside.py`, `getMassKG_3DP`) — done
+- `ring_gear_volume` runs from the pitch circle to the stator bore. Steel = pitch to min(pitch + 2 × module +
+  2 × `ring_stator_case_thickness`, bore), `ringFwUsedMM` long — the ring the search already allows in
+  `maxRingGearOD()` (no separate ring-wall key in ISSPG); the rest of the ring, the bearing holder, the
+  ring-stator tube and the ring hub are aluminium.
+- New `ring_gear_steel_mass` / `ring_housing_mass`, printed under `ring_mass` (log mode only).
+- The sun (with its rotor-coupler hub) stays steel: sun-hub follow-up.
 
 ### ICPG (`ActuatorandGearbox_ICPG.py`, `getMassKG_3DP` L1050)
 - **Already split by name:** `density_steel` / `density_alum` (= gear / structure density);
