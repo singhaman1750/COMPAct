@@ -513,3 +513,84 @@ def test_idspg_metal_optimum_gets_lighter():
     """The re-recorded metal golden design (same gear sets): 3,003 -> 2,429 g (rings 2,543 g, plus the
     stage-1 sun hub as aluminium)."""
     assert build_idspg("metal").getMassKG_3DP() == pytest.approx(2.429, abs=0.001)
+
+
+# ---- INDSPG --------------------------------------------------------------------------------------
+# Stage 1's ring housing reaches the rotor bore; only pitch -> pitch + 2 x ring_radial_thickness is steel,
+# clipped at the bore (the stage-1 search only guarantees ~2.2 mm there). Stage 2's ring_gear_volume is
+# the steel ring (as DSPG). The stage-1 sun hub is aluminium. Golden metal design (RI100, 20:1), per stage:
+# Ns, Np, Nr, module, planets; the split keeps the optimum.
+INDSPG_METAL_DESIGN = ((21, 24, 69, 0.5, 3), (27, 36, 99, 0.6, 3))
+
+
+def build_indspg(material):
+    sys.path.insert(0, str(REPO / "tests"))
+    from test_fresh_design_state import set_design
+    actuator, _ = gearbox_runner.build("indspg", "RI100", material)
+    set_design(actuator, "indspg", INDSPG_METAL_DESIGN)
+    actuator.updateFacewidth()
+    actuator.getMassKG_3DP()
+    return actuator
+
+
+def indspg_steel_volumes_m3(a):
+    """Stage-1 ring, stage-2 ring and the stage-1 sun hub (aluminium) volumes."""
+    gb = a.inrunnerdoubleStagePlanetaryGearbox
+    s1, s2 = gb.Stage1, gb.Stage2
+    pcd1, pcd2 = s1.Nr * s1.module, s2.Nr * s2.module
+    od1 = min(pcd1 + 2 * a.ring_radial_thickness, a.rotor_ID - 2 * a.loose_clearance_3DP)
+    ring1 = math.pi / 4 * (od1 ** 2 - pcd1 ** 2) * s1.fwRingMM
+    ring2 = math.pi / 4 * ((pcd2 + 2 * a.ring_radial_thickness) ** 2 - pcd2 ** 2) * a.fw_r2
+    hub = math.pi / 4 * a.sun_hub_dia1 ** 2 * a.sun_coupler_hub_thickness1
+    return ring1 * 1e-9, ring2 * 1e-9, hub * 1e-9
+
+
+def indspg_whole_volumes_m3(a):
+    """Stage-1 / stage-2 ring housings and the stage-1 sun, from the mass model run with one density."""
+    gb = a.inrunnerdoubleStagePlanetaryGearbox
+    densities = gb.densityGears, gb.densityStructure
+    gb.densityStructure = gb.densityGears
+    try:
+        a.getMassKG_3DP()
+        return tuple(m / gb.densityGears for m in (a.ring_gear_mass_stg1, a.ring_gear_mass_stg2, a.sun_mass_stg1))
+    finally:
+        gb.densityGears, gb.densityStructure = densities
+        a.getMassKG_3DP()
+
+
+@pytest.mark.parametrize("stage", [1, 2])
+def test_indspg_metal_ring_is_steel_and_the_housing_aluminium(stage):
+    a = build_indspg("metal")
+    gb = a.inrunnerdoubleStagePlanetaryGearbox
+    assert (gb.densityGears, gb.densityStructure) == (7850, 2700)
+    ring = indspg_steel_volumes_m3(a)[stage - 1]
+    whole = indspg_whole_volumes_m3(a)[stage - 1]
+    assert 0 < ring < whole
+    assert getattr(a, f"ring_gear_steel_mass_stg{stage}") == pytest.approx(ring * 7850, rel=1e-9)
+    assert getattr(a, f"ring_housing_mass_stg{stage}") == pytest.approx((whole - ring) * 2700, rel=1e-9)
+    assert getattr(a, f"ring_gear_mass_stg{stage}") == pytest.approx(
+        getattr(a, f"ring_gear_steel_mass_stg{stage}") + getattr(a, f"ring_housing_mass_stg{stage}"), rel=1e-12)
+
+
+def test_indspg_metal_stage1_sun_is_steel_and_its_hub_aluminium():
+    a = build_indspg("metal")
+    hub = indspg_steel_volumes_m3(a)[2]
+    whole = indspg_whole_volumes_m3(a)[2]
+    assert 0 < hub < whole
+    assert a.sun_hub_mass_stg1 == pytest.approx(hub * 2700, rel=1e-9)
+    assert a.sun_steel_mass_stg1 == pytest.approx((whole - hub) * 7850, rel=1e-9)
+
+
+def test_indspg_3dp_is_unchanged():
+    a = build_indspg("3dp")
+    gb = a.inrunnerdoubleStagePlanetaryGearbox
+    assert gb.densityGears == gb.densityStructure
+    ring1, ring2, hub = indspg_steel_volumes_m3(a)
+    assert a.ring_gear_steel_mass_stg1 == pytest.approx(ring1 * gb.densityGears, rel=1e-12)
+    assert a.ring_gear_steel_mass_stg2 == pytest.approx(ring2 * gb.densityGears, rel=1e-12)
+    assert a.sun_hub_mass_stg1 == pytest.approx(hub * gb.densityGears, rel=1e-12)
+
+
+def test_indspg_metal_optimum_gets_lighter():
+    """The re-recorded metal golden design (same gear sets): 2,032 -> 1,445 g."""
+    assert build_indspg("metal").getMassKG_3DP() == pytest.approx(1.445, abs=0.001)

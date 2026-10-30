@@ -1548,8 +1548,8 @@ class inrunnerdoubleStageActuator:
         #------------------------------------
         # density of materials
         #------------------------------------
-        density_structure = self.inrunnerdoubleStagePlanetaryGearbox.densityStructure
-        density_gears     = self.inrunnerdoubleStagePlanetaryGearbox.densityGears
+        density_structure = self.inrunnerdoubleStagePlanetaryGearbox.densityStructure  # motor case, ring housing, carriers, retainers, sun hub
+        density_gears     = self.inrunnerdoubleStagePlanetaryGearbox.densityGears      # gears and the ring gears' rings
         density_rotor     = self.inrunnerdoubleStagePlanetaryGearbox.densityRotor
 
         #------------------------------------
@@ -1666,8 +1666,21 @@ class inrunnerdoubleStageActuator:
         bearing_support_vol3 = (np.pi * (self.standard_clearance_1_5mm*2) * (((self.bearing1_ID-self.standard_clearance_1_5mm*3)*0.5)**2 - (((ring_ID+self.loose_clearance_3DP+self.standard_clearance_1_5mm*4)*0.5)**2))) * 1e-9
         step_above_rotor_vol = (np.pi * (step_above_rotor) * ((self.stator_wire_ID*0.5)**2 - ((ring_ID*0.5)**2))) * 1e-9
 
-        # ring teeth and housing weighed together as gear material; to be split into teeth (gear) and housing (structure), see ISSUES.md "Material modes"
-        ring_gear_mass = (ring_gear_volume + top_support_vol + casing_support_vol + bearing_support_vol1 + bearing_support_vol2 + bearing_support_vol3 + step_above_rotor_vol) * density_gears
+        ring_gear_total_volume = (ring_gear_volume + top_support_vol + casing_support_vol + bearing_support_vol1
+                                  + bearing_support_vol2 + bearing_support_vol3 + step_above_rotor_vol)
+
+        # Only the ring gear itself (ring PCD to PCD + 2 x ring_radial_thickness, ringFwUsedMM long) is gear material;
+        # the rest out to the rotor bore, the supports and the step above the rotor are structure: steel ring,
+        # aluminium housing in metal mode. The stage-1 search only keeps ring PCD <= rotor_ID - 6, so the steel
+        # ring is clipped at the bore of ring_gear_volume (rotor_ID - 2 x loose_clearance_3DP).
+        ring_gear_steel_OD     = min(ring_ID + 2*self.ring_radial_thickness, self.rotor_ID - self.loose_clearance_3DP*2)
+        ring_gear_steel_volume = np.pi * ((ring_gear_steel_OD*0.5)**2 - (ring_ID*0.5)**2) * ringFwUsedMM * 1e-9
+        ring_gear_steel_mass   = ring_gear_steel_volume * density_gears
+        if density_gears == density_structure:  # one material (3D printed): the original sum, bit-identical
+            ring_gear_mass = (ring_gear_volume + top_support_vol + casing_support_vol + bearing_support_vol1 + bearing_support_vol2 + bearing_support_vol3 + step_above_rotor_vol) * density_gears
+        else:
+            ring_gear_mass = ring_gear_steel_mass + (ring_gear_total_volume - ring_gear_steel_volume) * density_structure
+        ring_housing_mass = ring_gear_mass - ring_gear_steel_mass
         
 
 
@@ -1740,7 +1753,16 @@ class inrunnerdoubleStageActuator:
         sun_shaft_volume = np.pi * ((sun_shaft_dia*0.5) ** 2) * sun_shaft_height * 1e-9
 
         sun_volume       = sun_hub_volume + sun_gear_volume + sun_shaft_volume
-        sun_mass         = sun_volume * density_gears
+
+        # Only the sun gear and its shaft are gear material; the hub disc that couples the sun to the rotor is
+        # structure: steel sun, aluminium hub in metal mode (no central bolt hole in INDSPG).
+        sun_steel_volume = sun_gear_volume + sun_shaft_volume
+        sun_steel_mass   = sun_steel_volume * density_gears
+        if density_gears == density_structure:  # one material (3D printed): the original sum, bit-identical
+            sun_mass = sun_volume * density_gears
+        else:
+            sun_mass = sun_steel_mass + sun_hub_volume * density_structure
+        sun_hub_mass = sun_mass - sun_steel_mass
 
         #----------------------------------
         # Mass: metal rotor coupling
@@ -1797,9 +1819,13 @@ class inrunnerdoubleStageActuator:
 
         self.Motor_case_mass_stg1              = Motor_case_mass
         self.ring_gear_mass_stg1               = ring_gear_mass
+        self.ring_gear_steel_mass_stg1         = ring_gear_steel_mass
+        self.ring_housing_mass_stg1            = ring_housing_mass
         #self.gearbox_casing_mass_stg1          = gearbox_casing_mass
         self.carrier_mass_stg1                 = carrier_stg1_mass
         self.sun_mass_stg1                     = sun_mass
+        self.sun_steel_mass_stg1               = sun_steel_mass
+        self.sun_hub_mass_stg1                 = sun_hub_mass
         self.rotor_coupler_mass_stg1            = rotor_coupler_mass
         self.sec_carrier_mass_stg1             = sec_carrier_mass
         self.planet_mass_stg1                  = planet_mass
@@ -1842,8 +1868,8 @@ class inrunnerdoubleStageActuator:
         #------------------------------------
         # density of materials
         #------------------------------------
-        density_structure = self.inrunnerdoubleStagePlanetaryGearbox.densityStructure
-        density_gears     = self.inrunnerdoubleStagePlanetaryGearbox.densityGears
+        density_structure = self.inrunnerdoubleStagePlanetaryGearbox.densityStructure  # motor case, ring housing, carriers, retainers, sun hub
+        density_gears     = self.inrunnerdoubleStagePlanetaryGearbox.densityGears      # gears and the ring gears' rings
 
         #------------------------------------
         # Face Width
@@ -1958,8 +1984,16 @@ class inrunnerdoubleStageActuator:
         ring_bearing_step_VOL = np.pi * ( bearing_OD - standard_clearance_1_5mm ) * (standard_clearance_1_5mm)**2 * 1e-9
 
         total_ring_gear_volume = ring_gear_volume + ring_gear_casing_support_volume + ring_bearing_step_volume + ring_gear_bearing_support_volume + ring_casing_step_volume 
-        # ring teeth and housing weighed together as gear material; to be split into teeth (gear) and housing (structure), see ISSUES.md "Material modes"
-        ring_gear_mass = total_ring_gear_volume * density_gears
+
+        # Only the ring gear (ring PCD to ring_OD = PCD + 2 x ring_radial_thickness, fw_r2 long) is gear material;
+        # the casing support, casing step, bearing step and bearing support are structure: steel ring,
+        # aluminium housing in metal mode.
+        ring_gear_steel_mass = ring_gear_volume * density_gears
+        if density_gears == density_structure:  # one material (3D printed): the original sum, bit-identical
+            ring_gear_mass = total_ring_gear_volume * density_gears
+        else:
+            ring_gear_mass = ring_gear_steel_mass + (total_ring_gear_volume - ring_gear_volume) * density_structure
+        ring_housing_mass = ring_gear_mass - ring_gear_steel_mass
 
 
         #----------------------------------
@@ -2032,6 +2066,8 @@ class inrunnerdoubleStageActuator:
 
        # self.gearbox_casing_mass_stg2          = gearbox_casing_mass
         self.ring_gear_mass_stg2                 = ring_gear_mass
+        self.ring_gear_steel_mass_stg2           = ring_gear_steel_mass
+        self.ring_housing_mass_stg2              = ring_housing_mass
         self.carrier_mass_stg2                 = carrier_mass
         self.sec_carrier_mass_stg2             = sec_carrier_mass
         self.planet_mass_stg2                  = planet_mass
