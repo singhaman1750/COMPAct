@@ -339,7 +339,8 @@ def test_wpg_metal_optimum_gets_lighter():
 # As WPG: ring gear 1 (fixed, in gearbox_casing_mass) and ring gear 2 (the output ring, small_ring_mass).
 # Golden metal designs (RI100, 20:1): Ns, Np big, Nr big, Np small, Nr small, module big, module small,
 # planets (the order of tests/test_fresh_design_state.py); the split does not change the optimum here.
-INWPG_METAL = {"inwpg_dependent": ((18, 36, 90, 21, 75, 0.8, 0.8, 3), 1.718)}
+INWPG_METAL = {"inwpg_dependent": ((18, 36, 90, 21, 75, 0.8, 0.8, 3), 1.718),
+               "inwpg_independent": ((54, 30, 114, 24, 108, 0.6, 0.6, 6), 1.854)}
 
 
 def build_inwpg(gb_type, material):
@@ -405,5 +406,6 @@ def test_inwpg_3dp_rings_are_unchanged(gb_type):
 
 @pytest.mark.parametrize("gb_type", INWPG_METAL)
 def test_inwpg_metal_optimum_gets_lighter(gb_type):
-    """The re-recorded metal golden design (same gear set): dependent 2,410 -> 1,718 g."""
+    """The re-recorded metal golden designs (same gear sets): dependent 2,410 -> 1,718 g,
+    independent 2,517 -> 1,854 g."""
     assert build_inwpg(gb_type, "metal").getMassKG_3DP() == pytest.approx(INWPG_METAL[gb_type][1], abs=0.001)

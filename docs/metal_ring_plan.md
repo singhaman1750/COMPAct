@@ -47,6 +47,8 @@ lie inside the mass model's ring volume (checked by a test).
 | INSSPG type 1 | RI100 6.5:1 | 1,861 → 1,524 g (same gear set) |
 | INSSPG type 2 | RI100 6.5:1 | 1,616 → 1,304 g (same gear set; ring housing still the older formula, ISSUES bug 4) |
 | WPG | U8_Lite 20:1 | 1,748 → 1,238 g (new gear set 56/48/36/152/140; the old set would be 1,167 g but costs more: ratio 19.91, wider gears) |
+| INWPG dependent | RI100 20:1 | 2,410 → 1,718 g (same gear set) |
+| INWPG independent | RI100 20:1 | 2,517 → 1,854 g (same gear set) |
 
 ## Overview of the 13 remaining types
 
@@ -163,12 +165,14 @@ inrunner rotor hubs / couplers (`densityAluminum`, `densityRotor`).
   casing support + bearing step + bearing support + casing step) × density_gears` (L1922-1961).
 - **Steel:** stage 1 pitch + 2 × wall (decision 1, 2); stage 2 the existing `ring_gear_volume`.
 
-### INWPG dependent / independent (`ActuatorAndGearbox_INWPG_*.py`, `getMassKG_3DP`)
-- **At gear density:** `gearbox_casing_mass = (ring (pitch to **gearbox_casing_top_OD**) + bearing holder
-  + case mounting + plate + casing top + casing bottom) × density_gears` (dependent L2477-2488);
-  `small_ring_mass` (L2493-2510) as WPG.
-- **Steel:** big ring pitch + 2 × wall (`big_ring_radial_thickness`, + `2 × module` as the code's
-  `ring_OD`) × `ring1FwMM`; small ring annulus (`small_ring_radial_width`) × `ring2FwMM`.
+### INWPG dependent / independent (`ActuatorAndGearbox_INWPG_*.py`, `getMassKG_3DP`) — done
+- **Ring 1 in `gearbox_casing_mass`:** the existing `ring_volume` runs from the pitch circle to
+  `gearbox_casing_top_OD` (ring + casing wall). Steel = the ring itself, pitch to the code's
+  `ring_OD = pitch + 2 × module + 2 × ringRadialWidthMMBig`, `ring1FwMM` long (`ring_gear1_volume`); the casing
+  wall around it, bearing holder, case mounting, plate and casing top (/ bottom, dependent) are aluminium.
+- **Ring 2 `small_ring_mass`:** as WPG; `small_ring_gear` (`ring2FwMM`) steel, carrier wall, end wall and
+  output-bearing sleeve aluminium. Ring wall `ringRadialWidthMMSmall` (4).
+- Stored, not printed (the parts printout goes into the results file).
 
 ## Order
 
