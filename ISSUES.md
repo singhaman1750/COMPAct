@@ -732,7 +732,18 @@ formulas `setVariables()` uses, or a shared helper), or call the part of `setVar
 before weighing. The CAD output does not change; masses during the search do, so affected golden cases
 may need re-recording (INDSPG RI100 metal at least).
 
-**Status:** open (found 2026-10-30 during the WPG metal-mode review).
+**Temporary fix (2026-10-30):** the five `updateFacewidth()` functions end with `self.setVariables()`,
+as ISSPG, ICPG and INSSPG already do, so every candidate is weighed with its own values.
+`tests/test_fresh_design_state.py` weighs a design after another one and compares it with a freshly
+built actuator (fails without the fix in all five types). Golden: INDSPG RI100 metal has a new optimum
+(19/26/71 + 27/30/87 → 21/24/69 + 27/36/99; mass 1.988 → 2.032 kg, eff 0.891 → 0.895, Cost 4.193 →
+4.042); IDSPG RO100 metal and INDSPG RI100 3dp change only the `iter` count (47 → 41, 63 → 62).
+Search time: IDSPG about +50 %, INDSPG about +33 %, WPG / INWPG unchanged. A 156-case sweep of the
+five types (9 motors, ratios 5–30, both materials) ran without new errors (the 6 INDSPG errors at
+ratios 5 / 10 are bug 13 and happen without the fix too).
+
+**Status:** temporary fix done; full fix open: compute these values in the mass functions from the
+current design (as SSPG, CPG, DSPG and INCPG do), then remove the refresh line (the test stays).
 
 ## CAD issues
 
