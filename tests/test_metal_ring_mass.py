@@ -192,3 +192,69 @@ def test_dspg_3dp_casing_is_unchanged(stage):
 def test_dspg_metal_optimum_gets_lighter():
     """The re-recorded metal golden design (same gear sets) at 1,241 g, against 1,743 g before the split."""
     assert build_dspg("metal").getMassKG_3DP() == pytest.approx(1.241, abs=0.001)
+
+
+# ---- INSSPG --------------------------------------------------------------------------------------
+# The metal golden designs (RI100, 6.5:1): Ns, Np, Nr, module, planets. The split does not change
+# the optimum here, only its mass. "ring_mass" is the whole ring housing in INSSPG; its steel part is
+# ring_gear_mass. Type 2 still uses the older ring-housing formula (ISSUES bug 4); the split is the
+# same either way.
+INSSPG_METAL_DESIGNS = {"insspg_type_1": ((24, 54, 132, 0.6, 3), 1.524),
+                        "insspg_type_2": ((25, 56, 137, 0.5, 3), 1.304)}
+
+
+def build_insspg(gb_type, material):
+    actuator, _ = gearbox_runner.build(gb_type, "RI100", material)
+    gb = actuator.planetaryGearbox
+    Ns, Np, Nr, module, n = INSSPG_METAL_DESIGNS[gb_type][0]
+    gb.setNs(Ns), gb.setNp(Np), gb.setNr(Nr), gb.setModule(module), gb.setNumPlanet(n)
+    actuator.updateFacewidth()
+    actuator.getMassKG_3DP()
+    return actuator
+
+
+def insspg_ring_gear_volume_m3(a):
+    """The steel ring: ring PCD (Nr x module) to + 2 x ringRadialWidthMM, fw_r long."""
+    gb = a.planetaryGearbox
+    ring_id = gb.Nr * gb.module
+    return math.pi / 4 * ((ring_id + 2 * a.ringRadialWidthMM) ** 2 - ring_id ** 2) * gb.fwRingMM * 1e-9
+
+
+def insspg_ring_housing_volume_m3(a):
+    """The whole ring-housing volume, from the mass model run with one density for everything."""
+    gb = a.planetaryGearbox
+    densities = gb.densityGears, gb.densityStructure
+    gb.densityStructure = gb.densityGears
+    try:
+        a.getMassKG_3DP()
+        return a.ring_mass / gb.densityGears
+    finally:
+        gb.densityGears, gb.densityStructure = densities
+        a.getMassKG_3DP()
+
+
+@pytest.mark.parametrize("gb_type", INSSPG_METAL_DESIGNS)
+def test_insspg_metal_ring_is_steel_and_the_housing_aluminium(gb_type):
+    a = build_insspg(gb_type, "metal")
+    gb = a.planetaryGearbox
+    assert (gb.densityGears, gb.densityStructure) == (7850, 2700)
+    ring, whole = insspg_ring_gear_volume_m3(a), insspg_ring_housing_volume_m3(a)
+    assert 0 < ring < whole
+    assert a.ring_gear_mass == pytest.approx(ring * 7850, rel=1e-9)
+    assert a.ring_housing_mass == pytest.approx((whole - ring) * 2700, rel=1e-9)
+    assert a.ring_mass == pytest.approx(a.ring_gear_mass + a.ring_housing_mass, rel=1e-12)
+
+
+@pytest.mark.parametrize("gb_type", INSSPG_METAL_DESIGNS)
+def test_insspg_3dp_ring_is_unchanged(gb_type):
+    a = build_insspg(gb_type, "3dp")
+    gb = a.planetaryGearbox
+    assert gb.densityGears == gb.densityStructure
+    assert a.ring_gear_mass == pytest.approx(insspg_ring_gear_volume_m3(a) * gb.densityGears, rel=1e-12)
+    assert a.ring_housing_mass > 0
+
+
+@pytest.mark.parametrize("gb_type", INSSPG_METAL_DESIGNS)
+def test_insspg_metal_optimum_gets_lighter(gb_type):
+    """The re-recorded metal golden designs (same gear sets): type 1 1,861 -> 1,524 g, type 2 1,616 -> 1,304 g."""
+    assert build_insspg(gb_type, "metal").getMassKG_3DP() == pytest.approx(INSSPG_METAL_DESIGNS[gb_type][1], abs=0.001)
