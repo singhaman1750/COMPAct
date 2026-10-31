@@ -4,6 +4,7 @@ and the planet-bearing gap moved to the config drives exactly its CAD variables.
 gearbox gets are in test_variable_categories.py."""
 import pytest
 
+import gearbox_runner
 from variable_helpers import GEARBOXES, SPECS, downstream_of, equation_lines, golden_design, write_design
 
 TYPES = tuple(gb for gb in ("insspg_type_1", "insspg_type_2") if gb in SPECS)
@@ -104,3 +105,42 @@ def test_planet_bearing_gap_comes_from_the_config(monkeypatch, tmp_path, gb):
     assert more["fw_p"] == more["fw_r"] == 10.0 and more["fw_s_calc"] == base["fw_s_calc"]
     changed = {k for k in base if base[k] != more[k]}
     assert {"fw_p", "fw_r", "fw_s_used"} <= changed <= downstream_of(gb, "planet_bearing_gap")
+
+
+def rerun(actuator, folder, **params):
+    actuator.design_params.update(params)
+    actuator.setVariables()
+    actuator.updateFacewidth()
+    actuator.setVariables()
+    actuator.genEquationFile_editCADdirectly()
+    return {n: float(x) for n, x in equation_lines((folder / FOLDER / f"{actuator.insspg_type}_equations_onshape.txt").read_text())}
+
+
+@pytest.mark.parametrize("gb", TYPES)
+@pytest.mark.parametrize("key, value, moves, setup", [
+    ("rotor_support_bearing_OD_clearance", 14, "rotor_support_bearing_OD", {}),
+    ("rotor_upper_support_bearing_clearance_multiple", 15, "rotor_upper_support_bearing_OD", {}),
+    ("sun_support_OD_max", 10, "sun_support_OD", {}),
+    ("sun_support_clearance_multiple", 6, "sun_support_OD", {"sun_support_OD_max": 1000}),   # lift the cap so the margin shows
+])
+def test_moved_numbers_come_from_the_config(monkeypatch, tmp_path, gb, key, value, moves, setup):
+    """The numbers moved to insspg_params.json (4, 5, 21 and 3, value-identical): each drives the CAD variable it sets and
+    nothing outside what depends on it."""
+    actuator, _, _, _ = design(monkeypatch, tmp_path, gb, GEARBOXES[gb].golden()[0])
+    base = rerun(actuator, tmp_path, **setup)
+    more = rerun(actuator, tmp_path, **{key: value})
+    changed = {k for k in base if base[k] != more[k]}
+    assert moves in changed and changed <= downstream_of(gb, key)
+
+
+@pytest.mark.parametrize("gb", TYPES)
+def test_max_diameter_margin_comes_from_the_config(monkeypatch, tmp_path, gb):
+    """gearbox_runner's largest INSSPG gearbox diameter is the stator OD less max_diameter_stator_OD_margin (5.5 mm) and
+    the clearances."""
+    actuator, _, _, _ = design(monkeypatch, tmp_path, gb, GEARBOXES[gb].golden()[0])
+    rule = gearbox_runner.GEARBOXES[gb].max_diameter
+    d = dict(actuator.design_params)
+    base = rule(actuator.motor, d, {})
+    assert base == pytest.approx(actuator.motor.getStatorODMM() - 5.5 - 2 * d["standard_clearance_1_5mm"] - d["loose_clearance_3DP"] / 2)
+    d["max_diameter_stator_OD_margin"] += 2
+    assert rule(actuator.motor, d, {}) == pytest.approx(base - 2)
