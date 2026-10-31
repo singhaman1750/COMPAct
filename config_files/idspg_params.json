@@ -117,6 +117,7 @@
         "output_mounting_nut_depth2"                              : 3,
         "tight_clearance_3DP"                                    : 0.4,
         "loose_clearance_3DP"                                    : 0.8,
+        "planet_bearing_gap"                                     : 1.0,
         "a1_sun_bottom_casing_bearing_ID"                        : 20,
         "a1_sun_bottom_casing_bearing_OD"                        : 27,
         "a1_sun_bottom_casing_bearing_height"                    : 4,

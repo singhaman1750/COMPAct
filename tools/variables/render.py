@@ -38,6 +38,8 @@ def _source(e):
     s = e.get("source", {})
     if "optimiser" in s:
         return f"optimiser (`{s['optimiser']}`)"
+    if "constant" in s:
+        return f"constant `{s['constant']}` in the code"
     return f"{s['file']} → {s['block']} → `{s['key']}`"
 
 

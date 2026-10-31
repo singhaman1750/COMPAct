@@ -258,3 +258,29 @@ Automatic first pass from the code (the special cases above take precedence). Ca
 | `idspg_design_parameters` | 29 | **no** | sCarrierExtrusionDiaMM_Stg1, sCarrierExtrusionClearanceMM_Stg1, sCarrierExtrusionDiaMM_Stg2, sCarrierExtrusionClearanceMM_Stg2, planetMinDistanceMM | Ring1RadialWidthMM, Ring2RadialWidthMM, carrier1ShaftHeightMM, mainCase2AttachmentHeightMM, baseThicknessMM, sCarrierThicknessMM, mainCoverThicknessMM, planetBoreMM, sunBoreMM, couplerRadiusMM, couplerThicknessMM, couplerShaftHeightMM, CarrierRadialThicknessClearance1, CarrierRadialThicknessClearance2, carrierInnerDiaClearanceMM1, sCarrierInnerDiaClearanceMM1, carrierInnerDiaClearanceMM2, sCarrier… |
 | `idspg_optimization_parameters` | 14 | yes | GEAR_RATIO_MIN, GEAR_RATIO_MAX, GEAR_RATIO_STEP, MODULE_STAGE1_MIN, MODULE_STAGE1_MAX, MODULE_STAGE2_MIN, MODULE_STAGE2_MAX, NUM_PLANET_STAGE1_MIN, NUM_PLANET_STAGE1_MAX, NUM_PLANET_STAGE2_MIN, NUM_PLANET_STAGE2_MAX, NUM_TEETH_SUN_MIN, NUM_TEETH_PLANET_MIN, MAX_GB_DIA_MULT_FACTOR | — |
 | `idspg_design_parameters_3DP` | 91 | yes | sCarrierExtrusionDiaMM_Stg1, sCarrierExtrusionClearanceMM_Stg1, sCarrierExtrusionDiaMM_Stg2, sCarrierExtrusionClearanceMM_Stg2, planetMinDistanceMM, Motor_case_thickness, clearance_case_mount_holes_shell_thickness, output_mounting_hole_dia1, case_mounting_hole_dia, case_mounting_bolt_depth, case_mounting_surface_height, central_hole_offset_from_motor_mount_PCD, base_plate_thickness, air_flow_hole_… | bearing_retainer_thickness1, bearing_retainer_thickness2 |
+
+
+## Result (classification done)
+
+Spec: [`config_files/variables/idspg_variables.json`](../../../config_files/variables/idspg_variables.json), page [`docs/variables/idspg.md`](../idspg.md) (generated). Tests: the generic `tests/test_variable_categories.py` (IDSPG registered in `tests/variable_helpers.py`, with the two-stage setter of DSPG) and `tests/test_variable_categories_idspg.py`.
+
+**Counts (CAD variables, 198):** input 20, optimisation 15, fixed 79, dependent 84 (54 formula, 21 lookup, 5 stress rule, 4 implicit constraint). 36 names are aliases of another name (the plan said 35: the extra one is `a2_sun_coupler_hub_thickness`, written with `getattr(self, "sun_coupler_hub_thickness1", "N/A")`, the stage-1 value). The plain `idspg_equations.txt` carries the same 198 names, so no stage-file tooling is needed. **Code-only values: 51** (fixed 45, input 4, dependent 2: the two `maxGearboxDiameter` values), including every 3DP config key the CAD does not use. Confidence: 240 high, 9 medium, 0 low.
+
+**Medium-confidence entries**
+- `a1_sun_hub_dia`, `a2_sun_hub_dia` (Dependent / formula): the rotor's mount-hole circle plus hole diameter plus a hard-coded `5 x standard_clearance_1_5mm`; the mass code uses `4` (CAD and mass disagree, to be logged); the shared sun-hub margin item the plan still has to decide.
+- `a1_fw_s_used`, `a2_fw_s_used` (and its alias `a1_fw_s_used2`), `a1_ring_gear_relation`, `a2_ring_gear_relation` (Dependent / formula): the axial-fill rules that make the two stages fill the rotor height; the two `ring_gear_relation` values are written for the CAD and not used by the code.
+- `shortfall` (code-only, Fixed): always 0; the code sets it only in a disabled axial-fill case and the stage-2 sun length adds it. Its source is a constant in the code.
+- `planet_bearing_gap` (code-only, Fixed): one key for both stages; the plan leaves open whether it should be one per stage.
+
+**Config key added** to `idspg_design_parameters_3DP` in `idspg_params.json` (shared name, value that keeps every output bit-identical): `planet_bearing_gap` = 1.0 (was `standard_clearance_1_5mm * 2 / 3` in both stages; 1.5 * 2 / 3 is exactly 1.0), in `mitStressAnalysisMinFacewidth`. The other shared keys have no counterpart (no motor-case clearance rule, no `bearing_mount_thickness`). A test shows `planet_bearing_gap` drives exactly its CAD variables in both stages.
+
+**Shared tooling changed:** `tests/variable_helpers.py` (IDSPG entry), `tools/variables/render.py` (a source can be a constant in the code).
+
+**Results:** `python tests/golden/golden.py check`: All 58 cases match the baseline. `python -m pytest -q`: 1107 passed. No `CADs/` file, no golden baseline touched.
+
+**Open questions**
+1. One `planet_bearing_gap` for both stages, or one per stage (plan decision 1).
+2. The sun-hub margin: 5 in the CAD, 4 in the mass code; and the shared key (plan decision 2).
+3. The axial-fill rules (`fw_s_used`, `ring_gear_relation`) are the least clear part; they are plain formulas on the code's locals and are kept medium. ISSUES bug 14 (IDSPG stage-1 wide 3D-printed gears) is still open and affects the stage-1 stress widths, not their classification.
+4. `a1_ring_OD` is a copy of `Stator_ID` (an input): the stage-1 ring fits the stator bore.
+5. `idspg_design_parameters` (29 keys) is never read; listed as an unused block. The RO80 case where stage-2 parts do not move (CAD 6) concerns the Onshape model.

@@ -153,6 +153,13 @@ GEARBOXES = {
         extra=[("RI100", (28, 44, 28, 116, 100, 1.2, 1.2, 4))],     # module 1.2: the planet stack is under the cap
         branches=_branches_inwpg_dependent,
         params_name="inwpg_params_dependent.json"),
+    "idspg": Gearbox(
+        "idspg", "IDSPG", "idspg_equations", "internaldoubleStagePlanetaryGearbox",
+        counts={"input": 20, "optimisation": 15, "fixed": 79, "dependent": 84}, code_only=51,
+        set_gears=_set_dspg,
+        # [gr, n1, n2, Ns1, Np1, Nr1, Ns2, Np2, Nr2, module1, module2]
+        from_opt=lambda p: (p[3], p[4], p[5], p[9], p[1], p[6], p[7], p[8], p[10], p[2]),
+        extra=[], config_file="idspg_motor_config.json"),
     "icpg": Gearbox(
         "icpg", "ICPG", "icpg_equations", "internalcompoundPlanetaryGearbox",
         counts={"input": 25, "optimisation": 5, "fixed": 48, "dependent": 39}, code_only=29,
