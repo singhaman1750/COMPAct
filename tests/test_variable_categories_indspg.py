@@ -35,9 +35,8 @@ def test_shared_rules_reach_indspg():
         assert (BY_NAME[n]["category"], BY_NAME[n]["subtype"]) == ("dependent", "formula"), n
     assert (BY_NAME["a1_fw_p"]["category"], BY_NAME["a1_fw_p"]["subtype"]) == ("fixed", "planet part")   # stage 1: a fixed config width
     assert BY_NAME["a1_fw_p"]["source"]["key"] == "fw_p_1_fix"
-    for n in ("a1_bearing_ID", "a1_bearing_OD", "a1_bearing_height"):                  # the stage-1 output bearing is hard-coded in the code
-        assert BY_NAME[n]["category"] == "fixed" and BY_NAME[n]["confidence"] == "medium" and "constant" in BY_NAME[n]["source"], n
-    assert [BY_NAME[n]["source"]["constant"] for n in ("a1_bearing_ID", "a1_bearing_OD", "a1_bearing_height")] == [38.1, 47.625, 4.763]
+    for n in ("a1_bearing_ID", "a1_bearing_OD", "a1_bearing_height"):                  # the stage-1 output bearing: fixed, from the config
+        assert BY_NAME[n]["category"] == "fixed" and BY_NAME[n]["confidence"] == "high" and BY_NAME[n]["source"]["key"] == n, n
 
 
 @pytest.mark.parametrize("name", GEARBOXES[GB].golden())
@@ -120,3 +119,27 @@ def test_planet_bearing_gap_comes_from_the_config(monkeypatch, tmp_path):
     assert (more["a1_fw_s_calc"], more["a2_fw_s_calc"], more["a1_fw_p"]) == (base["a1_fw_s_calc"], base["a2_fw_s_calc"], base["a1_fw_p"])
     changed = {k for k in base if base[k] != more[k]}
     assert {"a1_fw_r", "a2_fw_r", "a2_fw_p"} <= changed <= downstream_of(GB, "planet_bearing_gap")
+
+
+@pytest.mark.parametrize("key, value", [("a1_bearing_ID", 40.0), ("a1_bearing_OD", 50.0), ("a1_bearing_height", 6.0)])
+def test_output_bearing_size_comes_from_the_config(monkeypatch, tmp_path, key, value):
+    """The stage-1 output bearing's size (config, ISSUES bug 22) sets its CAD variable under both stage prefixes and
+    changes nothing outside what depends on it."""
+    actuator, _, _, onshape = design(monkeypatch, tmp_path, GEARBOXES[GB].golden()[0])
+    base = {n: float(x) for n, x in onshape}
+    more = rerun(actuator, tmp_path, **{key: value})
+    alias = next(e["name"] for e in CAD if e.get("alias_of") == key)
+    assert more[key] == more[alias] == value and base[key] != value
+    changed = {k for k in base if base[k] != more[k]}
+    assert {key, alias} <= changed <= downstream_of(GB, key, alias)
+
+
+def test_output_bearing_mass_comes_from_the_config(monkeypatch, tmp_path):
+    """a1_bearing_massKg (config) is the stage-1 output bearing's mass: it adds to the stage-1 bearing mass and the
+    actuator mass one for one and leaves the CAD file alone."""
+    actuator, _, _, onshape = design(monkeypatch, tmp_path, GEARBOXES[GB].golden()[0])
+    mass, bearings = actuator.getMassKG_3DP(), actuator.bearing_mass_stg1
+    more = rerun(actuator, tmp_path, a1_bearing_massKg=actuator.bearing1_massKg + 0.01)
+    assert more == {n: float(x) for n, x in onshape}
+    assert actuator.getMassKG_3DP() == pytest.approx(mass + 0.01, abs=1e-12)
+    assert actuator.bearing_mass_stg1 == pytest.approx(bearings + 0.01, abs=1e-12)

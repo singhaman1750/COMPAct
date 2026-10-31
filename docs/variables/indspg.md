@@ -23,23 +23,17 @@ Confidence:
 |---|---|---|
 | Input | 12 | 2 |
 | Optimisation | 15 | 0 |
-| Fixed | 109 | 38 |
+| Fixed | 109 | 39 |
 | Dependent | 74 | 3 |
-| **Total** | **210** | **43** |
+| **Total** | **210** | **44** |
 
-CAD variables by confidence: high 197, medium 13, low 0
+CAD variables by confidence: high 203, medium 7, low 0
 
 ## To review (not high confidence)
 
-- `a1_bearing_ID` (Fixed, medium): hard-coded in the code, with no config key: the stage-1 output bearing's bore (an inch thin-section bearing, 38.1 x 47.625 x 4.763 mm); the mass code repeats the values
-- `a1_bearing_OD` (Fixed, medium): hard-coded in the code, with no config key: the stage-1 output bearing's outer diameter (38.1 x 47.625 x 4.763 mm); the mass code repeats the values
-- `a1_bearing_height` (Fixed, medium): hard-coded in the code, with no config key: the stage-1 output bearing's width (38.1 x 47.625 x 4.763 mm); the mass code repeats the values
 - `a1_sun_hub_dia` (Dependent, medium): sun hub: the rotor's inner diameter less 2 x (standard_clearance_1_5mm + a hard-coded 2); the hard-coded 2 has no config key
 - `a1_fw_s_used` (Dependent, medium): stage-1 sun length: the fixed planet width, clearances and carrier, with a hard-coded 2 x and, for a rotor 19 mm high (RI80), an extra 0.5 x standard_clearance_1_5mm
 - `a2_sun_hub_dia` (Dependent, medium): same value as a1_sun_hub_dia (the CAD writes it under both stage prefixes); sun hub: the rotor's inner diameter less 2 x (standard_clearance_1_5mm + a hard-coded 2); the hard-coded 2 has no config key
-- `a2_bearing1_ID` (Fixed, medium): same value as a1_bearing_ID (the CAD writes it under both stage prefixes); hard-coded in the code, with no config key: the stage-1 output bearing's bore (an inch thin-section bearing, 38.1 x 47.625 x 4.763 mm); the mass code repeats the values
-- `a2_bearing1_OD` (Fixed, medium): same value as a1_bearing_OD (the CAD writes it under both stage prefixes); hard-coded in the code, with no config key: the stage-1 output bearing's outer diameter (38.1 x 47.625 x 4.763 mm); the mass code repeats the values
-- `a2_bearing1_height1` (Fixed, medium): same value as a1_bearing_height (the CAD writes it under both stage prefixes); hard-coded in the code, with no config key: the stage-1 output bearing's width (38.1 x 47.625 x 4.763 mm); the mass code repeats the values
 - `a1_sun_bottom_casing_bearing_ID` (Dependent, medium): a two-case value: when the rotor is 19 mm high (RI80) the bearing is the catalogue one for the rotor's bore, otherwise (RI100) the config value a1_sun_bottom_casing_bearing_ID; catalogue bearing chosen by bearings_discrete for the bore the stage needs (smallest one that fits); this is its bore
 - `a1_sun_bottom_casing_bearing_OD` (Dependent, medium): a two-case value: when the rotor is 19 mm high (RI80) the bearing is the catalogue one for the rotor's bore, otherwise (RI100) the config value a1_sun_bottom_casing_bearing_OD; catalogue bearing chosen by bearings_discrete for the bore the stage needs (smallest one that fits); this is its outer diameter
 - `a1_sun_bottom_casing_bearing_height` (Dependent, medium): a two-case value: when the rotor is 19 mm high (RI80) the bearing is the catalogue one for the rotor's bore, otherwise (RI100) the config value a1_sun_bottom_casing_bearing_height; catalogue bearing chosen by bearings_discrete for the bore the stage needs (smallest one that fits); this is its width
@@ -99,9 +93,9 @@ From `config_files/variables/rules.json`; the test holds every gearbox's file to
 |---|---|---|---|---|---|---|
 | 1 | `a1_pressure_angle` | gear standard | indspg_motor_config.json → Gear_standard_parameters → `pressureAngleDEG` |  | high | gear standard, the same for every gearbox type |
 | 2 | `a1_fw_p` | planet part | indspg_params.json → indspg_design_parameters_3DP → `fw_p_1_fix` |  | high | stage-1 planet width: a fixed config value, not the stress rule (the stage-1 ring and sun widths follow the stress rule) |
-| 3 | `a1_bearing_ID` | bearing (chosen part) | constant `38.1` in the code |  | medium | hard-coded in the code, with no config key: the stage-1 output bearing's bore (an inch thin-section bearing, 38.1 x 47.625 x 4.763 mm); the mass code repeats the values |
-| 4 | `a1_bearing_OD` | bearing (chosen part) | constant `47.625` in the code |  | medium | hard-coded in the code, with no config key: the stage-1 output bearing's outer diameter (38.1 x 47.625 x 4.763 mm); the mass code repeats the values |
-| 5 | `a1_bearing_height` | bearing (chosen part) | constant `4.763` in the code |  | medium | hard-coded in the code, with no config key: the stage-1 output bearing's width (38.1 x 47.625 x 4.763 mm); the mass code repeats the values |
+| 3 | `a1_bearing_ID` | bearing (chosen part) | indspg_params.json → indspg_design_parameters_3DP → `a1_bearing_ID` |  | high | constant from the INDSPG 3DP design parameters: the stage-1 output bearing's bore (a fixed inch thin-section bearing, 38.1 x 47.625 x 4.763 mm, for every design; ISSUES bug 22); the mass code uses the same key |
+| 4 | `a1_bearing_OD` | bearing (chosen part) | indspg_params.json → indspg_design_parameters_3DP → `a1_bearing_OD` |  | high | constant from the INDSPG 3DP design parameters: the stage-1 output bearing's outer diameter (a fixed inch thin-section bearing, 38.1 x 47.625 x 4.763 mm, for every design; ISSUES bug 22); the mass code uses the same key |
+| 5 | `a1_bearing_height` | bearing (chosen part) | indspg_params.json → indspg_design_parameters_3DP → `a1_bearing_height` |  | high | constant from the INDSPG 3DP design parameters: the stage-1 output bearing's width (a fixed inch thin-section bearing, 38.1 x 47.625 x 4.763 mm, for every design; ISSUES bug 22); the mass code uses the same key |
 | 6 | `a1_clearance_planet` | clearance | indspg_params.json → indspg_design_parameters_3DP → `clearance_planet` |  | high | constant from the INDSPG 3DP design parameters (one value for both stages) |
 | 7 | `a1_case_mounting_hole_dia` | fastener size | indspg_params.json → indspg_design_parameters_3DP → `case_mounting_hole_dia` |  | high | constant from the INDSPG 3DP design parameters (one value for both stages) |
 | 8 | `a1_output_mounting_hole_dia` | fastener size | indspg_params.json → indspg_design_parameters_3DP → `output_mounting_hole_dia1` |  | high | constant from the INDSPG 3DP design parameters |
@@ -180,9 +174,9 @@ From `config_files/variables/rules.json`; the test holds every gearbox's file to
 | 81 | `a2_sun_shaft_bearing_ID` | bearing (chosen part) | indspg_params.json → indspg_design_parameters_3DP → `sun_shaft_bearing_ID2` |  | high | constant from the INDSPG 3DP design parameters |
 | 82 | `a2_sun_central_bolt_dia` | fastener size | indspg_params.json → indspg_design_parameters_3DP → `sun_central_bolt_dia2` |  | high | constant from the INDSPG 3DP design parameters |
 | 83 | `a2_bearing_retainer_thickness` | wall thickness | indspg_params.json → indspg_design_parameters_3DP → `bearing_retainer_thickness2` |  | high | constant from the INDSPG 3DP design parameters |
-| 84 | `a2_bearing1_ID` | bearing (chosen part) | constant `38.1` in the code |  | medium | same value as a1_bearing_ID (the CAD writes it under both stage prefixes); hard-coded in the code, with no config key: the stage-1 output bearing's bore (an inch thin-section bearing, 38.1 x 47.625 x 4.763 mm); the mass code repeats the values |
-| 85 | `a2_bearing1_OD` | bearing (chosen part) | constant `47.625` in the code |  | medium | same value as a1_bearing_OD (the CAD writes it under both stage prefixes); hard-coded in the code, with no config key: the stage-1 output bearing's outer diameter (38.1 x 47.625 x 4.763 mm); the mass code repeats the values |
-| 86 | `a2_bearing1_height1` | bearing (chosen part) | constant `4.763` in the code |  | medium | same value as a1_bearing_height (the CAD writes it under both stage prefixes); hard-coded in the code, with no config key: the stage-1 output bearing's width (38.1 x 47.625 x 4.763 mm); the mass code repeats the values |
+| 84 | `a2_bearing1_ID` | bearing (chosen part) | indspg_params.json → indspg_design_parameters_3DP → `a1_bearing_ID` |  | high | same value as a1_bearing_ID (the CAD writes it under both stage prefixes); constant from the INDSPG 3DP design parameters: the stage-1 output bearing's bore (a fixed inch thin-section bearing, 38.1 x 47.625 x 4.763 mm, for every design; ISSUES bug 22); the mass code uses the same key |
+| 85 | `a2_bearing1_OD` | bearing (chosen part) | indspg_params.json → indspg_design_parameters_3DP → `a1_bearing_OD` |  | high | same value as a1_bearing_OD (the CAD writes it under both stage prefixes); constant from the INDSPG 3DP design parameters: the stage-1 output bearing's outer diameter (a fixed inch thin-section bearing, 38.1 x 47.625 x 4.763 mm, for every design; ISSUES bug 22); the mass code uses the same key |
+| 86 | `a2_bearing1_height1` | bearing (chosen part) | indspg_params.json → indspg_design_parameters_3DP → `a1_bearing_height` |  | high | same value as a1_bearing_height (the CAD writes it under both stage prefixes); constant from the INDSPG 3DP design parameters: the stage-1 output bearing's width (a fixed inch thin-section bearing, 38.1 x 47.625 x 4.763 mm, for every design; ISSUES bug 22); the mass code uses the same key |
 | 87 | `a2_stg1_stg2_mounting_pattern_width` | wall thickness | indspg_params.json → indspg_design_parameters_3DP → `stg1_stg2_mounting_pattern_width` |  | high | same value as a1_stg1_stg2_mounting_pattern_width (the CAD writes it under both stage prefixes); constant from the INDSPG 3DP design parameters (one value for both stages) |
 | 88 | `a2_stg1_stg2_mounting_hole_dia` | fastener size | indspg_params.json → indspg_design_parameters_3DP → `stg1_stg2_mounting_hole_dia` |  | high | same value as a1_stg1_stg2_mounting_hole_dia (the CAD writes it under both stage prefixes); constant from the INDSPG 3DP design parameters (one value for both stages) |
 | 89 | `a2_tight_clearance_3DP` | clearance | indspg_params.json → indspg_design_parameters_3DP → `tight_clearance_3DP` |  | high | same value as a1_tight_clearance_3DP (the CAD writes it under both stage prefixes); constant from the INDSPG 3DP design parameters (one value for both stages) |
@@ -286,7 +280,7 @@ From `config_files/variables/rules.json`; the test holds every gearbox's file to
 | 73 | `a1_sun_bottom_casing_bearing_height` | lookup | `bearings_discrete(idRequiredMM=Rotor_ID - a1_standard_clearance_1_5mm)` → getBearingWidthMM, when `Rotor_height == 19`; otherwise indspg_params.json → indspg_design_parameters_3DP → `a1_sun_bottom_casing_bearing_height` | Rotor_ID, a1_standard_clearance_1_5mm, Rotor_height | medium | a two-case value: when the rotor is 19 mm high (RI80) the bearing is the catalogue one for the rotor's bore, otherwise (RI100) the config value a1_sun_bottom_casing_bearing_height; catalogue bearing chosen by bearings_discrete for the bore the stage needs (smallest one that fits); this is its width |
 | 74 | `rotor_mount_hole_PCD` | formula | `Rotor_ID - Rotor_csk_head_upper_dia - 2 * 2 - a1_standard_clearance_1_5mm` | a1_standard_clearance_1_5mm, Rotor_ID, Rotor_csk_head_upper_dia | medium | rotor mount-hole circle: the rotor's inner diameter less the countersink head, a hard-coded 2 x 2 mm and one clearance (the hard-coded numbers have no config key) |
 
-## Used by the code, not written to the CAD file (43)
+## Used by the code, not written to the CAD file (44)
 
 | # | Variable | Sub-type | Source / formula | Depends on | Confidence | Why |
 |---|---|---|---|---|---|---|
@@ -333,6 +327,7 @@ From `config_files/variables/rules.json`; the test holds every gearbox's file to
 | 41 | `NUM_TEETH_SUN_MIN` | search bound | indspg_params.json → indspg_optimization_parameters → `NUM_TEETH_SUN_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
 | 42 | `NUM_TEETH_PLANET_MIN` | search bound | indspg_params.json → indspg_optimization_parameters → `NUM_TEETH_PLANET_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
 | 43 | `MAX_GB_DIA_MULT_FACTOR` | search bound | indspg_params.json → indspg_optimization_parameters → `MAX_GB_DIA_MULT_FACTOR` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 44 | `a1_bearing_massKg` | bearing (chosen part) | indspg_params.json → indspg_design_parameters_3DP → `a1_bearing_massKg` |  | high | constant from the INDSPG 3DP design parameters: the stage-1 output bearing's mass (22.7 g), added to the stage-1 bearing mass; the stage-1 carrier mass still uses the lookup bearing (ISSUES bug 22) |
 
 ## Config blocks INDSPG doesn't read
 

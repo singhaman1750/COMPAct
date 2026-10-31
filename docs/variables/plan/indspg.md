@@ -282,7 +282,6 @@ Spec: [`config_files/variables/indspg_variables.json`](../../../config_files/var
 **Counts (CAD variables, 210):** input 12, optimisation 15, fixed 109, dependent 74 (47 formula, 18 lookup, 5 stress rule, 4 implicit constraint). 43 names are aliases of another name (the plan said 42: the extra one is `a2_sun_coupler_hub_thickness`, written with `getattr(self, "sun_coupler_hub_thickness1", "N/A")`, the stage-1 value). The plain `indspg_equations.txt` carries the same 210 names. **Code-only values: 43** (fixed 38, dependent 3: the two `maxGearboxDiameter` values and the bottom casing bearing's mass `a1_sun_bottom_casing_bearing_massKg`; input 2), including 11 config keys that are never read and `rotor_mount_hole_PCD_config`. Confidence: 237 high, 16 medium, 0 low.
 
 **Medium-confidence entries** (hard-coded numbers with no config key, and one two-case value)
-- `a1_bearing_ID`, `a1_bearing_OD`, `a1_bearing_height` (and the aliases `a2_bearing1_ID`, `_OD`, `_height1`) (Fixed, source = a constant in the code): the stage-1 output bearing is hard-coded as 38.1 / 47.625 / 4.763 mm (an inch thin-section bearing); the mass code repeats the three numbers and the bearing's mass (22.7 g). The plan proposes config keys.
 - `a1_sun_hub_dia`, `a2_sun_hub_dia` (Dependent / formula): `rotor_ID - 2 x (standard_clearance_1_5mm + 2)`, the 2 hard-coded.
 - `rotor_mount_hole_PCD` (Dependent / formula): `rotor_ID` less the countersink head, a hard-coded `2 x 2` and one clearance.
 - `a1_fw_s_used` (Dependent / formula): a hard-coded `2 x`, and for a 19 mm rotor (RI80) an extra `0.5 x standard_clearance_1_5mm`.
@@ -292,12 +291,14 @@ Spec: [`config_files/variables/indspg_variables.json`](../../../config_files/var
 
 **Config key added** to `indspg_design_parameters_3DP` in `indspg_params.json` (shared name, value that keeps every output bit-identical): `planet_bearing_gap` = 1.0 (was `standard_clearance_1_5mm * 2 / 3` in both stages; 1.5 * 2 / 3 is exactly 1.0), in `mitStressAnalysisMinFacewidth`. The other shared keys have no counterpart (no motor-case clearance rule, no `bearing_mount_thickness`). A test shows `planet_bearing_gap` drives exactly its CAD variables in both stages (stage 1's planet width is a fixed config value and does not move).
 
+**Stage-1 output bearing moved to the config (2026-10-31, ISSUES bug 22):** it was hard-coded as 38.1 / 47.625 / 4.763 mm (an inch thin-section bearing) in the CAD code, and the mass code repeated the three numbers and its mass (22.7 g). It is now `a1_bearing_ID`, `a1_bearing_OD`, `a1_bearing_height` and `a1_bearing_massKg` in `indspg_design_parameters_3DP`, read by both; same values, so every output is bit-identical. `a1_bearing_*` and the `a2_bearing1_*` aliases are Fixed / bearing, high confidence, and `a1_bearing_massKg` is a new code-only entry. Tests show each size key drives exactly its CAD variable under both prefixes (and what depends on it), and the mass key adds to the actuator mass one for one. Counts after the move: code-only 44 (fixed 39); confidence 244 high, 10 medium. The stage-1 carrier mass still uses the lookup bearing (bug 22, open).
+
 **Shared tooling changed:** `tests/test_variable_categories.py` and `tools/variables/render.py` (a lookup can carry `when` and `otherwise`: it applies when the condition holds and the other config source otherwise; the config-key, source, depends_on and value checks follow it), `tests/variable_helpers.py` (INDSPG entry and branch rules).
 
 **Results:** `python tests/golden/golden.py check`: All 58 cases match the baseline. `python -m pytest -q`: 1135 passed. No `CADs/` file, no golden baseline touched.
 
 **Open questions**
-1. The hard-coded stage-1 output bearing (38.1 / 47.625 / 4.763 mm, 22.7 g): new config keys (plan decision 4) and whether a bearing lookup should replace it.
+1. The stage-1 output bearing (now config keys, see above): whether a per-design bearing lookup should replace the fixed bearing, or the carrier mass should use the fixed one (ISSUES bug 22).
 2. The hard-coded 2 in `sun_hub_dia`, the `2 x 2` in `rotor_mount_hole_PCD` and the 2 and 0.5 in `a1_fw_s_used`: geometry or tuning (new keys, plan decision 4).
 3. The rotor-height-19 case (RI80) makes the stage-1 bottom casing bearing a lookup; RI100 uses the config value. The plan expected a dead lookup overwritten by the config; for RI80 the lookup is what the CAD gets.
 4. One `planet_bearing_gap` for both stages, or one per stage (plan decision 1).

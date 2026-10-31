@@ -422,9 +422,11 @@ class inrunnerdoubleStageActuator:
             self.a1_sun_bottom_casing_bearing_height = self.design_params["a1_sun_bottom_casing_bearing_height"]
             self.a1_sun_bottom_casing_bearing_massKg = self.design_params["a1_sun_bottom_casing_bearing_massKg"]
             
-        self.bearing1_ID = 38.1                                                                #TODO: if possible extract it from bearing selection once all done , THIS IS FIX VALUE
-        self.bearing1_OD = 47.625
-        self.bearing1_height = 4.763
+        # Stage-1 output bearing: a fixed bearing from the config (ISSUES bug 22)
+        self.bearing1_ID     = self.design_params["a1_bearing_ID"]
+        self.bearing1_OD     = self.design_params["a1_bearing_OD"]
+        self.bearing1_height = self.design_params["a1_bearing_height"]
+        self.bearing1_massKg = self.design_params["a1_bearing_massKg"]
 
 
         #case_mounting_bolt = nuts_and_bolts_dimensions(bolt_dia = self.case_mounting_hole_dia, bolt_type="socket_head")
@@ -1592,10 +1594,11 @@ class inrunnerdoubleStageActuator:
         WidthBearingMM    = Bearings.getBearingWidthMM()
         BearingMassKG     = Bearings.getBearingMassKG()
 
-        self.Bearing_ID_stg1_MM        = 38.1 # Bearings.getBearingIDMM()
-        self.Bearing_OD_stg1_MM        = 47.625 # Bearings.getBearingODMM()
-        self.Bearing_thickness_stg1_MM = 4.763 # Bearings.getBearingWidthMM()
-        self.Bearing_mass_stg1_KG      = 0.0227 # Bearings.getBearingMassKG()
+        # the fixed stage-1 output bearing (config), not the lookup above (ISSUES bug 22)
+        self.Bearing_ID_stg1_MM        = self.bearing1_ID
+        self.Bearing_OD_stg1_MM        = self.bearing1_OD
+        self.Bearing_thickness_stg1_MM = self.bearing1_height
+        self.Bearing_mass_stg1_KG      = self.bearing1_massKg
 
         #======================================
         # Mass Calculation

@@ -355,10 +355,12 @@
    "category": "fixed",
    "subtype": "bearing (chosen part)",
    "source": {
-    "constant": 38.1
+    "file": "indspg_params.json",
+    "block": "indspg_design_parameters_3DP",
+    "key": "a1_bearing_ID"
    },
-   "confidence": "medium",
-   "reason": "hard-coded in the code, with no config key: the stage-1 output bearing's bore (an inch thin-section bearing, 38.1 x 47.625 x 4.763 mm); the mass code repeats the values"
+   "confidence": "high",
+   "reason": "constant from the INDSPG 3DP design parameters: the stage-1 output bearing's bore (a fixed inch thin-section bearing, 38.1 x 47.625 x 4.763 mm, for every design; ISSUES bug 22); the mass code uses the same key"
   },
   {
    "name": "a1_bearing_OD",
@@ -366,10 +368,12 @@
    "category": "fixed",
    "subtype": "bearing (chosen part)",
    "source": {
-    "constant": 47.625
+    "file": "indspg_params.json",
+    "block": "indspg_design_parameters_3DP",
+    "key": "a1_bearing_OD"
    },
-   "confidence": "medium",
-   "reason": "hard-coded in the code, with no config key: the stage-1 output bearing's outer diameter (38.1 x 47.625 x 4.763 mm); the mass code repeats the values"
+   "confidence": "high",
+   "reason": "constant from the INDSPG 3DP design parameters: the stage-1 output bearing's outer diameter (a fixed inch thin-section bearing, 38.1 x 47.625 x 4.763 mm, for every design; ISSUES bug 22); the mass code uses the same key"
   },
   {
    "name": "a1_bearing_height",
@@ -377,10 +381,12 @@
    "category": "fixed",
    "subtype": "bearing (chosen part)",
    "source": {
-    "constant": 4.763
+    "file": "indspg_params.json",
+    "block": "indspg_design_parameters_3DP",
+    "key": "a1_bearing_height"
    },
-   "confidence": "medium",
-   "reason": "hard-coded in the code, with no config key: the stage-1 output bearing's width (38.1 x 47.625 x 4.763 mm); the mass code repeats the values"
+   "confidence": "high",
+   "reason": "constant from the INDSPG 3DP design parameters: the stage-1 output bearing's width (a fixed inch thin-section bearing, 38.1 x 47.625 x 4.763 mm, for every design; ISSUES bug 22); the mass code uses the same key"
   },
   {
    "name": "a1_clearance_planet",
@@ -2337,10 +2343,12 @@
    "category": "fixed",
    "subtype": "bearing (chosen part)",
    "source": {
-    "constant": 38.1
+    "file": "indspg_params.json",
+    "block": "indspg_design_parameters_3DP",
+    "key": "a1_bearing_ID"
    },
-   "confidence": "medium",
-   "reason": "same value as a1_bearing_ID (the CAD writes it under both stage prefixes); hard-coded in the code, with no config key: the stage-1 output bearing's bore (an inch thin-section bearing, 38.1 x 47.625 x 4.763 mm); the mass code repeats the values",
+   "confidence": "high",
+   "reason": "same value as a1_bearing_ID (the CAD writes it under both stage prefixes); constant from the INDSPG 3DP design parameters: the stage-1 output bearing's bore (a fixed inch thin-section bearing, 38.1 x 47.625 x 4.763 mm, for every design; ISSUES bug 22); the mass code uses the same key",
    "alias_of": "a1_bearing_ID"
   },
   {
@@ -2349,10 +2357,12 @@
    "category": "fixed",
    "subtype": "bearing (chosen part)",
    "source": {
-    "constant": 47.625
+    "file": "indspg_params.json",
+    "block": "indspg_design_parameters_3DP",
+    "key": "a1_bearing_OD"
    },
-   "confidence": "medium",
-   "reason": "same value as a1_bearing_OD (the CAD writes it under both stage prefixes); hard-coded in the code, with no config key: the stage-1 output bearing's outer diameter (38.1 x 47.625 x 4.763 mm); the mass code repeats the values",
+   "confidence": "high",
+   "reason": "same value as a1_bearing_OD (the CAD writes it under both stage prefixes); constant from the INDSPG 3DP design parameters: the stage-1 output bearing's outer diameter (a fixed inch thin-section bearing, 38.1 x 47.625 x 4.763 mm, for every design; ISSUES bug 22); the mass code uses the same key",
    "alias_of": "a1_bearing_OD"
   },
   {
@@ -2361,10 +2371,12 @@
    "category": "fixed",
    "subtype": "bearing (chosen part)",
    "source": {
-    "constant": 4.763
+    "file": "indspg_params.json",
+    "block": "indspg_design_parameters_3DP",
+    "key": "a1_bearing_height"
    },
-   "confidence": "medium",
-   "reason": "same value as a1_bearing_height (the CAD writes it under both stage prefixes); hard-coded in the code, with no config key: the stage-1 output bearing's width (38.1 x 47.625 x 4.763 mm); the mass code repeats the values",
+   "confidence": "high",
+   "reason": "same value as a1_bearing_height (the CAD writes it under both stage prefixes); constant from the INDSPG 3DP design parameters: the stage-1 output bearing's width (a fixed inch thin-section bearing, 38.1 x 47.625 x 4.763 mm, for every design; ISSUES bug 22); the mass code uses the same key",
    "alias_of": "a1_bearing_height"
   },
   {
@@ -3490,6 +3502,19 @@
    },
    "confidence": "high",
    "reason": "optimiser setting: limits of the search, not a part dimension"
+  },
+  {
+   "name": "a1_bearing_massKg",
+   "attr": "bearing1_massKg",
+   "category": "fixed",
+   "subtype": "bearing (chosen part)",
+   "source": {
+    "file": "indspg_params.json",
+    "block": "indspg_design_parameters_3DP",
+    "key": "a1_bearing_massKg"
+   },
+   "confidence": "high",
+   "reason": "constant from the INDSPG 3DP design parameters: the stage-1 output bearing's mass (22.7 g), added to the stage-1 bearing mass; the stage-1 carrier mass still uses the lookup bearing (ISSUES bug 22)"
   }
  ],
  "unused_config_blocks": [
