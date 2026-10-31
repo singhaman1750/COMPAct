@@ -329,7 +329,7 @@
     "key": "case_mounting_hole_allen_socket_dia"
    },
    "confidence": "high",
-   "reason": "constant from the INSSPG design parameters"
+   "reason": "constant from the INSSPG design parameters: the constructor first looks this size up from the bolt table (cached for speed), but setVariables then overwrites it with the config value, so the config value is what the CAD gets and the lookup is dead code"
   },
   {
    "name": "dp_s",
@@ -621,7 +621,7 @@
     "key": "output_mounting_nut_thickness"
    },
    "confidence": "high",
-   "reason": "constant from the INSSPG design parameters"
+   "reason": "constant from the INSSPG design parameters: the constructor first looks this size up from the bolt table (cached for speed), but setVariables then overwrites it with the config value, so the config value is what the CAD gets and the lookup is dead code"
   },
   {
    "name": "output_mounting_nut_wrench_size",
@@ -634,7 +634,7 @@
     "key": "output_mounting_nut_wrench_size"
    },
    "confidence": "high",
-   "reason": "constant from the INSSPG design parameters"
+   "reason": "constant from the INSSPG design parameters: the constructor first looks this size up from the bolt table (cached for speed), but setVariables then overwrites it with the config value, so the config value is what the CAD gets and the lookup is dead code"
   },
   {
    "name": "output_mounting_hole_dia",
@@ -673,7 +673,7 @@
     "key": "case_mounting_wrench_size"
    },
    "confidence": "high",
-   "reason": "constant from the INSSPG design parameters"
+   "reason": "constant from the INSSPG design parameters: the constructor first looks this size up from the bolt table (cached for speed), but setVariables then overwrites it with the config value, so the config value is what the CAD gets and the lookup is dead code"
   },
   {
    "name": "planet_pin_bolt_dia",
@@ -699,7 +699,7 @@
     "key": "planet_pin_socket_head_dia"
    },
    "confidence": "high",
-   "reason": "constant from the INSSPG design parameters"
+   "reason": "constant from the INSSPG design parameters: the constructor first looks this size up from the bolt table (cached for speed), but setVariables then overwrites it with the config value, so the config value is what the CAD gets and the lookup is dead code"
   },
   {
    "name": "planet_shaft_dia",
@@ -725,7 +725,7 @@
     "key": "planet_pin_bolt_wrench_size"
    },
    "confidence": "high",
-   "reason": "constant from the INSSPG design parameters"
+   "reason": "constant from the INSSPG design parameters: the constructor first looks this size up from the bolt table (cached for speed), but setVariables then overwrites it with the config value, so the config value is what the CAD gets and the lookup is dead code"
   },
   {
    "name": "planet_shaft_step_offset",
@@ -816,7 +816,7 @@
     "key": "carrier_trapezoidal_support_hole_socket_head_dia"
    },
    "confidence": "high",
-   "reason": "constant from the INSSPG design parameters"
+   "reason": "constant from the INSSPG design parameters: the constructor first looks this size up from the bolt table (cached for speed), but setVariables then overwrites it with the config value, so the config value is what the CAD gets and the lookup is dead code"
   },
   {
    "name": "carrier_trapezoidal_support_hole_wrench_size",
@@ -829,7 +829,7 @@
     "key": "carrier_trapezoidal_support_hole_wrench_size"
    },
    "confidence": "high",
-   "reason": "constant from the INSSPG design parameters"
+   "reason": "constant from the INSSPG design parameters: the constructor first looks this size up from the bolt table (cached for speed), but setVariables then overwrites it with the config value, so the config value is what the CAD gets and the lookup is dead code"
   },
   {
    "name": "carrier_bearing_step_width",
@@ -959,7 +959,7 @@
     "key": "sun_central_bolt_socket_head_dia"
    },
    "confidence": "high",
-   "reason": "constant from the INSSPG design parameters"
+   "reason": "constant from the INSSPG design parameters: the constructor first looks this size up from the bolt table (cached for speed), but setVariables then overwrites it with the config value, so the config value is what the CAD gets and the lookup is dead code"
   },
   {
    "name": "bearing_retainer_thickness",
