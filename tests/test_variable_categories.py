@@ -111,7 +111,7 @@ def test_depends_on_lists_exactly_the_names_in_each_formula_and_lookup(gb):
         if "formula" in e:
             exprs = [e["formula"]]
         elif "lookup" in e:
-            exprs = [v for k, v in e["lookup"]["args"].items() if k != "bolt_type"]
+            exprs = [v for k, v in e["lookup"]["args"].items() if k != "bolt_type"] + ([e["when"]] if "when" in e else [])
         else:
             continue
         used = {n.id for x in exprs for n in ast.walk(ast.parse(x, mode="eval")) if isinstance(n, ast.Name)}
@@ -123,7 +123,8 @@ def test_every_config_key_is_accounted_for(gb):
     cad, code = entries(gb)
     pfile = GEARBOXES[gb].params_file
     params = json.loads((CONFIG / pfile).read_text(encoding="utf-8"))
-    used = {(s["block"], s["key"]) for e in cad + code if (s := e.get("source", {})).get("file") == pfile}
+    used = {(s["block"], s["key"]) for e in cad + code
+            for s in (e.get("source", {}), e.get("otherwise", {})) if s.get("file") == pfile}
     unused = {b["block"] for b in SPECS[gb]["unused_config_blocks"]}
     assert set(params) == unused | {b for b, _ in used}
     for block, keys in params.items():
@@ -178,8 +179,11 @@ def test_sources_give_the_values(design):
         for part in block.split("."):
             data = data[names.get(part, part)]
         return data
+    env = {"cos": math.cos, "sqrt": math.sqrt, "pi": math.pi, "__builtins__": {}}
     for e in cad + code:
         s = e.get("source", {})
+        if "when" in e and not eval(e["when"], env, dict(vals)):        # a lookup that applies only when `when` holds
+            s = e["otherwise"]
         if s.get("file") == GEARBOXES[gb].params_file:
             expected = params[s["block"]][s["key"]]
             if s.get("per_motor"):
@@ -203,6 +207,8 @@ def test_formulas_and_lookups_give_the_values(design):
         if "formula" in e:
             got = eval(e["formula"], env, dict(vals))
         elif "lookup" in e:
+            if "when" in e and not eval(e["when"], env, dict(vals)):
+                continue                                                # the config value applies here (test_sources_give_the_values)
             lk = e["lookup"]
             args = {k: (eval(v, env, dict(vals)) if k != "bolt_type" else v) for k, v in lk["args"].items()}
             if lk["function"] == "bearings_discrete":

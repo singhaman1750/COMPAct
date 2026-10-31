@@ -34,7 +34,11 @@ def _source(e):
     if "lookup" in e:
         lk = e["lookup"]
         args = ", ".join(f"{k}={v}" for k, v in lk["args"].items())
-        return f"`{lk['function']}({args})` → {lk.get('field') or lk.get('method')}"
+        out = f"`{lk['function']}({args})` → {lk.get('field') or lk.get('method')}"
+        if e.get("when"):
+            o = e["otherwise"]
+            out += f", when `{e['when']}`; otherwise {o['file']} → {o['block']} → `{o['key']}`"
+        return out
     s = e.get("source", {})
     if "optimiser" in s:
         return f"optimiser (`{s['optimiser']}`)"

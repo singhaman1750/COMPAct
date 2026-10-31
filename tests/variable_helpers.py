@@ -81,6 +81,13 @@ def _branches_cpg(a):
             "ring grown to the bearing": not a.Nr * a.module_s + 5 * 2 > a.bearing_OD}
 
 
+def _branches_indspg(a):
+    return {"rotor 19 mm high: the bottom bearing is a lookup": a.rotor_height == 19,
+            "stage 2 sun length: the carrier circle is wider than the stage-1 bearing":
+            a.carrier_PCD2 - a.planet_shaft_dia2 - a.planet_shaft_step_offset2 - a.standard_clearance_1_5mm * 2
+            > a.bearing1_OD - a.standard_clearance_1_5mm * 2}
+
+
 def _branches_icpg(a):
     # sun_hub_dia is capped at the rotor OD, but the rotor mount holes' PCD + dia + 4 clearances is well below it for every
     # motor in motors.json (RO100 84 of 113.5 mm, RO80 72 of 92.6, RO60 55 of 73.8): the cap is never reached
@@ -153,6 +160,13 @@ GEARBOXES = {
         extra=[("RI100", (28, 44, 28, 116, 100, 1.2, 1.2, 4))],     # module 1.2: the planet stack is under the cap
         branches=_branches_inwpg_dependent,
         params_name="inwpg_params_dependent.json"),
+    "indspg": Gearbox(
+        "indspg", "INDSPG", "indspg_equations", "inrunnerdoubleStagePlanetaryGearbox",
+        counts={"input": 12, "optimisation": 15, "fixed": 109, "dependent": 74}, code_only=43,
+        set_gears=_set_dspg,
+        # [gr, n1, n2, Ns1, Np1, Nr1, Ns2, Np2, Nr2, module1, module2]
+        from_opt=lambda p: (p[3], p[4], p[5], p[9], p[1], p[6], p[7], p[8], p[10], p[2]),
+        extra=[], branches=_branches_indspg, config_file="indspg_motor_config.json"),
     "idspg": Gearbox(
         "idspg", "IDSPG", "idspg_equations", "internaldoubleStagePlanetaryGearbox",
         counts={"input": 20, "optimisation": 15, "fixed": 79, "dependent": 84}, code_only=51,

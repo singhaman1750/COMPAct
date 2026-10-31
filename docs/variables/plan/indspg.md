@@ -273,3 +273,32 @@ Automatic first pass from the code (the special cases above take precedence). Ca
 | `indspg_design_parameters` | 29 | **no** | sCarrierExtrusionDiaMM_Stg1, sCarrierExtrusionClearanceMM_Stg1, sCarrierExtrusionDiaMM_Stg2, sCarrierExtrusionClearanceMM_Stg2, planetMinDistanceMM | Ring1RadialWidthMM, Ring2RadialWidthMM, carrier1ShaftHeightMM, mainCase2AttachmentHeightMM, baseThicknessMM, sCarrierThicknessMM, mainCoverThicknessMM, planetBoreMM, sunBoreMM, couplerRadiusMM, couplerThicknessMM, couplerShaftHeightMM, CarrierRadialThicknessClearance1, CarrierRadialThicknessClearance2, carrierInnerDiaClearanceMM1, sCarrierInnerDiaClearanceMM1, carrierInnerDiaClearanceMM2, sCarrier… |
 | `indspg_optimization_parameters` | 14 | yes | GEAR_RATIO_MIN, GEAR_RATIO_MAX, GEAR_RATIO_STEP, MODULE_STAGE1_MIN, MODULE_STAGE1_MAX, MODULE_STAGE2_MIN, MODULE_STAGE2_MAX, NUM_PLANET_STAGE1_MIN, NUM_PLANET_STAGE1_MAX, NUM_PLANET_STAGE2_MIN, NUM_PLANET_STAGE2_MAX, NUM_TEETH_SUN_MIN, NUM_TEETH_PLANET_MIN, MAX_GB_DIA_MULT_FACTOR | — |
 | `indspg_design_parameters_3DP` | 105 | yes | sCarrierExtrusionDiaMM_Stg1, sCarrierExtrusionClearanceMM_Stg1, sCarrierExtrusionDiaMM_Stg2, sCarrierExtrusionClearanceMM_Stg2, planetMinDistanceMM, central_hole_offset_from_motor_mount_PCD, base_plate_thickness, air_flow_hole_offset, bearingIDClearanceMM, clearance_case_mount_holes_shell_thickness2, a1_sun_bottom_casing_bearing_massKg, rotor_mount_hole_PCD, ring2RadialWidthMM | a1_sun_carrier_bearing_ID, a1_sun_carrier_bearing_OD, a1_sun_carrier_bearing_height, bearing_retainer_hole_dia, bearing_retainer_hole_num, bearing_retainer_hole_wrench_nut_size, needle_bearing_planet_OD, needle_bearing_planet_ID, needle_bearing_planet_height |
+
+
+## Result (classification done)
+
+Spec: [`config_files/variables/indspg_variables.json`](../../../config_files/variables/indspg_variables.json), page [`docs/variables/indspg.md`](../indspg.md) (generated). Tests: the generic `tests/test_variable_categories.py` (INDSPG registered in `tests/variable_helpers.py`, with the two-stage setter of DSPG) and `tests/test_variable_categories_indspg.py`.
+
+**Counts (CAD variables, 210):** input 12, optimisation 15, fixed 109, dependent 74 (47 formula, 18 lookup, 5 stress rule, 4 implicit constraint). 43 names are aliases of another name (the plan said 42: the extra one is `a2_sun_coupler_hub_thickness`, written with `getattr(self, "sun_coupler_hub_thickness1", "N/A")`, the stage-1 value). The plain `indspg_equations.txt` carries the same 210 names. **Code-only values: 43** (fixed 38, dependent 3: the two `maxGearboxDiameter` values and the bottom casing bearing's mass `a1_sun_bottom_casing_bearing_massKg`; input 2), including 11 config keys that are never read and `rotor_mount_hole_PCD_config`. Confidence: 237 high, 16 medium, 0 low.
+
+**Medium-confidence entries** (hard-coded numbers with no config key, and one two-case value)
+- `a1_bearing_ID`, `a1_bearing_OD`, `a1_bearing_height` (and the aliases `a2_bearing1_ID`, `_OD`, `_height1`) (Fixed, source = a constant in the code): the stage-1 output bearing is hard-coded as 38.1 / 47.625 / 4.763 mm (an inch thin-section bearing); the mass code repeats the three numbers and the bearing's mass (22.7 g). The plan proposes config keys.
+- `a1_sun_hub_dia`, `a2_sun_hub_dia` (Dependent / formula): `rotor_ID - 2 x (standard_clearance_1_5mm + 2)`, the 2 hard-coded.
+- `rotor_mount_hole_PCD` (Dependent / formula): `rotor_ID` less the countersink head, a hard-coded `2 x 2` and one clearance.
+- `a1_fw_s_used` (Dependent / formula): a hard-coded `2 x`, and for a 19 mm rotor (RI80) an extra `0.5 x standard_clearance_1_5mm`.
+- `a1_sun_bottom_casing_bearing_ID` / `_OD` / `_height` (and the code-only mass `a1_sun_bottom_casing_bearing_massKg`) (Dependent / lookup with a condition): for a rotor 19 mm high (RI80) the bearing is the catalogue one for the rotor's bore; otherwise (RI100) it is the config value. The spec records both with a new `when` / `otherwise` field.
+- `planet_bearing_gap` (code-only, Fixed): one key for both stages; the plan leaves open whether it should be one per stage.
+- `maxGearboxDiameter_Stg1` (code-only, Dependent / formula): `rotor_ID - 4 x standard_clearance_1_5mm`, the 4 hard-coded in `gearbox_runner`.
+
+**Config key added** to `indspg_design_parameters_3DP` in `indspg_params.json` (shared name, value that keeps every output bit-identical): `planet_bearing_gap` = 1.0 (was `standard_clearance_1_5mm * 2 / 3` in both stages; 1.5 * 2 / 3 is exactly 1.0), in `mitStressAnalysisMinFacewidth`. The other shared keys have no counterpart (no motor-case clearance rule, no `bearing_mount_thickness`). A test shows `planet_bearing_gap` drives exactly its CAD variables in both stages (stage 1's planet width is a fixed config value and does not move).
+
+**Shared tooling changed:** `tests/test_variable_categories.py` and `tools/variables/render.py` (a lookup can carry `when` and `otherwise`: it applies when the condition holds and the other config source otherwise; the config-key, source, depends_on and value checks follow it), `tests/variable_helpers.py` (INDSPG entry and branch rules).
+
+**Results:** `python tests/golden/golden.py check`: All 58 cases match the baseline. `python -m pytest -q`: 1135 passed. No `CADs/` file, no golden baseline touched.
+
+**Open questions**
+1. The hard-coded stage-1 output bearing (38.1 / 47.625 / 4.763 mm, 22.7 g): new config keys (plan decision 4) and whether a bearing lookup should replace it.
+2. The hard-coded 2 in `sun_hub_dia`, the `2 x 2` in `rotor_mount_hole_PCD` and the 2 and 0.5 in `a1_fw_s_used`: geometry or tuning (new keys, plan decision 4).
+3. The rotor-height-19 case (RI80) makes the stage-1 bottom casing bearing a lookup; RI100 uses the config value. The plan expected a dead lookup overwritten by the config; for RI80 the lookup is what the CAD gets.
+4. One `planet_bearing_gap` for both stages, or one per stage (plan decision 1).
+5. Bug-18 pattern does not apply (each stage has its own module in the CAD). `indspg_design_parameters` (29 keys) is never read; listed as an unused block. ISSUES bug 11 (rotor coupler ID) and bug 13 (crashes where there is no design: the tests use golden designs only) concern the mass code and the optimiser.
