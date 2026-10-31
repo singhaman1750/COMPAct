@@ -209,3 +209,30 @@ Automatic first pass from the code (the special cases above take precedence). Ca
 |---|---|---|---|---|
 | `isspg_optimization_parameters` | 9 | yes | GEAR_RATIO_MIN, GEAR_RATIO_MAX, GEAR_RATIO_STEP, MODULE_MIN, MODULE_MAX, NUM_PLANET_MIN, NUM_PLANET_MAX, NUM_TEETH_SUN_MIN, NUM_TEETH_PLANET_MIN | — |
 | `isspg_3DP_design_parameters` | 68 | yes | planetMinDistanceMM, sCarrierExtrusionDiaMM, sCarrierExtrusionClearanceMM, ring_hub_thickness, ring_hub_to_case_hole_nut_wrench_size, ring_hub_to_case_hole_nut_depth, stator_hole_PCD, stator_hole_dia, sun_hub_dia, sun_coupler_hub_thickness, case_mounting_hole_shift, gear_axial_margin_mm | — |
+
+
+## Result (classification done)
+
+Spec: [`config_files/variables/isspg_compact_variables.json`](../../../config_files/variables/isspg_compact_variables.json), page [`docs/variables/isspg_compact.md`](../isspg_compact.md) (generated). Tests: the generic `tests/test_variable_categories.py` (ISSPG compact registered in `tests/variable_helpers.py`) and `tests/test_variable_categories_isspg.py` (parametrized over the ISSPG variants that have a spec; inside follows in its own commit).
+
+**Counts (CAD variables, 145):** input 24, optimisation 4, fixed 57, dependent 60 (25 formula, 31 lookup, 3 stress rule, 1 implicit constraint). The draft said input 22 / dependent 62: `motor_OD` and `motor_height` are read straight from the motor (Input), as the plan's special-case table says. **Code-only values: 30** (fixed 24, dependent 4: `pressure_angle_rad`, `maxGearboxDiameter`, `actuator_width`, `fw_limit_mm`; input 2). Eight of them are config keys the code computes instead (`sun_hub_dia`, `sun_coupler_hub_thickness`, `ring_hub_thickness`, `case_mounting_hole_shift`, `stator_hole_PCD`, `stator_hole_dia`, `ring_hub_to_case_hole_nut_*`), named `<key>_config`. Confidence: 164 high, 11 medium, 0 low.
+
+**Medium-confidence entries** (hard-coded numbers with no shared key)
+- `ring_hub_thickness`, `carrier_thickness`, `carrier_thickness_mid` (Dependent / formula): an iterative two-case rule. The carrier starts with a hard-coded 6 mm middle plate; if the ring hub that closes the stack would be thinner than a hard-coded 3 mm, the hub is set to 3 and the carrier takes up the difference. The three are written as one conditional formula each.
+- `sun_coupler_hub_thickness` (Dependent / formula): a hard-coded 3 mm term (the config's value is not read).
+- `sun_hub_dia` (Dependent / formula): a hard-coded `x 4` clearance margin, the shared sun-hub item the plan still has to decide (the config's value is not read).
+- `output_bearing_ID` / `_OD` / `_width` (Dependent / lookup): the bore request carries a hard-coded 20 mm clearance.
+- `sun2_bearing_ID` / `_OD` / `_width` (Dependent / lookup): requested by outer diameter (`motor_rotor_base_ID`); `bearings_discrete` returns the first bearing with OD >= the request, which can exceed it (ISSUES bug 5).
+
+**Config key added** to `isspg_3DP_design_parameters` in `isspg_params.json` (shared by compact and inside; shared name, value that keeps every output bit-identical): `planet_bearing_gap` = 1.0 (was `standard_clearance_1_5mm * 2 / 3`; 1.5 * 2 / 3 is exactly 1.0), read in `mitStressAnalysisMinFacewidth` of both variants. The other shared keys have no counterpart here (`clearance_motor_and_case` is already a config value, there is no `bearing_mount_thickness`, `case_mounting_hole_shift = case_mounting_hole_dia / 2`). Tests show `planet_bearing_gap` and `gear_axial_margin_mm` (the stator-height cap) each drive exactly their CAD variables.
+
+**Shared tooling changed:** `tests/variable_helpers.py` (ISSPG entries and a branch rule; a gearbox can write only the Onshape file, `has_plain=False`; golden cases without a design, such as RO60 where the motor is too small, are skipped).
+
+**Results:** `python tests/golden/golden.py check`: All 58 cases match the baseline. `python -m pytest -q`: 1024 passed. No `CADs/` file, no golden baseline touched.
+
+**Open questions**
+1. The hard-coded 6 and 3 (carrier and ring hub), the 3 in `sun_coupler_hub_thickness`, the 20 in the output bearing request and the `x 4` in `sun_hub_dia` are left in the code (medium); the plan proposed new keys (`carrier_thickness_mid_min`, `ring_hub_thickness_min`) to be decided in review (plan decision 4).
+2. `clearance_motor_and_case`, `wire_slot_length` and `wire_slot_radius` are config values here (Fixed), unlike SSPG and CPG (computed / read from the motor): a frameless motor has no wire-slot data.
+3. Width cap: the gears must fit `stator_height - gear_axial_margin_mm`; a wider design is scaled by `torque_carried_fraction`. `fw_limit_mm` is a code-only formula and the margin a code-only Fixed value.
+4. The CAD's `motor_OD` / `motor_height` come from the motor (Input / motor); the file has no wire-slot or driver-mount data of the motor.
+5. ISSPG writes only the Onshape file (no plain `isspg_compact_equations.txt`).

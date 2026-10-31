@@ -35,13 +35,16 @@ class Gearbox:
     branches: Callable = None             # actuator -> {rule: which branch}
     params_name: str = None               # the config file, when it is not <gb_type>_params.json
     config_file: str = "config.json"      # gear standard / MIT factors (the motor config of the frameless types)
+    has_plain: bool = True                # False: the gearbox writes only the Onshape file (ISSPG)
 
     @property
     def params_file(self):
         return self.params_name or f"{self.gb_type}_params.json"
 
     def golden(self):
-        return sorted(p.stem for p in BASELINE_DIR.glob(f"{self.gb_type}__*.json"))
+        """The golden cases with a design (a motor too small for the gearbox has a baseline without one)."""
+        return sorted(p.stem for p in BASELINE_DIR.glob(f"{self.gb_type}__*.json")
+                      if json.loads(p.read_text(encoding="utf-8")).get("cad_files"))
 
 
 def _set_sspg(gb, g):
@@ -76,6 +79,11 @@ def _branches_cpg(a):
     return {"big planets wider than motor": (a.Ns + a.Np_b * 2) * a.module_b >= a.motor_OD,
             "bearing wider than ring": a.bearing_OD + a.output_mounting_hole_dia * 4 > a.Nr * a.module_s + 2 * a.h_b_s,
             "ring grown to the bearing": not a.Nr * a.module_s + 5 * 2 > a.bearing_OD}
+
+
+def _branches_isspg(a):
+    return {"carrier / ring hub: the ring hub reaches its 3 mm minimum": a.carrier_thickness_mid != 6,
+            "stator-height cap applies": a.torque_carried_fraction < 1.0}
 
 
 def _branches_inwpg_dependent(a):
@@ -138,6 +146,22 @@ GEARBOXES = {
         extra=[("RI100", (28, 44, 28, 116, 100, 1.2, 1.2, 4))],     # module 1.2: the planet stack is under the cap
         branches=_branches_inwpg_dependent,
         params_name="inwpg_params_dependent.json"),
+    "isspg_compact": Gearbox(
+        "isspg_compact", "ISSPG", "isspg_compact_equations", "planetaryGearbox",
+        counts={"input": 24, "optimisation": 4, "fixed": 57, "dependent": 60}, code_only=30,
+        set_gears=_set_sspg,
+        from_opt=lambda p: (p[2], p[3], p[4], p[5], p[1]),           # [gr, n, Ns, Np, Nr, module, ...]
+        extra=[("RO100", (24, 54, 132, 1.2, 3))],        # module 1.2: short gears (the ring hub hits its 3 mm minimum), no width cap
+        branches=_branches_isspg,
+        params_name="isspg_params.json", has_plain=False),
+    "isspg_inside": Gearbox(
+        "isspg_inside", "ISSPG", "isspg_inside_equations", "planetaryGearbox",
+        counts={"input": 26, "optimisation": 4, "fixed": 54, "dependent": 63}, code_only=33,
+        set_gears=_set_sspg,
+        from_opt=lambda p: (p[2], p[3], p[4], p[5], p[1]),           # [gr, n, Ns, Np, Nr, module, ...]
+        extra=[("RO100", (30, 60, 150, 1.2, 3))],        # module 1.2: short gears (the ring hub hits its 3 mm minimum), no width cap
+        branches=_branches_isspg,
+        params_name="isspg_params.json", has_plain=False),
     "inwpg_independent": Gearbox(
         "inwpg_independent", "INWPG", "inwpg_independent_equations", "inrunnerWolfromPlanetaryGearbox",
         counts={"input": 21, "optimisation": 5, "fixed": 62, "dependent": 62}, code_only=26,
@@ -210,12 +234,14 @@ def write_design(monkeypatch, folder, gb, motor, material, gears):
     actuator.updateFacewidth()
     actuator.genEquationFile_editCADdirectly()
     base = Path(folder) / spec.cad_folder
+    onshape = equation_lines((base / f"{spec.cad_file}_onshape.txt").read_text())
     stage_files = load(gb).get("plain_files")      # a gearbox with one plain file per stage (DSPG)
-    if stage_files:
+    if not spec.has_plain:
+        plain = list(onshape)
+    elif stage_files:
         plain = [(prefix + n, v) for prefix, f in stage_files.items() for n, v in equation_lines((base / f).read_text())]
     else:
         plain = equation_lines((base / f"{spec.cad_file}.txt").read_text())
-    onshape = equation_lines((base / f"{spec.cad_file}_onshape.txt").read_text())
     return actuator, optimizer, plain, onshape
 
 
