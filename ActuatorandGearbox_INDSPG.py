@@ -279,6 +279,7 @@ class inrunnerdoubleStageActuator:
         self.bearing_retainer_thickness1                = self.design_params["bearing_retainer_thickness1"] # 2
 
         self.bearingIDClearanceMM                       = self.design_params["bearingIDClearanceMM"]
+        self.planet_bearing_gap                         = self.design_params["planet_bearing_gap"] # 1.0
 
 
         ## --------------------------------------------------------------------
@@ -1495,12 +1496,12 @@ class inrunnerdoubleStageActuator:
         bMin_ring_mit2   = (self.FOS * Ft2 * qe2 * qk2 / (self.inrunnerdoubleStagePlanetaryGearbox.Stage2.maxGearAllowableStressPa * module2 * 0.001))
 
         #------------- Contraint in planet to accomodate its bearings------------------------------------------
-        if (bMin_planet_mit1 * 1000 < (self.planet_bearing_width1*2 + self.standard_clearance_1_5mm * 2 / 3)) : 
-            bMin_planet_mit1 = (self.planet_bearing_width1*2 + self.standard_clearance_1_5mm * 2 / 3) / 1000
+        if (bMin_planet_mit1 * 1000 < (self.planet_bearing_width1*2 + self.planet_bearing_gap)) : 
+            bMin_planet_mit1 = (self.planet_bearing_width1*2 + self.planet_bearing_gap) / 1000
             bMin_ring_mit1 = bMin_planet_mit1 # FT on both are same
 
-        if (bMin_planet_mit2 * 1000 < (self.planet_bearing_width2*2 + self.standard_clearance_1_5mm * 2 / 3)) : 
-            bMin_planet_mit2 = (self.planet_bearing_width2*2 + self.standard_clearance_1_5mm * 2 / 3) / 1000
+        if (bMin_planet_mit2 * 1000 < (self.planet_bearing_width2*2 + self.planet_bearing_gap)) : 
+            bMin_planet_mit2 = (self.planet_bearing_width2*2 + self.planet_bearing_gap) / 1000
             bMin_ring_mit2 = bMin_planet_mit2 # FT on both are same
 
 

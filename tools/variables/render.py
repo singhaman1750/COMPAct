@@ -34,10 +34,16 @@ def _source(e):
     if "lookup" in e:
         lk = e["lookup"]
         args = ", ".join(f"{k}={v}" for k, v in lk["args"].items())
-        return f"`{lk['function']}({args})` → {lk.get('field') or lk.get('method')}"
+        out = f"`{lk['function']}({args})` → {lk.get('field') or lk.get('method')}"
+        if e.get("when"):
+            o = e["otherwise"]
+            out += f", when `{e['when']}`; otherwise {o['file']} → {o['block']} → `{o['key']}`"
+        return out
     s = e.get("source", {})
     if "optimiser" in s:
         return f"optimiser (`{s['optimiser']}`)"
+    if "constant" in s:
+        return f"constant `{s['constant']}` in the code"
     return f"{s['file']} → {s['block']} → `{s['key']}`"
 
 
@@ -75,7 +81,8 @@ def render(spec):
         out.append("")
     out += ["## Rules shared by every gearbox", "",
             "From `config_files/variables/rules.json`; the test holds every gearbox's file to them.", ""]
-    out += [f"- names matching `{r['name_pattern']}` are **{TITLES[r['category']]} / {r['subtype']}**: {r['reason']}"
+    out += [f"- names matching `{r['name_pattern']}` are **{TITLES[r['category']]} / {r['subtype']}**: {r['reason']}" +
+            (" Exceptions: " + "; ".join(f"{g}: {', '.join(f'`{n}`' for n in ns)}" for g, ns in r["except"].items()) + "." if r.get("except") else "")
             for r in load_rules()["rules"]]
     out.append("")
     for c in CATEGORIES:
@@ -85,8 +92,14 @@ def render(spec):
     out += [f"## Config blocks {gb} doesn't read", ""]
     out += [f"- {b['file']} → `{b['block']}`: {b['reason']}" for b in spec["unused_config_blocks"]]
     if spec.get("plain_file_aliases"):
-        out += ["", "## Names in the plain equation file", "",
-                f"`CADs/{gb}/{spec['gearbox']}_equations.txt` writes the same values; these names differ there:", ""]
+        if spec.get("plain_file"):
+            intro = f"`{spec['plain_file']}` writes the same values; these names differ there:"
+        elif spec.get("plain_files"):
+            files = ", ".join(f"`CADs/{gb}/{f}` ({p[:-1]} names)" for p, f in spec["plain_files"].items())
+            intro = f"{files} write the same values without the stage prefix; these names differ there:"
+        else:
+            intro = f"`CADs/{gb}/{spec['gearbox']}_equations.txt` writes the same values; these names differ there:"
+        out += ["", "## Names in the plain equation file", "", intro, ""]
         out += [f"- `\"{k}\"` = `{v}`" for k, v in spec["plain_file_aliases"].items()]
     return "\n".join(out) + "\n"
 

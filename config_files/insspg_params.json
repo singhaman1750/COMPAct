@@ -84,6 +84,7 @@
         "bearing_retainer_thickness": 2.0,
         "tight_clearance_3DP": 0.4,
         "loose_clearance_3DP": 0.8,
+        "planet_bearing_gap": 1.0,
         "stator_casing_thickness": 3.5,
         "stator_bottom_step_height_": 4.5,
         "stator_upper_step_height": 7.0,

@@ -414,6 +414,7 @@ class singleStagePlanetaryActuator:
         self.tight_clearance_3DP                = self.design_params["tight_clearance_3DP"]
         self.loose_clearance_3DP                = self.design_params["loose_clearance_3DP"]
         self.Rotor_tight_clearance              = self.design_params["Rotor_tight_clearance"]
+        self.planet_bearing_gap                 = self.design_params["planet_bearing_gap"] # 1.0
 
         # --- Dynamic Bearing Lookup ---
         self.bearingIDClearanceMM = self.design_params.get("bearingIDClearanceMM")
@@ -875,8 +876,8 @@ class singleStagePlanetaryActuator:
         bMin_planet_mit = (self.FOS * Ft * qe * qk / (self.planetaryGearbox.maxGearAllowableStressPa * module * 0.001))
         bMin_ring_mit   = (self.FOS * Ft * qe * qk / (self.planetaryGearbox.maxGearAllowableStressPa * module * 0.001))
 
-        if (bMin_planet_mit * 1000 < (self.planet_bearing_width*2 + self.standard_clearance_1_5mm * 2 / 3)) : 
-            bMin_planet_mit = (self.planet_bearing_width*2 + self.standard_clearance_1_5mm * 2 / 3) / 1000
+        if (bMin_planet_mit * 1000 < (self.planet_bearing_width*2 + self.planet_bearing_gap)) : 
+            bMin_planet_mit = (self.planet_bearing_width*2 + self.planet_bearing_gap) / 1000
             bMin_ring_mit = bMin_planet_mit 
 
         bMin_sun_mitMM    = bMin_sun_mit    * 1000

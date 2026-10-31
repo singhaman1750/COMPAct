@@ -1,0 +1,3447 @@
+{
+ "gearbox": "idspg",
+ "about": "Every IDSPG variable sorted into input / optimisation / fixed / dependent. 'cad_variables' are the 198 variables IDSPG writes to CADs/IDSPG/idspg_equations_onshape.txt (and the same names to idspg_equations.txt), in that order, under the stage prefixes a1_ / a2_; 36 of them are written twice under both prefixes, and the second name is marked 'alias_of' the first (same value, same classification). 'code_only' are values the code uses but does not write to the CAD file, plus every config key the CAD does not use; 'unused_config_blocks' are config blocks IDSPG never reads. tests/test_variable_categories.py checks the lists against the code and re-evaluates every formula and lookup; docs/variables/idspg.md is generated from this file (python tools/variables/render.py).",
+ "categories": {
+  "input": "chosen parts and material: the motor's dimensions and torque, the motor driver's mount dimensions, the gear material's allowable stress",
+  "optimisation": "searched by the optimiser: teeth, module, number of planets",
+  "fixed": "constants that don't depend on the design: clearances, wall thicknesses, fastener and bearing choices, feature sizes, the gear standard",
+  "dependent": "computed from the variables above, by a formula, a catalogue lookup (bearings, bolts, nuts) or a rule the code applies (the tooth-stress rule for face widths)"
+ },
+ "confidence": {
+  "high": "the code reads it directly from one source, or computes it with an explicit formula",
+  "medium": "the code is clear, but the category is a judgement call (see the reason)",
+  "low": "can't be decided from the code alone"
+ },
+ "plain_file_aliases": {},
+ "cad_variables": [
+  {
+   "name": "a1_Ns",
+   "attr": "Ns1",
+   "category": "optimisation",
+   "subtype": "teeth",
+   "source": {
+    "optimiser": "optimizationinternalDoubleStagePlanetaryActuator"
+   },
+   "confidence": "high",
+   "reason": "stage-1 sun teeth: searched by the optimiser loop"
+  },
+  {
+   "name": "a1_Np",
+   "attr": "Np1",
+   "category": "optimisation",
+   "subtype": "teeth",
+   "source": {
+    "optimiser": "optimizationinternalDoubleStagePlanetaryActuator"
+   },
+   "confidence": "high",
+   "reason": "stage-1 planet teeth: searched by the optimiser loop"
+  },
+  {
+   "name": "a1_Nr",
+   "attr": "Nr1",
+   "category": "dependent",
+   "subtype": "implicit constraint",
+   "formula": "a1_Ns + 2 * a1_Np",
+   "depends_on": [
+    "a1_Ns",
+    "a1_Np"
+   ],
+   "confidence": "high",
+   "reason": "implicitly constrained: the coaxial constraint Ns + 2 x Np = Nr fixes it, and the optimiser sets it from Ns and Np instead of searching it (the code lists it among the optimisation variables)"
+  },
+  {
+   "name": "a1_num_planet",
+   "attr": "num_planet1",
+   "category": "optimisation",
+   "subtype": "planets",
+   "source": {
+    "optimiser": "optimizationinternalDoubleStagePlanetaryActuator"
+   },
+   "confidence": "high",
+   "reason": "stage-1 number of planets: searched by the optimiser loop"
+  },
+  {
+   "name": "a1_module",
+   "attr": "module1",
+   "category": "optimisation",
+   "subtype": "module",
+   "source": {
+    "optimiser": "optimizationinternalDoubleStagePlanetaryActuator"
+   },
+   "confidence": "high",
+   "reason": "stage-1 module: searched by the optimiser loop"
+  },
+  {
+   "name": "a1_pressure_angle",
+   "attr": "pressure_angle",
+   "category": "fixed",
+   "subtype": "gear standard",
+   "source": {
+    "file": "idspg_motor_config.json",
+    "block": "Gear_standard_parameters",
+    "key": "pressureAngleDEG"
+   },
+   "confidence": "high",
+   "reason": "gear standard, the same for every gearbox type"
+  },
+  {
+   "name": "a1_motor_OD",
+   "attr": "motor_OD",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "motorDiaMM",
+   "depends_on": [
+    "motorDiaMM"
+   ],
+   "confidence": "high",
+   "reason": "computed by the code: motorDiaMM"
+  },
+  {
+   "name": "a1_motor_height",
+   "attr": "motor_height",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "motorLengthMM",
+   "depends_on": [
+    "motorLengthMM"
+   ],
+   "confidence": "high",
+   "reason": "computed by the code: motorLengthMM"
+  },
+  {
+   "name": "a1_h_a",
+   "attr": "h_a1",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "1 * a1_module",
+   "depends_on": [
+    "a1_module"
+   ],
+   "confidence": "high",
+   "reason": "addendum, standard proportion of the module"
+  },
+  {
+   "name": "a1_h_b",
+   "attr": "h_b1",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "1.25 * a1_module",
+   "depends_on": [
+    "a1_module"
+   ],
+   "confidence": "high",
+   "reason": "standard proportion of the module (same value as h_f)"
+  },
+  {
+   "name": "a1_h_f",
+   "attr": "h_f1",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "1.25 * a1_module",
+   "depends_on": [
+    "a1_module"
+   ],
+   "confidence": "high",
+   "reason": "dedendum, standard proportion of the module"
+  },
+  {
+   "name": "a1_clr_tip_root",
+   "attr": "clr_tip_root1",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "a1_h_f - a1_h_a",
+   "depends_on": [
+    "a1_h_f",
+    "a1_h_a"
+   ],
+   "confidence": "high",
+   "reason": "tip-root clearance from addendum and dedendum"
+  },
+  {
+   "name": "a1_dp_s",
+   "attr": "dp_s1",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "a1_module * a1_Ns",
+   "depends_on": [
+    "a1_module",
+    "a1_Ns"
+   ],
+   "confidence": "high",
+   "reason": "pitch diameter"
+  },
+  {
+   "name": "a1_db_s",
+   "attr": "db_s1",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "a1_dp_s * cos(a1_pressure_angle * pi / 180)",
+   "depends_on": [
+    "a1_dp_s",
+    "a1_pressure_angle"
+   ],
+   "confidence": "high",
+   "reason": "base-circle diameter"
+  },
+  {
+   "name": "a1_fw_s_calc",
+   "attr": "fw_s1_calc",
+   "category": "dependent",
+   "subtype": "stress rule",
+   "rule": "b = FOS x Ft x qe x qk / (gear_allowable_stress x module) (mitStressAnalysisMinFacewidth), with Ft = serviceFactor x motor_peak_torque / (num_planet x sun pitch radius), qe = 1 / sun-planet contact ratio, qk = curve fit in Ns; a1_fw_s_calc = b",
+   "depends_on": [
+    "a1_module",
+    "a1_Ns",
+    "a1_Np",
+    "a1_Nr",
+    "a1_num_planet",
+    "a1_pressure_angle",
+    "motor_peak_torque",
+    "gear_allowable_stress",
+    "FOS",
+    "serviceFactor"
+   ],
+   "confidence": "high",
+   "reason": "stage-1 sun face width from the tooth-stress rule: fixed by the optimisation variables, the motor torque, the gear material and the safety factors, so the optimiser has no freedom over it"
+  },
+  {
+   "name": "a1_alpha_s",
+   "attr": "alpha_s1",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "sqrt(a1_dp_s ** 2 - a1_db_s ** 2) / a1_db_s * 180 / pi - a1_pressure_angle",
+   "depends_on": [
+    "a1_pressure_angle",
+    "a1_db_s",
+    "a1_dp_s"
+   ],
+   "confidence": "high",
+   "reason": "involute angle used to draw the tooth"
+  },
+  {
+   "name": "a1_beta_s",
+   "attr": "beta_s1",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "(360 / (4 * a1_Ns) - a1_alpha_s) * 2",
+   "depends_on": [
+    "a1_alpha_s",
+    "a1_Ns"
+   ],
+   "confidence": "high",
+   "reason": "tooth angle used to draw the tooth"
+  },
+  {
+   "name": "a1_dp_p",
+   "attr": "dp_p1",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "a1_module * a1_Np",
+   "depends_on": [
+    "a1_module",
+    "a1_Np"
+   ],
+   "confidence": "high",
+   "reason": "pitch diameter"
+  },
+  {
+   "name": "a1_db_p",
+   "attr": "db_p1",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "a1_dp_p * cos(a1_pressure_angle * pi / 180)",
+   "depends_on": [
+    "a1_dp_p",
+    "a1_pressure_angle"
+   ],
+   "confidence": "high",
+   "reason": "base-circle diameter"
+  },
+  {
+   "name": "a1_fw_p",
+   "attr": "fw_p1",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "a1_fw_r",
+   "depends_on": [
+    "a1_fw_r"
+   ],
+   "confidence": "high",
+   "reason": "computed by the code: a1_fw_r"
+  },
+  {
+   "name": "a1_alpha_p",
+   "attr": "alpha_p1",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "sqrt(a1_dp_p ** 2 - a1_db_p ** 2) / a1_db_p * 180 / pi - a1_pressure_angle",
+   "depends_on": [
+    "a1_pressure_angle",
+    "a1_db_p",
+    "a1_dp_p"
+   ],
+   "confidence": "high",
+   "reason": "involute angle used to draw the tooth"
+  },
+  {
+   "name": "a1_beta_p",
+   "attr": "beta_p1",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "(360 / (4 * a1_Np) - a1_alpha_p) * 2",
+   "depends_on": [
+    "a1_alpha_p",
+    "a1_Np"
+   ],
+   "confidence": "high",
+   "reason": "tooth angle used to draw the tooth"
+  },
+  {
+   "name": "a1_dp_r",
+   "attr": "dp_r1",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "a1_module * a1_Nr",
+   "depends_on": [
+    "a1_module",
+    "a1_Nr"
+   ],
+   "confidence": "high",
+   "reason": "pitch diameter"
+  },
+  {
+   "name": "a1_db_r",
+   "attr": "db_r1",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "a1_dp_r * cos(a1_pressure_angle * pi / 180)",
+   "depends_on": [
+    "a1_dp_r",
+    "a1_pressure_angle"
+   ],
+   "confidence": "high",
+   "reason": "base-circle diameter"
+  },
+  {
+   "name": "a1_fw_r",
+   "attr": "fw_r1",
+   "category": "dependent",
+   "subtype": "stress rule",
+   "rule": "b = FOS x Ft x qe x qk / (gear_allowable_stress x module) (mitStressAnalysisMinFacewidth), with Ft = serviceFactor x motor_peak_torque / (num_planet x sun pitch radius), qe = 1 / sun-planet contact ratio, qk = curve fit in Ns; if b < 2 x planet_bearing_width + planet_bearing_gap, b is raised to that value; a1_fw_r = b (the planet width is a copy)",
+   "depends_on": [
+    "a1_module",
+    "a1_Ns",
+    "a1_Np",
+    "a1_Nr",
+    "a1_num_planet",
+    "a1_pressure_angle",
+    "motor_peak_torque",
+    "gear_allowable_stress",
+    "FOS",
+    "serviceFactor",
+    "a1_planet_bearing_width",
+    "planet_bearing_gap"
+   ],
+   "confidence": "high",
+   "reason": "stage-1 ring face width from the tooth-stress rule, raised to hold the planet's two bearings; the planet width is a copy (ISSUES bug 14, wide 3D-printed stage-1 gears, is still open)"
+  },
+  {
+   "name": "a1_alpha_r",
+   "attr": "alpha_r1",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "sqrt(a1_dp_r ** 2 - a1_db_r ** 2) / a1_db_r * 180 / pi - a1_pressure_angle",
+   "depends_on": [
+    "a1_pressure_angle",
+    "a1_db_r",
+    "a1_dp_r"
+   ],
+   "confidence": "high",
+   "reason": "involute angle used to draw the tooth"
+  },
+  {
+   "name": "a1_beta_r",
+   "attr": "beta_r1",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "(360 / (4 * a1_Nr) + a1_alpha_r) * 2",
+   "depends_on": [
+    "a1_alpha_r",
+    "a1_Nr"
+   ],
+   "confidence": "high",
+   "reason": "tooth angle used to draw the tooth"
+  },
+  {
+   "name": "a1_bearing_ID",
+   "attr": "bearing1_ID",
+   "category": "dependent",
+   "subtype": "lookup",
+   "lookup": {
+    "function": "bearings_discrete",
+    "args": {
+     "idRequiredMM": "a1_module * (a1_Ns + a1_Np) + bearingIDClearanceMM"
+    },
+    "method": "getBearingIDMM"
+   },
+   "depends_on": [
+    "bearingIDClearanceMM",
+    "a1_module",
+    "a1_Ns",
+    "a1_Np"
+   ],
+   "confidence": "high",
+   "reason": "catalogue bearing chosen by bearings_discrete for the bore the stage needs (smallest one that fits); this is its bore"
+  },
+  {
+   "name": "a1_bearing_OD",
+   "attr": "bearing1_OD",
+   "category": "dependent",
+   "subtype": "lookup",
+   "lookup": {
+    "function": "bearings_discrete",
+    "args": {
+     "idRequiredMM": "a1_module * (a1_Ns + a1_Np) + bearingIDClearanceMM"
+    },
+    "method": "getBearingODMM"
+   },
+   "depends_on": [
+    "bearingIDClearanceMM",
+    "a1_module",
+    "a1_Ns",
+    "a1_Np"
+   ],
+   "confidence": "high",
+   "reason": "catalogue bearing chosen by bearings_discrete for the bore the stage needs (smallest one that fits); this is its outer diameter"
+  },
+  {
+   "name": "a1_bearing_height",
+   "attr": "bearing1_height",
+   "category": "dependent",
+   "subtype": "lookup",
+   "lookup": {
+    "function": "bearings_discrete",
+    "args": {
+     "idRequiredMM": "a1_module * (a1_Ns + a1_Np) + bearingIDClearanceMM"
+    },
+    "method": "getBearingWidthMM"
+   },
+   "depends_on": [
+    "bearingIDClearanceMM",
+    "a1_module",
+    "a1_Ns",
+    "a1_Np"
+   ],
+   "confidence": "high",
+   "reason": "catalogue bearing chosen by bearings_discrete for the bore the stage needs (smallest one that fits); this is its width"
+  },
+  {
+   "name": "a1_clearance_planet",
+   "attr": "clearance_planet",
+   "category": "fixed",
+   "subtype": "clearance",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "clearance_planet"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters (one value for both stages)"
+  },
+  {
+   "name": "a1_sec_carrier_thickness",
+   "attr": "sec_carrier_thickness1",
+   "category": "fixed",
+   "subtype": "wall thickness",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "sec_carrier_thickness1"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters"
+  },
+  {
+   "name": "a1_sun_coupler_hub_thickness",
+   "attr": "sun_coupler_hub_thickness1",
+   "category": "fixed",
+   "subtype": "wall thickness",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "sun_coupler_hub_thickness1"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters"
+  },
+  {
+   "name": "a1_clearance_sun_coupler_sec_carrier",
+   "attr": "clearance_sun_coupler_sec_carrier",
+   "category": "fixed",
+   "subtype": "clearance",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "clearance_sun_coupler_sec_carrier"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters (one value for both stages)"
+  },
+  {
+   "name": "a1_ring_radial_thickness",
+   "attr": "ring_radial_thickness",
+   "category": "fixed",
+   "subtype": "wall thickness",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "ring_radial_thickness"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters (one value for both stages)"
+  },
+  {
+   "name": "a1_ring_OD",
+   "attr": "ring_OD1",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "Stator_ID",
+   "depends_on": [
+    "Stator_ID"
+   ],
+   "confidence": "high",
+   "reason": "stage-1 ring outer diameter: the ring fits the stator bore, a copy of Stator_ID (an input)"
+  },
+  {
+   "name": "a1_pattern_offset_from_motor_case_OD_base",
+   "attr": "pattern_offset_from_motor_case_OD_base",
+   "category": "fixed",
+   "subtype": "feature size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "pattern_offset_from_motor_case_OD_base"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters (one value for both stages)"
+  },
+  {
+   "name": "a1_pattern_bulge_dia",
+   "attr": "pattern_bulge_dia",
+   "category": "fixed",
+   "subtype": "feature size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "pattern_bulge_dia"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters (one value for both stages)"
+  },
+  {
+   "name": "a1_pattern_num_bulge",
+   "attr": "pattern_num_bulge",
+   "category": "fixed",
+   "subtype": "feature size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "pattern_num_bulge"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters (one value for both stages)"
+  },
+  {
+   "name": "a1_pattern_depth",
+   "attr": "pattern_depth",
+   "category": "fixed",
+   "subtype": "feature size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "pattern_depth"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters (one value for both stages)"
+  },
+  {
+   "name": "a1_planet_pin_bolt_dia",
+   "attr": "planet_pin_bolt_dia1",
+   "category": "fixed",
+   "subtype": "fastener size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "planet_pin_bolt_dia1"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters"
+  },
+  {
+   "name": "a1_planet_pin_socket_head_dia",
+   "attr": "planet_pin_socket_head_dia1",
+   "category": "dependent",
+   "subtype": "lookup",
+   "lookup": {
+    "function": "nuts_and_bolts_dimensions",
+    "args": {
+     "bolt_dia": "a1_planet_pin_bolt_dia",
+     "bolt_type": "socket_head"
+    },
+    "field": "bolt_head_dia"
+   },
+   "depends_on": [
+    "a1_planet_pin_bolt_dia"
+   ],
+   "confidence": "high",
+   "reason": "standard socket-head fastener size for the chosen bolt diameter"
+  },
+  {
+   "name": "a1_carrier_PCD",
+   "attr": "carrier_PCD1",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "(a1_Np + a1_Ns) * a1_module",
+   "depends_on": [
+    "a1_module",
+    "a1_Np",
+    "a1_Ns"
+   ],
+   "confidence": "high",
+   "reason": "planet-centre circle (twice the centre distance)"
+  },
+  {
+   "name": "a1_planet_shaft_dia",
+   "attr": "planet_shaft_dia1",
+   "category": "fixed",
+   "subtype": "planet part",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "planet_shaft_dia1"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters"
+  },
+  {
+   "name": "a1_planet_shaft_step_offset",
+   "attr": "planet_shaft_step_offset",
+   "category": "fixed",
+   "subtype": "planet part",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "planet_shaft_step_offset"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters (one value for both stages)"
+  },
+  {
+   "name": "a1_carrier_trapezoidal_support_sun_offset",
+   "attr": "carrier_trapezoidal_support_sun_offset1",
+   "category": "fixed",
+   "subtype": "feature size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "carrier_trapezoidal_support_sun_offset1"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters"
+  },
+  {
+   "name": "a1_carrier_trapezoidal_support_hole_PCD_offset_bearing_ID",
+   "attr": "carrier_trapezoidal_support_hole_PCD_offset_bearing_ID1",
+   "category": "fixed",
+   "subtype": "feature size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "carrier_trapezoidal_support_hole_PCD_offset_bearing_ID1"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters"
+  },
+  {
+   "name": "a1_carrier_trapezoidal_support_hole_dia",
+   "attr": "carrier_trapezoidal_support_hole_dia1",
+   "category": "fixed",
+   "subtype": "fastener size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "carrier_trapezoidal_support_hole_dia1"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters"
+  },
+  {
+   "name": "a1_carrier_trapezoidal_support_hole_socket_head_dia",
+   "attr": "carrier_trapezoidal_support_hole_socket_head_dia1",
+   "category": "dependent",
+   "subtype": "lookup",
+   "lookup": {
+    "function": "nuts_and_bolts_dimensions",
+    "args": {
+     "bolt_dia": "a1_carrier_trapezoidal_support_hole_dia",
+     "bolt_type": "socket_head"
+    },
+    "field": "bolt_head_dia"
+   },
+   "depends_on": [
+    "a1_carrier_trapezoidal_support_hole_dia"
+   ],
+   "confidence": "high",
+   "reason": "standard socket-head fastener size for the chosen bolt diameter"
+  },
+  {
+   "name": "a1_carrier_bearing_step_width",
+   "attr": "carrier_bearing_step_width",
+   "category": "fixed",
+   "subtype": "feature size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "carrier_bearing_step_width"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters (one value for both stages)"
+  },
+  {
+   "name": "a1_standard_clearance_1_5mm",
+   "attr": "standard_clearance_1_5mm",
+   "category": "fixed",
+   "subtype": "clearance",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "standard_clearance_1_5mm"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters (one value for both stages)"
+  },
+  {
+   "name": "a1_standard_fillet_1_5mm",
+   "attr": "standard_fillet_1_5mm",
+   "category": "fixed",
+   "subtype": "feature size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "standard_fillet_1_5mm"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters (one value for both stages)"
+  },
+  {
+   "name": "a1_sun_shaft_bearing_OD",
+   "attr": "sun_shaft_bearing_OD1",
+   "category": "fixed",
+   "subtype": "bearing (chosen part)",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "sun_shaft_bearing_OD1"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters"
+  },
+  {
+   "name": "a1_sun_shaft_bearing_width",
+   "attr": "sun_shaft_bearing_width1",
+   "category": "fixed",
+   "subtype": "bearing (chosen part)",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "sun_shaft_bearing_width1"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters"
+  },
+  {
+   "name": "a1_standard_bearing_insertion_chamfer",
+   "attr": "standard_bearing_insertion_chamfer",
+   "category": "fixed",
+   "subtype": "feature size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "standard_bearing_insertion_chamfer"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters (one value for both stages)"
+  },
+  {
+   "name": "a1_carrier_trapezoidal_support_hole_wrench_size",
+   "attr": "carrier_trapezoidal_support_hole_wrench_size1",
+   "category": "dependent",
+   "subtype": "lookup",
+   "lookup": {
+    "function": "nuts_and_bolts_dimensions",
+    "args": {
+     "bolt_dia": "a1_carrier_trapezoidal_support_hole_dia",
+     "bolt_type": "socket_head"
+    },
+    "field": "nut_width_across_flats"
+   },
+   "depends_on": [
+    "a1_carrier_trapezoidal_support_hole_dia"
+   ],
+   "confidence": "high",
+   "reason": "standard socket-head fastener size for the chosen bolt diameter"
+  },
+  {
+   "name": "a1_planet_pin_bolt_wrench_size",
+   "attr": "planet_pin_bolt_wrench_size1",
+   "category": "dependent",
+   "subtype": "lookup",
+   "lookup": {
+    "function": "nuts_and_bolts_dimensions",
+    "args": {
+     "bolt_dia": "a1_planet_pin_bolt_dia",
+     "bolt_type": "socket_head"
+    },
+    "field": "nut_width_across_flats"
+   },
+   "depends_on": [
+    "a1_planet_pin_bolt_dia"
+   ],
+   "confidence": "high",
+   "reason": "standard socket-head fastener size for the chosen bolt diameter"
+  },
+  {
+   "name": "a1_planet_bearing_OD",
+   "attr": "planet_bearing_OD1",
+   "category": "fixed",
+   "subtype": "bearing (chosen part)",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "planet_bearing_OD1"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters"
+  },
+  {
+   "name": "a1_planet_bearing_width",
+   "attr": "planet_bearing_width1",
+   "category": "fixed",
+   "subtype": "bearing (chosen part)",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "planet_bearing_width1"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters"
+  },
+  {
+   "name": "a1_planet_bore",
+   "attr": "planet_bore1",
+   "category": "fixed",
+   "subtype": "planet part",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "planet_bore1"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters"
+  },
+  {
+   "name": "a1_sun_shaft_bearing_ID",
+   "attr": "sun_shaft_bearing_ID1",
+   "category": "fixed",
+   "subtype": "bearing (chosen part)",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "sun_shaft_bearing_ID1"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters"
+  },
+  {
+   "name": "a1_sun_hub_dia",
+   "attr": "sun_hub_dia1",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "rotor_mount_hole_PCD + rotor_mount_hole_dia + a1_standard_clearance_1_5mm * 5",
+   "depends_on": [
+    "rotor_mount_hole_PCD",
+    "rotor_mount_hole_dia",
+    "a1_standard_clearance_1_5mm"
+   ],
+   "confidence": "medium",
+   "reason": "sun hub: the rotor's mount-hole circle plus hole diameter plus a hard-coded 5 x standard_clearance_1_5mm; the mass code uses 4 (CAD and mass disagree, to be logged); the shared sun-hub margin item the plan still has to decide"
+  },
+  {
+   "name": "a1_sun_central_bolt_dia",
+   "attr": "sun_central_bolt_dia1",
+   "category": "fixed",
+   "subtype": "fastener size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "sun_central_bolt_dia1"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters"
+  },
+  {
+   "name": "a1_sun_central_bolt_socket_head_dia",
+   "attr": "sun_central_bolt_socket_head_dia1",
+   "category": "dependent",
+   "subtype": "lookup",
+   "lookup": {
+    "function": "nuts_and_bolts_dimensions",
+    "args": {
+     "bolt_dia": "a1_sun_central_bolt_dia",
+     "bolt_type": "socket_head"
+    },
+    "field": "bolt_head_dia"
+   },
+   "depends_on": [
+    "a1_sun_central_bolt_dia"
+   ],
+   "confidence": "high",
+   "reason": "standard socket-head fastener size for the chosen bolt diameter"
+  },
+  {
+   "name": "a1_fw_s_used",
+   "attr": "fw_s1_used",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "Rotor_height + stator_rotor_top_offset + a1_ring_gear_thickness_mounting_casing - a1_bearing_height - a1_clearance_planet - a1_carrier_bearing_step_width - bearing_retainer_thickness",
+   "depends_on": [
+    "bearing_retainer_thickness",
+    "a1_carrier_bearing_step_width",
+    "a1_clearance_planet",
+    "a1_bearing_height",
+    "a1_ring_gear_thickness_mounting_casing",
+    "Rotor_height",
+    "stator_rotor_top_offset"
+   ],
+   "confidence": "medium",
+   "reason": "stage-1 sun length: the rotor height and offsets, less the stage-1 bearing, clearances and retainer (an axial-fill rule that makes the stages fill the rotor height)"
+  },
+  {
+   "name": "a1_Ns2",
+   "attr": "Ns2",
+   "category": "optimisation",
+   "subtype": "teeth",
+   "source": {
+    "optimiser": "optimizationinternalDoubleStagePlanetaryActuator"
+   },
+   "confidence": "high",
+   "reason": "same value as a2_Ns (the CAD writes it under both stage prefixes); stage-2 sun teeth: searched by the optimiser loop",
+   "alias_of": "a2_Ns"
+  },
+  {
+   "name": "a1_Np2",
+   "attr": "Np2",
+   "category": "optimisation",
+   "subtype": "teeth",
+   "source": {
+    "optimiser": "optimizationinternalDoubleStagePlanetaryActuator"
+   },
+   "confidence": "high",
+   "reason": "same value as a2_Np (the CAD writes it under both stage prefixes); stage-2 planet teeth: searched by the optimiser loop",
+   "alias_of": "a2_Np"
+  },
+  {
+   "name": "a1_Nr2",
+   "attr": "Nr2",
+   "category": "dependent",
+   "subtype": "implicit constraint",
+   "formula": "a2_Ns + 2 * a2_Np",
+   "depends_on": [
+    "a2_Ns",
+    "a2_Np"
+   ],
+   "confidence": "high",
+   "reason": "same value as a2_Nr (the CAD writes it under both stage prefixes); implicitly constrained: the coaxial constraint Ns + 2 x Np = Nr fixes it, and the optimiser sets it from Ns and Np instead of searching it (the code lists it among the optimisation variables)",
+   "alias_of": "a2_Nr"
+  },
+  {
+   "name": "a1_module2",
+   "attr": "module2",
+   "category": "optimisation",
+   "subtype": "module",
+   "source": {
+    "optimiser": "optimizationinternalDoubleStagePlanetaryActuator"
+   },
+   "confidence": "high",
+   "reason": "same value as a2_module (the CAD writes it under both stage prefixes); stage-2 module: searched by the optimiser loop",
+   "alias_of": "a2_module"
+  },
+  {
+   "name": "a1_dp_s2",
+   "attr": "dp_s2",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "a2_module * a2_Ns",
+   "depends_on": [
+    "a2_module",
+    "a2_Ns"
+   ],
+   "confidence": "high",
+   "reason": "same value as a2_dp_s (the CAD writes it under both stage prefixes); pitch diameter",
+   "alias_of": "a2_dp_s"
+  },
+  {
+   "name": "a1_db_s2",
+   "attr": "db_s2",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "a2_dp_s * cos(a1_pressure_angle * pi / 180)",
+   "depends_on": [
+    "a2_dp_s",
+    "a1_pressure_angle"
+   ],
+   "confidence": "high",
+   "reason": "same value as a2_db_s (the CAD writes it under both stage prefixes); base-circle diameter",
+   "alias_of": "a2_db_s"
+  },
+  {
+   "name": "a1_fw_s_calc2",
+   "attr": "fw_s2_calc",
+   "category": "dependent",
+   "subtype": "stress rule",
+   "rule": "b = FOS x Ft x qe x qk / (gear_allowable_stress x module) (mitStressAnalysisMinFacewidth), with Ft = serviceFactor x motor_peak_torque x stage-1 gear ratio / (num_planet x sun pitch radius), qe = 1 / sun-planet contact ratio, qk = curve fit in Ns; a2_fw_s_calc = b",
+   "depends_on": [
+    "a2_module",
+    "a2_Ns",
+    "a2_Np",
+    "a2_Nr",
+    "a2_num_planet",
+    "a1_pressure_angle",
+    "a1_Ns",
+    "a1_Nr",
+    "motor_peak_torque",
+    "gear_allowable_stress",
+    "FOS",
+    "serviceFactor"
+   ],
+   "confidence": "high",
+   "reason": "stage-2 sun face width from the tooth-stress rule: fixed by the optimisation variables, the motor torque, the gear material and the safety factors, so the optimiser has no freedom over it"
+  },
+  {
+   "name": "a1_alpha_s2",
+   "attr": "alpha_s2",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "sqrt(a2_dp_s ** 2 - a2_db_s ** 2) / a2_db_s * 180 / pi - a1_pressure_angle",
+   "depends_on": [
+    "a1_pressure_angle",
+    "a2_db_s",
+    "a2_dp_s"
+   ],
+   "confidence": "high",
+   "reason": "same value as a2_alpha_s (the CAD writes it under both stage prefixes); involute angle used to draw the tooth",
+   "alias_of": "a2_alpha_s"
+  },
+  {
+   "name": "a1_beta_s2",
+   "attr": "beta_s2",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "(360 / (4 * a2_Ns) - a2_alpha_s) * 2",
+   "depends_on": [
+    "a2_alpha_s",
+    "a2_Ns"
+   ],
+   "confidence": "high",
+   "reason": "same value as a2_beta_s (the CAD writes it under both stage prefixes); tooth angle used to draw the tooth",
+   "alias_of": "a2_beta_s"
+  },
+  {
+   "name": "a1_fw_s_used2",
+   "attr": "fw_s2_used",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "bearing_retainer_thickness + a1_standard_clearance_1_5mm + a2_sec_carrier_thickness + a1_clearance_planet + a2_fw_p + shortfall",
+   "depends_on": [
+    "shortfall",
+    "a2_fw_p",
+    "a1_clearance_planet",
+    "a2_sec_carrier_thickness",
+    "bearing_retainer_thickness",
+    "a1_standard_clearance_1_5mm"
+   ],
+   "confidence": "medium",
+   "reason": "stage-2 sun length: retainer, clearances, carrier, planet width and the always-zero shortfall (an axial-fill rule)"
+  },
+  {
+   "name": "a1_fw_p2",
+   "attr": "fw_p2",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "a2_fw_r",
+   "depends_on": [
+    "a2_fw_r"
+   ],
+   "confidence": "high",
+   "reason": "same value as a2_fw_p (the CAD writes it under both stage prefixes); computed by the code: a2_fw_r",
+   "alias_of": "a2_fw_p"
+  },
+  {
+   "name": "a1_tight_clearance_3DP",
+   "attr": "tight_clearance_3DP",
+   "category": "fixed",
+   "subtype": "clearance",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "tight_clearance_3DP"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters (one value for both stages)"
+  },
+  {
+   "name": "a1_loose_clearance_3DP",
+   "attr": "loose_clearance_3DP",
+   "category": "fixed",
+   "subtype": "clearance",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "loose_clearance_3DP"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters (one value for both stages)"
+  },
+  {
+   "name": "a2_Ns",
+   "attr": "Ns2",
+   "category": "optimisation",
+   "subtype": "teeth",
+   "source": {
+    "optimiser": "optimizationinternalDoubleStagePlanetaryActuator"
+   },
+   "confidence": "high",
+   "reason": "stage-2 sun teeth: searched by the optimiser loop"
+  },
+  {
+   "name": "a2_Np",
+   "attr": "Np2",
+   "category": "optimisation",
+   "subtype": "teeth",
+   "source": {
+    "optimiser": "optimizationinternalDoubleStagePlanetaryActuator"
+   },
+   "confidence": "high",
+   "reason": "stage-2 planet teeth: searched by the optimiser loop"
+  },
+  {
+   "name": "a2_Nr",
+   "attr": "Nr2",
+   "category": "dependent",
+   "subtype": "implicit constraint",
+   "formula": "a2_Ns + 2 * a2_Np",
+   "depends_on": [
+    "a2_Ns",
+    "a2_Np"
+   ],
+   "confidence": "high",
+   "reason": "implicitly constrained: the coaxial constraint Ns + 2 x Np = Nr fixes it, and the optimiser sets it from Ns and Np instead of searching it (the code lists it among the optimisation variables)"
+  },
+  {
+   "name": "a2_module",
+   "attr": "module2",
+   "category": "optimisation",
+   "subtype": "module",
+   "source": {
+    "optimiser": "optimizationinternalDoubleStagePlanetaryActuator"
+   },
+   "confidence": "high",
+   "reason": "stage-2 module: searched by the optimiser loop"
+  },
+  {
+   "name": "a2_pressure_angle",
+   "attr": "pressure_angle",
+   "category": "fixed",
+   "subtype": "gear standard",
+   "source": {
+    "file": "idspg_motor_config.json",
+    "block": "Gear_standard_parameters",
+    "key": "pressureAngleDEG"
+   },
+   "confidence": "high",
+   "reason": "same value as a1_pressure_angle (the CAD writes it under both stage prefixes); gear standard, the same for every gearbox type",
+   "alias_of": "a1_pressure_angle"
+  },
+  {
+   "name": "a2_h_a",
+   "attr": "h_a2",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "1 * a2_module",
+   "depends_on": [
+    "a2_module"
+   ],
+   "confidence": "high",
+   "reason": "addendum, standard proportion of the module"
+  },
+  {
+   "name": "a2_h_f",
+   "attr": "h_f2",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "1.25 * a2_module",
+   "depends_on": [
+    "a2_module"
+   ],
+   "confidence": "high",
+   "reason": "dedendum, standard proportion of the module"
+  },
+  {
+   "name": "a2_clr_tip_root",
+   "attr": "clr_tip_root2",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "a2_h_f - a2_h_a",
+   "depends_on": [
+    "a2_h_f",
+    "a2_h_a"
+   ],
+   "confidence": "high",
+   "reason": "tip-root clearance from addendum and dedendum"
+  },
+  {
+   "name": "a2_dp_r",
+   "attr": "dp_r2",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "a2_module * a2_Nr",
+   "depends_on": [
+    "a2_module",
+    "a2_Nr"
+   ],
+   "confidence": "high",
+   "reason": "pitch diameter"
+  },
+  {
+   "name": "a2_db_r",
+   "attr": "db_r2",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "a2_dp_r * cos(a1_pressure_angle * pi / 180)",
+   "depends_on": [
+    "a2_dp_r",
+    "a1_pressure_angle"
+   ],
+   "confidence": "high",
+   "reason": "base-circle diameter"
+  },
+  {
+   "name": "a2_fw_r",
+   "attr": "fw_r2",
+   "category": "dependent",
+   "subtype": "stress rule",
+   "rule": "b = FOS x Ft x qe x qk / (gear_allowable_stress x module) (mitStressAnalysisMinFacewidth), with Ft = serviceFactor x motor_peak_torque x stage-1 gear ratio / (num_planet x sun pitch radius), qe = 1 / sun-planet contact ratio, qk = curve fit in Ns; if b < 2 x planet_bearing_width + planet_bearing_gap, b is raised to that value; a2_fw_r = b (the planet width is a copy)",
+   "depends_on": [
+    "a2_module",
+    "a2_Ns",
+    "a2_Np",
+    "a2_Nr",
+    "a2_num_planet",
+    "a1_pressure_angle",
+    "a1_Ns",
+    "a1_Nr",
+    "motor_peak_torque",
+    "gear_allowable_stress",
+    "FOS",
+    "serviceFactor",
+    "a2_planet_bearing_width",
+    "planet_bearing_gap"
+   ],
+   "confidence": "high",
+   "reason": "stage-2 ring face width from the tooth-stress rule, raised to hold the planet's two bearings; the planet width is a copy"
+  },
+  {
+   "name": "a2_alpha_r",
+   "attr": "alpha_r2",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "sqrt(a2_dp_r ** 2 - a2_db_r ** 2) / a2_db_r * 180 / pi - a1_pressure_angle",
+   "depends_on": [
+    "a1_pressure_angle",
+    "a2_db_r",
+    "a2_dp_r"
+   ],
+   "confidence": "high",
+   "reason": "involute angle used to draw the tooth"
+  },
+  {
+   "name": "a2_beta_r",
+   "attr": "beta_r2",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "(360 / (4 * a2_Nr) + a2_alpha_r) * 2",
+   "depends_on": [
+    "a2_alpha_r",
+    "a2_Nr"
+   ],
+   "confidence": "high",
+   "reason": "tooth angle used to draw the tooth"
+  },
+  {
+   "name": "a2_bearing_ID",
+   "attr": "bearing2_ID",
+   "category": "dependent",
+   "subtype": "lookup",
+   "lookup": {
+    "function": "bearings_discrete",
+    "args": {
+     "idRequiredMM": "a2_module * (a2_Ns + a2_Np) + bearingIDClearanceMM"
+    },
+    "method": "getBearingIDMM"
+   },
+   "depends_on": [
+    "bearingIDClearanceMM",
+    "a2_module",
+    "a2_Ns",
+    "a2_Np"
+   ],
+   "confidence": "high",
+   "reason": "catalogue bearing chosen by bearings_discrete for the bore the stage needs (smallest one that fits); this is its bore"
+  },
+  {
+   "name": "a2_bearing_OD",
+   "attr": "bearing2_OD",
+   "category": "dependent",
+   "subtype": "lookup",
+   "lookup": {
+    "function": "bearings_discrete",
+    "args": {
+     "idRequiredMM": "a2_module * (a2_Ns + a2_Np) + bearingIDClearanceMM"
+    },
+    "method": "getBearingODMM"
+   },
+   "depends_on": [
+    "bearingIDClearanceMM",
+    "a2_module",
+    "a2_Ns",
+    "a2_Np"
+   ],
+   "confidence": "high",
+   "reason": "catalogue bearing chosen by bearings_discrete for the bore the stage needs (smallest one that fits); this is its outer diameter"
+  },
+  {
+   "name": "a2_bearing_height",
+   "attr": "bearing2_height",
+   "category": "dependent",
+   "subtype": "lookup",
+   "lookup": {
+    "function": "bearings_discrete",
+    "args": {
+     "idRequiredMM": "a2_module * (a2_Ns + a2_Np) + bearingIDClearanceMM"
+    },
+    "method": "getBearingWidthMM"
+   },
+   "depends_on": [
+    "bearingIDClearanceMM",
+    "a2_module",
+    "a2_Ns",
+    "a2_Np"
+   ],
+   "confidence": "high",
+   "reason": "catalogue bearing chosen by bearings_discrete for the bore the stage needs (smallest one that fits); this is its width"
+  },
+  {
+   "name": "a2_clearance_planet",
+   "attr": "clearance_planet",
+   "category": "fixed",
+   "subtype": "clearance",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "clearance_planet"
+   },
+   "confidence": "high",
+   "reason": "same value as a1_clearance_planet (the CAD writes it under both stage prefixes); constant from the IDSPG 3DP design parameters (one value for both stages)",
+   "alias_of": "a1_clearance_planet"
+  },
+  {
+   "name": "a2_output_mounting_hole_dia",
+   "attr": "output_mounting_hole_dia2",
+   "category": "fixed",
+   "subtype": "fastener size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "output_mounting_hole_dia2"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters"
+  },
+  {
+   "name": "a2_sec_carrier_thickness",
+   "attr": "sec_carrier_thickness2",
+   "category": "fixed",
+   "subtype": "wall thickness",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "sec_carrier_thickness2"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters"
+  },
+  {
+   "name": "a2_sun_coupler_hub_thickness",
+   "attr": "sun_coupler_hub_thickness1",
+   "category": "fixed",
+   "subtype": "wall thickness",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "sun_coupler_hub_thickness1"
+   },
+   "confidence": "high",
+   "reason": "same value as a1_sun_coupler_hub_thickness (the CAD writes it under both stage prefixes); constant from the IDSPG 3DP design parameters",
+   "alias_of": "a1_sun_coupler_hub_thickness"
+  },
+  {
+   "name": "a2_clearance_sun_coupler_sec_carrier",
+   "attr": "clearance_sun_coupler_sec_carrier",
+   "category": "fixed",
+   "subtype": "clearance",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "clearance_sun_coupler_sec_carrier"
+   },
+   "confidence": "high",
+   "reason": "same value as a1_clearance_sun_coupler_sec_carrier (the CAD writes it under both stage prefixes); constant from the IDSPG 3DP design parameters (one value for both stages)",
+   "alias_of": "a1_clearance_sun_coupler_sec_carrier"
+  },
+  {
+   "name": "a2_motor_OD",
+   "attr": "motor_OD",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "motorDiaMM",
+   "depends_on": [
+    "motorDiaMM"
+   ],
+   "confidence": "high",
+   "reason": "same value as a1_motor_OD (the CAD writes it under both stage prefixes); computed by the code: motorDiaMM",
+   "alias_of": "a1_motor_OD"
+  },
+  {
+   "name": "a2_output_mounting_nut_wrench_size",
+   "attr": "output_mounting_nut_wrench_size2",
+   "category": "dependent",
+   "subtype": "lookup",
+   "lookup": {
+    "function": "nuts_and_bolts_dimensions",
+    "args": {
+     "bolt_dia": "a2_output_mounting_hole_dia"
+    },
+    "field": "nut_width_across_flats"
+   },
+   "depends_on": [
+    "a2_output_mounting_hole_dia"
+   ],
+   "confidence": "high",
+   "reason": "standard socket-head fastener size for the chosen bolt diameter"
+  },
+  {
+   "name": "a2_output_mounting_nut_thickness",
+   "attr": "output_mounting_nut_thickness2",
+   "category": "dependent",
+   "subtype": "lookup",
+   "lookup": {
+    "function": "nuts_and_bolts_dimensions",
+    "args": {
+     "bolt_dia": "a2_output_mounting_hole_dia"
+    },
+    "field": "nut_thickness"
+   },
+   "depends_on": [
+    "a2_output_mounting_hole_dia"
+   ],
+   "confidence": "high",
+   "reason": "standard socket-head fastener size for the chosen bolt diameter"
+  },
+  {
+   "name": "a2_output_mounting_nut_depth",
+   "attr": "output_mounting_nut_depth2",
+   "category": "fixed",
+   "subtype": "fastener size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "output_mounting_nut_depth2"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters"
+  },
+  {
+   "name": "a2_ring_radial_thickness",
+   "attr": "ring_radial_thickness",
+   "category": "fixed",
+   "subtype": "wall thickness",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "ring_radial_thickness"
+   },
+   "confidence": "high",
+   "reason": "same value as a1_ring_radial_thickness (the CAD writes it under both stage prefixes); constant from the IDSPG 3DP design parameters (one value for both stages)",
+   "alias_of": "a1_ring_radial_thickness"
+  },
+  {
+   "name": "a2_ring_OD",
+   "attr": "ring_OD2",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "a2_Nr * a2_module + a1_ring_radial_thickness * 2",
+   "depends_on": [
+    "a2_Nr",
+    "a2_module",
+    "a1_ring_radial_thickness"
+   ],
+   "confidence": "high",
+   "reason": "stage-2 ring outer diameter: the ring's pitch diameter plus two ring walls"
+  },
+  {
+   "name": "a2_pattern_offset_from_motor_case_OD_base",
+   "attr": "pattern_offset_from_motor_case_OD_base",
+   "category": "fixed",
+   "subtype": "feature size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "pattern_offset_from_motor_case_OD_base"
+   },
+   "confidence": "high",
+   "reason": "same value as a1_pattern_offset_from_motor_case_OD_base (the CAD writes it under both stage prefixes); constant from the IDSPG 3DP design parameters (one value for both stages)",
+   "alias_of": "a1_pattern_offset_from_motor_case_OD_base"
+  },
+  {
+   "name": "a2_pattern_bulge_dia",
+   "attr": "pattern_bulge_dia",
+   "category": "fixed",
+   "subtype": "feature size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "pattern_bulge_dia"
+   },
+   "confidence": "high",
+   "reason": "same value as a1_pattern_bulge_dia (the CAD writes it under both stage prefixes); constant from the IDSPG 3DP design parameters (one value for both stages)",
+   "alias_of": "a1_pattern_bulge_dia"
+  },
+  {
+   "name": "a2_pattern_num_bulge",
+   "attr": "pattern_num_bulge",
+   "category": "fixed",
+   "subtype": "feature size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "pattern_num_bulge"
+   },
+   "confidence": "high",
+   "reason": "same value as a1_pattern_num_bulge (the CAD writes it under both stage prefixes); constant from the IDSPG 3DP design parameters (one value for both stages)",
+   "alias_of": "a1_pattern_num_bulge"
+  },
+  {
+   "name": "a2_pattern_depth",
+   "attr": "pattern_depth",
+   "category": "fixed",
+   "subtype": "feature size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "pattern_depth"
+   },
+   "confidence": "high",
+   "reason": "same value as a1_pattern_depth (the CAD writes it under both stage prefixes); constant from the IDSPG 3DP design parameters (one value for both stages)",
+   "alias_of": "a1_pattern_depth"
+  },
+  {
+   "name": "a2_motor_height",
+   "attr": "motor_height",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "motorLengthMM",
+   "depends_on": [
+    "motorLengthMM"
+   ],
+   "confidence": "high",
+   "reason": "same value as a1_motor_height (the CAD writes it under both stage prefixes); computed by the code: motorLengthMM",
+   "alias_of": "a1_motor_height"
+  },
+  {
+   "name": "a2_num_planet",
+   "attr": "num_planet2",
+   "category": "optimisation",
+   "subtype": "planets",
+   "source": {
+    "optimiser": "optimizationinternalDoubleStagePlanetaryActuator"
+   },
+   "confidence": "high",
+   "reason": "stage-2 number of planets: searched by the optimiser loop"
+  },
+  {
+   "name": "a2_planet_pin_bolt_dia",
+   "attr": "planet_pin_bolt_dia2",
+   "category": "fixed",
+   "subtype": "fastener size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "planet_pin_bolt_dia2"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters"
+  },
+  {
+   "name": "a2_planet_pin_socket_head_dia",
+   "attr": "planet_pin_socket_head_dia2",
+   "category": "dependent",
+   "subtype": "lookup",
+   "lookup": {
+    "function": "nuts_and_bolts_dimensions",
+    "args": {
+     "bolt_dia": "a2_planet_pin_bolt_dia",
+     "bolt_type": "socket_head"
+    },
+    "field": "bolt_head_dia"
+   },
+   "depends_on": [
+    "a2_planet_pin_bolt_dia"
+   ],
+   "confidence": "high",
+   "reason": "standard socket-head fastener size for the chosen bolt diameter"
+  },
+  {
+   "name": "a2_carrier_PCD",
+   "attr": "carrier_PCD2",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "(a2_Np + a2_Ns) * a2_module",
+   "depends_on": [
+    "a2_module",
+    "a2_Np",
+    "a2_Ns"
+   ],
+   "confidence": "high",
+   "reason": "planet-centre circle (twice the centre distance)"
+  },
+  {
+   "name": "a2_planet_shaft_dia",
+   "attr": "planet_shaft_dia2",
+   "category": "fixed",
+   "subtype": "planet part",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "planet_shaft_dia2"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters"
+  },
+  {
+   "name": "a2_fw_p",
+   "attr": "fw_p2",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "a2_fw_r",
+   "depends_on": [
+    "a2_fw_r"
+   ],
+   "confidence": "high",
+   "reason": "computed by the code: a2_fw_r"
+  },
+  {
+   "name": "a2_planet_shaft_step_offset",
+   "attr": "planet_shaft_step_offset2",
+   "category": "fixed",
+   "subtype": "planet part",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "planet_shaft_step_offset2"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters"
+  },
+  {
+   "name": "a2_carrier_trapezoidal_support_sun_offset",
+   "attr": "carrier_trapezoidal_support_sun_offset2",
+   "category": "fixed",
+   "subtype": "feature size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "carrier_trapezoidal_support_sun_offset2"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters"
+  },
+  {
+   "name": "a2_carrier_trapezoidal_support_hole_PCD_offset_bearing_ID",
+   "attr": "carrier_trapezoidal_support_hole_PCD_offset_bearing_ID2",
+   "category": "fixed",
+   "subtype": "feature size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "carrier_trapezoidal_support_hole_PCD_offset_bearing_ID2"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters"
+  },
+  {
+   "name": "a2_carrier_trapezoidal_support_hole_dia",
+   "attr": "carrier_trapezoidal_support_hole_dia2",
+   "category": "fixed",
+   "subtype": "fastener size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "carrier_trapezoidal_support_hole_dia2"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters"
+  },
+  {
+   "name": "a2_carrier_trapezoidal_support_hole_socket_head_dia",
+   "attr": "carrier_trapezoidal_support_hole_socket_head_dia2",
+   "category": "dependent",
+   "subtype": "lookup",
+   "lookup": {
+    "function": "nuts_and_bolts_dimensions",
+    "args": {
+     "bolt_dia": "a2_carrier_trapezoidal_support_hole_dia",
+     "bolt_type": "socket_head"
+    },
+    "field": "bolt_head_dia"
+   },
+   "depends_on": [
+    "a2_carrier_trapezoidal_support_hole_dia"
+   ],
+   "confidence": "high",
+   "reason": "standard socket-head fastener size for the chosen bolt diameter"
+  },
+  {
+   "name": "a2_carrier_bearing_step_width",
+   "attr": "carrier_bearing_step_width2",
+   "category": "fixed",
+   "subtype": "feature size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "carrier_bearing_step_width2"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters"
+  },
+  {
+   "name": "a2_standard_clearance_1_5mm",
+   "attr": "standard_clearance_1_5mm",
+   "category": "fixed",
+   "subtype": "clearance",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "standard_clearance_1_5mm"
+   },
+   "confidence": "high",
+   "reason": "same value as a1_standard_clearance_1_5mm (the CAD writes it under both stage prefixes); constant from the IDSPG 3DP design parameters (one value for both stages)",
+   "alias_of": "a1_standard_clearance_1_5mm"
+  },
+  {
+   "name": "a2_standard_fillet_1_5mm",
+   "attr": "standard_fillet_1_5mm",
+   "category": "fixed",
+   "subtype": "feature size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "standard_fillet_1_5mm"
+   },
+   "confidence": "high",
+   "reason": "same value as a1_standard_fillet_1_5mm (the CAD writes it under both stage prefixes); constant from the IDSPG 3DP design parameters (one value for both stages)",
+   "alias_of": "a1_standard_fillet_1_5mm"
+  },
+  {
+   "name": "a2_sun_shaft_bearing_OD",
+   "attr": "sun_shaft_bearing_OD2",
+   "category": "fixed",
+   "subtype": "bearing (chosen part)",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "sun_shaft_bearing_OD2"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters"
+  },
+  {
+   "name": "a2_sun_shaft_bearing_width",
+   "attr": "sun_shaft_bearing_width2",
+   "category": "fixed",
+   "subtype": "bearing (chosen part)",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "sun_shaft_bearing_width2"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters"
+  },
+  {
+   "name": "a2_standard_bearing_insertion_chamfer",
+   "attr": "standard_bearing_insertion_chamfer",
+   "category": "fixed",
+   "subtype": "feature size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "standard_bearing_insertion_chamfer"
+   },
+   "confidence": "high",
+   "reason": "same value as a1_standard_bearing_insertion_chamfer (the CAD writes it under both stage prefixes); constant from the IDSPG 3DP design parameters (one value for both stages)",
+   "alias_of": "a1_standard_bearing_insertion_chamfer"
+  },
+  {
+   "name": "a2_carrier_trapezoidal_support_hole_wrench_size",
+   "attr": "carrier_trapezoidal_support_hole_wrench_size2",
+   "category": "dependent",
+   "subtype": "lookup",
+   "lookup": {
+    "function": "nuts_and_bolts_dimensions",
+    "args": {
+     "bolt_dia": "a2_carrier_trapezoidal_support_hole_dia",
+     "bolt_type": "socket_head"
+    },
+    "field": "nut_width_across_flats"
+   },
+   "depends_on": [
+    "a2_carrier_trapezoidal_support_hole_dia"
+   ],
+   "confidence": "high",
+   "reason": "standard socket-head fastener size for the chosen bolt diameter"
+  },
+  {
+   "name": "a2_planet_pin_bolt_wrench_size",
+   "attr": "planet_pin_bolt_wrench_size2",
+   "category": "dependent",
+   "subtype": "lookup",
+   "lookup": {
+    "function": "nuts_and_bolts_dimensions",
+    "args": {
+     "bolt_dia": "a2_planet_pin_bolt_dia",
+     "bolt_type": "socket_head"
+    },
+    "field": "nut_width_across_flats"
+   },
+   "depends_on": [
+    "a2_planet_pin_bolt_dia"
+   ],
+   "confidence": "high",
+   "reason": "standard socket-head fastener size for the chosen bolt diameter"
+  },
+  {
+   "name": "a2_h_b",
+   "attr": "h_b2",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "1.25 * a2_module",
+   "depends_on": [
+    "a2_module"
+   ],
+   "confidence": "high",
+   "reason": "standard proportion of the module (same value as h_f)"
+  },
+  {
+   "name": "a2_dp_s",
+   "attr": "dp_s2",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "a2_module * a2_Ns",
+   "depends_on": [
+    "a2_module",
+    "a2_Ns"
+   ],
+   "confidence": "high",
+   "reason": "pitch diameter"
+  },
+  {
+   "name": "a2_db_s",
+   "attr": "db_s2",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "a2_dp_s * cos(a1_pressure_angle * pi / 180)",
+   "depends_on": [
+    "a2_dp_s",
+    "a1_pressure_angle"
+   ],
+   "confidence": "high",
+   "reason": "base-circle diameter"
+  },
+  {
+   "name": "a2_fw_s_calc",
+   "attr": "fw_s2_calc",
+   "category": "dependent",
+   "subtype": "stress rule",
+   "rule": "b = FOS x Ft x qe x qk / (gear_allowable_stress x module) (mitStressAnalysisMinFacewidth), with Ft = serviceFactor x motor_peak_torque x stage-1 gear ratio / (num_planet x sun pitch radius), qe = 1 / sun-planet contact ratio, qk = curve fit in Ns; a2_fw_s_calc = b",
+   "depends_on": [
+    "a2_module",
+    "a2_Ns",
+    "a2_Np",
+    "a2_Nr",
+    "a2_num_planet",
+    "a1_pressure_angle",
+    "a1_Ns",
+    "a1_Nr",
+    "motor_peak_torque",
+    "gear_allowable_stress",
+    "FOS",
+    "serviceFactor"
+   ],
+   "confidence": "high",
+   "reason": "same value as a1_fw_s_calc2 (the CAD writes it under both stage prefixes); stage-2 sun face width from the tooth-stress rule: fixed by the optimisation variables, the motor torque, the gear material and the safety factors, so the optimiser has no freedom over it",
+   "alias_of": "a1_fw_s_calc2"
+  },
+  {
+   "name": "a2_alpha_s",
+   "attr": "alpha_s2",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "sqrt(a2_dp_s ** 2 - a2_db_s ** 2) / a2_db_s * 180 / pi - a1_pressure_angle",
+   "depends_on": [
+    "a1_pressure_angle",
+    "a2_db_s",
+    "a2_dp_s"
+   ],
+   "confidence": "high",
+   "reason": "involute angle used to draw the tooth"
+  },
+  {
+   "name": "a2_beta_s",
+   "attr": "beta_s2",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "(360 / (4 * a2_Ns) - a2_alpha_s) * 2",
+   "depends_on": [
+    "a2_alpha_s",
+    "a2_Ns"
+   ],
+   "confidence": "high",
+   "reason": "tooth angle used to draw the tooth"
+  },
+  {
+   "name": "a2_dp_p",
+   "attr": "dp_p2",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "a2_module * a2_Np",
+   "depends_on": [
+    "a2_module",
+    "a2_Np"
+   ],
+   "confidence": "high",
+   "reason": "pitch diameter"
+  },
+  {
+   "name": "a2_db_p",
+   "attr": "db_p2",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "a2_dp_p * cos(a1_pressure_angle * pi / 180)",
+   "depends_on": [
+    "a2_dp_p",
+    "a1_pressure_angle"
+   ],
+   "confidence": "high",
+   "reason": "base-circle diameter"
+  },
+  {
+   "name": "a2_alpha_p",
+   "attr": "alpha_p2",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "sqrt(a2_dp_p ** 2 - a2_db_p ** 2) / a2_db_p * 180 / pi - a1_pressure_angle",
+   "depends_on": [
+    "a1_pressure_angle",
+    "a2_db_p",
+    "a2_dp_p"
+   ],
+   "confidence": "high",
+   "reason": "involute angle used to draw the tooth"
+  },
+  {
+   "name": "a2_beta_p",
+   "attr": "beta_p2",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "(360 / (4 * a2_Np) - a2_alpha_p) * 2",
+   "depends_on": [
+    "a2_alpha_p",
+    "a2_Np"
+   ],
+   "confidence": "high",
+   "reason": "tooth angle used to draw the tooth"
+  },
+  {
+   "name": "a2_planet_bearing_OD",
+   "attr": "planet_bearing_OD2",
+   "category": "fixed",
+   "subtype": "bearing (chosen part)",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "planet_bearing_OD2"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters"
+  },
+  {
+   "name": "a2_planet_bearing_width",
+   "attr": "planet_bearing_width2",
+   "category": "fixed",
+   "subtype": "bearing (chosen part)",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "planet_bearing_width2"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters"
+  },
+  {
+   "name": "a2_planet_bore",
+   "attr": "planet_bore2",
+   "category": "fixed",
+   "subtype": "planet part",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "planet_bore2"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters"
+  },
+  {
+   "name": "a2_sun_shaft_bearing_ID",
+   "attr": "sun_shaft_bearing_ID2",
+   "category": "fixed",
+   "subtype": "bearing (chosen part)",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "sun_shaft_bearing_ID2"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters"
+  },
+  {
+   "name": "a2_sun_hub_dia",
+   "attr": "sun_hub_dia1",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "rotor_mount_hole_PCD + rotor_mount_hole_dia + a1_standard_clearance_1_5mm * 5",
+   "depends_on": [
+    "rotor_mount_hole_PCD",
+    "rotor_mount_hole_dia",
+    "a1_standard_clearance_1_5mm"
+   ],
+   "confidence": "medium",
+   "reason": "same value as a1_sun_hub_dia (the CAD writes it under both stage prefixes); sun hub: the rotor's mount-hole circle plus hole diameter plus a hard-coded 5 x standard_clearance_1_5mm; the mass code uses 4 (CAD and mass disagree, to be logged); the shared sun-hub margin item the plan still has to decide",
+   "alias_of": "a1_sun_hub_dia"
+  },
+  {
+   "name": "a2_sun_central_bolt_dia",
+   "attr": "sun_central_bolt_dia2",
+   "category": "fixed",
+   "subtype": "fastener size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "sun_central_bolt_dia2"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters"
+  },
+  {
+   "name": "a2_sun_central_bolt_socket_head_dia",
+   "attr": "sun_central_bolt_socket_head_dia2",
+   "category": "dependent",
+   "subtype": "lookup",
+   "lookup": {
+    "function": "nuts_and_bolts_dimensions",
+    "args": {
+     "bolt_dia": "a2_sun_central_bolt_dia"
+    },
+    "field": "bolt_head_dia"
+   },
+   "depends_on": [
+    "a2_sun_central_bolt_dia"
+   ],
+   "confidence": "high",
+   "reason": "standard socket-head fastener size for the chosen bolt diameter"
+  },
+  {
+   "name": "a2_fw_s_used",
+   "attr": "fw_s2_used",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "bearing_retainer_thickness + a1_standard_clearance_1_5mm + a2_sec_carrier_thickness + a1_clearance_planet + a2_fw_p + shortfall",
+   "depends_on": [
+    "shortfall",
+    "a2_fw_p",
+    "a1_clearance_planet",
+    "a2_sec_carrier_thickness",
+    "bearing_retainer_thickness",
+    "a1_standard_clearance_1_5mm"
+   ],
+   "confidence": "medium",
+   "reason": "same value as a1_fw_s_used2 (the CAD writes it under both stage prefixes); stage-2 sun length: retainer, clearances, carrier, planet width and the always-zero shortfall (an axial-fill rule)",
+   "alias_of": "a1_fw_s_used2"
+  },
+  {
+   "name": "a2_Ns1",
+   "attr": "Ns1",
+   "category": "optimisation",
+   "subtype": "teeth",
+   "source": {
+    "optimiser": "optimizationinternalDoubleStagePlanetaryActuator"
+   },
+   "confidence": "high",
+   "reason": "same value as a1_Ns (the CAD writes it under both stage prefixes); stage-1 sun teeth: searched by the optimiser loop",
+   "alias_of": "a1_Ns"
+  },
+  {
+   "name": "a2_Np1",
+   "attr": "Np1",
+   "category": "optimisation",
+   "subtype": "teeth",
+   "source": {
+    "optimiser": "optimizationinternalDoubleStagePlanetaryActuator"
+   },
+   "confidence": "high",
+   "reason": "same value as a1_Np (the CAD writes it under both stage prefixes); stage-1 planet teeth: searched by the optimiser loop",
+   "alias_of": "a1_Np"
+  },
+  {
+   "name": "a2_Nr1",
+   "attr": "Nr1",
+   "category": "dependent",
+   "subtype": "implicit constraint",
+   "formula": "a1_Ns + 2 * a1_Np",
+   "depends_on": [
+    "a1_Ns",
+    "a1_Np"
+   ],
+   "confidence": "high",
+   "reason": "same value as a1_Nr (the CAD writes it under both stage prefixes); implicitly constrained: the coaxial constraint Ns + 2 x Np = Nr fixes it, and the optimiser sets it from Ns and Np instead of searching it (the code lists it among the optimisation variables)",
+   "alias_of": "a1_Nr"
+  },
+  {
+   "name": "a2_module1",
+   "attr": "module1",
+   "category": "optimisation",
+   "subtype": "module",
+   "source": {
+    "optimiser": "optimizationinternalDoubleStagePlanetaryActuator"
+   },
+   "confidence": "high",
+   "reason": "same value as a1_module (the CAD writes it under both stage prefixes); stage-1 module: searched by the optimiser loop",
+   "alias_of": "a1_module"
+  },
+  {
+   "name": "a2_bearing1_ID",
+   "attr": "bearing1_ID",
+   "category": "dependent",
+   "subtype": "lookup",
+   "lookup": {
+    "function": "bearings_discrete",
+    "args": {
+     "idRequiredMM": "a1_module * (a1_Ns + a1_Np) + bearingIDClearanceMM"
+    },
+    "method": "getBearingIDMM"
+   },
+   "depends_on": [
+    "bearingIDClearanceMM",
+    "a1_module",
+    "a1_Ns",
+    "a1_Np"
+   ],
+   "confidence": "high",
+   "reason": "same value as a1_bearing_ID (the CAD writes it under both stage prefixes); catalogue bearing chosen by bearings_discrete for the bore the stage needs (smallest one that fits); this is its bore",
+   "alias_of": "a1_bearing_ID"
+  },
+  {
+   "name": "a2_bearing1_OD",
+   "attr": "bearing1_OD",
+   "category": "dependent",
+   "subtype": "lookup",
+   "lookup": {
+    "function": "bearings_discrete",
+    "args": {
+     "idRequiredMM": "a1_module * (a1_Ns + a1_Np) + bearingIDClearanceMM"
+    },
+    "method": "getBearingODMM"
+   },
+   "depends_on": [
+    "bearingIDClearanceMM",
+    "a1_module",
+    "a1_Ns",
+    "a1_Np"
+   ],
+   "confidence": "high",
+   "reason": "same value as a1_bearing_OD (the CAD writes it under both stage prefixes); catalogue bearing chosen by bearings_discrete for the bore the stage needs (smallest one that fits); this is its outer diameter",
+   "alias_of": "a1_bearing_OD"
+  },
+  {
+   "name": "a2_bearing1_height1",
+   "attr": "bearing1_height",
+   "category": "dependent",
+   "subtype": "lookup",
+   "lookup": {
+    "function": "bearings_discrete",
+    "args": {
+     "idRequiredMM": "a1_module * (a1_Ns + a1_Np) + bearingIDClearanceMM"
+    },
+    "method": "getBearingWidthMM"
+   },
+   "depends_on": [
+    "bearingIDClearanceMM",
+    "a1_module",
+    "a1_Ns",
+    "a1_Np"
+   ],
+   "confidence": "high",
+   "reason": "same value as a1_bearing_height (the CAD writes it under both stage prefixes); catalogue bearing chosen by bearings_discrete for the bore the stage needs (smallest one that fits); this is its width",
+   "alias_of": "a1_bearing_height"
+  },
+  {
+   "name": "a2_num_planet1",
+   "attr": "num_planet1",
+   "category": "optimisation",
+   "subtype": "planets",
+   "source": {
+    "optimiser": "optimizationinternalDoubleStagePlanetaryActuator"
+   },
+   "confidence": "high",
+   "reason": "same value as a1_num_planet (the CAD writes it under both stage prefixes); stage-1 number of planets: searched by the optimiser loop",
+   "alias_of": "a1_num_planet"
+  },
+  {
+   "name": "a2_tight_clearance_3DP",
+   "attr": "tight_clearance_3DP",
+   "category": "fixed",
+   "subtype": "clearance",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "tight_clearance_3DP"
+   },
+   "confidence": "high",
+   "reason": "same value as a1_tight_clearance_3DP (the CAD writes it under both stage prefixes); constant from the IDSPG 3DP design parameters (one value for both stages)",
+   "alias_of": "a1_tight_clearance_3DP"
+  },
+  {
+   "name": "a2_loose_clearance_3DP",
+   "attr": "loose_clearance_3DP",
+   "category": "fixed",
+   "subtype": "clearance",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "loose_clearance_3DP"
+   },
+   "confidence": "high",
+   "reason": "same value as a1_loose_clearance_3DP (the CAD writes it under both stage prefixes); constant from the IDSPG 3DP design parameters (one value for both stages)",
+   "alias_of": "a1_loose_clearance_3DP"
+  },
+  {
+   "name": "Rotor_ID",
+   "attr": "Rotor_ID",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.geometry",
+    "key": "rotor_ID"
+   },
+   "confidence": "high",
+   "reason": "read from the chosen motor's geometry"
+  },
+  {
+   "name": "Rotor_OD",
+   "attr": "Rotor_OD",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.geometry",
+    "key": "motor_OD"
+   },
+   "confidence": "high",
+   "reason": "read from the chosen motor's geometry"
+  },
+  {
+   "name": "Rotor_bottom_ID",
+   "attr": "Rotor_bottom_ID",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.geometry",
+    "key": "motor_rotor_base_ID"
+   },
+   "confidence": "high",
+   "reason": "read from the chosen motor's geometry"
+  },
+  {
+   "name": "Rotor_csk_head_height",
+   "attr": "Rotor_csk_head_height",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.geometry",
+    "key": "rotorCSKHeadHeightMM"
+   },
+   "confidence": "high",
+   "reason": "read from the chosen motor's geometry"
+  },
+  {
+   "name": "Rotor_csk_head_upper_dia",
+   "attr": "Rotor_csk_head_upper_dia",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.geometry",
+    "key": "rotorCSKHeadUpperDiaMM"
+   },
+   "confidence": "high",
+   "reason": "read from the chosen motor's geometry"
+  },
+  {
+   "name": "Rotor_height",
+   "attr": "Rotor_height",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.geometry",
+    "key": "rotor_height"
+   },
+   "confidence": "high",
+   "reason": "read from the chosen motor's geometry"
+  },
+  {
+   "name": "Stator_ID",
+   "attr": "Stator_ID",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.geometry",
+    "key": "stator_ID"
+   },
+   "confidence": "high",
+   "reason": "read from the chosen motor's geometry"
+  },
+  {
+   "name": "Stator_OD",
+   "attr": "Stator_OD",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.geometry",
+    "key": "stator_OD"
+   },
+   "confidence": "high",
+   "reason": "read from the chosen motor's geometry"
+  },
+  {
+   "name": "Stator_height",
+   "attr": "Stator_height",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.geometry",
+    "key": "stator_height"
+   },
+   "confidence": "high",
+   "reason": "read from the chosen motor's geometry"
+  },
+  {
+   "name": "Stator_mounting_holes_PCD",
+   "attr": "Stator_mounting_holes_PCD",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.geometry",
+    "key": "stator_hole_PCD"
+   },
+   "confidence": "high",
+   "reason": "read from the chosen motor's geometry"
+  },
+  {
+   "name": "rotor_mount_hole_PCD",
+   "attr": "rotor_mount_hole_PCD",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.geometry",
+    "key": "motor_rotor_hole_PCD"
+   },
+   "confidence": "high",
+   "reason": "read from the chosen motor's geometry"
+  },
+  {
+   "name": "rotor_mount_hole_dia",
+   "attr": "rotor_mount_hole_dia",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.geometry",
+    "key": "motor_rotor_hole_dia"
+   },
+   "confidence": "high",
+   "reason": "read from the chosen motor's geometry"
+  },
+  {
+   "name": "rotor_mount_hole_num",
+   "attr": "rotor_mount_hole_num",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.geometry",
+    "key": "motor_rotor_hole_num"
+   },
+   "confidence": "high",
+   "reason": "read from the chosen motor's geometry"
+  },
+  {
+   "name": "rotor_bottom_thickness",
+   "attr": "rotor_bottom_thickness",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.geometry",
+    "key": "motor_rotor_base_thickness"
+   },
+   "confidence": "high",
+   "reason": "read from the chosen motor's geometry"
+  },
+  {
+   "name": "stator_mounitng_holes_head_socket_dia",
+   "attr": "stator_mounitng_holes_head_socket_dia",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.geometry",
+    "key": "stator_mounitng_holes_head_socket_dia"
+   },
+   "confidence": "high",
+   "reason": "read from the chosen motor's geometry"
+  },
+  {
+   "name": "stator_mounting_hole_num",
+   "attr": "stator_mounting_hole_num",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.geometry",
+    "key": "stator_hole_num"
+   },
+   "confidence": "high",
+   "reason": "read from the chosen motor's geometry"
+  },
+  {
+   "name": "stator_mounting_holes_dia",
+   "attr": "stator_mounting_holes_dia",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.geometry",
+    "key": "stator_hole_dia"
+   },
+   "confidence": "high",
+   "reason": "read from the chosen motor's geometry"
+  },
+  {
+   "name": "stator_mounting_plate_OD",
+   "attr": "stator_mounting_plate_OD",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.geometry",
+    "key": "motor_stator_extrusion_dia"
+   },
+   "confidence": "high",
+   "reason": "read from the chosen motor's geometry"
+  },
+  {
+   "name": "stator_rotor_top_offset",
+   "attr": "stator_rotor_top_offset",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.geometry",
+    "key": "stator_top_rotor_top_offset"
+   },
+   "confidence": "high",
+   "reason": "read from the chosen motor's geometry"
+  },
+  {
+   "name": "motor_stator_extrusion_depth",
+   "attr": "motor_stator_extrusion_depth",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.geometry",
+    "key": "motor_stator_extrusion_depth"
+   },
+   "confidence": "high",
+   "reason": "read from the chosen motor's geometry"
+  },
+  {
+   "name": "a1_sun_bottom_casing_bearing_ID",
+   "attr": "a1_sun_bottom_casing_bearing_ID",
+   "category": "fixed",
+   "subtype": "bearing (chosen part)",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "a1_sun_bottom_casing_bearing_ID"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters (one value for both stages)"
+  },
+  {
+   "name": "a1_sun_bottom_casing_bearing_OD",
+   "attr": "a1_sun_bottom_casing_bearing_OD",
+   "category": "fixed",
+   "subtype": "bearing (chosen part)",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "a1_sun_bottom_casing_bearing_OD"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters (one value for both stages)"
+  },
+  {
+   "name": "a1_sun_bottom_casing_bearing_height",
+   "attr": "a1_sun_bottom_casing_bearing_height",
+   "category": "fixed",
+   "subtype": "bearing (chosen part)",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "a1_sun_bottom_casing_bearing_height"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters (one value for both stages)"
+  },
+  {
+   "name": "a1_sun_carrier_bearing_ID",
+   "attr": "a1_sun_carrier_bearing_ID",
+   "category": "fixed",
+   "subtype": "bearing (chosen part)",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "a1_sun_carrier_bearing_ID"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters (one value for both stages)"
+  },
+  {
+   "name": "a1_sun_carrier_bearing_OD",
+   "attr": "a1_sun_carrier_bearing_OD",
+   "category": "fixed",
+   "subtype": "bearing (chosen part)",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "a1_sun_carrier_bearing_OD"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters (one value for both stages)"
+  },
+  {
+   "name": "a1_sun_carrier_bearing_height",
+   "attr": "a1_sun_carrier_bearing_height",
+   "category": "fixed",
+   "subtype": "bearing (chosen part)",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "a1_sun_carrier_bearing_height"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters (one value for both stages)"
+  },
+  {
+   "name": "bearing_retainer_hole_dia",
+   "attr": "bearing_retainer_hole_dia",
+   "category": "fixed",
+   "subtype": "fastener size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "bearing_retainer_hole_dia"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters (one value for both stages)"
+  },
+  {
+   "name": "bearing_retainer_hole_num",
+   "attr": "bearing_retainer_hole_num",
+   "category": "fixed",
+   "subtype": "fastener size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "bearing_retainer_hole_num"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters (one value for both stages)"
+  },
+  {
+   "name": "bearing_retainer_hole_wrench_nut_size",
+   "attr": "bearing_retainer_hole_wrench_nut_size",
+   "category": "fixed",
+   "subtype": "fastener size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "bearing_retainer_hole_wrench_nut_size"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters (one value for both stages)"
+  },
+  {
+   "name": "a2_bearing_retainer_hole_dia",
+   "attr": "a2_bearing_retainer_hole_dia",
+   "category": "fixed",
+   "subtype": "fastener size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "a2_bearing_retainer_hole_dia"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters (one value for both stages)"
+  },
+  {
+   "name": "a2_bearing_retainer_hole_num",
+   "attr": "a2_bearing_retainer_hole_num",
+   "category": "fixed",
+   "subtype": "fastener size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "a2_bearing_retainer_hole_num"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters (one value for both stages)"
+  },
+  {
+   "name": "a2_bearing_retainer_nut_wrench_size",
+   "attr": "a2_bearing_retainer_nut_wrench_size",
+   "category": "fixed",
+   "subtype": "fastener size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "a2_bearing_retainer_nut_wrench_size"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters (one value for both stages)"
+  },
+  {
+   "name": "a2_bearing_retainer_wrench_height",
+   "attr": "a2_bearing_retainer_wrench_height",
+   "category": "fixed",
+   "subtype": "fastener size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "a2_bearing_retainer_wrench_height"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters (one value for both stages)"
+  },
+  {
+   "name": "bearing_retainer_thickness",
+   "attr": "bearing_retainer_thickness",
+   "category": "fixed",
+   "subtype": "wall thickness",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "bearing_retainer_thickness"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters (one value for both stages)"
+  },
+  {
+   "name": "motor_casing_thickness",
+   "attr": "motor_casing_thickness",
+   "category": "fixed",
+   "subtype": "wall thickness",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "motor_casing_thickness"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters (one value for both stages)"
+  },
+  {
+   "name": "a1_ring_gear_relation",
+   "attr": "a1_ring_gear_relation",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "Stator_height + a1_ring_gear_thickness_mounting_casing - bearing_retainer_thickness - a1_bearing_height - a1_carrier_bearing_step_width - a1_clearance_planet - a1_fw_r - a1_clearance_planet * 0.5",
+   "depends_on": [
+    "a1_fw_r",
+    "a1_clearance_planet",
+    "a1_carrier_bearing_step_width",
+    "a1_bearing_height",
+    "bearing_retainer_thickness",
+    "Stator_height",
+    "a1_ring_gear_thickness_mounting_casing"
+   ],
+   "confidence": "medium",
+   "reason": "axial-fill check for stage 1: the stator height and mounting casing less the stage-1 stack (a value written for the CAD, not used by the code)"
+  },
+  {
+   "name": "a2_ring_gear_relation",
+   "attr": "a2_ring_gear_relation",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "a1_fw_s_used + a1_standard_clearance_1_5mm + a1_carrier_bearing_step_width + a1_bearing_height + a1_fw_s_used2 - a2_fw_p - Stator_height - a1_ring_gear_thickness_mounting_casing - rotor_bottom_thickness - motor_stator_extrusion_depth",
+   "depends_on": [
+    "motor_stator_extrusion_depth",
+    "rotor_bottom_thickness",
+    "a1_ring_gear_thickness_mounting_casing",
+    "Stator_height",
+    "a2_fw_p",
+    "a1_fw_s_used2",
+    "a1_bearing_height",
+    "a1_carrier_bearing_step_width",
+    "a1_fw_s_used",
+    "a1_standard_clearance_1_5mm"
+   ],
+   "confidence": "medium",
+   "reason": "axial-fill check for stage 2: the two stage lengths less the stator, rotor base and extrusion (a value written for the CAD, not used by the code)"
+  },
+  {
+   "name": "a1_ring_gear_thickness_mounting_casing",
+   "attr": "a1_ring_gear_thickness_mounting_casing",
+   "category": "fixed",
+   "subtype": "wall thickness",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "a1_ring_gear_thickness_mounting_casing"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters (one value for both stages)"
+  },
+  {
+   "name": "a2_ring_gear_thickness_mounting_casing",
+   "attr": "a2_ring_gear_thickness_mounting_casing",
+   "category": "fixed",
+   "subtype": "wall thickness",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "a2_ring_gear_thickness_mounting_casing"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters (one value for both stages)"
+  },
+  {
+   "name": "a1_sun_gear_rotor_nut_depth",
+   "attr": "a1_sun_gear_rotor_nut_depth",
+   "category": "fixed",
+   "subtype": "fastener size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "a1_sun_gear_rotor_nut_depth"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters (one value for both stages)"
+  },
+  {
+   "name": "a1_sun_gear_rotor_nut_wrench_size",
+   "attr": "a1_sun_gear_rotor_nut_wrench_size",
+   "category": "fixed",
+   "subtype": "fastener size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "a1_sun_gear_rotor_nut_wrench_size"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters (one value for both stages)"
+  }
+ ],
+ "code_only": [
+  {
+   "name": "motor_peak_torque",
+   "attr": "MaxMotorTorque",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.electrical",
+    "key": "peak_torque_Nm"
+   },
+   "confidence": "high",
+   "reason": "motor torque the gears are sized for (peak torque under the default rating setting); sets the face widths"
+  },
+  {
+   "name": "gear_allowable_stress",
+   "attr": "maxGearAllowableStressMPa",
+   "category": "input",
+   "subtype": "material",
+   "source": {
+    "file": "config.json",
+    "block": "Material_properties.<gear material>",
+    "key": "maxAllowableStressMPa"
+   },
+   "confidence": "high",
+   "reason": "allowable tooth stress of the gear material, chosen with the material mode (3dp: PLA, metal: steel); sets the face widths"
+  },
+  {
+   "name": "FOS",
+   "attr": "FOS",
+   "category": "fixed",
+   "subtype": "safety factor",
+   "source": {
+    "file": "idspg_motor_config.json",
+    "block": "MIT_params",
+    "key": "FOS"
+   },
+   "confidence": "high",
+   "reason": "factor of safety in the tooth-stress rule"
+  },
+  {
+   "name": "serviceFactor",
+   "attr": "serviceFactor",
+   "category": "fixed",
+   "subtype": "safety factor",
+   "source": {
+    "file": "idspg_motor_config.json",
+    "block": "MIT_params",
+    "key": "serviceFactor"
+   },
+   "confidence": "high",
+   "reason": "service factor on the motor torque in the tooth-stress rule"
+  },
+  {
+   "name": "planet_bearing_gap",
+   "attr": "planet_bearing_gap",
+   "category": "fixed",
+   "subtype": "clearance",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "planet_bearing_gap"
+   },
+   "confidence": "medium",
+   "reason": "axial gap between the two planet bearings (one in each planet gear); with the bearing width it sets the smallest planet and ring width of both stages; one key for both stages, the plan leaves open whether it should be one per stage (planet_bearing_gap1 / 2)"
+  },
+  {
+   "name": "maxGearboxDiameter",
+   "attr": "maxGearboxDiameter",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "MAX_GB_DIA_MULT_FACTOR * (a1_motor_OD + a1_standard_clearance_1_5mm * 2)",
+   "depends_on": [
+    "MAX_GB_DIA_MULT_FACTOR",
+    "a1_motor_OD",
+    "a1_standard_clearance_1_5mm"
+   ],
+   "confidence": "high",
+   "reason": "largest gearbox diameter the optimiser may use (gearbox_runner max_diameter): the motor's outer diameter plus two clearances, times a factor"
+  },
+  {
+   "name": "maxGearboxDiameter_Stg1",
+   "attr": "maxGearboxDiameter_Stg1",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "Stator_ID - ring1RadialWidthMM * 2",
+   "depends_on": [
+    "Stator_ID",
+    "ring1RadialWidthMM"
+   ],
+   "confidence": "high",
+   "reason": "largest stage-1 diameter the optimiser may use (gearbox_runner max_diameter_stage1): the stator bore less two ring walls"
+  },
+  {
+   "name": "motorDiaMM",
+   "attr": "motorDiaMM",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.geometry",
+    "key": "motor_OD"
+   },
+   "confidence": "high",
+   "reason": "read from the chosen motor's geometry"
+  },
+  {
+   "name": "motorLengthMM",
+   "attr": "motorLengthMM",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.geometry",
+    "key": "motor_height"
+   },
+   "confidence": "high",
+   "reason": "read from the chosen motor's geometry"
+  },
+  {
+   "name": "bearingIDClearanceMM",
+   "attr": "bearingIDClearanceMM",
+   "category": "fixed",
+   "subtype": "constraint constant",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "bearingIDClearanceMM"
+   },
+   "confidence": "high",
+   "reason": "constant from the IDSPG 3DP design parameters (one value for both stages)"
+  },
+  {
+   "name": "shortfall",
+   "attr": "shortfall",
+   "category": "fixed",
+   "subtype": "constraint constant",
+   "source": {
+    "constant": 0
+   },
+   "confidence": "medium",
+   "reason": "always 0: the code sets it only in a disabled axial-fill case (the stage-2 sun length adds it)"
+  },
+  {
+   "name": "sCarrierExtrusionDiaMM_Stg1",
+   "category": "fixed",
+   "subtype": "feature size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "sCarrierExtrusionDiaMM_Stg1"
+   },
+   "confidence": "high",
+   "reason": "read by the code but not written to the CAD file"
+  },
+  {
+   "name": "sCarrierExtrusionClearanceMM_Stg1",
+   "category": "fixed",
+   "subtype": "clearance",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "sCarrierExtrusionClearanceMM_Stg1"
+   },
+   "confidence": "high",
+   "reason": "read by the code but not written to the CAD file"
+  },
+  {
+   "name": "sCarrierExtrusionDiaMM_Stg2",
+   "category": "fixed",
+   "subtype": "feature size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "sCarrierExtrusionDiaMM_Stg2"
+   },
+   "confidence": "high",
+   "reason": "read by the code but not written to the CAD file"
+  },
+  {
+   "name": "sCarrierExtrusionClearanceMM_Stg2",
+   "category": "fixed",
+   "subtype": "clearance",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "sCarrierExtrusionClearanceMM_Stg2"
+   },
+   "confidence": "high",
+   "reason": "read by the code but not written to the CAD file"
+  },
+  {
+   "name": "planetMinDistanceMM",
+   "category": "fixed",
+   "subtype": "constraint constant",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "planetMinDistanceMM"
+   },
+   "confidence": "high",
+   "reason": "read by the code but not written to the CAD file"
+  },
+  {
+   "name": "Motor_case_thickness",
+   "category": "fixed",
+   "subtype": "wall thickness",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "Motor_case_thickness"
+   },
+   "confidence": "high",
+   "reason": "read by the code but not written to the CAD file"
+  },
+  {
+   "name": "clearance_case_mount_holes_shell_thickness",
+   "category": "fixed",
+   "subtype": "clearance",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "clearance_case_mount_holes_shell_thickness"
+   },
+   "confidence": "high",
+   "reason": "read by the code but not written to the CAD file"
+  },
+  {
+   "name": "output_mounting_hole_dia1",
+   "attr": "output_mounting_hole_dia1",
+   "category": "fixed",
+   "subtype": "fastener size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "output_mounting_hole_dia1"
+   },
+   "confidence": "high",
+   "reason": "read by the code but not written to the CAD file"
+  },
+  {
+   "name": "case_mounting_hole_dia",
+   "category": "fixed",
+   "subtype": "fastener size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "case_mounting_hole_dia"
+   },
+   "confidence": "high",
+   "reason": "read by the code but not written to the CAD file"
+  },
+  {
+   "name": "case_mounting_bolt_depth",
+   "category": "fixed",
+   "subtype": "fastener size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "case_mounting_bolt_depth"
+   },
+   "confidence": "high",
+   "reason": "read by the code but not written to the CAD file"
+  },
+  {
+   "name": "case_mounting_surface_height",
+   "category": "fixed",
+   "subtype": "wall thickness",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "case_mounting_surface_height"
+   },
+   "confidence": "high",
+   "reason": "read by the code but not written to the CAD file"
+  },
+  {
+   "name": "bearing_retainer_thickness1",
+   "category": "fixed",
+   "subtype": "wall thickness",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "bearing_retainer_thickness1"
+   },
+   "confidence": "high",
+   "reason": "in the config but never read"
+  },
+  {
+   "name": "central_hole_offset_from_motor_mount_PCD",
+   "category": "fixed",
+   "subtype": "feature size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "central_hole_offset_from_motor_mount_PCD"
+   },
+   "confidence": "high",
+   "reason": "read by the code but not written to the CAD file"
+  },
+  {
+   "name": "base_plate_thickness",
+   "category": "fixed",
+   "subtype": "wall thickness",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "base_plate_thickness"
+   },
+   "confidence": "high",
+   "reason": "read by the code but not written to the CAD file"
+  },
+  {
+   "name": "air_flow_hole_offset",
+   "category": "fixed",
+   "subtype": "feature size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "air_flow_hole_offset"
+   },
+   "confidence": "high",
+   "reason": "read by the code but not written to the CAD file"
+  },
+  {
+   "name": "output_mounting_nut_depth1",
+   "category": "fixed",
+   "subtype": "fastener size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "output_mounting_nut_depth1"
+   },
+   "confidence": "high",
+   "reason": "read by the code but not written to the CAD file"
+  },
+  {
+   "name": "ring_to_chamfer_clearance1",
+   "category": "fixed",
+   "subtype": "clearance",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "ring_to_chamfer_clearance1"
+   },
+   "confidence": "high",
+   "reason": "read by the code but not written to the CAD file"
+  },
+  {
+   "name": "Motor_case_OD_base_to_chamfer",
+   "category": "fixed",
+   "subtype": "feature size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "Motor_case_OD_base_to_chamfer"
+   },
+   "confidence": "high",
+   "reason": "read by the code but not written to the CAD file"
+  },
+  {
+   "name": "case_mounting_nut_clearance",
+   "category": "fixed",
+   "subtype": "clearance",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "case_mounting_nut_clearance"
+   },
+   "confidence": "high",
+   "reason": "read by the code but not written to the CAD file"
+  },
+  {
+   "name": "clearance_case_mount_holes_shell_thickness2",
+   "category": "fixed",
+   "subtype": "clearance",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "clearance_case_mount_holes_shell_thickness2"
+   },
+   "confidence": "high",
+   "reason": "read by the code but not written to the CAD file"
+  },
+  {
+   "name": "ring_to_chamfer_clearance2",
+   "category": "fixed",
+   "subtype": "clearance",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "ring_to_chamfer_clearance2"
+   },
+   "confidence": "high",
+   "reason": "read by the code but not written to the CAD file"
+  },
+  {
+   "name": "bearing_retainer_thickness2",
+   "category": "fixed",
+   "subtype": "wall thickness",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "bearing_retainer_thickness2"
+   },
+   "confidence": "high",
+   "reason": "in the config but never read"
+  },
+  {
+   "name": "stg1_stg2_mounting_hole_dia",
+   "category": "fixed",
+   "subtype": "fastener size",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "stg1_stg2_mounting_hole_dia"
+   },
+   "confidence": "high",
+   "reason": "read by the code but not written to the CAD file"
+  },
+  {
+   "name": "stg1_stg2_mounting_pattern_width",
+   "category": "fixed",
+   "subtype": "wall thickness",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "stg1_stg2_mounting_pattern_width"
+   },
+   "confidence": "high",
+   "reason": "read by the code but not written to the CAD file"
+  },
+  {
+   "name": "ring1RadialWidthMM",
+   "attr": "ring1RadialWidthMM",
+   "category": "fixed",
+   "subtype": "wall thickness",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "ring1RadialWidthMM"
+   },
+   "confidence": "high",
+   "reason": "read by the code but not written to the CAD file"
+  },
+  {
+   "name": "ring2RadialWidthMM",
+   "attr": "ring2RadialWidthMM",
+   "category": "fixed",
+   "subtype": "wall thickness",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "ring2RadialWidthMM"
+   },
+   "confidence": "high",
+   "reason": "read by the code but not written to the CAD file"
+  },
+  {
+   "name": "GEAR_RATIO_MIN",
+   "category": "fixed",
+   "subtype": "search bound",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_optimization_parameters",
+    "key": "GEAR_RATIO_MIN"
+   },
+   "confidence": "high",
+   "reason": "optimiser setting: limits of the search, not a part dimension"
+  },
+  {
+   "name": "GEAR_RATIO_MAX",
+   "category": "fixed",
+   "subtype": "search bound",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_optimization_parameters",
+    "key": "GEAR_RATIO_MAX"
+   },
+   "confidence": "high",
+   "reason": "optimiser setting: limits of the search, not a part dimension"
+  },
+  {
+   "name": "GEAR_RATIO_STEP",
+   "category": "fixed",
+   "subtype": "search bound",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_optimization_parameters",
+    "key": "GEAR_RATIO_STEP"
+   },
+   "confidence": "high",
+   "reason": "optimiser setting: limits of the search, not a part dimension"
+  },
+  {
+   "name": "MODULE_STAGE1_MIN",
+   "category": "fixed",
+   "subtype": "search bound",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_optimization_parameters",
+    "key": "MODULE_STAGE1_MIN"
+   },
+   "confidence": "high",
+   "reason": "optimiser setting: limits of the search, not a part dimension"
+  },
+  {
+   "name": "MODULE_STAGE1_MAX",
+   "category": "fixed",
+   "subtype": "search bound",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_optimization_parameters",
+    "key": "MODULE_STAGE1_MAX"
+   },
+   "confidence": "high",
+   "reason": "optimiser setting: limits of the search, not a part dimension"
+  },
+  {
+   "name": "MODULE_STAGE2_MIN",
+   "category": "fixed",
+   "subtype": "search bound",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_optimization_parameters",
+    "key": "MODULE_STAGE2_MIN"
+   },
+   "confidence": "high",
+   "reason": "optimiser setting: limits of the search, not a part dimension"
+  },
+  {
+   "name": "MODULE_STAGE2_MAX",
+   "category": "fixed",
+   "subtype": "search bound",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_optimization_parameters",
+    "key": "MODULE_STAGE2_MAX"
+   },
+   "confidence": "high",
+   "reason": "optimiser setting: limits of the search, not a part dimension"
+  },
+  {
+   "name": "NUM_PLANET_STAGE1_MIN",
+   "category": "fixed",
+   "subtype": "search bound",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_optimization_parameters",
+    "key": "NUM_PLANET_STAGE1_MIN"
+   },
+   "confidence": "high",
+   "reason": "optimiser setting: limits of the search, not a part dimension"
+  },
+  {
+   "name": "NUM_PLANET_STAGE1_MAX",
+   "category": "fixed",
+   "subtype": "search bound",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_optimization_parameters",
+    "key": "NUM_PLANET_STAGE1_MAX"
+   },
+   "confidence": "high",
+   "reason": "optimiser setting: limits of the search, not a part dimension"
+  },
+  {
+   "name": "NUM_PLANET_STAGE2_MIN",
+   "category": "fixed",
+   "subtype": "search bound",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_optimization_parameters",
+    "key": "NUM_PLANET_STAGE2_MIN"
+   },
+   "confidence": "high",
+   "reason": "optimiser setting: limits of the search, not a part dimension"
+  },
+  {
+   "name": "NUM_PLANET_STAGE2_MAX",
+   "category": "fixed",
+   "subtype": "search bound",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_optimization_parameters",
+    "key": "NUM_PLANET_STAGE2_MAX"
+   },
+   "confidence": "high",
+   "reason": "optimiser setting: limits of the search, not a part dimension"
+  },
+  {
+   "name": "NUM_TEETH_SUN_MIN",
+   "category": "fixed",
+   "subtype": "search bound",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_optimization_parameters",
+    "key": "NUM_TEETH_SUN_MIN"
+   },
+   "confidence": "high",
+   "reason": "optimiser setting: limits of the search, not a part dimension"
+  },
+  {
+   "name": "NUM_TEETH_PLANET_MIN",
+   "category": "fixed",
+   "subtype": "search bound",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_optimization_parameters",
+    "key": "NUM_TEETH_PLANET_MIN"
+   },
+   "confidence": "high",
+   "reason": "optimiser setting: limits of the search, not a part dimension"
+  },
+  {
+   "name": "MAX_GB_DIA_MULT_FACTOR",
+   "category": "fixed",
+   "subtype": "search bound",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_optimization_parameters",
+    "key": "MAX_GB_DIA_MULT_FACTOR"
+   },
+   "confidence": "high",
+   "reason": "optimiser setting: limits of the search, not a part dimension"
+  }
+ ],
+ "unused_config_blocks": [
+  {
+   "file": "idspg_params.json",
+   "block": "idspg_design_parameters",
+   "reason": "older design block (29 keys); IDSPG reads only idspg_design_parameters_3DP (gearbox_runner)"
+  }
+ ]
+}
