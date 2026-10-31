@@ -205,3 +205,28 @@ Automatic first pass from the code (the special cases above take precedence). Ca
 | `wpg_design_parameters` | 24 | **no** | planetMinDistanceMM, ringRadialWidthMMSmall, ringRadialWidthMMBig, sCarrierExtrusionDiaMM, sCarrierExtrusionClearanceMM, gearbox_casing_thickness, small_ring_gear_casing_thickness, bearingIDClearanceMM | mainCoverThicknessMM, baseThicknessMM, planetBoreMM, sunBoreMM, couplerRadiusMM, couplerThicknessMM, couplerShaftHeightMM, clearanceMotorandCaseMM, clearanceCarrierPlanetMM, clearanceSCarrierMotorMM, carrierThicknessMM, CarrierRadialThicknessClearance1, carrierInnerDiaClearanceMM1, sCarrierInnerDiaClearanceMM1, MainCover3AndCarrierClearanceMM, CarrierAndMainCaseClearanceMM |
 | `wpg_optimization_parameters` | 15 | yes | GEAR_RATIO_MIN, GEAR_RATIO_MAX, GEAR_RATIO_STEP, MODULE_BIG_MIN, MODULE_BIG_MAX, MODULE_SMALL_MIN, MODULE_SMALL_MAX, NUM_PLANET_MIN, NUM_PLANET_MAX, NUM_TEETH_SUN_MIN, NUM_TEETH_PLANET_BIG_MIN, NUM_TEETH_PLANET_SMALL_MIN, MAX_GB_DIA_MULT_FACTOR, MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR, SMALL_MOTOR_DIA_MM | — |
 | `wpg_3DP_design_parameters` | 59 | yes | planetMinDistanceMM, ringRadialWidthMMSmall, ringRadialWidthMMBig, sCarrierExtrusionDiaMM, sCarrierExtrusionClearanceMM, gearbox_casing_thickness, small_ring_gear_casing_thickness, bearingIDClearanceMM | — |
+
+
+## Result (classification done)
+
+Spec: [`config_files/variables/wpg_variables.json`](../../../config_files/variables/wpg_variables.json), page [`docs/variables/wpg.md`](../wpg.md) (generated). Tests: the generic `tests/test_variable_categories.py` (WPG registered in `tests/variable_helpers.py`) and `tests/test_variable_categories_wpg.py`.
+
+**Counts (CAD variables, 143):** input 18, optimisation 5, fixed 52, dependent 68 (42 formula, 21 lookup, 3 stress rule, 2 implicit constraint). The draft said fixed 53 / dependent 67: `clearance_motor_and_case` is now a copy of the config key `clearance_motor_and_case_min`, so it is Dependent / formula. **Code-only values: 35** (fixed 29, dependent 3: `pressure_angle_rad`, `maxGearboxDiameter`, `actuator_width`; input 2; optimisation 1: `module_s`). Confidence: 177 high, 1 medium, 0 low.
+
+**Medium-confidence entry**
+- `clearance_motor_and_case` (Dependent / formula = `clearance_motor_and_case_min`): the CAD takes the configured 5 as a constant, while the mass code grows it with the big ring (`(ring1_OD - motor_OD) / 2 + 5`). CAD and mass disagree (to log; the fix changes results, so it gets its own PR). The motor case is also sized from `maxGearboxDiameter` (the search limit), not from the chosen design.
+
+**Config keys added** to `wpg_3DP_design_parameters` (shared names, values that keep every output bit-identical): `clearance_motor_and_case_min` = 5, `case_mounting_hole_wall_overlap` = 0.5, `bearing_mount_wall_bolt_dia_multiple` = 2, `planet_bearing_gap` = 1.0 (was `standard_clearance_1_5mm * 2 / 3` for the pair and `* 1 / 3` per gear; 1.5 * 2 / 3 is exactly 1.0 and 1.5 * 1 / 3 exactly 0.5, so the code reads `planet_bearing_gap` and `planet_bearing_gap / 2`). They replace the hard-coded numbers in `setVariables`, `mitStressAnalysisMinFacewidth` and `getMassKG_3DP` (case clearance and bearing-mount rules). Each has a test that it drives exactly its CAD variables (and the mass where it does).
+
+**Shared tooling changed:** `rules.json` (`Nr` pattern accepts `Nr_b` / `Nr_s`; the stress-rule pattern accepts `fw_r_s`), `tests/variable_helpers.py` (WPG entry and setter); `docs/variables/{sspg,cpg,dspg}.md` regenerated (only the shared-rules list changed).
+
+**Results:** `python tests/golden/golden.py check`: All 58 cases match the baseline. `python -m pytest -q`: 822 passed. No `CADs/` file, no golden baseline touched.
+
+**Open questions**
+1. **Bug-18 pattern (one module in the CAD file)**: `module` is `moduleBig`; the small ring and small planet are drawn with it although the stress rule and the gearbox constraints use `moduleSmall` (`MODULE_SMALL_*` is searched). Logged, not fixed here: `module_s` is a code-only optimisation entry. The plan's `module_b` / `module_s` code change (as CPG) is value-identical today and still open (plan decision 5).
+2. **`bearing_mount_thickness` second case is unreachable** in the CAD rule: the bearing is chosen with a bore of at least `module * Nr_s + 2 * module + 2 * small_ring_case_thickness`, so `bearing_OD + 4 * output_mounting_hole_dia` always exceeds `Nr_s * module + 2 * h_b`. The branch test lists only the sun-hub rule for that reason. The mass code compares with a different ring term (`Nr2 * module2 + 2 * ring2_radial_thickness + 2 * standard_clearance_1_5mm`): CAD and mass differ (to log).
+3. Three separate config values set a ring wall: `ring_radial_thickness` (the CAD), `ringRadialWidthMMBig` and `ringRadialWidthMMSmall` (the gearbox class; the first also sizes `maxGearboxDiameter`). All are 5 today.
+4. `case_mounting_hole_wall_overlap` also reaches the mass, through `Motor_case_OD_max` (the case-mounting ring), unlike CPG.
+5. `sun_hub_dia` keeps its two hard-coded `* 2` clearance multiples (high confidence as a formula; no shared key proposed).
+6. `carrier_PCD` and `Nr_s` are each assigned twice in `setVariables` with the same expression (kept as one entry).
+7. `wpg_design_parameters` (24 keys) is never read; listed as an unused block. `planetMinDistanceMM`, `sCarrierExtrusion*`, `gearbox_casing_thickness`, `small_ring_gear_casing_thickness` and the ring-wall keys are code-only: read by the classes, not written to the CAD.

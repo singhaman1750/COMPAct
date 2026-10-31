@@ -53,6 +53,12 @@ def _set_cpg(gb, g):
     gb.setModuleBig(m_b), gb.setModuleSmall(m_s), gb.setNumPlanet(n)
 
 
+def _set_wpg(gb, g):
+    Ns, Np_b, Np_s, Nr_b, Nr_s, m_b, m_s, n = g
+    gb.setNs(Ns), gb.setNpBig(Np_b), gb.setNpSmall(Np_s), gb.setNrBig(Nr_b), gb.setNrSmall(Nr_s)
+    gb.setModuleBig(m_b), gb.setModuleSmall(m_s), gb.setNumPlanet(n)
+
+
 def _set_dspg(gb, g):
     Ns1, Np1, Nr1, m1, n1, Ns2, Np2, Nr2, m2, n2 = g
     for stage, (Ns, Np, Nr, module, n) in ((gb.Stage1, (Ns1, Np1, Nr1, m1, n1)), (gb.Stage2, (Ns2, Np2, Nr2, m2, n2))):
@@ -68,6 +74,13 @@ def _branches_cpg(a):
     return {"big planets wider than motor": (a.Ns + a.Np_b * 2) * a.module_b >= a.motor_OD,
             "bearing wider than ring": a.bearing_OD + a.output_mounting_hole_dia * 4 > a.Nr * a.module_s + 2 * a.h_b_s,
             "ring grown to the bearing": not a.Nr * a.module_s + 5 * 2 > a.bearing_OD}
+
+
+def _branches_wpg(a):
+    # bearing_mount_thickness has a second case, but the bearing is chosen with a bore of at least
+    # module * Nr_s + 2 * module + 2 * small_ring_case_thickness, so the first case always applies
+    return {"sun hub: motor holes wider than the sun tip":
+            a.motor_output_hole_PCD + a.motor_output_hole_CSK_OD + a.standard_clearance_1_5mm * 2 > a.module * a.Ns + 2 * a.module}
 
 
 def _branches_dspg(a):
@@ -95,6 +108,14 @@ GEARBOXES = {
                ("VT8020_PRO", (24, 40, 26, 90, 1.2, 1.2, 3)),
                ("U10_Plus_KV80", (18, 24, 60, 102, 1.0, 1.0, 3))],   # made up: ring wider than bearing + bolts
         branches=_branches_cpg),
+    "wpg": Gearbox(
+        "wpg", "WPG", "wpg_equations", "wolfromPlanetaryGearbox",
+        counts={"input": 18, "optimisation": 5, "fixed": 52, "dependent": 68}, code_only=35,
+        set_gears=_set_wpg,
+        # [gr, n, Ns, Np_b, Nr_b, Np_s, Nr_s, module_b, module_s]
+        from_opt=lambda p: (p[2], p[3], p[5], p[4], p[6], p[7], p[8], p[1]),
+        extra=[],
+        branches=_branches_wpg),
     "dspg": Gearbox(
         "dspg", "DSPG", "dspg_equations", "doubleStagePlanetaryGearbox",
         counts={"input": 36, "optimisation": 15, "fixed": 90, "dependent": 114}, code_only=33,

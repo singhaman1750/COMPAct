@@ -4875,6 +4875,11 @@ class wolfromPlanetaryActuator:
         self.tight_clearance_3DP                        = self.design_params["tight_clearance_3DP"]        
         self.loose_clearance_3DP                        = self.design_params["loose_clearance_3DP"]
 
+        self.clearance_motor_and_case_min               = self.design_params["clearance_motor_and_case_min"] # 5
+        self.case_mounting_hole_wall_overlap            = self.design_params["case_mounting_hole_wall_overlap"] # 0.5
+        self.bearing_mount_wall_bolt_dia_multiple       = self.design_params["bearing_mount_wall_bolt_dia_multiple"] # 2
+        self.planet_bearing_gap                         = self.design_params["planet_bearing_gap"] # 1.0
+
         # --- Gear Variables ---
         self.pressure_angle = self.wolfromPlanetaryGearbox.getPressureAngleRad()
         self.pressure_angle_deg = self.wolfromPlanetaryGearbox.getPressureAngleRad() * 180 / np.pi
@@ -5076,14 +5081,14 @@ class wolfromPlanetaryActuator:
 
         # --- Motor & Gearbox casing ---
         self.case_dist = self.sec_carrier_thickness + self.clearance_planet + self.sun_coupler_hub_thickness - self.case_mounting_surface_height
-        self.case_mounting_hole_shift = self.case_mounting_hole_dia / 2 - 0.5
-        self.clearance_motor_and_case = 5
+        self.case_mounting_hole_shift = self.case_mounting_hole_dia / 2 - self.case_mounting_hole_wall_overlap
+        self.clearance_motor_and_case = self.clearance_motor_and_case_min
         #self.clearance_motor_and_case = (5 if ((self.Ns + self.Np_b * 2) * self.module) < self.motor_OD else (((self.Ns + self.Np_b * 2) * self.module - self.motor_OD) * 0.5 + 5) )
         #self.motor_case_OD_base = self.motor_OD + self.clearance_motor_and_case * 2 + self.Motor_case_thickness * 2
         self.motor_case_OD_base = self.maxGearboxDiameter + 2*self.ring_radial_thickness + self.clearance_motor_and_case * 2 + self.Motor_case_thickness * 2
         self.case_mounting_PCD = self.motor_case_OD_base + self.case_mounting_hole_shift * 2
         self.Motor_case_OD_max = self.case_mounting_PCD + self.case_mounting_hole_allen_socket_dia + self.clearance_case_mount_holes_shell_thickness * 2
-        self.bearing_mount_thickness = (self.output_mounting_hole_dia * 2 if (self.bearing_OD + self.output_mounting_hole_dia * 4) > (self.Nr_s * self.module + 2 * self.h_b) else ((self.Nr_s * self.module + 2 * self.h_b - (self.bearing_OD + self.output_mounting_hole_dia * 4)) / 2) + self.output_mounting_hole_dia * 2 + self.standard_clearance_1_5mm)
+        self.bearing_mount_thickness = (self.output_mounting_hole_dia * self.bearing_mount_wall_bolt_dia_multiple if (self.bearing_OD + self.output_mounting_hole_dia * (2 * self.bearing_mount_wall_bolt_dia_multiple)) > (self.Nr_s * self.module + 2 * self.h_b) else ((self.Nr_s * self.module + 2 * self.h_b - (self.bearing_OD + self.output_mounting_hole_dia * (2 * self.bearing_mount_wall_bolt_dia_multiple))) / 2) + self.output_mounting_hole_dia * self.bearing_mount_wall_bolt_dia_multiple + self.standard_clearance_1_5mm)
         self.output_mounting_PCD = self.bearing_OD + self.bearing_mount_thickness
         #self.Motor_case_ID = self.motor_OD + self.clearance_motor_and_case * 2
         self.Motor_case_ID = self.maxGearboxDiameter + self.clearance_motor_and_case * 2 + 2*self.ring_radial_thickness
@@ -6218,11 +6223,11 @@ class wolfromPlanetaryActuator:
             bMin_planetBig_mit = bMin_planetBig_mit_2
 
         #------------- Contraint in planet to accomodate its bearings------------------------------------------
-        if ((bMin_planetBig_mit + bMin_planetSmall_mit) * 1000 < (self.planet_bearing_width*2 + self.standard_clearance_1_5mm * 2 / 3)) : 
-            if ((bMin_planetBig_mit) * 1000 < (self.planet_bearing_width + self.standard_clearance_1_5mm * 1 / 3)): 
-                bMin_planetBig_mit = (self.planet_bearing_width + self.standard_clearance_1_5mm * 1 / 3) / 1000
-            if ((bMin_planetSmall_mit) * 1000 < (self.planet_bearing_width + self.standard_clearance_1_5mm * 1 / 3)): 
-                bMin_planetSmall_mit = (self.planet_bearing_width + self.standard_clearance_1_5mm * 1 / 3) / 1000
+        if ((bMin_planetBig_mit + bMin_planetSmall_mit) * 1000 < (self.planet_bearing_width*2 + self.planet_bearing_gap)) : 
+            if ((bMin_planetBig_mit) * 1000 < (self.planet_bearing_width + self.planet_bearing_gap / 2)): 
+                bMin_planetBig_mit = (self.planet_bearing_width + self.planet_bearing_gap / 2) / 1000
+            if ((bMin_planetSmall_mit) * 1000 < (self.planet_bearing_width + self.planet_bearing_gap / 2)): 
+                bMin_planetSmall_mit = (self.planet_bearing_width + self.planet_bearing_gap / 2) / 1000
             bMin_ringBig_mit   = bMin_planetBig_mit
             bMin_ringSmall_mit = bMin_planetSmall_mit
 
@@ -6402,9 +6407,9 @@ class wolfromPlanetaryActuator:
         motor_OD = self.motorDiaMM
 
         if (ring1_OD < motor_OD):
-            clearance_motor_and_case = 5
+            clearance_motor_and_case = self.clearance_motor_and_case_min
         else: 
-            clearance_motor_and_case = (ring1_OD - motor_OD)/2 + 5
+            clearance_motor_and_case = (ring1_OD - motor_OD)/2 + self.clearance_motor_and_case_min
 
         motor_height      = self.motorLengthMM
         Motor_case_height = motor_height + case_mounting_surface_height + standard_clearance_1_5mm
@@ -6430,13 +6435,13 @@ class wolfromPlanetaryActuator:
         ringFwUsedMM = ring1FwMM
 
         # --- Bearing holding structure --- 
-        if ((bearing_OD + output_mounting_hole_dia * 4) > ((Nr2 * module2 + 2 * ring2_radial_thickness) + standard_clearance_1_5mm * 2)):
-            bearing_mount_thickness  = output_mounting_hole_dia * 2
+        if ((bearing_OD + output_mounting_hole_dia * (2 * self.bearing_mount_wall_bolt_dia_multiple)) > ((Nr2 * module2 + 2 * ring2_radial_thickness) + standard_clearance_1_5mm * 2)):
+            bearing_mount_thickness  = output_mounting_hole_dia * self.bearing_mount_wall_bolt_dia_multiple
         else:
             bearing_mount_thickness = (((
                                         ((Nr2 * module2 + 2 * ring2_radial_thickness) + standard_clearance_1_5mm * 2) 
-                                        - (bearing_OD + output_mounting_hole_dia * 4))/2) 
-                                        + output_mounting_hole_dia * 2 + standard_clearance_1_5mm)        
+                                        - (bearing_OD + output_mounting_hole_dia * (2 * self.bearing_mount_wall_bolt_dia_multiple)))/2) 
+                                        + output_mounting_hole_dia * self.bearing_mount_wall_bolt_dia_multiple + standard_clearance_1_5mm)        
 
         bearing_holding_structure_ID     = bearing_OD
         bearing_holding_structure_OD     = bearing_OD + bearing_mount_thickness * 2
