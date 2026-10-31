@@ -184,7 +184,7 @@ GEARBOXES = {
         config_file="motor_config.json"),
     "isspg_compact": Gearbox(
         "isspg_compact", "ISSPG", "isspg_compact_equations", "planetaryGearbox",
-        counts={"input": 24, "optimisation": 4, "fixed": 57, "dependent": 60}, code_only=31,
+        counts={"input": 24, "optimisation": 4, "fixed": 57, "dependent": 60}, code_only=33,
         set_gears=_set_sspg,
         from_opt=lambda p: (p[2], p[3], p[4], p[5], p[1]),           # [gr, n, Ns, Np, Nr, module, ...]
         extra=[("RO100", (24, 54, 132, 1.2, 3))],        # module 1.2: short gears (the ring hub hits its 3 mm minimum), no width cap
@@ -192,7 +192,7 @@ GEARBOXES = {
         params_name="isspg_params.json", has_plain=False),
     "isspg_inside": Gearbox(
         "isspg_inside", "ISSPG", "isspg_inside_equations", "planetaryGearbox",
-        counts={"input": 26, "optimisation": 4, "fixed": 54, "dependent": 63}, code_only=34,
+        counts={"input": 26, "optimisation": 4, "fixed": 54, "dependent": 63}, code_only=36,
         set_gears=_set_sspg,
         from_opt=lambda p: (p[2], p[3], p[4], p[5], p[1]),           # [gr, n, Ns, Np, Nr, module, ...]
         extra=[("RO100", (30, 60, 150, 1.2, 3))],        # module 1.2: short gears (the ring hub hits its 3 mm minimum), no width cap
