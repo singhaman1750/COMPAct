@@ -95,7 +95,7 @@ def test_stress_rule_widths_follow_what_they_depend_on(monkeypatch, tmp_path, gb
 def test_planet_stack_cap_comes_from_the_config(monkeypatch, tmp_path, gb):
     """planet_stack_stator_heights (config) caps the planet stack (big ring + small ring + clearance_planet) at that
     many stator heights: on a 3d-printed design that hits the cap, the stack equals the cap, and raising it from 2 to
-    3 stator heights lengthens the gears, changing exactly the CAD variables downstream of it."""
+    2.4 stator heights lengthens the gears, changing exactly the CAD variables downstream of it."""
     def run(heights, folder):
         folder.mkdir()
         actuator, _, _, onshape = design(monkeypatch, folder, gb, f"{gb}__RI100__20")
@@ -104,11 +104,11 @@ def test_planet_stack_cap_comes_from_the_config(monkeypatch, tmp_path, gb):
         return {n: float(x) for n, x in onshape}, actuator
 
     base, act = run(None, tmp_path / "a")
-    more, more_act = run(3.0, tmp_path / "b")
+    more, more_act = run(2.4, tmp_path / "b")
     stator = act.motor.stator_height
     assert act.torque_carried_fraction < 1.0 and more_act.torque_carried_fraction < 1.0                 # capped both times
     assert base["fw_r_b"] + base["fw_r_s"] + base["clearance_planet"] == pytest.approx(2.0 * stator)
-    assert more["fw_r_b"] + more["fw_r_s"] + more["clearance_planet"] == pytest.approx(3.0 * stator)
+    assert more["fw_r_b"] + more["fw_r_s"] + more["clearance_planet"] == pytest.approx(2.4 * stator)
     changed = {k for k in base if base[k] != more[k]}
     assert {"fw_s_calc", "fw_r_b", "fw_p_b", "fw_r_s", "fw_p_s", "fw_s_used"} <= changed <= downstream_of(gb, "planet_stack_stator_heights")
 
@@ -151,3 +151,27 @@ def test_motor_minimum_for_the_rotor_top_bearing_comes_from_the_config(monkeypat
     assert more["rotor_top_bearing_ID"] > base["rotor_top_bearing_ID"] >= 25
     changed = {k for k in base if base[k] != more[k]}
     assert "rotor_top_bearing_ID" in changed and changed <= downstream_of(gb, "min_rotor_top_bearing_ID")
+
+
+@pytest.mark.skipif("inwpg_independent" not in SPECS, reason="needs the independent spec")
+def test_rotor_top_bearing_of_the_independent_variant_comes_from_the_config(monkeypatch, tmp_path):
+    """The independent variant takes the rotor top bearing from the params file, one value per motor (no catalogue
+    lookup): giving RI100 RI80's bearing changes the three rotor_top_bearing values and exactly the CAD variables
+    downstream of them (the sun hub, ...), and nothing else."""
+    gb = "inwpg_independent"
+    names = ("rotor_top_bearing_ID", "rotor_top_bearing_OD", "rotor_top_bearing_width")
+
+    def run(swap, folder):
+        folder.mkdir()
+        actuator, _, _, onshape = design(monkeypatch, folder, gb, f"{gb}__RI100__20")
+        if swap:
+            for key in names:
+                actuator.design_params[key] = {"RI100": actuator.design_params[key]["RI80"], "RI80": actuator.design_params[key]["RI80"]}
+            onshape = rerun(actuator, folder, gb).items()
+        return {n: float(x) for n, x in onshape}
+
+    base, more = run(False, tmp_path / "a"), run(True, tmp_path / "b")
+    assert [more[n] for n in names] != [base[n] for n in names]
+    changed = {k for k in base if base[k] != more[k]}
+    assert changed == downstream_of(gb, *names) & set(base)
+    assert set(names) | {"sun_hub_dia"} <= changed
