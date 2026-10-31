@@ -471,6 +471,7 @@ class internalcompoundPlanetaryActuator:
         self.clearance_planet                   = self.design_params["clearance_planet"]
         self.standard_clearance_1_5mm           = self.design_params["standard_clearance_1_5mm"]
         self.planet_bearing_gap                 = self.design_params["planet_bearing_gap"] # 1.0
+        self.sun_hub_clearance_multiple         = self.design_params["sun_hub_clearance_multiple"] # 4
         self.standard_fillet_1_5mm              = self.design_params["standard_fillet_1_5mm"]
         self.standard_bearing_insertion_chamfer = self.design_params["standard_bearing_insertion_chamfer"]
         self.tight_clearance_3DP                = self.design_params["tight_clearance_3DP"]
@@ -530,7 +531,7 @@ class internalcompoundPlanetaryActuator:
         self.sun_gear_rotor_nut_wrench_size      = self.design_params["sun_gear_rotor_nut_wrench_size"]
         self.sun_gear_rotor_nut_height           = self.design_params["sun_gear_rotor_nut_height"]
         
-        sun_hub_dia_min = self.rotor_mount_hole_PCD + self.sun_gear_rotor_nut_wrench_size + self.standard_clearance_1_5mm * 4
+        sun_hub_dia_min = self.rotor_mount_hole_PCD + self.sun_gear_rotor_nut_wrench_size + self.standard_clearance_1_5mm * self.sun_hub_clearance_multiple
         
         sun_bottom_casing_bearing_ID_required  = sun_hub_dia_min #self.motor_rotor_base_ID
         sun_bottom_casing_bearing              = bearings_discrete(sun_bottom_casing_bearing_ID_required)
@@ -598,7 +599,7 @@ class internalcompoundPlanetaryActuator:
 
         # Sun hub diameter (capped at rotor OD with clearance)
         sun_hub_dia_calc = (self.rotor_mount_hole_PCD + self.rotor_mount_hole_dia
-                            + self.standard_clearance_1_5mm * 4)
+                            + self.standard_clearance_1_5mm * self.sun_hub_clearance_multiple)
         cap              = self.Rotor_OD - self.standard_clearance_1_5mm * 2
         self.sun_hub_dia = cap if sun_hub_dia_calc > self.Rotor_OD else sun_hub_dia_calc
 

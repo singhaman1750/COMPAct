@@ -207,5 +207,5 @@ Spec: [`config_files/variables/isspg_inside_variables.json`](../../../config_fil
 **Results:** `python tests/golden/golden.py check`: All 58 cases match the baseline. `python -m pytest -q`: 1054 passed. No `CADs/` file, no golden baseline touched.
 
 **Open questions (beyond compact's)**
-1. The input bearing is sized from a hard-coded-margin sun-hub request (`x 4`, the shared item the plan still has to decide) and then sets `sun_hub_dia`; the plan's "no hard-coded number" for inside's `sun_hub_dia` holds for the formula itself, not for the request that feeds it.
+1. The input bearing is sized from a hard-coded-margin sun-hub request (`x 4`, the shared item the plan still has to decide) and then sets `sun_hub_dia`; the plan's "no hard-coded number" for inside's `sun_hub_dia` holds for the formula itself, not for the request that feeds it. **Done (2026-10-31):** the margin is now the config key `sun_hub_clearance_multiple` (4 in every type with this rule, SSPG and CPG included; 5 in IDSPG, its CAD value), read by the CAD code and the mass code; value-identical; `tests/test_sun_hub_clearance.py`.
 2. `rotorCSKHeadUpperDiaMM` and `rotorCSKHeadHeightMM` are motor inputs written by this variant only.

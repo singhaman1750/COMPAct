@@ -1521,11 +1521,12 @@
    "attr": "sun_hub_dia",
    "category": "dependent",
    "subtype": "formula",
-   "formula": "motor_output_hole_PCD + motor_output_hole_dia + standard_clearance_1_5mm * 4",
+   "formula": "motor_output_hole_PCD + motor_output_hole_dia + standard_clearance_1_5mm * sun_hub_clearance_multiple",
    "depends_on": [
     "motor_output_hole_PCD",
     "motor_output_hole_dia",
-    "standard_clearance_1_5mm"
+    "standard_clearance_1_5mm",
+    "sun_hub_clearance_multiple"
    ],
    "confidence": "high",
    "reason": "sun coupler hub, sized to the motor's output holes"
@@ -1734,6 +1735,19 @@
    },
    "confidence": "high",
    "reason": "axial gap between the two bearings inside a planet; with them it sets the smallest planet (and ring) face width"
+  },
+  {
+   "name": "sun_hub_clearance_multiple",
+   "attr": "sun_hub_clearance_multiple",
+   "category": "fixed",
+   "subtype": "clearance",
+   "source": {
+    "file": "sspg_params.json",
+    "block": "sspg_3DP_design_parameters",
+    "key": "sun_hub_clearance_multiple"
+   },
+   "confidence": "high",
+   "reason": "margin around the sun hub's bolt circle, in multiples of standard_clearance_1_5mm (4); used for the sun hub (CAD and mass code); one shared key name across the gearbox types"
   },
   {
    "name": "pressure_angle_rad",

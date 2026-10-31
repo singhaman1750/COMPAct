@@ -811,15 +811,16 @@
    "attr": "sun_hub_dia",
    "category": "dependent",
    "subtype": "formula",
-   "formula": "(Rotor_OD - standard_clearance_1_5mm * 2) if (rotor_mount_hole_PCD + rotor_mount_hole_dia + standard_clearance_1_5mm * 4) > Rotor_OD else (rotor_mount_hole_PCD + rotor_mount_hole_dia + standard_clearance_1_5mm * 4)",
+   "formula": "(Rotor_OD - standard_clearance_1_5mm * 2) if (rotor_mount_hole_PCD + rotor_mount_hole_dia + standard_clearance_1_5mm * sun_hub_clearance_multiple) > Rotor_OD else (rotor_mount_hole_PCD + rotor_mount_hole_dia + standard_clearance_1_5mm * sun_hub_clearance_multiple)",
    "depends_on": [
     "Rotor_OD",
     "standard_clearance_1_5mm",
     "rotor_mount_hole_PCD",
-    "rotor_mount_hole_dia"
+    "rotor_mount_hole_dia",
+    "sun_hub_clearance_multiple"
    ],
-   "confidence": "medium",
-   "reason": "sun hub: sized to the rotor's mount holes plus a hard-coded x 4 clearance margin, capped at the rotor's outer diameter less two clearances (the shared sun-hub margin item the plan still has to decide)"
+   "confidence": "high",
+   "reason": "sun hub: sized to the rotor's mount holes plus a margin of sun_hub_clearance_multiple x standard_clearance_1_5mm (config), capped at the rotor's outer diameter less two clearances"
   },
   {
    "name": "sun_central_bolt_dia",
@@ -1003,17 +1004,18 @@
    "lookup": {
     "function": "bearings_discrete",
     "args": {
-     "idRequiredMM": "rotor_mount_hole_PCD + sun_gear_rotor_nut_wrench_size + standard_clearance_1_5mm * 4"
+     "idRequiredMM": "rotor_mount_hole_PCD + sun_gear_rotor_nut_wrench_size + standard_clearance_1_5mm * sun_hub_clearance_multiple"
     },
     "method": "getBearingIDMM"
    },
    "depends_on": [
     "rotor_mount_hole_PCD",
     "sun_gear_rotor_nut_wrench_size",
-    "standard_clearance_1_5mm"
+    "standard_clearance_1_5mm",
+    "sun_hub_clearance_multiple"
    ],
-   "confidence": "medium",
-   "reason": "catalogue bearing chosen by bearings_discrete (smallest one that fits) (the request has a hard-coded number: x 4 clearance margin); this is its bore"
+   "confidence": "high",
+   "reason": "catalogue bearing chosen by bearings_discrete (smallest one that fits) (the request: the hole circle plus the nut plus sun_hub_clearance_multiple x standard_clearance_1_5mm, config); this is its bore"
   },
   {
    "name": "sun_bottom_casing_bearing_OD",
@@ -1023,17 +1025,18 @@
    "lookup": {
     "function": "bearings_discrete",
     "args": {
-     "idRequiredMM": "rotor_mount_hole_PCD + sun_gear_rotor_nut_wrench_size + standard_clearance_1_5mm * 4"
+     "idRequiredMM": "rotor_mount_hole_PCD + sun_gear_rotor_nut_wrench_size + standard_clearance_1_5mm * sun_hub_clearance_multiple"
     },
     "method": "getBearingODMM"
    },
    "depends_on": [
     "rotor_mount_hole_PCD",
     "sun_gear_rotor_nut_wrench_size",
-    "standard_clearance_1_5mm"
+    "standard_clearance_1_5mm",
+    "sun_hub_clearance_multiple"
    ],
-   "confidence": "medium",
-   "reason": "catalogue bearing chosen by bearings_discrete (smallest one that fits) (the request has a hard-coded number: x 4 clearance margin); this is its outer diameter"
+   "confidence": "high",
+   "reason": "catalogue bearing chosen by bearings_discrete (smallest one that fits) (the request: the hole circle plus the nut plus sun_hub_clearance_multiple x standard_clearance_1_5mm, config); this is its outer diameter"
   },
   {
    "name": "sun_bottom_casing_bearing_height",
@@ -1043,17 +1046,18 @@
    "lookup": {
     "function": "bearings_discrete",
     "args": {
-     "idRequiredMM": "rotor_mount_hole_PCD + sun_gear_rotor_nut_wrench_size + standard_clearance_1_5mm * 4"
+     "idRequiredMM": "rotor_mount_hole_PCD + sun_gear_rotor_nut_wrench_size + standard_clearance_1_5mm * sun_hub_clearance_multiple"
     },
     "method": "getBearingWidthMM"
    },
    "depends_on": [
     "rotor_mount_hole_PCD",
     "sun_gear_rotor_nut_wrench_size",
-    "standard_clearance_1_5mm"
+    "standard_clearance_1_5mm",
+    "sun_hub_clearance_multiple"
    ],
-   "confidence": "medium",
-   "reason": "catalogue bearing chosen by bearings_discrete (smallest one that fits) (the request has a hard-coded number: x 4 clearance margin); this is its width"
+   "confidence": "high",
+   "reason": "catalogue bearing chosen by bearings_discrete (smallest one that fits) (the request: the hole circle plus the nut plus sun_hub_clearance_multiple x standard_clearance_1_5mm, config); this is its width"
   },
   {
    "name": "sun_gear_rotor_nut_wrench_size",
@@ -1731,6 +1735,19 @@
    },
    "confidence": "high",
    "reason": "axial gap between the two planet bearings (one in each planet gear); with the bearing width it sets the smallest planet and ring width"
+  },
+  {
+   "name": "sun_hub_clearance_multiple",
+   "attr": "sun_hub_clearance_multiple",
+   "category": "fixed",
+   "subtype": "clearance",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "sun_hub_clearance_multiple"
+   },
+   "confidence": "high",
+   "reason": "margin around the sun hub's bolt circle, in multiples of standard_clearance_1_5mm (4); used for the sun hub and the bottom-casing bearing request; one shared key name across the gearbox types"
   },
   {
    "name": "maxGearboxDiameter",

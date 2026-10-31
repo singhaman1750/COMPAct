@@ -569,6 +569,7 @@ class internalsingleStagePlanetaryActuator:
         self.loose_clearance_3DP                        = self.design_params["loose_clearance_3DP"]
         self.bearing_step_width                         = self.design_params["bearing_step_width"] # 2
         self.planet_bearing_gap                         = self.design_params["planet_bearing_gap"] # 1.0
+        self.sun_hub_clearance_multiple                 = self.design_params["sun_hub_clearance_multiple"] # 4
 
         # --- Sun coupler, sun gear & sun gear dimensions ---
         self.sun1_bearing_ID           = self.design_params["sun1_bearing_ID"]           # 8
@@ -761,7 +762,7 @@ class internalsingleStagePlanetaryActuator:
         self.sun_hub_nut_wrench_size    = sun_hub_bolt.nut_width_across_flats 
         self.sun_hub_nut_depth          = sun_hub_bolt.nut_thickness
 
-        self.sun_hub_dia = self.motor_rotor_hole_PCD + self.sun_hub_nut_wrench_size + self.standard_clearance_1_5mm * 4
+        self.sun_hub_dia = self.motor_rotor_hole_PCD + self.sun_hub_nut_wrench_size + self.standard_clearance_1_5mm * self.sun_hub_clearance_multiple
         
         sun_central_bolt = nuts_and_bolts_dimensions(bolt_dia = self.sun_central_bolt_dia, bolt_type="socket_head")
         self.sun_central_bolt_socket_head_dia   = sun_central_bolt.bolt_head_dia

@@ -265,6 +265,7 @@ class internaldoubleStagePlanetaryActuator:
         self.motor_casing_thickness                     = self.design_params["motor_casing_thickness"] # 3.5
         self.bearingIDClearanceMM                       = self.design_params["bearingIDClearanceMM"]
         self.planet_bearing_gap                         = self.design_params["planet_bearing_gap"] # 1.0
+        self.sun_hub_clearance_multiple                 = self.design_params["sun_hub_clearance_multiple"] # 5
 
         #new variables added -------------                  #TODO : REMOVE THIS LATER 
 
@@ -562,7 +563,7 @@ class internaldoubleStagePlanetaryActuator:
         self.carrier_PCD1 = (self.Np1 + self.Ns1) * self.module1
         #self.fw_s1_used = self.fw_p1 + self.clearance_planet + self.sec_carrier_thickness1 + self.standard_clearance_1_5mm                                #TODO :stg 2 set variables
         #self.case_dist1 = self.sec_carrier_thickness1 + self.clearance_planet + self.sun_coupler_hub_thickness1 - self.case_mounting_surface_height
-        self.sun_hub_dia1 = self.rotor_mount_hole_PCD + self.rotor_mount_hole_dia + self.standard_clearance_1_5mm * 5                                       #TODO: check if correct
+        self.sun_hub_dia1 = self.rotor_mount_hole_PCD + self.rotor_mount_hole_dia + self.standard_clearance_1_5mm * self.sun_hub_clearance_multiple                                       #TODO: check if correct
 
         ## --------------------------------------------------------------------
         ## Stage 1 - Fastener and Detailed Feature Dimensions

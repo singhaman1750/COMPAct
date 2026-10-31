@@ -867,14 +867,15 @@
    "attr": "sun_hub_dia1",
    "category": "dependent",
    "subtype": "formula",
-   "formula": "rotor_mount_hole_PCD + rotor_mount_hole_dia + a1_standard_clearance_1_5mm * 5",
+   "formula": "rotor_mount_hole_PCD + rotor_mount_hole_dia + a1_standard_clearance_1_5mm * sun_hub_clearance_multiple",
    "depends_on": [
     "rotor_mount_hole_PCD",
     "rotor_mount_hole_dia",
-    "a1_standard_clearance_1_5mm"
+    "a1_standard_clearance_1_5mm",
+    "sun_hub_clearance_multiple"
    ],
-   "confidence": "medium",
-   "reason": "sun hub: the rotor's mount-hole circle plus hole diameter plus a hard-coded 5 x standard_clearance_1_5mm; the mass code uses 4 (CAD and mass disagree, to be logged); the shared sun-hub margin item the plan still has to decide"
+   "confidence": "high",
+   "reason": "sun hub: the rotor's mount-hole circle plus hole diameter plus a margin of sun_hub_clearance_multiple x standard_clearance_1_5mm (config, 5 in IDSPG); the mass code still uses 4 (ISSUES: IDSPG sun hub)"
   },
   {
    "name": "a1_sun_central_bolt_dia",
@@ -2048,14 +2049,15 @@
    "attr": "sun_hub_dia1",
    "category": "dependent",
    "subtype": "formula",
-   "formula": "rotor_mount_hole_PCD + rotor_mount_hole_dia + a1_standard_clearance_1_5mm * 5",
+   "formula": "rotor_mount_hole_PCD + rotor_mount_hole_dia + a1_standard_clearance_1_5mm * sun_hub_clearance_multiple",
    "depends_on": [
     "rotor_mount_hole_PCD",
     "rotor_mount_hole_dia",
-    "a1_standard_clearance_1_5mm"
+    "a1_standard_clearance_1_5mm",
+    "sun_hub_clearance_multiple"
    ],
-   "confidence": "medium",
-   "reason": "same value as a1_sun_hub_dia (the CAD writes it under both stage prefixes); sun hub: the rotor's mount-hole circle plus hole diameter plus a hard-coded 5 x standard_clearance_1_5mm; the mass code uses 4 (CAD and mass disagree, to be logged); the shared sun-hub margin item the plan still has to decide",
+   "confidence": "high",
+   "reason": "same value as a1_sun_hub_dia (the CAD writes it under both stage prefixes); sun hub: the rotor's mount-hole circle plus hole diameter plus a margin of sun_hub_clearance_multiple x standard_clearance_1_5mm (config, 5 in IDSPG); the mass code still uses 4 (ISSUES: IDSPG sun hub)",
    "alias_of": "a1_sun_hub_dia"
   },
   {
@@ -2875,6 +2877,19 @@
    },
    "confidence": "medium",
    "reason": "axial gap between the two planet bearings (one in each planet gear); with the bearing width it sets the smallest planet and ring width of both stages; one key for both stages, the plan leaves open whether it should be one per stage (planet_bearing_gap1 / 2)"
+  },
+  {
+   "name": "sun_hub_clearance_multiple",
+   "attr": "sun_hub_clearance_multiple",
+   "category": "fixed",
+   "subtype": "clearance",
+   "source": {
+    "file": "idspg_params.json",
+    "block": "idspg_design_parameters_3DP",
+    "key": "sun_hub_clearance_multiple"
+   },
+   "confidence": "high",
+   "reason": "margin around the sun hub's bolt circle, in multiples of standard_clearance_1_5mm (5); used for the stage-1 sun hub in the CAD (the mass code still uses 4); one shared key name across the gearbox types"
   },
   {
    "name": "maxGearboxDiameter",

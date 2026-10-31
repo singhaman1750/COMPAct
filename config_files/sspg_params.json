@@ -110,6 +110,7 @@
         "planet_bearing_OD"                                      : 12, 
         "planet_bearing_width"                                   : 3.5,
         "planet_bearing_gap"                                     : 1.0,
+        "sun_hub_clearance_multiple"                             : 4,
         "planet_bore"                                            : 10,
         "bearing_retainer_thickness"                             : 2,
         "tight_clearance_3DP"                                    : 0.4,

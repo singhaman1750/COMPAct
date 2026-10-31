@@ -220,7 +220,7 @@ Spec: [`config_files/variables/isspg_compact_variables.json`](../../../config_fi
 **Medium-confidence entries** (hard-coded numbers with no shared key)
 - `ring_hub_thickness`, `carrier_thickness`, `carrier_thickness_mid` (Dependent / formula): an iterative two-case rule. The carrier starts with a hard-coded 6 mm middle plate; if the ring hub that closes the stack would be thinner than a hard-coded 3 mm, the hub is set to 3 and the carrier takes up the difference. The three are written as one conditional formula each.
 - `sun_coupler_hub_thickness` (Dependent / formula): a hard-coded 3 mm term (the config's value is not read).
-- `sun_hub_dia` (Dependent / formula): a hard-coded `x 4` clearance margin, the shared sun-hub item the plan still has to decide (the config's value is not read).
+- `sun_hub_dia` (Dependent / formula): a hard-coded `x 4` clearance margin, the shared sun-hub item the plan still has to decide (the config's value is not read). **Done (2026-10-31):** the margin is now the config key `sun_hub_clearance_multiple` (4 in every type with this rule, SSPG and CPG included; 5 in IDSPG, its CAD value), read by the CAD code and the mass code; value-identical; `tests/test_sun_hub_clearance.py`.
 - `output_bearing_ID` / `_OD` / `_width` (Dependent / lookup): the bore request carries a hard-coded 20 mm clearance.
 - `sun2_bearing_ID` / `_OD` / `_width` (Dependent / lookup): requested by outer diameter (`motor_rotor_base_ID`); `bearings_discrete` returns the first bearing with OD >= the request, which can exceed it (ISSUES bug 5).
 

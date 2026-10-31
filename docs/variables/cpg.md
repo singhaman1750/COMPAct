@@ -23,9 +23,9 @@ Confidence:
 |---|---|---|
 | Input | 18 | 2 |
 | Optimisation | 5 | 1 |
-| Fixed | 42 | 24 |
+| Fixed | 42 | 25 |
 | Dependent | 54 | 4 |
-| **Total** | **119** | **31** |
+| **Total** | **119** | **32** |
 
 CAD variables by confidence: high 119, medium 0, low 0
 
@@ -165,7 +165,7 @@ From `config_files/variables/rules.json`; the test holds every gearbox's file to
 | 42 | `carrier_trapezoidal_support_hole_socket_head_dia` | lookup | `nuts_and_bolts_dimensions(bolt_dia=carrier_trapezoidal_support_hole_dia, bolt_type=socket_head)` → bolt_head_dia | carrier_trapezoidal_support_hole_dia | high | standard socket-head fastener size for the chosen bolt diameter |
 | 43 | `carrier_trapezoidal_support_hole_wrench_size` | lookup | `nuts_and_bolts_dimensions(bolt_dia=carrier_trapezoidal_support_hole_dia, bolt_type=socket_head)` → nut_width_across_flats | carrier_trapezoidal_support_hole_dia | high | standard socket-head fastener size for the chosen bolt diameter |
 | 44 | `planet_pin_bolt_wrench_size` | lookup | `nuts_and_bolts_dimensions(bolt_dia=planet_pin_bolt_dia, bolt_type=socket_head)` → nut_width_across_flats | planet_pin_bolt_dia | high | standard socket-head fastener size for the chosen bolt diameter |
-| 45 | `sun_hub_dia` | formula | `motor_output_hole_PCD + motor_output_hole_dia + standard_clearance_1_5mm * 4` | motor_output_hole_PCD, motor_output_hole_dia, standard_clearance_1_5mm | high | sun coupler hub, sized to the motor's output holes |
+| 45 | `sun_hub_dia` | formula | `motor_output_hole_PCD + motor_output_hole_dia + standard_clearance_1_5mm * sun_hub_clearance_multiple` | motor_output_hole_PCD, motor_output_hole_dia, standard_clearance_1_5mm, sun_hub_clearance_multiple | high | sun coupler hub, sized to the motor's output holes |
 | 46 | `sun_central_bolt_socket_head_dia` | lookup | `nuts_and_bolts_dimensions(bolt_dia=sun_central_bolt_dia, bolt_type=socket_head)` → bolt_head_dia | sun_central_bolt_dia | high | standard socket-head fastener size for the chosen bolt diameter |
 | 47 | `fw_s_used` | formula | `fw_p_s + fw_p_b + clearance_planet + sec_carrier_thickness + standard_clearance_1_5mm` | fw_p_s, fw_p_b, clearance_planet, sec_carrier_thickness, standard_clearance_1_5mm | high | printed sun length: both planet widths plus the carrier and clearances |
 | 48 | `motor_output_hole_CSK_OD` | lookup | `nuts_and_bolts_dimensions(bolt_dia=motor_output_hole_dia, bolt_type=CSK)` → bolt_head_dia | motor_output_hole_dia | high | standard countersunk fastener size for the chosen bolt diameter |
@@ -176,7 +176,7 @@ From `config_files/variables/rules.json`; the test holds every gearbox's file to
 | 53 | `alpha_p_s` | formula | `(sqrt(dp_p_s**2 - db_p_s**2) / db_p_s) * 180 / pi - pressure_angle_rad * 180 / pi` | dp_p_s, db_p_s, pressure_angle_rad | high | involute angle used to draw the tooth |
 | 54 | `beta_p_s` | formula | `(360 / (4 * Np_s) - alpha_p_s) * 2` | Np_s, alpha_p_s | high | tooth angle used to draw the tooth |
 
-## Used by the code, not written to the CAD file (31)
+## Used by the code, not written to the CAD file (32)
 
 | # | Variable | Sub-type | Source / formula | Depends on | Confidence | Why |
 |---|---|---|---|---|---|---|
@@ -194,23 +194,24 @@ From `config_files/variables/rules.json`; the test holds every gearbox's file to
 | 12 | `case_mounting_hole_wall_overlap` | clearance | cpg_params.json → cpg_3DP_design_parameters → `case_mounting_hole_wall_overlap` |  | high | how far the case mounting holes cut into the case wall (0 = the hole just touches the wall); sets case_mounting_hole_shift |
 | 13 | `bearing_mount_wall_bolt_dia_multiple` | wall thickness | cpg_params.json → cpg_3DP_design_parameters → `bearing_mount_wall_bolt_dia_multiple` |  | high | bearing-mount wall per side, in output-bolt diameters; sets bearing_mount_thickness (CAD) and the bearing-holding structure mass |
 | 14 | `planet_bearing_gap` | clearance | cpg_params.json → cpg_3DP_design_parameters → `planet_bearing_gap` |  | high | axial gap between the two planet bearings (one in each planet gear); with them it sets the smallest planet widths |
-| 15 | `output_mounting_hole_num` | fastener size | cpg_params.json → cpg_3DP_design_parameters → `output_mounting_hole_num` |  | high | number of output mounting holes: read from the config but not used by the code or written to the CAD file |
-| 16 | `module_s` | module | optimiser (`optimizationCompoundPlanetaryActuator`) |  | high | the small module (small planet, ring): searched by the optimiser loop, but not in the CAD file (which has one module; ISSUES bug 18) |
-| 17 | `h_b_s` | formula | `1.25 * module_s` | module_s | high | ring tooth depth (small module), used by the bearing-mount rule |
-| 18 | `maxGearboxDiameter` | formula | `(MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR if motor_OD < SMALL_MOTOR_DIA_MM else MAX_GB_DIA_MULT_FACTOR) * motor_OD` | MAX_GB_DIA_MULT_FACTOR, MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR, SMALL_MOTOR_DIA_MM, motor_OD | high | largest gearbox diameter the optimiser may use (gearbox_runner max_diameter; unlike SSPG, without subtracting the ring wall) |
-| 19 | `actuator_width` | formula | `fw_r + clearance_planet + bearing_height + clearance_planet + case_dist + bearing_retainer_thickness + motor_height + case_mounting_surface_height + standard_clearance_1_5mm + base_plate_thickness` | fw_r, clearance_planet, bearing_height, case_dist, bearing_retainer_thickness, motor_height, case_mounting_surface_height, standard_clearance_1_5mm, base_plate_thickness | high | axial width without the driver mount, written to the results CSV |
-| 20 | `GEAR_RATIO_MIN` | search bound | cpg_params.json → cpg_optimization_parameters → `GEAR_RATIO_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 21 | `GEAR_RATIO_MAX` | search bound | cpg_params.json → cpg_optimization_parameters → `GEAR_RATIO_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 22 | `GEAR_RATIO_STEP` | search bound | cpg_params.json → cpg_optimization_parameters → `GEAR_RATIO_STEP` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 23 | `MODULE_MIN` | search bound | cpg_params.json → cpg_optimization_parameters → `MODULE_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 24 | `MODULE_MAX` | search bound | cpg_params.json → cpg_optimization_parameters → `MODULE_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 25 | `NUM_PLANET_MIN` | search bound | cpg_params.json → cpg_optimization_parameters → `NUM_PLANET_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 26 | `NUM_PLANET_MAX` | search bound | cpg_params.json → cpg_optimization_parameters → `NUM_PLANET_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 27 | `NUM_TEETH_SUN_MIN` | search bound | cpg_params.json → cpg_optimization_parameters → `NUM_TEETH_SUN_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 28 | `NUM_TEETH_PLANET_MIN` | search bound | cpg_params.json → cpg_optimization_parameters → `NUM_TEETH_PLANET_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 29 | `MAX_GB_DIA_MULT_FACTOR` | search bound | cpg_params.json → cpg_optimization_parameters → `MAX_GB_DIA_MULT_FACTOR` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 30 | `MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR` | search bound | cpg_params.json → cpg_optimization_parameters → `MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 31 | `SMALL_MOTOR_DIA_MM` | search bound | cpg_params.json → cpg_optimization_parameters → `SMALL_MOTOR_DIA_MM` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 15 | `sun_hub_clearance_multiple` | clearance | cpg_params.json → cpg_3DP_design_parameters → `sun_hub_clearance_multiple` |  | high | margin around the sun hub's bolt circle, in multiples of standard_clearance_1_5mm (4); used for the sun hub (CAD and mass code); one shared key name across the gearbox types |
+| 16 | `output_mounting_hole_num` | fastener size | cpg_params.json → cpg_3DP_design_parameters → `output_mounting_hole_num` |  | high | number of output mounting holes: read from the config but not used by the code or written to the CAD file |
+| 17 | `module_s` | module | optimiser (`optimizationCompoundPlanetaryActuator`) |  | high | the small module (small planet, ring): searched by the optimiser loop, but not in the CAD file (which has one module; ISSUES bug 18) |
+| 18 | `h_b_s` | formula | `1.25 * module_s` | module_s | high | ring tooth depth (small module), used by the bearing-mount rule |
+| 19 | `maxGearboxDiameter` | formula | `(MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR if motor_OD < SMALL_MOTOR_DIA_MM else MAX_GB_DIA_MULT_FACTOR) * motor_OD` | MAX_GB_DIA_MULT_FACTOR, MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR, SMALL_MOTOR_DIA_MM, motor_OD | high | largest gearbox diameter the optimiser may use (gearbox_runner max_diameter; unlike SSPG, without subtracting the ring wall) |
+| 20 | `actuator_width` | formula | `fw_r + clearance_planet + bearing_height + clearance_planet + case_dist + bearing_retainer_thickness + motor_height + case_mounting_surface_height + standard_clearance_1_5mm + base_plate_thickness` | fw_r, clearance_planet, bearing_height, case_dist, bearing_retainer_thickness, motor_height, case_mounting_surface_height, standard_clearance_1_5mm, base_plate_thickness | high | axial width without the driver mount, written to the results CSV |
+| 21 | `GEAR_RATIO_MIN` | search bound | cpg_params.json → cpg_optimization_parameters → `GEAR_RATIO_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 22 | `GEAR_RATIO_MAX` | search bound | cpg_params.json → cpg_optimization_parameters → `GEAR_RATIO_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 23 | `GEAR_RATIO_STEP` | search bound | cpg_params.json → cpg_optimization_parameters → `GEAR_RATIO_STEP` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 24 | `MODULE_MIN` | search bound | cpg_params.json → cpg_optimization_parameters → `MODULE_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 25 | `MODULE_MAX` | search bound | cpg_params.json → cpg_optimization_parameters → `MODULE_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 26 | `NUM_PLANET_MIN` | search bound | cpg_params.json → cpg_optimization_parameters → `NUM_PLANET_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 27 | `NUM_PLANET_MAX` | search bound | cpg_params.json → cpg_optimization_parameters → `NUM_PLANET_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 28 | `NUM_TEETH_SUN_MIN` | search bound | cpg_params.json → cpg_optimization_parameters → `NUM_TEETH_SUN_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 29 | `NUM_TEETH_PLANET_MIN` | search bound | cpg_params.json → cpg_optimization_parameters → `NUM_TEETH_PLANET_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 30 | `MAX_GB_DIA_MULT_FACTOR` | search bound | cpg_params.json → cpg_optimization_parameters → `MAX_GB_DIA_MULT_FACTOR` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 31 | `MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR` | search bound | cpg_params.json → cpg_optimization_parameters → `MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 32 | `SMALL_MOTOR_DIA_MM` | search bound | cpg_params.json → cpg_optimization_parameters → `SMALL_MOTOR_DIA_MM` |  | high | optimiser setting: limits of the search, not a part dimension |
 
 ## Config blocks CPG doesn't read
 
