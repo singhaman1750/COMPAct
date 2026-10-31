@@ -192,3 +192,20 @@ Automatic first pass from the code (the special cases above take precedence). Ca
 |---|---|---|---|---|
 | `isspg_optimization_parameters` | 9 | yes | GEAR_RATIO_MIN, GEAR_RATIO_MAX, GEAR_RATIO_STEP, MODULE_MIN, MODULE_MAX, NUM_PLANET_MIN, NUM_PLANET_MAX, NUM_TEETH_SUN_MIN, NUM_TEETH_PLANET_MIN | — |
 | `isspg_3DP_design_parameters` | 68 | yes | planetMinDistanceMM, sCarrierExtrusionDiaMM, sCarrierExtrusionClearanceMM, ring_hub_thickness, ring_hub_to_case_hole_nut_wrench_size, ring_hub_to_case_hole_nut_depth, stator_hole_PCD, stator_hole_dia, sun_hub_dia, sun_coupler_hub_thickness, case_mounting_hole_shift, input_bearing_ID, input_bearing_OD, input_bearing_width, gear_axial_margin_mm | — |
+
+
+## Result (classification done)
+
+Spec: [`config_files/variables/isspg_inside_variables.json`](../../../config_files/variables/isspg_inside_variables.json), page [`docs/variables/isspg_inside.md`](../isspg_inside.md) (generated). Method, tooling, config key and open questions are those of [ISSPG compact](isspg_compact.md#result-classification-done); this variant shares the config and the tests (`tests/test_variable_categories_isspg.py` now runs for both).
+
+**Counts (CAD variables, 147):** input 26, optimisation 4, fixed 54, dependent 63 (25 formula, 34 lookup, 3 stress rule, 1 implicit constraint). Against the compact variant: two extra inputs (`rotorCSKHeadUpperDiaMM`, `rotorCSKHeadHeightMM`), and `input_bearing_ID` / `_OD` / `_width` are catalogue lookups instead of config values (the config's three values are read but unused: code-only `input_bearing_*_config`). **Code-only values: 33.** Confidence: 171 high, 9 medium, 0 low.
+
+**Medium-confidence entries:** the carrier / ring-hub two-case rule (`ring_hub_thickness`, `carrier_thickness`, `carrier_thickness_mid`: hard-coded 6 and 3, as in compact); `output_bearing_ID` / `_OD` / `_width` (the request has a hard-coded 20 mm clearance); `input_bearing_ID` / `_OD` / `_width` (the request is the compact variant's sun-hub size, with its hard-coded `x 4` margin). `sun_hub_dia` is now the input bearing's bore and `sun_coupler_hub_thickness` the input bearing's width plus the bearing step, both plain formulas with no hard-coded number (high); the sun2 bearing is requested by the sun's size (`Ns x module + standard_clearance_1_5mm`), not by outer diameter (high).
+
+**Code change:** `planet_bearing_gap` read in this variant's stress rule (the config key was added with compact); every output is bit-identical.
+
+**Results:** `python tests/golden/golden.py check`: All 58 cases match the baseline. `python -m pytest -q`: 1054 passed. No `CADs/` file, no golden baseline touched.
+
+**Open questions (beyond compact's)**
+1. The input bearing is sized from a hard-coded-margin sun-hub request (`x 4`, the shared item the plan still has to decide) and then sets `sun_hub_dia`; the plan's "no hard-coded number" for inside's `sun_hub_dia` holds for the formula itself, not for the request that feeds it.
+2. `rotorCSKHeadUpperDiaMM` and `rotorCSKHeadHeightMM` are motor inputs written by this variant only.
