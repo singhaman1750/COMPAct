@@ -143,3 +143,16 @@ Automatic first pass from the code (the special cases above take precedence). Ca
 | `sspg_design_parameters` | 26 | yes | planetMinDistanceMM, sCarrierExtrusionDiaMM, sCarrierExtrusionClearanceMM, bearingIDClearanceMM | carrier1ShaftHeightMM, mainCase2AttachmentHeightMM, baseThicknessMM, sCarrierThicknessMM, mainCoverThicknessMM, planetBoreMM, sunBoreMM, couplerRadiusMM, couplerThicknessMM, couplerShaftHeightMM, clearanceMotorandCaseMM, clearanceRingandCaseMM, clearance1RingandCaseMM, clearanceCarrierPlanetMM, upperHousingHeight, clearanceSCarrierMotorMM, carrierIDClearanceMM, sCarrierIDClearanceMM, smallBearingM… |
 | `sspg_optimization_parameters` | 10 | yes | GEAR_RATIO_MIN, GEAR_RATIO_MAX, GEAR_RATIO_STEP, MODULE_MIN, MODULE_MAX, NUM_PLANET_MIN, NUM_PLANET_MAX, NUM_TEETH_SUN_MIN, NUM_TEETH_PLANET_MIN, MAX_GB_DIA_MULT_FACTOR | — |
 | `sspg_3DP_design_parameters` | 70 | yes | bearing_ID, bearing_OD, bearing_height, rotor_output_hole_PCD, sun_hub_dia, stator_bottom_step_height_, stator_upper_step_height, stator_side_step_OD, stator_mounting_holes_dia, rotor_support_bearing_ID, rotor_support_bearing_OD, rotor_support_bearing_height, rotor_upper_support_bearing_ID, rotor_upper_support_bearing_OD, rotor_upper_support_bearing_height, stator_casing_hole_wrench_size | — |
+
+
+## Result (classification done)
+
+Spec: [`config_files/variables/insspg_type_2_variables.json`](../../../config_files/variables/insspg_type_2_variables.json), page [`docs/variables/insspg_type_2.md`](../insspg_type_2.md) (generated). Method, tooling, config key and open questions are those of [type 1](insspg_type_1.md#result-classification-done): type 2 shares the class, the config (`planet_bearing_gap` was added once, for both) and the shared tooling. Tests: the generic `tests/test_variable_categories.py` (type 2 registered with its own golden designs RI100 / RI80) and `tests/test_variable_categories_insspg.py` (now parametrized over both types, plus a check that the two specs differ only in `fw_s_used`).
+
+**Counts (CAD variables, 107):** input 12, optimisation 4, fixed 56, dependent 35, the same as type 1; 60 code-only values, the same list. Confidence: 158 high, 9 medium, 0 low. The only entry that differs from type 1 is `fw_s_used`: `Rotor_height - 2 - sun_coupler_hub_thickness + loose_clearance_3DP + sec_carrier_thickness + fw_p + standard_clearance_1_5mm` (a hard-coded `2`; type 1 uses the rotor support bearing height and a hard-coded `1.5 x standard_clearance_1_5mm`). It stays medium for the hard-coded 2.
+
+**Results:** `python tests/golden/golden.py check`: All 58 cases match the baseline. `python -m pytest -q`: 881 passed. No `CADs/` file, no golden baseline touched, no code or config change in this commit.
+
+**Open questions (beyond type 1's)**
+1. The hard-coded `2` in type 2's `fw_s_used` has no shared key (plan decision 4).
+2. The mass code differs per type (`_getMassKG_3DP_type2`: extra sun-shaft bearing masses, casing features, ISSUES bug 4); it is out of scope for the classification.
