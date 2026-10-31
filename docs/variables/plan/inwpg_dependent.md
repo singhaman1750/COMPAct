@@ -216,7 +216,7 @@ Spec: [`config_files/variables/inwpg_dependent_variables.json`](../../../config_
 **Results:** `python tests/golden/golden.py check`: All 58 cases match the baseline. `python -m pytest -q`: 963 passed. No `CADs/` file, no golden baseline touched.
 
 **Open questions**
-1. **Bug-18 pattern**: `module` is `moduleBig`; the small planet and the small ring are drawn with it although the stress rule uses `moduleSmall`. Logged, not fixed: `module_s` is a code-only optimisation entry; `dp_p_s` and `dp_r_s` say so. The plan's `module_b` / `module_s` code change is still open (plan decision 5).
+1. **Bug-18 pattern: fixed (option A, 2026-10-31).** The class now has `module_b` and `module_s`; the small-side gears use `module_s` (spec: `module` has attr `module_b`, `module_s` attr `module_s`; the small-side formulas name `module_s`). The CAD file still writes one `module` (= `module_b`); option B (a second module in the CAD) stays open (ISSUES bug 18).
 2. The shared face-width rule is still name-based, with a per-gearbox exception list instead of the source-based check the plan proposed.
 3. The planet-stack cap scales all five widths by `torque_carried_fraction` when the stack is longer than `planet_stack_stator_heights x stator_height`; the spec lists the cap among the dependencies of the three stress widths, and `fw_limit_mm` is a code-only formula.
 4. `bearingIDClearanceMM` is written to the CAD file here (a code-only key in other types): Fixed / config.

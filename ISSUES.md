@@ -679,7 +679,7 @@ CPG results (3dp and metal; golden re-record).
 
 **Status:** open (planned).
 
-### 18. CPG — the CAD draws the ring and the small planet with the big module
+### 18. CPG, WPG, INCPG, INWPG, ICPG — the CAD draws the small-module gears with the big module
 
 `compoundPlanetaryActuator.setVariables` sets `self.module = moduleBig` and uses it for every gear,
 including the ring and the small planet, which mesh with the small module (`dp_r`, `dp_p_s`, the ring
@@ -695,7 +695,16 @@ the ring-thickness rule and `ring_OD` use `module_s` (with `h_b_s`). The CAD fil
 `"module"` (= `module_b`), so the Onshape interface is unchanged; golden check unchanged
 (`tests/test_cpg_modules.py` checks unequal modules by hand).
 
-**Status:** option A done; option B open: actually allowing unequal modules needs a tolerance in
+**Same pattern in WPG, INCPG (dependent, independent), INWPG (dependent, independent) and ICPG**
+(found during the variable classification): one `module` (= `moduleBig`) for every gear. **Option A
+done for them too (2026-10-31):** each class has `module_b` (sun, big planet; in the Wolfrom types also
+the big ring) and `module_s` (small planet, and the ring it meshes with: the ring in INCPG / ICPG, the
+small ring in WPG / INWPG). On `module_s`: `dp_p_s`, `dp_r` / `dp_r_s`, the WPG / INWPG output-bearing
+size (`module_s × Nr_s + 2 × module_s + …`), WPG's bearing-mount rule (with `h_b_s`), ICPG's small-planet
+and ring pitch radii in the mass code. The CAD files still write one `"module"` (= `module_b`); golden
+check unchanged; `tests/test_split_modules.py` checks unequal modules by hand.
+
+**Status:** option A done (all six types); option B open: actually allowing unequal modules needs a tolerance in
 the geometric constraint and a second module (and tooth heights) in the CAD file and the Onshape
 model.
 
