@@ -181,3 +181,18 @@ Automatic first pass from the code (the special cases above take precedence). Ca
 |---|---|---|---|---|
 | `incpg_optimization_parameters` | 10 | yes | GEAR_RATIO_MIN, GEAR_RATIO_MAX, GEAR_RATIO_STEP, MODULE_MIN, MODULE_MAX, NUM_PLANET_MIN, NUM_PLANET_MAX, NUM_TEETH_SUN_MIN, NUM_TEETH_PLANET_MIN, MAX_GB_DIA_MULT_FACTOR | — |
 | `incpg_3DP_design_parameters` | 59 | yes | planetMinDistanceMM, sCarrierExtrusionDiaMM, sCarrierExtrusionClearanceMM | — |
+
+
+## Result (classification done)
+
+Spec: [`config_files/variables/incpg_independent_variables.json`](../../../config_files/variables/incpg_independent_variables.json), page [`docs/variables/incpg_independent.md`](../incpg_independent.md) (generated). Method, tooling, config key and open questions are those of [INCPG dependent](incpg_dependent.md#result-classification-done); this variant shares the config structure and the tests (`tests/test_variable_categories_incpg.py` now runs for both, plus a test for the per-motor rotor top bearing).
+
+**Counts (CAD variables, 138):** input 21, optimisation 5, fixed 57, dependent 55 (27 formula, 24 lookup, 3 stress rule, 1 implicit constraint). Against the dependent variant: four extra variables (`rotor_top_bearing_holder_thickness`, `stator_hole_nut_depth`, `stator_hole_nut_wrench_size`, `stator_hole_allen_socket_dia`), and `rotor_top_bearing_ID` / `_OD` / `_width` are Fixed (one value per motor in the params file) instead of catalogue lookups. **Code-only values: 21** (the dependent list without `min_rotor_top_bearing_ID`). Confidence: 158 high, 1 medium (`fw_r`, as in the dependent variant), 0 low.
+
+**Config key added** to `incpg_3DP_design_parameters` in `incpg_independent_params.json`: `planet_bearing_gap` = 1.0 (was `standard_clearance_1_5mm * 2 / 3` and `* 1 / 3`), read in `mitStressAnalysisMinFacewidth`; every output is bit-identical. No other code change.
+
+**Results:** `python tests/golden/golden.py check`: All 58 cases match the baseline. `python -m pytest -q`: 932 passed. No `CADs/` file, no golden baseline touched.
+
+**Open questions (beyond the dependent variant's)**
+1. The rotor top bearing is a per-motor config value here (ID, OD and width together; the mass code looks the bearing mass up for that triple, so a made-up size fails): a Fixed value with `per_motor` sources, not a lookup.
+2. `sun_hub_dia` uses `rotor_top_bearing_ID - 2 x rotor_hub_thickness` here (`rotor_ID` in the dependent variant) and `fw_s_used` is a longer stack; both are plain formulas.

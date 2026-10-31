@@ -126,6 +126,12 @@ GEARBOXES = {
         set_gears=_set_cpg,
         from_opt=lambda p: (p[2], p[3], p[4], p[5], p[6], p[7], p[1]),   # [gr, n, Ns, Np_b, Np_s, Nr, m_b, m_s]
         extra=[], branches=_branches_incpg_dependent),
+    "incpg_independent": Gearbox(
+        "incpg_independent", "INCPG", "incpg_independent_equations", "inrunnerCompoundPlanetaryGearbox",
+        counts={"input": 21, "optimisation": 5, "fixed": 57, "dependent": 55}, code_only=21,
+        set_gears=_set_cpg,
+        from_opt=lambda p: (p[2], p[3], p[4], p[5], p[6], p[7], p[1]),   # [gr, n, Ns, Np_b, Np_s, Nr, m_b, m_s]
+        extra=[]),
     "insspg_type_1": Gearbox(
         "insspg_type_1", "INSSPG", "insspg_type_1_equations", "planetaryGearbox",
         counts={"input": 12, "optimisation": 4, "fixed": 56, "dependent": 35}, code_only=60,

@@ -126,3 +126,27 @@ def test_motor_minimum_for_the_rotor_top_bearing_comes_from_the_config(monkeypat
     assert more["rotor_top_bearing_ID"] > base["rotor_top_bearing_ID"] >= 25
     changed = {k for k in base if base[k] != more[k]}
     assert "rotor_top_bearing_ID" in changed and changed <= downstream_of(gb, "min_rotor_top_bearing_ID")
+
+
+@pytest.mark.skipif("incpg_independent" not in SPECS, reason="needs the independent spec")
+def test_rotor_top_bearing_of_the_independent_variant_comes_from_the_config(monkeypatch, tmp_path):
+    """The independent variant takes the rotor top bearing from the params file, one value per motor (no catalogue
+    lookup): giving RI100 RI80's bearing (35 x 47 x 7 mm instead of 40 x 50 x 6) changes the three rotor_top_bearing
+    values and exactly the CAD variables downstream of them (the sun hub, ...), and nothing else."""
+    gb = "incpg_independent"
+    names = ("rotor_top_bearing_ID", "rotor_top_bearing_OD", "rotor_top_bearing_width")
+
+    def run(swap, folder):
+        folder.mkdir()
+        actuator, _, _, onshape = design(monkeypatch, folder, gb, f"{gb}__RI100__10")
+        if swap:
+            for key in names:
+                actuator.design_params[key] = {"RI100": actuator.design_params[key]["RI80"], "RI80": actuator.design_params[key]["RI80"]}
+            onshape = rerun(actuator, folder, gb).items()
+        return {n: float(x) for n, x in onshape}
+
+    base, more = run(False, tmp_path / "a"), run(True, tmp_path / "b")
+    assert [base[n] for n in names] == [40, 50, 6] and [more[n] for n in names] == [35, 47, 7]
+    changed = {k for k in base if base[k] != more[k]}
+    assert changed == downstream_of(gb, *names) & set(base)
+    assert set(names) | {"sun_hub_dia"} <= changed

@@ -648,6 +648,7 @@ class inrunnerCompoundPlanetaryActuator:
         self.tight_clearance_3DP                        = self.design_params["tight_clearance_3DP"]        
         self.loose_clearance_3DP                        = self.design_params["loose_clearance_3DP"]
         self.bearing_step_width                         = self.design_params["bearing_step_width"] # 2
+        self.planet_bearing_gap                         = self.design_params["planet_bearing_gap"] # 1.0
 
         #-----------Motor----------------------------
         self.motor_OD             = self.motorDiaMM                     # 86.8
@@ -1626,11 +1627,11 @@ class inrunnerCompoundPlanetaryActuator:
         bMin_ring_mit        = (self.FOS * Ft_rp * qe2 * qk2 / (self.inrunnerCompoundPlanetaryGearbox.maxGearAllowableStressPa * moduleSmall * 0.001))
 
         #------------- Contraint in planet to accomodate its bearings------------------------------------------
-        if ((bMin_planetBig_mit + bMin_planetSmall_mit) * 1000 < (self.planet_bearing_width*2 + self.standard_clearance_1_5mm * 2 / 3)) : 
-            if ((bMin_planetBig_mit) * 1000 < (self.planet_bearing_width + self.standard_clearance_1_5mm * 1 / 3)): 
-                bMin_planetBig_mit = (self.planet_bearing_width + self.standard_clearance_1_5mm * 1 / 3) / 1000
-            if ((bMin_planetSmall_mit) * 1000 < (self.planet_bearing_width + self.standard_clearance_1_5mm * 1 / 3)): 
-                bMin_planetSmall_mit = (self.planet_bearing_width + self.standard_clearance_1_5mm * 1 / 3) / 1000
+        if ((bMin_planetBig_mit + bMin_planetSmall_mit) * 1000 < (self.planet_bearing_width*2 + self.planet_bearing_gap)) : 
+            if ((bMin_planetBig_mit) * 1000 < (self.planet_bearing_width + self.planet_bearing_gap / 2)): 
+                bMin_planetBig_mit = (self.planet_bearing_width + self.planet_bearing_gap / 2) / 1000
+            if ((bMin_planetSmall_mit) * 1000 < (self.planet_bearing_width + self.planet_bearing_gap / 2)): 
+                bMin_planetSmall_mit = (self.planet_bearing_width + self.planet_bearing_gap / 2) / 1000
             bMin_ring_mit = bMin_planetSmall_mit # FT on both are same
 
         bMin_sun_mitMM         = bMin_sun_mit * 1000
