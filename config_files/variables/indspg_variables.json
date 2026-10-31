@@ -304,7 +304,7 @@
    "attr": "fw_r1",
    "category": "dependent",
    "subtype": "stress rule",
-   "rule": "b = FOS x Ft x qe x qk / (gear_allowable_stress x module) (mitStressAnalysisMinFacewidth), with Ft = serviceFactor x motor_peak_torque / (num_planet x sun pitch radius), qe = 1 / sun-planet contact ratio, qk = curve fit in Ns; if b < 2 x planet_bearing_width + planet_bearing_gap, b is raised to that value; a1_fw_r = b (the planet width is a copy)",
+   "rule": "b = FOS x Ft x qe x qk / (gear_allowable_stress x module) (mitStressAnalysisMinFacewidth), with Ft = serviceFactor x motor_peak_torque / (num_planet x sun pitch radius), qe = 1 / sun-planet contact ratio, qk = curve fit in Ns; if b < 2 x planet_bearing_width + planet_bearing_gap, b is raised to that value; a1_fw_r = b (the code's planet width fw_p1 copies it, but the CAD's a1_fw_p is the config's fixed fw_p_1_fix)",
    "depends_on": [
     "a1_module",
     "a1_Ns",
@@ -973,7 +973,7 @@
     "a1_clearance_planet"
    ],
    "confidence": "medium",
-   "reason": "stage-1 sun length: the fixed planet width, clearances and carrier, with a hard-coded 2 x and, for a rotor 19 mm high (no motor in motors.json has one), an extra 0.5 x standard_clearance_1_5mm"
+   "reason": "stage-1 sun length: the fixed planet width, clearances and carrier, with a hard-coded 2 x and, for a rotor 19 mm high (RI80), an extra 0.5 x standard_clearance_1_5mm"
   },
   {
    "name": "a1_bearing_retainer_thickness",

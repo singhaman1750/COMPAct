@@ -188,6 +188,8 @@ def test_sources_give_the_values(design):
             expected = params[s["block"]][s["key"]]
             if s.get("per_motor"):
                 expected = expected[actuator.motor.motorName]
+        elif "constant" in s:                                           # a number fixed in the code
+            expected = s["constant"]
         elif s.get("file") == "motors.json":
             expected = lookup(motors, s["block"])[s["key"]]
         elif s.get("file", "").endswith(".json") and s["file"] not in (GEARBOXES[gb].params_file, "motors.json"):
