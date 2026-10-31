@@ -78,6 +78,11 @@ def _branches_cpg(a):
             "ring grown to the bearing": not a.Nr * a.module_s + 5 * 2 > a.bearing_OD}
 
 
+def _branches_incpg_dependent(a):
+    return {"rotor top bearing: the sun, not the motor minimum, sets the bore":
+            a.module * a.Ns + 2 * a.standard_clearance_1_5mm > a.min_rotor_top_bearing_ID}
+
+
 def _branches_insspg(a):
     return {"sun support: capped at 21 mm":
             a.carrier_PCD - (a.planet_shaft_dia + a.planet_shaft_step_offset * 2) - a.standard_clearance_1_5mm * 3 > 21}
@@ -115,6 +120,12 @@ GEARBOXES = {
                ("VT8020_PRO", (24, 40, 26, 90, 1.2, 1.2, 3)),
                ("U10_Plus_KV80", (18, 24, 60, 102, 1.0, 1.0, 3))],   # made up: ring wider than bearing + bolts
         branches=_branches_cpg),
+    "incpg_dependent": Gearbox(
+        "incpg_dependent", "INCPG", "incpg_dependent_equations", "inrunnerCompoundPlanetaryGearbox",
+        counts={"input": 21, "optimisation": 5, "fixed": 54, "dependent": 54}, code_only=22,
+        set_gears=_set_cpg,
+        from_opt=lambda p: (p[2], p[3], p[4], p[5], p[6], p[7], p[1]),   # [gr, n, Ns, Np_b, Np_s, Nr, m_b, m_s]
+        extra=[], branches=_branches_incpg_dependent),
     "insspg_type_1": Gearbox(
         "insspg_type_1", "INSSPG", "insspg_type_1_equations", "planetaryGearbox",
         counts={"input": 12, "optimisation": 4, "fixed": 56, "dependent": 35}, code_only=60,

@@ -147,6 +147,8 @@ def values(gb, actuator, onshape):
         if "attr" not in e:
             s = e["source"]
             vals[e["name"]] = params[s["block"]][s["key"]]
+            if s.get("per_motor"):                       # one value per motor in the params file
+                vals[e["name"]] = vals[e["name"]][actuator.motor.motorName]
         elif hasattr(actuator, e["attr"]):
             vals[e["name"]] = getattr(actuator, e["attr"])
         else:
@@ -178,6 +180,8 @@ def test_sources_give_the_values(design):
         s = e.get("source", {})
         if s.get("file") == GEARBOXES[gb].params_file:
             expected = params[s["block"]][s["key"]]
+            if s.get("per_motor"):
+                expected = expected[actuator.motor.motorName]
         elif s.get("file") == "motors.json":
             expected = lookup(motors, s["block"])[s["key"]]
         elif s.get("file", "").endswith(".json") and s["file"] not in (GEARBOXES[gb].params_file, "motors.json"):
