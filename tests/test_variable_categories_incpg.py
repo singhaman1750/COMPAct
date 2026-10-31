@@ -32,10 +32,13 @@ def rerun(actuator, folder, gb, **params):
 def test_shared_rules_reach_incpg(gb):
     spec = by_name(gb)
     assert (spec["Nr"]["category"], spec["Nr"]["subtype"]) == ("dependent", "implicit constraint")
-    for n in ("fw_s_calc", "fw_p_b", "fw_r"):
+    for n in ("fw_s_calc", "fw_p_b"):
         assert (spec[n]["category"], spec[n]["subtype"]) == ("dependent", "stress rule"), n
-    assert spec["fw_r"]["confidence"] == "medium"                              # stress width + standard_clearance_1_5mm
-    assert (spec["fw_p_s"]["category"], spec["fw_p_s"]["subtype"]) == ("dependent", "formula")   # a copy of fw_r
+    stress = next(e for e in SPECS[gb]["code_only"] if e["name"] == "fw_r_stress")        # the ring's stress width: code-only, not in the CAD
+    assert (stress["category"], stress["subtype"], stress["attr"]) == ("dependent", "stress rule", "fwRingMM")
+    for n in ("fw_r", "fw_p_s"):       # fw_r = fw_r_stress + standard_clearance_1_5mm (excepted from the shared rule); fw_p_s is a copy of fw_r
+        assert (spec[n]["category"], spec[n]["subtype"]) == ("dependent", "formula"), n
+    assert spec["fw_r"]["formula"] == "fw_r_stress + standard_clearance_1_5mm" and spec["fw_p_s"]["formula"] == "fw_r"
     assert spec["pressure_angle_deg"]["category"] == "fixed" and spec["pressure_angle"]["subtype"] == "formula"
 
 

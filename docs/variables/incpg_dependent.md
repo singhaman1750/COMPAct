@@ -24,21 +24,17 @@ Confidence:
 | Input | 21 | 2 |
 | Optimisation | 5 | 1 |
 | Fixed | 54 | 17 |
-| Dependent | 54 | 2 |
-| **Total** | **134** | **22** |
+| Dependent | 54 | 3 |
+| **Total** | **134** | **23** |
 
-CAD variables by confidence: high 133, medium 1, low 0
-
-## To review (not high confidence)
-
-- `fw_r` (Dependent, medium): ring face width: the small planet - ring stress width (raised to hold the planet bearing) plus standard_clearance_1_5mm; kept as a stress rule because the shared rule names fw_r that way, and the small planet's width fw_p_s is a copy of it
+CAD variables by confidence: high 134, medium 0, low 0
 
 ## Rules shared by every gearbox
 
 From `config_files/variables/rules.json`; the test holds every gearbox's file to them.
 
 - names matching `^(a[12]_)?Nr(_[bs]|[0-9]*)$` are **Dependent / implicit constraint**: ring-gear teeth are implicitly constrained: the coaxial geometric constraint (e.g. Nr = Ns + 2 x Np) fixes them once the sun and planet teeth are chosen, so the optimiser sets them instead of searching them
-- names matching `^fw_(s_calc|p|p_b|r|r_s)$` are **Dependent / stress rule**: gear face widths follow from the tooth-stress rule: the optimisation variables, the motor torque, the gear material and the safety factors fix them, and the optimiser always takes the smallest width that passes (widths that are a formula of another width, e.g. CPG's fw_p_s = fw_r + clearance_planet, are dependent / formula) Exceptions: inwpg_dependent: `fw_p_b`; inwpg_independent: `fw_p_b`.
+- names matching `^fw_(s_calc|p|p_b|r|r_s)$` are **Dependent / stress rule**: gear face widths follow from the tooth-stress rule: the optimisation variables, the motor torque, the gear material and the safety factors fix them, and the optimiser always takes the smallest width that passes (widths that are a formula of another width, e.g. CPG's fw_p_s = fw_r + clearance_planet, are dependent / formula) Exceptions: inwpg_dependent: `fw_p_b`; inwpg_independent: `fw_p_b`; incpg_dependent: `fw_r`; incpg_independent: `fw_r`.
 - names matching `^a[12]_fw_(s_calc|r)[12]?$` are **Dependent / stress rule**: the same stress-rule face widths in a two-stage gearbox, under the stage prefixes a1_ / a2_ (the planet width a1_fw_p / a2_fw_p is a copy of the ring width, so it is dependent / formula and not in this rule)
 
 ## Input (21)
@@ -164,7 +160,7 @@ From `config_files/variables/rules.json`; the test holds every gearbox's file to
 | 22 | `db_r` | formula | `dp_r * cos(pressure_angle)` | dp_r, pressure_angle | high | base-circle diameter |
 | 23 | `alpha_r` | formula | `sqrt(dp_r ** 2 - db_r ** 2) / db_r * 180 / pi - pressure_angle_deg` | pressure_angle_deg, db_r, dp_r | high | involute angle used to draw the tooth |
 | 24 | `beta_r` | formula | `(360 / (4 * Nr) + alpha_r) * 2` | alpha_r, Nr | high | tooth angle used to draw the tooth |
-| 25 | `fw_r` | stress rule | two stress widths, b = FOS x Ft x qe x qk / (gear_allowable_stress x module): b1 for the sun - big planet mesh (module, Ft from serviceFactor x motor_peak_torque at the sun, qe from the sun-planet contact ratio, qk from Ns) and b2 for the small planet - ring mesh (module_s, qk from Np_s); then, if b1 + b2 < 2 x planet_bearing_width + planet_bearing_gap, each planet gear is raised to at least planet_bearing_width + planet_bearing_gap / 2 (one bearing per gear, half the gap each; mitStressAnalysisMinFacewidth); fw_r = b2 (raised) + standard_clearance_1_5mm (the CAD's ring width is the stress width plus one standard clearance) | module, module_s, Ns, Np_b, Np_s, Nr, num_planet, pressure_angle, motor_peak_torque, gear_allowable_stress, FOS, serviceFactor, planet_bearing_width, planet_bearing_gap, standard_clearance_1_5mm | medium | ring face width: the small planet - ring stress width (raised to hold the planet bearing) plus standard_clearance_1_5mm; kept as a stress rule because the shared rule names fw_r that way, and the small planet's width fw_p_s is a copy of it |
+| 25 | `fw_r` | formula | `fw_r_stress + standard_clearance_1_5mm` | fw_r_stress, standard_clearance_1_5mm | high | ring face width: the stress width plus one standard clearance (the small planet's width fw_p_s is a copy of it); the shared face-width rule lists fw_r as an exception for this gearbox |
 | 26 | `dp_p_s` | formula | `module * Np_s` | module, Np_s | high | small-planet pitch diameter, drawn with the CAD file's single module (the small planet's own module is module_s, which the CAD file does not carry; same pattern as CPG bug 18) |
 | 27 | `db_p_s` | formula | `dp_p_s * cos(pressure_angle)` | dp_p_s, pressure_angle | high | base-circle diameter |
 | 28 | `alpha_p_s` | formula | `sqrt(dp_p_s ** 2 - db_p_s ** 2) / db_p_s * 180 / pi - pressure_angle_deg` | pressure_angle_deg, db_p_s, dp_p_s | high | involute angle used to draw the tooth |
@@ -195,32 +191,33 @@ From `config_files/variables/rules.json`; the test holds every gearbox's file to
 | 53 | `case_mounting_hole_shift` | formula | `case_mounting_hole_dia / 2` | case_mounting_hole_dia | high | how far the case bolt circle sits outside the case wall: half the bolt hole, less the configured overlap |
 | 54 | `fw_s_used` | formula | `bearing_step_width + sec_carrier_thickness + clearance_planet + fw_p_b + fw_p_s` | fw_p_s, fw_p_b, clearance_planet, bearing_step_width, sec_carrier_thickness | high | printed sun length: planet width plus the carrier and clearances |
 
-## Used by the code, not written to the CAD file (22)
+## Used by the code, not written to the CAD file (23)
 
 | # | Variable | Sub-type | Source / formula | Depends on | Confidence | Why |
 |---|---|---|---|---|---|---|
 | 1 | `module_s` | module | optimiser (`optimizationInrunnerCompoundPlanetaryActuator`) |  | high | the small module (small planet, ring): searched by the optimiser loop and used by the stress rule and the gearbox constraints, but not in the CAD file, which has one module (same pattern as CPG bug 18) |
-| 2 | `motor_peak_torque` | motor | motors.json → motors.<motor>.electrical → `peak_torque_Nm` |  | high | motor torque the gears are sized for (peak torque under the default rating setting); sets the face widths |
-| 3 | `gear_allowable_stress` | material | config.json → Material_properties.<gear material> → `maxAllowableStressMPa` |  | high | allowable tooth stress of the gear material, chosen with the material mode (3dp: PLA, metal: steel); sets the face widths |
-| 4 | `FOS` | safety factor | config.json → MIT_params → `FOS` |  | high | factor of safety in the tooth-stress rule |
-| 5 | `serviceFactor` | safety factor | config.json → MIT_params → `serviceFactor` |  | high | service factor on the motor torque in the tooth-stress rule |
-| 6 | `planet_bearing_gap` | clearance | incpg_dependent_params.json → incpg_3DP_design_parameters → `planet_bearing_gap` |  | high | axial gap between the two planet bearings (one in each planet gear); with the bearing width it sets the smallest planet and ring widths |
-| 7 | `maxGearboxDiameter` | formula | `MAX_GB_DIA_MULT_FACTOR * motor_OD` | MAX_GB_DIA_MULT_FACTOR, motor_OD | high | largest gearbox diameter the optimiser may use (gearbox_runner max_diameter): the stator's outer diameter times a factor |
-| 8 | `actuator_width` | formula | `motor_case_thickness + motor_height + standard_clearance_1_5mm + sec_carrier_thickness + clearance_planet + fw_p_b + fw_p_s + clearance_planet + bearing_step_width + output_bearing_width` | output_bearing_width, bearing_step_width, clearance_planet, fw_p_s, fw_p_b, sec_carrier_thickness, standard_clearance_1_5mm, motor_case_thickness, motor_height | high | axial width without the driver mount, written to the results CSV |
-| 9 | `min_rotor_top_bearing_ID` | constraint constant | incpg_dependent_params.json → incpg_3DP_design_parameters → `min_rotor_top_bearing_ID` |  | high | smallest bore of the rotor top bearing for this motor (one value per motor in the params file); the bearing request is the larger of this and the sun's size |
-| 10 | `planetMinDistanceMM` | constraint constant | incpg_dependent_params.json → incpg_3DP_design_parameters → `planetMinDistanceMM` |  | high | read by the code but not written to the CAD file |
-| 11 | `sCarrierExtrusionDiaMM` | constraint constant | incpg_dependent_params.json → incpg_3DP_design_parameters → `sCarrierExtrusionDiaMM` |  | high | read by the code but not written to the CAD file |
-| 12 | `sCarrierExtrusionClearanceMM` | constraint constant | incpg_dependent_params.json → incpg_3DP_design_parameters → `sCarrierExtrusionClearanceMM` |  | high | read by the code but not written to the CAD file |
-| 13 | `GEAR_RATIO_MIN` | search bound | incpg_dependent_params.json → incpg_optimization_parameters → `GEAR_RATIO_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 14 | `GEAR_RATIO_MAX` | search bound | incpg_dependent_params.json → incpg_optimization_parameters → `GEAR_RATIO_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 15 | `GEAR_RATIO_STEP` | search bound | incpg_dependent_params.json → incpg_optimization_parameters → `GEAR_RATIO_STEP` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 16 | `MODULE_MIN` | search bound | incpg_dependent_params.json → incpg_optimization_parameters → `MODULE_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 17 | `MODULE_MAX` | search bound | incpg_dependent_params.json → incpg_optimization_parameters → `MODULE_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 18 | `NUM_PLANET_MIN` | search bound | incpg_dependent_params.json → incpg_optimization_parameters → `NUM_PLANET_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 19 | `NUM_PLANET_MAX` | search bound | incpg_dependent_params.json → incpg_optimization_parameters → `NUM_PLANET_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 20 | `NUM_TEETH_SUN_MIN` | search bound | incpg_dependent_params.json → incpg_optimization_parameters → `NUM_TEETH_SUN_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 21 | `NUM_TEETH_PLANET_MIN` | search bound | incpg_dependent_params.json → incpg_optimization_parameters → `NUM_TEETH_PLANET_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 22 | `MAX_GB_DIA_MULT_FACTOR` | search bound | incpg_dependent_params.json → incpg_optimization_parameters → `MAX_GB_DIA_MULT_FACTOR` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 2 | `fw_r_stress` | stress rule | two stress widths, b = FOS x Ft x qe x qk / (gear_allowable_stress x module): b1 for the sun - big planet mesh (module, Ft from serviceFactor x motor_peak_torque at the sun, qe from the sun-planet contact ratio, qk from Ns) and b2 for the small planet - ring mesh (module_s, qk from Np_s); then, if b1 + b2 < 2 x planet_bearing_width + planet_bearing_gap, each planet gear is raised to at least planet_bearing_width + planet_bearing_gap / 2 (one bearing per gear, half the gap each; mitStressAnalysisMinFacewidth); fw_r_stress = b2 (raised) | module, module_s, Ns, Np_b, Np_s, Nr, num_planet, pressure_angle, motor_peak_torque, gear_allowable_stress, FOS, serviceFactor, planet_bearing_width, planet_bearing_gap | high | the small planet - ring face width from the tooth-stress rule, raised to hold the planet bearing; the CAD's ring width fw_r adds one standard clearance to it |
+| 3 | `motor_peak_torque` | motor | motors.json → motors.<motor>.electrical → `peak_torque_Nm` |  | high | motor torque the gears are sized for (peak torque under the default rating setting); sets the face widths |
+| 4 | `gear_allowable_stress` | material | config.json → Material_properties.<gear material> → `maxAllowableStressMPa` |  | high | allowable tooth stress of the gear material, chosen with the material mode (3dp: PLA, metal: steel); sets the face widths |
+| 5 | `FOS` | safety factor | config.json → MIT_params → `FOS` |  | high | factor of safety in the tooth-stress rule |
+| 6 | `serviceFactor` | safety factor | config.json → MIT_params → `serviceFactor` |  | high | service factor on the motor torque in the tooth-stress rule |
+| 7 | `planet_bearing_gap` | clearance | incpg_dependent_params.json → incpg_3DP_design_parameters → `planet_bearing_gap` |  | high | axial gap between the two planet bearings (one in each planet gear); with the bearing width it sets the smallest planet and ring widths |
+| 8 | `maxGearboxDiameter` | formula | `MAX_GB_DIA_MULT_FACTOR * motor_OD` | MAX_GB_DIA_MULT_FACTOR, motor_OD | high | largest gearbox diameter the optimiser may use (gearbox_runner max_diameter): the stator's outer diameter times a factor |
+| 9 | `actuator_width` | formula | `motor_case_thickness + motor_height + standard_clearance_1_5mm + sec_carrier_thickness + clearance_planet + fw_p_b + fw_p_s + clearance_planet + bearing_step_width + output_bearing_width` | output_bearing_width, bearing_step_width, clearance_planet, fw_p_s, fw_p_b, sec_carrier_thickness, standard_clearance_1_5mm, motor_case_thickness, motor_height | high | axial width without the driver mount, written to the results CSV |
+| 10 | `min_rotor_top_bearing_ID` | constraint constant | incpg_dependent_params.json → incpg_3DP_design_parameters → `min_rotor_top_bearing_ID` |  | high | smallest bore of the rotor top bearing for this motor (one value per motor in the params file); the bearing request is the larger of this and the sun's size |
+| 11 | `planetMinDistanceMM` | constraint constant | incpg_dependent_params.json → incpg_3DP_design_parameters → `planetMinDistanceMM` |  | high | read by the code but not written to the CAD file |
+| 12 | `sCarrierExtrusionDiaMM` | constraint constant | incpg_dependent_params.json → incpg_3DP_design_parameters → `sCarrierExtrusionDiaMM` |  | high | read by the code but not written to the CAD file |
+| 13 | `sCarrierExtrusionClearanceMM` | constraint constant | incpg_dependent_params.json → incpg_3DP_design_parameters → `sCarrierExtrusionClearanceMM` |  | high | read by the code but not written to the CAD file |
+| 14 | `GEAR_RATIO_MIN` | search bound | incpg_dependent_params.json → incpg_optimization_parameters → `GEAR_RATIO_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 15 | `GEAR_RATIO_MAX` | search bound | incpg_dependent_params.json → incpg_optimization_parameters → `GEAR_RATIO_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 16 | `GEAR_RATIO_STEP` | search bound | incpg_dependent_params.json → incpg_optimization_parameters → `GEAR_RATIO_STEP` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 17 | `MODULE_MIN` | search bound | incpg_dependent_params.json → incpg_optimization_parameters → `MODULE_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 18 | `MODULE_MAX` | search bound | incpg_dependent_params.json → incpg_optimization_parameters → `MODULE_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 19 | `NUM_PLANET_MIN` | search bound | incpg_dependent_params.json → incpg_optimization_parameters → `NUM_PLANET_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 20 | `NUM_PLANET_MAX` | search bound | incpg_dependent_params.json → incpg_optimization_parameters → `NUM_PLANET_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 21 | `NUM_TEETH_SUN_MIN` | search bound | incpg_dependent_params.json → incpg_optimization_parameters → `NUM_TEETH_SUN_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 22 | `NUM_TEETH_PLANET_MIN` | search bound | incpg_dependent_params.json → incpg_optimization_parameters → `NUM_TEETH_PLANET_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 23 | `MAX_GB_DIA_MULT_FACTOR` | search bound | incpg_dependent_params.json → incpg_optimization_parameters → `MAX_GB_DIA_MULT_FACTOR` |  | high | optimiser setting: limits of the search, not a part dimension |
 
 ## Config blocks INCPG_DEPENDENT doesn't read
 

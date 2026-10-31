@@ -1408,27 +1408,14 @@
    "name": "fw_r",
    "attr": "fw_r",
    "category": "dependent",
-   "subtype": "stress rule",
-   "rule": "two stress widths, b = FOS x Ft x qe x qk / (gear_allowable_stress x module): b1 for the sun - big planet mesh (module, Ft from serviceFactor x motor_peak_torque at the sun, qe from the sun-planet contact ratio, qk from Ns) and b2 for the small planet - ring mesh (module_s, qk from Np_s); then, if b1 + b2 < 2 x planet_bearing_width + planet_bearing_gap, each planet gear is raised to at least planet_bearing_width + planet_bearing_gap / 2 (one bearing per gear, half the gap each; mitStressAnalysisMinFacewidth); fw_r = b2 (raised) + standard_clearance_1_5mm (the CAD's ring width is the stress width plus one standard clearance)",
+   "subtype": "formula",
+   "formula": "fw_r_stress + standard_clearance_1_5mm",
    "depends_on": [
-    "module",
-    "module_s",
-    "Ns",
-    "Np_b",
-    "Np_s",
-    "Nr",
-    "num_planet",
-    "pressure_angle",
-    "motor_peak_torque",
-    "gear_allowable_stress",
-    "FOS",
-    "serviceFactor",
-    "planet_bearing_width",
-    "planet_bearing_gap",
+    "fw_r_stress",
     "standard_clearance_1_5mm"
    ],
-   "confidence": "medium",
-   "reason": "ring face width: the small planet - ring stress width (raised to hold the planet bearing) plus standard_clearance_1_5mm; kept as a stress rule because the shared rule names fw_r that way, and the small planet's width fw_p_s is a copy of it"
+   "confidence": "high",
+   "reason": "ring face width: the stress width plus one standard clearance (the small planet's width fw_p_s is a copy of it); the shared face-width rule lists fw_r as an exception for this gearbox"
   },
   {
    "name": "dp_p_s",
@@ -1953,6 +1940,31 @@
    },
    "confidence": "high",
    "reason": "the small module (small planet, ring): searched by the optimiser loop and used by the stress rule and the gearbox constraints, but not in the CAD file, which has one module (same pattern as CPG bug 18)"
+  },
+  {
+   "name": "fw_r_stress",
+   "attr": "fwRingMM",
+   "category": "dependent",
+   "subtype": "stress rule",
+   "rule": "two stress widths, b = FOS x Ft x qe x qk / (gear_allowable_stress x module): b1 for the sun - big planet mesh (module, Ft from serviceFactor x motor_peak_torque at the sun, qe from the sun-planet contact ratio, qk from Ns) and b2 for the small planet - ring mesh (module_s, qk from Np_s); then, if b1 + b2 < 2 x planet_bearing_width + planet_bearing_gap, each planet gear is raised to at least planet_bearing_width + planet_bearing_gap / 2 (one bearing per gear, half the gap each; mitStressAnalysisMinFacewidth); fw_r_stress = b2 (raised)",
+   "depends_on": [
+    "module",
+    "module_s",
+    "Ns",
+    "Np_b",
+    "Np_s",
+    "Nr",
+    "num_planet",
+    "pressure_angle",
+    "motor_peak_torque",
+    "gear_allowable_stress",
+    "FOS",
+    "serviceFactor",
+    "planet_bearing_width",
+    "planet_bearing_gap"
+   ],
+   "confidence": "high",
+   "reason": "the small planet - ring face width from the tooth-stress rule, raised to hold the planet bearing; the CAD's ring width fw_r adds one standard clearance to it"
   },
   {
    "name": "motor_peak_torque",

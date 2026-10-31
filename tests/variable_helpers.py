@@ -172,13 +172,13 @@ GEARBOXES = {
         params_name="inwpg_params_independent.json"),
     "incpg_dependent": Gearbox(
         "incpg_dependent", "INCPG", "incpg_dependent_equations", "inrunnerCompoundPlanetaryGearbox",
-        counts={"input": 21, "optimisation": 5, "fixed": 54, "dependent": 54}, code_only=22,
+        counts={"input": 21, "optimisation": 5, "fixed": 54, "dependent": 54}, code_only=23,
         set_gears=_set_cpg,
         from_opt=lambda p: (p[2], p[3], p[4], p[5], p[6], p[7], p[1]),   # [gr, n, Ns, Np_b, Np_s, Nr, m_b, m_s]
         extra=[], branches=_branches_incpg_dependent),
     "incpg_independent": Gearbox(
         "incpg_independent", "INCPG", "incpg_independent_equations", "inrunnerCompoundPlanetaryGearbox",
-        counts={"input": 21, "optimisation": 5, "fixed": 57, "dependent": 55}, code_only=21,
+        counts={"input": 21, "optimisation": 5, "fixed": 57, "dependent": 55}, code_only=22,
         set_gears=_set_cpg,
         from_opt=lambda p: (p[2], p[3], p[4], p[5], p[6], p[7], p[1]),   # [gr, n, Ns, Np_b, Np_s, Nr, m_b, m_s]
         extra=[]),
