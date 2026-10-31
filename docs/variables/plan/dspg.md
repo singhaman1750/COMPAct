@@ -319,3 +319,29 @@ Automatic first pass from the code (the special cases above take precedence). Ca
 | `dspg_design_parameters` | 29 | **no** | sCarrierExtrusionDiaMM_Stg1, sCarrierExtrusionClearanceMM_Stg1, sCarrierExtrusionDiaMM_Stg2, sCarrierExtrusionClearanceMM_Stg2, planetMinDistanceMM | Ring1RadialWidthMM, Ring2RadialWidthMM, carrier1ShaftHeightMM, mainCase2AttachmentHeightMM, baseThicknessMM, sCarrierThicknessMM, mainCoverThicknessMM, planetBoreMM, sunBoreMM, couplerRadiusMM, couplerThicknessMM, couplerShaftHeightMM, CarrierRadialThicknessClearance1, CarrierRadialThicknessClearance2, carrierInnerDiaClearanceMM1, sCarrierInnerDiaClearanceMM1, carrierInnerDiaClearanceMM2, sCarrier… |
 | `dspg_optimization_parameters` | 16 | yes | GEAR_RATIO_MIN, GEAR_RATIO_MAX, GEAR_RATIO_STEP, MODULE_STAGE1_MIN, MODULE_STAGE1_MAX, MODULE_STAGE2_MIN, MODULE_STAGE2_MAX, NUM_PLANET_STAGE1_MIN, NUM_PLANET_STAGE1_MAX, NUM_PLANET_STAGE2_MIN, NUM_PLANET_STAGE2_MAX, NUM_TEETH_SUN_MIN, NUM_TEETH_PLANET_MIN, MAX_GB_DIA_MULT_FACTOR, MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR, SMALL_MOTOR_DIA_MM | — |
 | `dspg_design_parameters_3DP` | 70 | yes | sCarrierExtrusionDiaMM_Stg1, sCarrierExtrusionClearanceMM_Stg1, sCarrierExtrusionDiaMM_Stg2, sCarrierExtrusionClearanceMM_Stg2, planetMinDistanceMM, bearingIDClearanceMM, clearance_case_mount_holes_shell_thickness2 | — |
+
+
+## Result (classification done)
+
+Spec: [`config_files/variables/dspg_variables.json`](../../../config_files/variables/dspg_variables.json), page [`docs/variables/dspg.md`](../dspg.md) (generated). Tests: the generic `tests/test_variable_categories.py` (DSPG registered in `tests/variable_helpers.py`) and `tests/test_variable_categories_dspg.py`.
+
+**Counts (CAD variables, 255):** input 36, optimisation 15, fixed 90, dependent 114 (70 formula, 35 lookup, 5 stress rule, 4 implicit constraint). 79 names are aliases of another name (the plan said 78: the extra one is `a2_sun_coupler_hub_thickness`, whose writer is `getattr(self, "sun_coupler_hub_thickness1", "N/A")`, i.e. the stage-1 value; it is an alias of `a1_sun_coupler_hub_thickness`, Fixed, so fixed is 90 and dependent 114 against the draft's 89 / 115). **Code-only values: 33** (fixed 29, input 2, dependent 2: `maxGearboxDiameter`, `actuator_width`). Confidence: 284 high, 4 medium, 0 low.
+
+**Medium-confidence entries**
+- `a1_sun_hub_dia`, `a2_sun_hub_dia` (Dependent / formula): `sun_hub_dia = motor_output_hole_PCD + motor_output_hole_dia + standard_clearance_1_5mm * 4`; the 4 is still hard-coded in the CAD code and in the stage-1 mass code. Left as it is: the plan's shared-key decision (finding 2, `sun_hub_clearance_multiple`) is still open.
+- `bearing_mount_wall_bolt_dia_multiple` (code-only, Fixed): one key for both stages and both the CAD and the mass code; the plan leaves open whether it should be one per stage.
+- `planet_bearing_gap` (code-only, Fixed): the same single-key choice for both stages.
+
+**Config keys added** to `dspg_design_parameters_3DP` (shared names, values that keep every output bit-identical): `clearance_motor_and_case_min` = 5, `case_mounting_hole_wall_overlap` = 0.5, `bearing_mount_wall_bolt_dia_multiple` = 2, `planet_bearing_gap` = 1.0 (was `standard_clearance_1_5mm * 2 / 3` in both stages; 1.5 * 2 / 3 is exactly 1.0). They replace the hard-coded numbers in `setVariables_stg1` / `_stg2`, `mitStressAnalysisMinFacewidth`, and the stage-1 / stage-2 mass functions (`getMassKG_3DP_stg1`: case clearance and bearing mount; `getMassKG_3DP_stg2`: bearing mount). Each has a test that it drives exactly its CAD variables (and the mass where it should).
+
+**Shared tooling changed:** `rules.json` (`Nr` pattern accepts the `a1_` / `a2_` prefix; a new stress-rule pattern for `a[12]_fw_(s_calc|r)[12]?`, while `a1_fw_p` / `a2_fw_p` stay formulas), `tests/variable_helpers.py` (DSPG entry, two-stage gear setter, plain files read per stage from the spec's `plain_files`), `tools/variables/render.py` (names the two stage files); `docs/variables/sspg.md` and `cpg.md` regenerated (only the shared-rules list changed).
+
+**Results:** `python tests/golden/golden.py check`: All 58 cases match the baseline. `python -m pytest -q`: 782 passed. No `CADs/` file, no golden baseline touched.
+
+**Open questions**
+1. One key per stage (`planet_bearing_gap1` / `2`, `bearing_mount_wall_bolt_dia_multiple1` / `2`) or the single shared key used here? (plan decision 1)
+2. `sun_hub_dia` margin: shared key, and apply to SSPG / CPG too? (plan decision 2)
+3. `clearance_motor_and_case_min` and `case_mounting_hole_wall_overlap` exist once: stage 2 writes the stage-1 case values, so there is no second copy to key.
+4. `clearance_case_mount_holes_shell_thickness2` is read in stage 2 but never written or used (the CAD writes the stage-1 value under both prefixes): kept as a code-only Fixed value, not removed.
+5. Stage 2's stress widths depend on stage 1 too (the stage-1 gear ratio sets the torque on stage 2); the spec lists `a1_Ns` and `a1_Nr` among the dependencies of `a2_fw_s_calc` / `a2_fw_r`.
+6. `dspg_design_parameters` (29 keys) is never read; listed as an unused block. `planetMinDistanceMM` and the `sCarrierExtrusion*` keys are read by the gearbox class only for its interference check; they are code-only, not written to the CAD.

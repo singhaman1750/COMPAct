@@ -53,6 +53,12 @@ def _set_cpg(gb, g):
     gb.setModuleBig(m_b), gb.setModuleSmall(m_s), gb.setNumPlanet(n)
 
 
+def _set_dspg(gb, g):
+    Ns1, Np1, Nr1, m1, n1, Ns2, Np2, Nr2, m2, n2 = g
+    for stage, (Ns, Np, Nr, module, n) in ((gb.Stage1, (Ns1, Np1, Nr1, m1, n1)), (gb.Stage2, (Ns2, Np2, Nr2, m2, n2))):
+        stage.setNs(Ns), stage.setNp(Np), stage.setNr(Nr), stage.setModule(module), stage.setNumPlanet(n)
+
+
 def _branches_single(a):
     return {"ring wider than motor": a.ring_OD >= a.motor_OD,
             "bearing wider than ring": a.bearing_OD + a.output_mounting_hole_dia * 4 > a.Nr * a.module + 2 * a.h_b}
@@ -62,6 +68,13 @@ def _branches_cpg(a):
     return {"big planets wider than motor": (a.Ns + a.Np_b * 2) * a.module_b >= a.motor_OD,
             "bearing wider than ring": a.bearing_OD + a.output_mounting_hole_dia * 4 > a.Nr * a.module_s + 2 * a.h_b_s,
             "ring grown to the bearing": not a.Nr * a.module_s + 5 * 2 > a.bearing_OD}
+
+
+def _branches_dspg(a):
+    return {"stage 1: ring wider than motor": a.ring_OD1 >= a.motor_OD,
+            "stage 1: bearing wider than ring": a.bearing1_OD + a.output_mounting_hole_dia1 * 4 > a.Nr1 * a.module1 + 2 * a.h_b1,
+            "stage 2: bearing wider than ring": a.bearing2_OD + a.output_mounting_hole_dia2 * 4 > a.Nr2 * a.module2 + 2 * a.h_b2,
+            "stage 1-2 mounting: extra width needed": a.stg1_stg2_mounting_extra_width > 0}
 
 
 GEARBOXES = {
@@ -82,6 +95,15 @@ GEARBOXES = {
                ("VT8020_PRO", (24, 40, 26, 90, 1.2, 1.2, 3)),
                ("U10_Plus_KV80", (18, 24, 60, 102, 1.0, 1.0, 3))],   # made up: ring wider than bearing + bolts
         branches=_branches_cpg),
+    "dspg": Gearbox(
+        "dspg", "DSPG", "dspg_equations", "doubleStagePlanetaryGearbox",
+        counts={"input": 36, "optimisation": 15, "fixed": 90, "dependent": 114}, code_only=33,
+        set_gears=_set_dspg,
+        # [gr, n1, n2, Ns1, Np1, Nr1, Ns2, Np2, Nr2, module1, module2]
+        from_opt=lambda p: (p[3], p[4], p[5], p[9], p[1], p[6], p[7], p[8], p[10], p[2]),
+        extra=[("U8_Lite", (18, 60, 138, 1.0, 3, 36, 30, 96, 0.5, 3)),    # small stage-2 ring: no extra mounting width
+               ("U8_Lite", (18, 60, 138, 1.0, 3, 18, 60, 138, 1.0, 3))],   # both rings wider than their bearings
+        branches=_branches_dspg),
 }
 # only gearboxes whose spec exists are tested
 SPECS = {gb: load(gb) for gb in GEARBOXES if (CONFIG / "variables" / f"{gb}_variables.json").is_file()}
@@ -101,7 +123,11 @@ def write_design(monkeypatch, folder, gb, motor, material, gears):
     actuator.updateFacewidth()
     actuator.genEquationFile_editCADdirectly()
     base = Path(folder) / spec.cad_folder
-    plain = equation_lines((base / f"{spec.cad_file}.txt").read_text())
+    stage_files = load(gb).get("plain_files")      # a gearbox with one plain file per stage (DSPG)
+    if stage_files:
+        plain = [(prefix + n, v) for prefix, f in stage_files.items() for n, v in equation_lines((base / f).read_text())]
+    else:
+        plain = equation_lines((base / f"{spec.cad_file}.txt").read_text())
     onshape = equation_lines((base / f"{spec.cad_file}_onshape.txt").read_text())
     return actuator, optimizer, plain, onshape
 
