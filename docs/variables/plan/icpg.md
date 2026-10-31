@@ -187,7 +187,7 @@ Spec: [`config_files/variables/icpg_variables.json`](../../../config_files/varia
 
 **Medium-confidence entries**
 - The six `driver_*` dimensions (`driver_mount_thickness`, `driver_mount_inserts_OD`, `driver_upper_holes_dist_from_center`, `driver_lower_holes_dist_from_center`, `driver_mount_height`, `driver_side_holes_dist_from_center`; Input / driver): the runner passes no driver (`driver=OMIT`), so the values come from `icpg_params.json`, not from `Motor_drivers`. Plan decision 3: Input (as here, for consistency) or Fixed.
-- `sun_hub_dia` (Dependent / formula): the rotor's mount-hole circle plus a hard-coded `x 4` clearance margin (the shared sun-hub item), capped at the rotor OD less two clearances.
+- `sun_hub_dia` (Dependent / formula): the rotor's mount-hole circle plus a hard-coded `x 4` clearance margin (the shared sun-hub item), capped at the rotor OD less two clearances. **Done (2026-10-31):** the margin is now the config key `sun_hub_clearance_multiple` (4 in every type with this rule, SSPG and CPG included; 5 in IDSPG, its CAD value), read by the CAD code and the mass code; value-identical; `tests/test_sun_hub_clearance.py`.
 - `fw_s_used` (Dependent / formula): a two-case floor rule, the motor height when the stator's radial clearance around the output bearing is below a hard-coded `2 x standard_clearance_1_5mm` and the stack is shorter; the plan asks whether the 2 is geometry or tuning.
 - `sun_bottom_casing_bearing_ID` / `_OD` / `_height` (Dependent / lookup): the bearing request is the sun-hub size with the same hard-coded `x 4` margin.
 

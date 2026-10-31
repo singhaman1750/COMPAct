@@ -23,18 +23,16 @@ Confidence:
 |---|---|---|
 | Input | 20 | 4 |
 | Optimisation | 15 | 0 |
-| Fixed | 79 | 45 |
+| Fixed | 79 | 46 |
 | Dependent | 84 | 2 |
-| **Total** | **198** | **51** |
+| **Total** | **198** | **52** |
 
-CAD variables by confidence: high 191, medium 7, low 0
+CAD variables by confidence: high 193, medium 5, low 0
 
 ## To review (not high confidence)
 
-- `a1_sun_hub_dia` (Dependent, medium): sun hub: the rotor's mount-hole circle plus hole diameter plus a hard-coded 5 x standard_clearance_1_5mm; the mass code uses 4 (CAD and mass disagree, to be logged); the shared sun-hub margin item the plan still has to decide
 - `a1_fw_s_used` (Dependent, medium): stage-1 sun length: the rotor height and offsets, less the stage-1 bearing, clearances and retainer (an axial-fill rule that makes the stages fill the rotor height)
 - `a1_fw_s_used2` (Dependent, medium): stage-2 sun length: retainer, clearances, carrier, planet width and the always-zero shortfall (an axial-fill rule)
-- `a2_sun_hub_dia` (Dependent, medium): same value as a1_sun_hub_dia (the CAD writes it under both stage prefixes); sun hub: the rotor's mount-hole circle plus hole diameter plus a hard-coded 5 x standard_clearance_1_5mm; the mass code uses 4 (CAD and mass disagree, to be logged); the shared sun-hub margin item the plan still has to decide
 - `a2_fw_s_used` (Dependent, medium): same value as a1_fw_s_used2 (the CAD writes it under both stage prefixes); stage-2 sun length: retainer, clearances, carrier, planet width and the always-zero shortfall (an axial-fill rule)
 - `a1_ring_gear_relation` (Dependent, medium): axial-fill check for stage 1: the stator height and mounting casing less the stage-1 stack (a value written for the CAD, not used by the code)
 - `a2_ring_gear_relation` (Dependent, medium): axial-fill check for stage 2: the two stage lengths less the stator, rotor base and extrusion (a value written for the CAD, not used by the code)
@@ -213,7 +211,7 @@ From `config_files/variables/rules.json`; the test holds every gearbox's file to
 | 29 | `a1_carrier_trapezoidal_support_hole_socket_head_dia` | lookup | `nuts_and_bolts_dimensions(bolt_dia=a1_carrier_trapezoidal_support_hole_dia, bolt_type=socket_head)` → bolt_head_dia | a1_carrier_trapezoidal_support_hole_dia | high | standard socket-head fastener size for the chosen bolt diameter |
 | 30 | `a1_carrier_trapezoidal_support_hole_wrench_size` | lookup | `nuts_and_bolts_dimensions(bolt_dia=a1_carrier_trapezoidal_support_hole_dia, bolt_type=socket_head)` → nut_width_across_flats | a1_carrier_trapezoidal_support_hole_dia | high | standard socket-head fastener size for the chosen bolt diameter |
 | 31 | `a1_planet_pin_bolt_wrench_size` | lookup | `nuts_and_bolts_dimensions(bolt_dia=a1_planet_pin_bolt_dia, bolt_type=socket_head)` → nut_width_across_flats | a1_planet_pin_bolt_dia | high | standard socket-head fastener size for the chosen bolt diameter |
-| 32 | `a1_sun_hub_dia` | formula | `rotor_mount_hole_PCD + rotor_mount_hole_dia + a1_standard_clearance_1_5mm * 5` | rotor_mount_hole_PCD, rotor_mount_hole_dia, a1_standard_clearance_1_5mm | medium | sun hub: the rotor's mount-hole circle plus hole diameter plus a hard-coded 5 x standard_clearance_1_5mm; the mass code uses 4 (CAD and mass disagree, to be logged); the shared sun-hub margin item the plan still has to decide |
+| 32 | `a1_sun_hub_dia` | formula | `rotor_mount_hole_PCD + rotor_mount_hole_dia + a1_standard_clearance_1_5mm * sun_hub_clearance_multiple` | rotor_mount_hole_PCD, rotor_mount_hole_dia, a1_standard_clearance_1_5mm, sun_hub_clearance_multiple | high | sun hub: the rotor's mount-hole circle plus hole diameter plus a margin of sun_hub_clearance_multiple x standard_clearance_1_5mm (config, 5 in IDSPG); the mass code still uses 4 (ISSUES: IDSPG sun hub) |
 | 33 | `a1_sun_central_bolt_socket_head_dia` | lookup | `nuts_and_bolts_dimensions(bolt_dia=a1_sun_central_bolt_dia, bolt_type=socket_head)` → bolt_head_dia | a1_sun_central_bolt_dia | high | standard socket-head fastener size for the chosen bolt diameter |
 | 34 | `a1_fw_s_used` | formula | `Rotor_height + stator_rotor_top_offset + a1_ring_gear_thickness_mounting_casing - a1_bearing_height - a1_clearance_planet - a1_carrier_bearing_step_width - bearing_retainer_thickness` | bearing_retainer_thickness, a1_carrier_bearing_step_width, a1_clearance_planet, a1_bearing_height, a1_ring_gear_thickness_mounting_casing, Rotor_height, stator_rotor_top_offset | medium | stage-1 sun length: the rotor height and offsets, less the stage-1 bearing, clearances and retainer (an axial-fill rule that makes the stages fill the rotor height) |
 | 35 | `a1_Nr2` | implicit constraint | `a2_Ns + 2 * a2_Np` | a2_Ns, a2_Np | high | same value as a2_Nr (the CAD writes it under both stage prefixes); implicitly constrained: the coaxial constraint Ns + 2 x Np = Nr fixes it, and the optimiser sets it from Ns and Np instead of searching it (the code lists it among the optimisation variables) |
@@ -257,7 +255,7 @@ From `config_files/variables/rules.json`; the test holds every gearbox's file to
 | 73 | `a2_db_p` | formula | `a2_dp_p * cos(a1_pressure_angle * pi / 180)` | a2_dp_p, a1_pressure_angle | high | base-circle diameter |
 | 74 | `a2_alpha_p` | formula | `sqrt(a2_dp_p ** 2 - a2_db_p ** 2) / a2_db_p * 180 / pi - a1_pressure_angle` | a1_pressure_angle, a2_db_p, a2_dp_p | high | involute angle used to draw the tooth |
 | 75 | `a2_beta_p` | formula | `(360 / (4 * a2_Np) - a2_alpha_p) * 2` | a2_alpha_p, a2_Np | high | tooth angle used to draw the tooth |
-| 76 | `a2_sun_hub_dia` | formula | `rotor_mount_hole_PCD + rotor_mount_hole_dia + a1_standard_clearance_1_5mm * 5` | rotor_mount_hole_PCD, rotor_mount_hole_dia, a1_standard_clearance_1_5mm | medium | same value as a1_sun_hub_dia (the CAD writes it under both stage prefixes); sun hub: the rotor's mount-hole circle plus hole diameter plus a hard-coded 5 x standard_clearance_1_5mm; the mass code uses 4 (CAD and mass disagree, to be logged); the shared sun-hub margin item the plan still has to decide |
+| 76 | `a2_sun_hub_dia` | formula | `rotor_mount_hole_PCD + rotor_mount_hole_dia + a1_standard_clearance_1_5mm * sun_hub_clearance_multiple` | rotor_mount_hole_PCD, rotor_mount_hole_dia, a1_standard_clearance_1_5mm, sun_hub_clearance_multiple | high | same value as a1_sun_hub_dia (the CAD writes it under both stage prefixes); sun hub: the rotor's mount-hole circle plus hole diameter plus a margin of sun_hub_clearance_multiple x standard_clearance_1_5mm (config, 5 in IDSPG); the mass code still uses 4 (ISSUES: IDSPG sun hub) |
 | 77 | `a2_sun_central_bolt_socket_head_dia` | lookup | `nuts_and_bolts_dimensions(bolt_dia=a2_sun_central_bolt_dia)` → bolt_head_dia | a2_sun_central_bolt_dia | high | standard socket-head fastener size for the chosen bolt diameter |
 | 78 | `a2_fw_s_used` | formula | `bearing_retainer_thickness + a1_standard_clearance_1_5mm + a2_sec_carrier_thickness + a1_clearance_planet + a2_fw_p + shortfall` | shortfall, a2_fw_p, a1_clearance_planet, a2_sec_carrier_thickness, bearing_retainer_thickness, a1_standard_clearance_1_5mm | medium | same value as a1_fw_s_used2 (the CAD writes it under both stage prefixes); stage-2 sun length: retainer, clearances, carrier, planet width and the always-zero shortfall (an axial-fill rule) |
 | 79 | `a2_Nr1` | implicit constraint | `a1_Ns + 2 * a1_Np` | a1_Ns, a1_Np | high | same value as a1_Nr (the CAD writes it under both stage prefixes); implicitly constrained: the coaxial constraint Ns + 2 x Np = Nr fixes it, and the optimiser sets it from Ns and Np instead of searching it (the code lists it among the optimisation variables) |
@@ -267,7 +265,7 @@ From `config_files/variables/rules.json`; the test holds every gearbox's file to
 | 83 | `a1_ring_gear_relation` | formula | `Stator_height + a1_ring_gear_thickness_mounting_casing - bearing_retainer_thickness - a1_bearing_height - a1_carrier_bearing_step_width - a1_clearance_planet - a1_fw_r - a1_clearance_planet * 0.5` | a1_fw_r, a1_clearance_planet, a1_carrier_bearing_step_width, a1_bearing_height, bearing_retainer_thickness, Stator_height, a1_ring_gear_thickness_mounting_casing | medium | axial-fill check for stage 1: the stator height and mounting casing less the stage-1 stack (a value written for the CAD, not used by the code) |
 | 84 | `a2_ring_gear_relation` | formula | `a1_fw_s_used + a1_standard_clearance_1_5mm + a1_carrier_bearing_step_width + a1_bearing_height + a1_fw_s_used2 - a2_fw_p - Stator_height - a1_ring_gear_thickness_mounting_casing - rotor_bottom_thickness - motor_stator_extrusion_depth` | motor_stator_extrusion_depth, rotor_bottom_thickness, a1_ring_gear_thickness_mounting_casing, Stator_height, a2_fw_p, a1_fw_s_used2, a1_bearing_height, a1_carrier_bearing_step_width, a1_fw_s_used, a1_standard_clearance_1_5mm | medium | axial-fill check for stage 2: the two stage lengths less the stator, rotor base and extrusion (a value written for the CAD, not used by the code) |
 
-## Used by the code, not written to the CAD file (51)
+## Used by the code, not written to the CAD file (52)
 
 | # | Variable | Sub-type | Source / formula | Depends on | Confidence | Why |
 |---|---|---|---|---|---|---|
@@ -276,52 +274,53 @@ From `config_files/variables/rules.json`; the test holds every gearbox's file to
 | 3 | `FOS` | safety factor | idspg_motor_config.json → MIT_params → `FOS` |  | high | factor of safety in the tooth-stress rule |
 | 4 | `serviceFactor` | safety factor | idspg_motor_config.json → MIT_params → `serviceFactor` |  | high | service factor on the motor torque in the tooth-stress rule |
 | 5 | `planet_bearing_gap` | clearance | idspg_params.json → idspg_design_parameters_3DP → `planet_bearing_gap` |  | medium | axial gap between the two planet bearings (one in each planet gear); with the bearing width it sets the smallest planet and ring width of both stages; one key for both stages, the plan leaves open whether it should be one per stage (planet_bearing_gap1 / 2) |
-| 6 | `maxGearboxDiameter` | formula | `MAX_GB_DIA_MULT_FACTOR * (a1_motor_OD + a1_standard_clearance_1_5mm * 2)` | MAX_GB_DIA_MULT_FACTOR, a1_motor_OD, a1_standard_clearance_1_5mm | high | largest gearbox diameter the optimiser may use (gearbox_runner max_diameter): the motor's outer diameter plus two clearances, times a factor |
-| 7 | `maxGearboxDiameter_Stg1` | formula | `Stator_ID - ring1RadialWidthMM * 2` | Stator_ID, ring1RadialWidthMM | high | largest stage-1 diameter the optimiser may use (gearbox_runner max_diameter_stage1): the stator bore less two ring walls |
-| 8 | `motorDiaMM` | motor | motors.json → motors.<motor>.geometry → `motor_OD` |  | high | read from the chosen motor's geometry |
-| 9 | `motorLengthMM` | motor | motors.json → motors.<motor>.geometry → `motor_height` |  | high | read from the chosen motor's geometry |
-| 10 | `bearingIDClearanceMM` | constraint constant | idspg_params.json → idspg_design_parameters_3DP → `bearingIDClearanceMM` |  | high | constant from the IDSPG 3DP design parameters (one value for both stages) |
-| 11 | `shortfall` | constraint constant | constant `0` in the code |  | medium | always 0: the code sets it only in a disabled axial-fill case (the stage-2 sun length adds it) |
-| 12 | `sCarrierExtrusionDiaMM_Stg1` | feature size | idspg_params.json → idspg_design_parameters_3DP → `sCarrierExtrusionDiaMM_Stg1` |  | high | read by the code but not written to the CAD file |
-| 13 | `sCarrierExtrusionClearanceMM_Stg1` | clearance | idspg_params.json → idspg_design_parameters_3DP → `sCarrierExtrusionClearanceMM_Stg1` |  | high | read by the code but not written to the CAD file |
-| 14 | `sCarrierExtrusionDiaMM_Stg2` | feature size | idspg_params.json → idspg_design_parameters_3DP → `sCarrierExtrusionDiaMM_Stg2` |  | high | read by the code but not written to the CAD file |
-| 15 | `sCarrierExtrusionClearanceMM_Stg2` | clearance | idspg_params.json → idspg_design_parameters_3DP → `sCarrierExtrusionClearanceMM_Stg2` |  | high | read by the code but not written to the CAD file |
-| 16 | `planetMinDistanceMM` | constraint constant | idspg_params.json → idspg_design_parameters_3DP → `planetMinDistanceMM` |  | high | read by the code but not written to the CAD file |
-| 17 | `Motor_case_thickness` | wall thickness | idspg_params.json → idspg_design_parameters_3DP → `Motor_case_thickness` |  | high | read by the code but not written to the CAD file |
-| 18 | `clearance_case_mount_holes_shell_thickness` | clearance | idspg_params.json → idspg_design_parameters_3DP → `clearance_case_mount_holes_shell_thickness` |  | high | read by the code but not written to the CAD file |
-| 19 | `output_mounting_hole_dia1` | fastener size | idspg_params.json → idspg_design_parameters_3DP → `output_mounting_hole_dia1` |  | high | read by the code but not written to the CAD file |
-| 20 | `case_mounting_hole_dia` | fastener size | idspg_params.json → idspg_design_parameters_3DP → `case_mounting_hole_dia` |  | high | read by the code but not written to the CAD file |
-| 21 | `case_mounting_bolt_depth` | fastener size | idspg_params.json → idspg_design_parameters_3DP → `case_mounting_bolt_depth` |  | high | read by the code but not written to the CAD file |
-| 22 | `case_mounting_surface_height` | wall thickness | idspg_params.json → idspg_design_parameters_3DP → `case_mounting_surface_height` |  | high | read by the code but not written to the CAD file |
-| 23 | `bearing_retainer_thickness1` | wall thickness | idspg_params.json → idspg_design_parameters_3DP → `bearing_retainer_thickness1` |  | high | in the config but never read |
-| 24 | `central_hole_offset_from_motor_mount_PCD` | feature size | idspg_params.json → idspg_design_parameters_3DP → `central_hole_offset_from_motor_mount_PCD` |  | high | read by the code but not written to the CAD file |
-| 25 | `base_plate_thickness` | wall thickness | idspg_params.json → idspg_design_parameters_3DP → `base_plate_thickness` |  | high | read by the code but not written to the CAD file |
-| 26 | `air_flow_hole_offset` | feature size | idspg_params.json → idspg_design_parameters_3DP → `air_flow_hole_offset` |  | high | read by the code but not written to the CAD file |
-| 27 | `output_mounting_nut_depth1` | fastener size | idspg_params.json → idspg_design_parameters_3DP → `output_mounting_nut_depth1` |  | high | read by the code but not written to the CAD file |
-| 28 | `ring_to_chamfer_clearance1` | clearance | idspg_params.json → idspg_design_parameters_3DP → `ring_to_chamfer_clearance1` |  | high | read by the code but not written to the CAD file |
-| 29 | `Motor_case_OD_base_to_chamfer` | feature size | idspg_params.json → idspg_design_parameters_3DP → `Motor_case_OD_base_to_chamfer` |  | high | read by the code but not written to the CAD file |
-| 30 | `case_mounting_nut_clearance` | clearance | idspg_params.json → idspg_design_parameters_3DP → `case_mounting_nut_clearance` |  | high | read by the code but not written to the CAD file |
-| 31 | `clearance_case_mount_holes_shell_thickness2` | clearance | idspg_params.json → idspg_design_parameters_3DP → `clearance_case_mount_holes_shell_thickness2` |  | high | read by the code but not written to the CAD file |
-| 32 | `ring_to_chamfer_clearance2` | clearance | idspg_params.json → idspg_design_parameters_3DP → `ring_to_chamfer_clearance2` |  | high | read by the code but not written to the CAD file |
-| 33 | `bearing_retainer_thickness2` | wall thickness | idspg_params.json → idspg_design_parameters_3DP → `bearing_retainer_thickness2` |  | high | in the config but never read |
-| 34 | `stg1_stg2_mounting_hole_dia` | fastener size | idspg_params.json → idspg_design_parameters_3DP → `stg1_stg2_mounting_hole_dia` |  | high | read by the code but not written to the CAD file |
-| 35 | `stg1_stg2_mounting_pattern_width` | wall thickness | idspg_params.json → idspg_design_parameters_3DP → `stg1_stg2_mounting_pattern_width` |  | high | read by the code but not written to the CAD file |
-| 36 | `ring1RadialWidthMM` | wall thickness | idspg_params.json → idspg_design_parameters_3DP → `ring1RadialWidthMM` |  | high | read by the code but not written to the CAD file |
-| 37 | `ring2RadialWidthMM` | wall thickness | idspg_params.json → idspg_design_parameters_3DP → `ring2RadialWidthMM` |  | high | read by the code but not written to the CAD file |
-| 38 | `GEAR_RATIO_MIN` | search bound | idspg_params.json → idspg_optimization_parameters → `GEAR_RATIO_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 39 | `GEAR_RATIO_MAX` | search bound | idspg_params.json → idspg_optimization_parameters → `GEAR_RATIO_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 40 | `GEAR_RATIO_STEP` | search bound | idspg_params.json → idspg_optimization_parameters → `GEAR_RATIO_STEP` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 41 | `MODULE_STAGE1_MIN` | search bound | idspg_params.json → idspg_optimization_parameters → `MODULE_STAGE1_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 42 | `MODULE_STAGE1_MAX` | search bound | idspg_params.json → idspg_optimization_parameters → `MODULE_STAGE1_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 43 | `MODULE_STAGE2_MIN` | search bound | idspg_params.json → idspg_optimization_parameters → `MODULE_STAGE2_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 44 | `MODULE_STAGE2_MAX` | search bound | idspg_params.json → idspg_optimization_parameters → `MODULE_STAGE2_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 45 | `NUM_PLANET_STAGE1_MIN` | search bound | idspg_params.json → idspg_optimization_parameters → `NUM_PLANET_STAGE1_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 46 | `NUM_PLANET_STAGE1_MAX` | search bound | idspg_params.json → idspg_optimization_parameters → `NUM_PLANET_STAGE1_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 47 | `NUM_PLANET_STAGE2_MIN` | search bound | idspg_params.json → idspg_optimization_parameters → `NUM_PLANET_STAGE2_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 48 | `NUM_PLANET_STAGE2_MAX` | search bound | idspg_params.json → idspg_optimization_parameters → `NUM_PLANET_STAGE2_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 49 | `NUM_TEETH_SUN_MIN` | search bound | idspg_params.json → idspg_optimization_parameters → `NUM_TEETH_SUN_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 50 | `NUM_TEETH_PLANET_MIN` | search bound | idspg_params.json → idspg_optimization_parameters → `NUM_TEETH_PLANET_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 51 | `MAX_GB_DIA_MULT_FACTOR` | search bound | idspg_params.json → idspg_optimization_parameters → `MAX_GB_DIA_MULT_FACTOR` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 6 | `sun_hub_clearance_multiple` | clearance | idspg_params.json → idspg_design_parameters_3DP → `sun_hub_clearance_multiple` |  | high | margin around the sun hub's bolt circle, in multiples of standard_clearance_1_5mm (5); used for the stage-1 sun hub in the CAD (the mass code still uses 4); one shared key name across the gearbox types |
+| 7 | `maxGearboxDiameter` | formula | `MAX_GB_DIA_MULT_FACTOR * (a1_motor_OD + a1_standard_clearance_1_5mm * 2)` | MAX_GB_DIA_MULT_FACTOR, a1_motor_OD, a1_standard_clearance_1_5mm | high | largest gearbox diameter the optimiser may use (gearbox_runner max_diameter): the motor's outer diameter plus two clearances, times a factor |
+| 8 | `maxGearboxDiameter_Stg1` | formula | `Stator_ID - ring1RadialWidthMM * 2` | Stator_ID, ring1RadialWidthMM | high | largest stage-1 diameter the optimiser may use (gearbox_runner max_diameter_stage1): the stator bore less two ring walls |
+| 9 | `motorDiaMM` | motor | motors.json → motors.<motor>.geometry → `motor_OD` |  | high | read from the chosen motor's geometry |
+| 10 | `motorLengthMM` | motor | motors.json → motors.<motor>.geometry → `motor_height` |  | high | read from the chosen motor's geometry |
+| 11 | `bearingIDClearanceMM` | constraint constant | idspg_params.json → idspg_design_parameters_3DP → `bearingIDClearanceMM` |  | high | constant from the IDSPG 3DP design parameters (one value for both stages) |
+| 12 | `shortfall` | constraint constant | constant `0` in the code |  | medium | always 0: the code sets it only in a disabled axial-fill case (the stage-2 sun length adds it) |
+| 13 | `sCarrierExtrusionDiaMM_Stg1` | feature size | idspg_params.json → idspg_design_parameters_3DP → `sCarrierExtrusionDiaMM_Stg1` |  | high | read by the code but not written to the CAD file |
+| 14 | `sCarrierExtrusionClearanceMM_Stg1` | clearance | idspg_params.json → idspg_design_parameters_3DP → `sCarrierExtrusionClearanceMM_Stg1` |  | high | read by the code but not written to the CAD file |
+| 15 | `sCarrierExtrusionDiaMM_Stg2` | feature size | idspg_params.json → idspg_design_parameters_3DP → `sCarrierExtrusionDiaMM_Stg2` |  | high | read by the code but not written to the CAD file |
+| 16 | `sCarrierExtrusionClearanceMM_Stg2` | clearance | idspg_params.json → idspg_design_parameters_3DP → `sCarrierExtrusionClearanceMM_Stg2` |  | high | read by the code but not written to the CAD file |
+| 17 | `planetMinDistanceMM` | constraint constant | idspg_params.json → idspg_design_parameters_3DP → `planetMinDistanceMM` |  | high | read by the code but not written to the CAD file |
+| 18 | `Motor_case_thickness` | wall thickness | idspg_params.json → idspg_design_parameters_3DP → `Motor_case_thickness` |  | high | read by the code but not written to the CAD file |
+| 19 | `clearance_case_mount_holes_shell_thickness` | clearance | idspg_params.json → idspg_design_parameters_3DP → `clearance_case_mount_holes_shell_thickness` |  | high | read by the code but not written to the CAD file |
+| 20 | `output_mounting_hole_dia1` | fastener size | idspg_params.json → idspg_design_parameters_3DP → `output_mounting_hole_dia1` |  | high | read by the code but not written to the CAD file |
+| 21 | `case_mounting_hole_dia` | fastener size | idspg_params.json → idspg_design_parameters_3DP → `case_mounting_hole_dia` |  | high | read by the code but not written to the CAD file |
+| 22 | `case_mounting_bolt_depth` | fastener size | idspg_params.json → idspg_design_parameters_3DP → `case_mounting_bolt_depth` |  | high | read by the code but not written to the CAD file |
+| 23 | `case_mounting_surface_height` | wall thickness | idspg_params.json → idspg_design_parameters_3DP → `case_mounting_surface_height` |  | high | read by the code but not written to the CAD file |
+| 24 | `bearing_retainer_thickness1` | wall thickness | idspg_params.json → idspg_design_parameters_3DP → `bearing_retainer_thickness1` |  | high | in the config but never read |
+| 25 | `central_hole_offset_from_motor_mount_PCD` | feature size | idspg_params.json → idspg_design_parameters_3DP → `central_hole_offset_from_motor_mount_PCD` |  | high | read by the code but not written to the CAD file |
+| 26 | `base_plate_thickness` | wall thickness | idspg_params.json → idspg_design_parameters_3DP → `base_plate_thickness` |  | high | read by the code but not written to the CAD file |
+| 27 | `air_flow_hole_offset` | feature size | idspg_params.json → idspg_design_parameters_3DP → `air_flow_hole_offset` |  | high | read by the code but not written to the CAD file |
+| 28 | `output_mounting_nut_depth1` | fastener size | idspg_params.json → idspg_design_parameters_3DP → `output_mounting_nut_depth1` |  | high | read by the code but not written to the CAD file |
+| 29 | `ring_to_chamfer_clearance1` | clearance | idspg_params.json → idspg_design_parameters_3DP → `ring_to_chamfer_clearance1` |  | high | read by the code but not written to the CAD file |
+| 30 | `Motor_case_OD_base_to_chamfer` | feature size | idspg_params.json → idspg_design_parameters_3DP → `Motor_case_OD_base_to_chamfer` |  | high | read by the code but not written to the CAD file |
+| 31 | `case_mounting_nut_clearance` | clearance | idspg_params.json → idspg_design_parameters_3DP → `case_mounting_nut_clearance` |  | high | read by the code but not written to the CAD file |
+| 32 | `clearance_case_mount_holes_shell_thickness2` | clearance | idspg_params.json → idspg_design_parameters_3DP → `clearance_case_mount_holes_shell_thickness2` |  | high | read by the code but not written to the CAD file |
+| 33 | `ring_to_chamfer_clearance2` | clearance | idspg_params.json → idspg_design_parameters_3DP → `ring_to_chamfer_clearance2` |  | high | read by the code but not written to the CAD file |
+| 34 | `bearing_retainer_thickness2` | wall thickness | idspg_params.json → idspg_design_parameters_3DP → `bearing_retainer_thickness2` |  | high | in the config but never read |
+| 35 | `stg1_stg2_mounting_hole_dia` | fastener size | idspg_params.json → idspg_design_parameters_3DP → `stg1_stg2_mounting_hole_dia` |  | high | read by the code but not written to the CAD file |
+| 36 | `stg1_stg2_mounting_pattern_width` | wall thickness | idspg_params.json → idspg_design_parameters_3DP → `stg1_stg2_mounting_pattern_width` |  | high | read by the code but not written to the CAD file |
+| 37 | `ring1RadialWidthMM` | wall thickness | idspg_params.json → idspg_design_parameters_3DP → `ring1RadialWidthMM` |  | high | read by the code but not written to the CAD file |
+| 38 | `ring2RadialWidthMM` | wall thickness | idspg_params.json → idspg_design_parameters_3DP → `ring2RadialWidthMM` |  | high | read by the code but not written to the CAD file |
+| 39 | `GEAR_RATIO_MIN` | search bound | idspg_params.json → idspg_optimization_parameters → `GEAR_RATIO_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 40 | `GEAR_RATIO_MAX` | search bound | idspg_params.json → idspg_optimization_parameters → `GEAR_RATIO_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 41 | `GEAR_RATIO_STEP` | search bound | idspg_params.json → idspg_optimization_parameters → `GEAR_RATIO_STEP` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 42 | `MODULE_STAGE1_MIN` | search bound | idspg_params.json → idspg_optimization_parameters → `MODULE_STAGE1_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 43 | `MODULE_STAGE1_MAX` | search bound | idspg_params.json → idspg_optimization_parameters → `MODULE_STAGE1_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 44 | `MODULE_STAGE2_MIN` | search bound | idspg_params.json → idspg_optimization_parameters → `MODULE_STAGE2_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 45 | `MODULE_STAGE2_MAX` | search bound | idspg_params.json → idspg_optimization_parameters → `MODULE_STAGE2_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 46 | `NUM_PLANET_STAGE1_MIN` | search bound | idspg_params.json → idspg_optimization_parameters → `NUM_PLANET_STAGE1_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 47 | `NUM_PLANET_STAGE1_MAX` | search bound | idspg_params.json → idspg_optimization_parameters → `NUM_PLANET_STAGE1_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 48 | `NUM_PLANET_STAGE2_MIN` | search bound | idspg_params.json → idspg_optimization_parameters → `NUM_PLANET_STAGE2_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 49 | `NUM_PLANET_STAGE2_MAX` | search bound | idspg_params.json → idspg_optimization_parameters → `NUM_PLANET_STAGE2_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 50 | `NUM_TEETH_SUN_MIN` | search bound | idspg_params.json → idspg_optimization_parameters → `NUM_TEETH_SUN_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 51 | `NUM_TEETH_PLANET_MIN` | search bound | idspg_params.json → idspg_optimization_parameters → `NUM_TEETH_PLANET_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 52 | `MAX_GB_DIA_MULT_FACTOR` | search bound | idspg_params.json → idspg_optimization_parameters → `MAX_GB_DIA_MULT_FACTOR` |  | high | optimiser setting: limits of the search, not a part dimension |
 
 ## Config blocks IDSPG doesn't read
 

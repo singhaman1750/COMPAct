@@ -161,7 +161,7 @@ steps: classify → number check → review the medium items → move the agreed
 ## Decisions for the user (before or during the work)
 
 1. One shared key per stage, or one per stage with suffix `1` / `2`, for the double-stage types.
-2. The shared `sun_hub_dia` margin key, and whether to apply it to SSPG / CPG too.
+2. The shared `sun_hub_dia` margin key, and whether to apply it to SSPG / CPG too. **Done (2026-10-31):** the margin is now the config key `sun_hub_clearance_multiple` (4 in every type with this rule, SSPG and CPG included; 5 in IDSPG, its CAD value), read by the CAD code and the mass code; value-identical; `tests/test_sun_hub_clearance.py`.
 3. ICPG driver dimensions: Input or Fixed.
 4. Names for the new type-specific keys (ISSPG, INSSPG, INDSPG constants).
 5. Whether to fix the bug-18 pattern (`module_b` / `module_s`) in each type during its classification

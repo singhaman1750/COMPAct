@@ -1480,14 +1480,15 @@
    "attr": "sun_hub_dia1",
    "category": "dependent",
    "subtype": "formula",
-   "formula": "a1_motor_output_hole_PCD + a1_motor_output_hole_dia + a1_standard_clearance_1_5mm * 4",
+   "formula": "a1_motor_output_hole_PCD + a1_motor_output_hole_dia + a1_standard_clearance_1_5mm * sun_hub_clearance_multiple",
    "depends_on": [
     "a1_motor_output_hole_PCD",
     "a1_motor_output_hole_dia",
-    "a1_standard_clearance_1_5mm"
+    "a1_standard_clearance_1_5mm",
+    "sun_hub_clearance_multiple"
    ],
-   "confidence": "medium",
-   "reason": "sun coupler hub, sized to the motor's output holes plus a margin of 4 x standard_clearance_1_5mm; the 4 is hard-coded in the CAD code and in the stage-1 mass code, and the plan still has to decide a shared key for it"
+   "confidence": "high",
+   "reason": "sun coupler hub, sized to the motor's output holes plus a margin of sun_hub_clearance_multiple x standard_clearance_1_5mm (config; the stage-1 mass code uses the same key)"
   },
   {
    "name": "a1_sun_central_bolt_dia",
@@ -3341,14 +3342,15 @@
    "attr": "sun_hub_dia1",
    "category": "dependent",
    "subtype": "formula",
-   "formula": "a1_motor_output_hole_PCD + a1_motor_output_hole_dia + a1_standard_clearance_1_5mm * 4",
+   "formula": "a1_motor_output_hole_PCD + a1_motor_output_hole_dia + a1_standard_clearance_1_5mm * sun_hub_clearance_multiple",
    "depends_on": [
     "a1_motor_output_hole_PCD",
     "a1_motor_output_hole_dia",
-    "a1_standard_clearance_1_5mm"
+    "a1_standard_clearance_1_5mm",
+    "sun_hub_clearance_multiple"
    ],
-   "confidence": "medium",
-   "reason": "same value as a1_sun_hub_dia (the CAD writes it under both stage prefixes); sun coupler hub, sized to the motor's output holes plus a margin of 4 x standard_clearance_1_5mm; the 4 is hard-coded in the CAD code and in the stage-1 mass code, and the plan still has to decide a shared key for it",
+   "confidence": "high",
+   "reason": "same value as a1_sun_hub_dia (the CAD writes it under both stage prefixes); sun coupler hub, sized to the motor's output holes plus a margin of sun_hub_clearance_multiple x standard_clearance_1_5mm (config; the stage-1 mass code uses the same key)",
    "alias_of": "a1_sun_hub_dia"
   },
   {
@@ -3759,6 +3761,19 @@
    },
    "confidence": "medium",
    "reason": "axial gap between the two planet bearings in a planet; with the bearing width it sets the smallest planet and ring widths of both stages; one key for both stages, the plan leaves open whether it should be one per stage (planet_bearing_gap1 / 2)"
+  },
+  {
+   "name": "sun_hub_clearance_multiple",
+   "attr": "sun_hub_clearance_multiple",
+   "category": "fixed",
+   "subtype": "clearance",
+   "source": {
+    "file": "dspg_params.json",
+    "block": "dspg_design_parameters_3DP",
+    "key": "sun_hub_clearance_multiple"
+   },
+   "confidence": "high",
+   "reason": "margin around the sun hub's bolt circle, in multiples of standard_clearance_1_5mm (4); used for the stage-1 sun hub (CAD and stage-1 mass code); one shared key name across the gearbox types"
   },
   {
    "name": "bearingIDClearanceMM",

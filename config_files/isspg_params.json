@@ -24,6 +24,7 @@
         "tight_clearance_3DP"           : 0.4,
         "loose_clearance_3DP"           : 0.8,
         "planet_bearing_gap": 1.0,
+        "sun_hub_clearance_multiple": 4,
         "bearing_step_width"    : 2,
         "standard_bearing_insertion_chamfer" : 0.5,
         "magnet_mount_hole_dia"         : 3,

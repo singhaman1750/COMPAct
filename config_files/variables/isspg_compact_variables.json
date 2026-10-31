@@ -1786,14 +1786,15 @@
    "attr": "sun_hub_dia",
    "category": "dependent",
    "subtype": "formula",
-   "formula": "motor_rotor_hole_PCD + sun_hub_nut_wrench_size + standard_clearance_1_5mm * 4",
+   "formula": "motor_rotor_hole_PCD + sun_hub_nut_wrench_size + standard_clearance_1_5mm * sun_hub_clearance_multiple",
    "depends_on": [
     "motor_rotor_hole_PCD",
     "sun_hub_nut_wrench_size",
-    "standard_clearance_1_5mm"
+    "standard_clearance_1_5mm",
+    "sun_hub_clearance_multiple"
    ],
-   "confidence": "medium",
-   "reason": "sun coupler hub, sized to the motor's output holes; the x 4 clearance margin is hard-coded (the config's sun_hub_dia is not read); the plan still has to decide a shared key"
+   "confidence": "high",
+   "reason": "sun coupler hub, sized to the motor's output holes plus a margin of sun_hub_clearance_multiple x standard_clearance_1_5mm (config; the config's sun_hub_dia is not read)"
   },
   {
    "name": "sun_central_bolt_socket_head_dia",
@@ -2210,6 +2211,19 @@
    },
    "confidence": "high",
    "reason": "axial gap between the two planet bearings (one in each planet gear); with the bearing width it sets the smallest planet and ring width"
+  },
+  {
+   "name": "sun_hub_clearance_multiple",
+   "attr": "sun_hub_clearance_multiple",
+   "category": "fixed",
+   "subtype": "clearance",
+   "source": {
+    "file": "isspg_params.json",
+    "block": "isspg_3DP_design_parameters",
+    "key": "sun_hub_clearance_multiple"
+   },
+   "confidence": "high",
+   "reason": "margin around the sun hub's bolt circle, in multiples of standard_clearance_1_5mm (4); used for the sun hub; one shared key name across the gearbox types"
   },
   {
    "name": "maxGearboxDiameter",

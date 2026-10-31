@@ -23,11 +23,11 @@ Confidence:
 |---|---|---|
 | Input | 24 | 2 |
 | Optimisation | 4 | 0 |
-| Fixed | 57 | 24 |
+| Fixed | 57 | 25 |
 | Dependent | 60 | 4 |
-| **Total** | **145** | **30** |
+| **Total** | **145** | **31** |
 
-CAD variables by confidence: high 134, medium 11, low 0
+CAD variables by confidence: high 135, medium 10, low 0
 
 ## To review (not high confidence)
 
@@ -38,7 +38,6 @@ CAD variables by confidence: high 134, medium 11, low 0
 - `sun2_bearing_ID` (Dependent, medium): catalogue bearing chosen by bearings_discrete (smallest one that fits) (requested by outer diameter: bearings_discrete returns the first bearing with OD >= the request, which can exceed it, ISSUES bug 5); this is its bore
 - `sun2_bearing_OD` (Dependent, medium): catalogue bearing chosen by bearings_discrete (smallest one that fits) (requested by outer diameter: bearings_discrete returns the first bearing with OD >= the request, which can exceed it, ISSUES bug 5); this is its outer diameter
 - `sun2_bearing_width` (Dependent, medium): catalogue bearing chosen by bearings_discrete (smallest one that fits) (requested by outer diameter: bearings_discrete returns the first bearing with OD >= the request, which can exceed it, ISSUES bug 5); this is its width
-- `sun_hub_dia` (Dependent, medium): sun coupler hub, sized to the motor's output holes; the x 4 clearance margin is hard-coded (the config's sun_hub_dia is not read); the plan still has to decide a shared key
 - `carrier_thickness_mid` (Dependent, medium): middle carrier plate: a hard-coded 6 mm, or, when the ring hub would be thinner than a hard-coded 3 mm, what remains of the carrier after the top; an iterative two-case rule with two hard-coded numbers
 - `carrier_thickness` (Dependent, medium): carrier thickness: the hard-coded 6 mm middle plate plus the top, or, when the ring hub would be thinner than a hard-coded 3 mm, whatever closes the stack; an iterative two-case rule with two hard-coded numbers
 - `ring_hub_thickness` (Dependent, medium): ring hub thickness: whatever lets the stack reach the motor, but at least a hard-coded 3 mm (the config's ring_hub_thickness is not read); an iterative two-case rule with two hard-coded numbers
@@ -200,7 +199,7 @@ From `config_files/variables/rules.json`; the test holds every gearbox's file to
 | 43 | `sun2_bearing_width` | lookup | `bearings_discrete(idRequiredMM=0, odRequiredMM=motor_rotor_base_ID)` → getBearingWidthMM | motor_rotor_base_ID | medium | catalogue bearing chosen by bearings_discrete (smallest one that fits) (requested by outer diameter: bearings_discrete returns the first bearing with OD >= the request, which can exceed it, ISSUES bug 5); this is its width |
 | 44 | `sun_hub_nut_wrench_size` | lookup | `nuts_and_bolts_dimensions(bolt_dia=motor_rotor_hole_dia, bolt_type=socket_head)` → nut_width_across_flats | motor_rotor_hole_dia | high | standard socket-head fastener size for the chosen bolt diameter |
 | 45 | `sun_hub_nut_depth` | lookup | `nuts_and_bolts_dimensions(bolt_dia=motor_rotor_hole_dia, bolt_type=socket_head)` → nut_thickness | motor_rotor_hole_dia | high | standard socket-head fastener size for the chosen bolt diameter |
-| 46 | `sun_hub_dia` | formula | `motor_rotor_hole_PCD + sun_hub_nut_wrench_size + standard_clearance_1_5mm * 4` | motor_rotor_hole_PCD, sun_hub_nut_wrench_size, standard_clearance_1_5mm | medium | sun coupler hub, sized to the motor's output holes; the x 4 clearance margin is hard-coded (the config's sun_hub_dia is not read); the plan still has to decide a shared key |
+| 46 | `sun_hub_dia` | formula | `motor_rotor_hole_PCD + sun_hub_nut_wrench_size + standard_clearance_1_5mm * sun_hub_clearance_multiple` | motor_rotor_hole_PCD, sun_hub_nut_wrench_size, standard_clearance_1_5mm, sun_hub_clearance_multiple | high | sun coupler hub, sized to the motor's output holes plus a margin of sun_hub_clearance_multiple x standard_clearance_1_5mm (config; the config's sun_hub_dia is not read) |
 | 47 | `sun_central_bolt_socket_head_dia` | lookup | `nuts_and_bolts_dimensions(bolt_dia=sun_central_bolt_dia, bolt_type=socket_head)` → bolt_head_dia | sun_central_bolt_dia | high | standard socket-head fastener size for the chosen bolt diameter |
 | 48 | `sun_central_nut_wrench_size` | lookup | `nuts_and_bolts_dimensions(bolt_dia=sun_central_bolt_dia, bolt_type=socket_head)` → nut_width_across_flats | sun_central_bolt_dia | high | standard socket-head fastener size for the chosen bolt diameter |
 | 49 | `sun_central_nut_depth` | lookup | `nuts_and_bolts_dimensions(bolt_dia=sun_central_bolt_dia, bolt_type=socket_head)` → nut_thickness | sun_central_bolt_dia | high | standard socket-head fastener size for the chosen bolt diameter |
@@ -216,7 +215,7 @@ From `config_files/variables/rules.json`; the test holds every gearbox's file to
 | 59 | `actuactor_mount_nut_wrench_size` | lookup | `nuts_and_bolts_dimensions(bolt_dia=actuactor_mount_hole_dia, bolt_type=socket_head)` → nut_width_across_flats | actuactor_mount_hole_dia | high | standard socket-head fastener size for the chosen bolt diameter |
 | 60 | `actuactor_mount_nut_depth` | lookup | `nuts_and_bolts_dimensions(bolt_dia=actuactor_mount_hole_dia, bolt_type=socket_head)` → nut_thickness | actuactor_mount_hole_dia | high | standard socket-head fastener size for the chosen bolt diameter |
 
-## Used by the code, not written to the CAD file (30)
+## Used by the code, not written to the CAD file (31)
 
 | # | Variable | Sub-type | Source / formula | Depends on | Confidence | Why |
 |---|---|---|---|---|---|---|
@@ -226,30 +225,31 @@ From `config_files/variables/rules.json`; the test holds every gearbox's file to
 | 4 | `FOS` | safety factor | config.json → MIT_params → `FOS` |  | high | factor of safety in the tooth-stress rule (the ISSPG default is 1.2) |
 | 5 | `serviceFactor` | safety factor | config.json → MIT_params → `serviceFactor` |  | high | service factor on the motor torque in the tooth-stress rule |
 | 6 | `planet_bearing_gap` | clearance | isspg_params.json → isspg_3DP_design_parameters → `planet_bearing_gap` |  | high | axial gap between the two planet bearings (one in each planet gear); with the bearing width it sets the smallest planet and ring width |
-| 7 | `maxGearboxDiameter` | formula | `stator_ID` | stator_ID | high | largest gearbox diameter the optimiser may use: the stator's inner diameter (the gears sit inside the frameless outrunner) |
-| 8 | `actuator_width` | formula | `motor_case_thickness + motor_case_thickness + motor_case_height` | motor_case_height, motor_case_thickness | high | axial width: both motor-case walls plus the motor case height, written to the results CSV |
-| 9 | `fw_limit_mm` | formula | `stator_height - gear_axial_margin_mm` | stator_height, gear_axial_margin_mm | high | the widest gear the stator height allows: the stator height less gear_axial_margin_mm (the width cap of the stress rule) |
-| 10 | `planetMinDistanceMM` | constraint constant | isspg_params.json → isspg_3DP_design_parameters → `planetMinDistanceMM` |  | high | read by the code but not written to the CAD file |
-| 11 | `sCarrierExtrusionDiaMM` | constraint constant | isspg_params.json → isspg_3DP_design_parameters → `sCarrierExtrusionDiaMM` |  | high | read by the code but not written to the CAD file |
-| 12 | `sCarrierExtrusionClearanceMM` | constraint constant | isspg_params.json → isspg_3DP_design_parameters → `sCarrierExtrusionClearanceMM` |  | high | read by the code but not written to the CAD file |
-| 13 | `ring_hub_thickness_config` | wall thickness | isspg_params.json → isspg_3DP_design_parameters → `ring_hub_thickness` |  | high | config value ring_hub_thickness (the CAD variable of the same name is not read from it): in the config but never read |
-| 14 | `ring_hub_to_case_hole_nut_wrench_size_config` | fastener size | isspg_params.json → isspg_3DP_design_parameters → `ring_hub_to_case_hole_nut_wrench_size` |  | high | config value ring_hub_to_case_hole_nut_wrench_size (the CAD variable of the same name is not read from it): in the config but never read |
-| 15 | `ring_hub_to_case_hole_nut_depth_config` | fastener size | isspg_params.json → isspg_3DP_design_parameters → `ring_hub_to_case_hole_nut_depth` |  | high | config value ring_hub_to_case_hole_nut_depth (the CAD variable of the same name is not read from it): in the config but never read |
-| 16 | `stator_hole_PCD_config` | feature size | isspg_params.json → isspg_3DP_design_parameters → `stator_hole_PCD` |  | high | config value stator_hole_PCD (the CAD variable of the same name is not read from it): in the config but never read |
-| 17 | `stator_hole_dia_config` | fastener size | isspg_params.json → isspg_3DP_design_parameters → `stator_hole_dia` |  | high | config value stator_hole_dia (the CAD variable of the same name is not read from it): in the config but never read |
-| 18 | `sun_hub_dia_config` | feature size | isspg_params.json → isspg_3DP_design_parameters → `sun_hub_dia` |  | high | config value sun_hub_dia (the CAD variable of the same name is not read from it): in the config but never read |
-| 19 | `sun_coupler_hub_thickness_config` | wall thickness | isspg_params.json → isspg_3DP_design_parameters → `sun_coupler_hub_thickness` |  | high | config value sun_coupler_hub_thickness (the CAD variable of the same name is not read from it): in the config but never read |
-| 20 | `case_mounting_hole_shift_config` | feature size | isspg_params.json → isspg_3DP_design_parameters → `case_mounting_hole_shift` |  | high | config value case_mounting_hole_shift (the CAD variable of the same name is not read from it): in the config but never read |
-| 21 | `gear_axial_margin_mm` | feature size | isspg_params.json → isspg_3DP_design_parameters → `gear_axial_margin_mm` |  | high | read by the code but not written to the CAD file |
-| 22 | `GEAR_RATIO_MIN` | search bound | isspg_params.json → isspg_optimization_parameters → `GEAR_RATIO_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 23 | `GEAR_RATIO_MAX` | search bound | isspg_params.json → isspg_optimization_parameters → `GEAR_RATIO_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 24 | `GEAR_RATIO_STEP` | search bound | isspg_params.json → isspg_optimization_parameters → `GEAR_RATIO_STEP` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 25 | `MODULE_MIN` | search bound | isspg_params.json → isspg_optimization_parameters → `MODULE_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 26 | `MODULE_MAX` | search bound | isspg_params.json → isspg_optimization_parameters → `MODULE_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 27 | `NUM_PLANET_MIN` | search bound | isspg_params.json → isspg_optimization_parameters → `NUM_PLANET_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 28 | `NUM_PLANET_MAX` | search bound | isspg_params.json → isspg_optimization_parameters → `NUM_PLANET_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 29 | `NUM_TEETH_SUN_MIN` | search bound | isspg_params.json → isspg_optimization_parameters → `NUM_TEETH_SUN_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 30 | `NUM_TEETH_PLANET_MIN` | search bound | isspg_params.json → isspg_optimization_parameters → `NUM_TEETH_PLANET_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 7 | `sun_hub_clearance_multiple` | clearance | isspg_params.json → isspg_3DP_design_parameters → `sun_hub_clearance_multiple` |  | high | margin around the sun hub's bolt circle, in multiples of standard_clearance_1_5mm (4); used for the sun hub; one shared key name across the gearbox types |
+| 8 | `maxGearboxDiameter` | formula | `stator_ID` | stator_ID | high | largest gearbox diameter the optimiser may use: the stator's inner diameter (the gears sit inside the frameless outrunner) |
+| 9 | `actuator_width` | formula | `motor_case_thickness + motor_case_thickness + motor_case_height` | motor_case_height, motor_case_thickness | high | axial width: both motor-case walls plus the motor case height, written to the results CSV |
+| 10 | `fw_limit_mm` | formula | `stator_height - gear_axial_margin_mm` | stator_height, gear_axial_margin_mm | high | the widest gear the stator height allows: the stator height less gear_axial_margin_mm (the width cap of the stress rule) |
+| 11 | `planetMinDistanceMM` | constraint constant | isspg_params.json → isspg_3DP_design_parameters → `planetMinDistanceMM` |  | high | read by the code but not written to the CAD file |
+| 12 | `sCarrierExtrusionDiaMM` | constraint constant | isspg_params.json → isspg_3DP_design_parameters → `sCarrierExtrusionDiaMM` |  | high | read by the code but not written to the CAD file |
+| 13 | `sCarrierExtrusionClearanceMM` | constraint constant | isspg_params.json → isspg_3DP_design_parameters → `sCarrierExtrusionClearanceMM` |  | high | read by the code but not written to the CAD file |
+| 14 | `ring_hub_thickness_config` | wall thickness | isspg_params.json → isspg_3DP_design_parameters → `ring_hub_thickness` |  | high | config value ring_hub_thickness (the CAD variable of the same name is not read from it): in the config but never read |
+| 15 | `ring_hub_to_case_hole_nut_wrench_size_config` | fastener size | isspg_params.json → isspg_3DP_design_parameters → `ring_hub_to_case_hole_nut_wrench_size` |  | high | config value ring_hub_to_case_hole_nut_wrench_size (the CAD variable of the same name is not read from it): in the config but never read |
+| 16 | `ring_hub_to_case_hole_nut_depth_config` | fastener size | isspg_params.json → isspg_3DP_design_parameters → `ring_hub_to_case_hole_nut_depth` |  | high | config value ring_hub_to_case_hole_nut_depth (the CAD variable of the same name is not read from it): in the config but never read |
+| 17 | `stator_hole_PCD_config` | feature size | isspg_params.json → isspg_3DP_design_parameters → `stator_hole_PCD` |  | high | config value stator_hole_PCD (the CAD variable of the same name is not read from it): in the config but never read |
+| 18 | `stator_hole_dia_config` | fastener size | isspg_params.json → isspg_3DP_design_parameters → `stator_hole_dia` |  | high | config value stator_hole_dia (the CAD variable of the same name is not read from it): in the config but never read |
+| 19 | `sun_hub_dia_config` | feature size | isspg_params.json → isspg_3DP_design_parameters → `sun_hub_dia` |  | high | config value sun_hub_dia (the CAD variable of the same name is not read from it): in the config but never read |
+| 20 | `sun_coupler_hub_thickness_config` | wall thickness | isspg_params.json → isspg_3DP_design_parameters → `sun_coupler_hub_thickness` |  | high | config value sun_coupler_hub_thickness (the CAD variable of the same name is not read from it): in the config but never read |
+| 21 | `case_mounting_hole_shift_config` | feature size | isspg_params.json → isspg_3DP_design_parameters → `case_mounting_hole_shift` |  | high | config value case_mounting_hole_shift (the CAD variable of the same name is not read from it): in the config but never read |
+| 22 | `gear_axial_margin_mm` | feature size | isspg_params.json → isspg_3DP_design_parameters → `gear_axial_margin_mm` |  | high | read by the code but not written to the CAD file |
+| 23 | `GEAR_RATIO_MIN` | search bound | isspg_params.json → isspg_optimization_parameters → `GEAR_RATIO_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 24 | `GEAR_RATIO_MAX` | search bound | isspg_params.json → isspg_optimization_parameters → `GEAR_RATIO_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 25 | `GEAR_RATIO_STEP` | search bound | isspg_params.json → isspg_optimization_parameters → `GEAR_RATIO_STEP` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 26 | `MODULE_MIN` | search bound | isspg_params.json → isspg_optimization_parameters → `MODULE_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 27 | `MODULE_MAX` | search bound | isspg_params.json → isspg_optimization_parameters → `MODULE_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 28 | `NUM_PLANET_MIN` | search bound | isspg_params.json → isspg_optimization_parameters → `NUM_PLANET_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 29 | `NUM_PLANET_MAX` | search bound | isspg_params.json → isspg_optimization_parameters → `NUM_PLANET_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 30 | `NUM_TEETH_SUN_MIN` | search bound | isspg_params.json → isspg_optimization_parameters → `NUM_TEETH_SUN_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 31 | `NUM_TEETH_PLANET_MIN` | search bound | isspg_params.json → isspg_optimization_parameters → `NUM_TEETH_PLANET_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
 
 ## Config blocks ISSPG_COMPACT doesn't read
 

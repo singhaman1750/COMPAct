@@ -280,7 +280,7 @@ Spec: [`config_files/variables/idspg_variables.json`](../../../config_files/vari
 
 **Open questions**
 1. One `planet_bearing_gap` for both stages, or one per stage (plan decision 1).
-2. The sun-hub margin: 5 in the CAD, 4 in the mass code; and the shared key (plan decision 2).
+2. The sun-hub margin: 5 in the CAD, 4 in the mass code; and the shared key (plan decision 2). **Done (2026-10-31):** the margin is now the config key `sun_hub_clearance_multiple` (4 in every type with this rule, SSPG and CPG included; 5 in IDSPG, its CAD value), read by the CAD code and the mass code; value-identical; `tests/test_sun_hub_clearance.py`.
 3. The axial-fill rules (`fw_s_used`, `ring_gear_relation`) are the least clear part; they are plain formulas on the code's locals and are kept medium. ISSUES bug 14 (IDSPG stage-1 wide 3D-printed gears) is still open and affects the stage-1 stress widths, not their classification.
 4. `a1_ring_OD` is a copy of `Stator_ID` (an input): the stage-1 ring fits the stator bore.
 5. `idspg_design_parameters` (29 keys) is never read; listed as an unused block. The RO80 case where stage-2 parts do not move (CAD 6) concerns the Onshape model.

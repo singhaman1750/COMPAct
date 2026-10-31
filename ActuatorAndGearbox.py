@@ -2138,6 +2138,7 @@ class singleStagePlanetaryActuator:
         self.planet_bearing_OD        = self.design_params["planet_bearing_OD"] # 12 
         self.planet_bearing_width     = self.design_params["planet_bearing_width"] # 3.5
         self.planet_bearing_gap       = self.design_params["planet_bearing_gap"] # 1.0
+        self.sun_hub_clearance_multiple = self.design_params["sun_hub_clearance_multiple"] # 4
         self.planet_bore              = self.design_params["planet_bore"] # 10
 
         # --- bearing retainer dimensions ---
@@ -2251,7 +2252,7 @@ class singleStagePlanetaryActuator:
         self.motor_output_hole_CSK_head_height = motor_output_hole_bolt.bolt_head_height
 
         # --- Sun coupler & sun gear dimensions ---
-        self.sun_hub_dia = self.motor_output_hole_PCD + self.motor_output_hole_dia + self.standard_clearance_1_5mm * 4
+        self.sun_hub_dia = self.motor_output_hole_PCD + self.motor_output_hole_dia + self.standard_clearance_1_5mm * self.sun_hub_clearance_multiple
         
         sun_central_bolt = nuts_and_bolts_dimensions(bolt_dia = self.sun_central_bolt_dia, bolt_type="socket_head")
         self.sun_central_bolt_socket_head_dia   = sun_central_bolt.bolt_head_dia
@@ -3283,7 +3284,7 @@ class singleStagePlanetaryActuator:
         #----------------------------------
         # Mass: sspg_sun
         #----------------------------------
-        sun_hub_dia = motor_output_hole_PCD + motor_output_hole_dia + standard_clearance_1_5mm * 4
+        sun_hub_dia = motor_output_hole_PCD + motor_output_hole_dia + standard_clearance_1_5mm * self.sun_hub_clearance_multiple
 
         sun_shaft_dia    = sun_shaft_bearing_ID
         sun_shaft_height = sun_shaft_bearing_width + 2 * standard_clearance_1_5mm
@@ -3502,6 +3503,7 @@ class compoundPlanetaryActuator:
         self.planet_bearing_OD        = self.design_params["planet_bearing_OD"] # 12
         self.planet_bearing_width     = self.design_params["planet_bearing_width"] # 3
         self.planet_bearing_gap       = self.design_params["planet_bearing_gap"] # 1.0
+        self.sun_hub_clearance_multiple = self.design_params["sun_hub_clearance_multiple"] # 4
         self.planet_bore              = self.design_params["planet_bore"] # 10
 
         # --- Sun coupler and sun central bolt ---
@@ -3596,7 +3598,7 @@ class compoundPlanetaryActuator:
         sun_central_bolt = nuts_and_bolts_dimensions(bolt_dia = self.sun_central_bolt_dia, bolt_type="socket_head")
         self.sun_central_bolt_socket_head_dia = sun_central_bolt.bolt_head_dia # 8.5
         
-        self.sun_hub_dia = self.motor_output_hole_PCD + self.motor_output_hole_dia + self.standard_clearance_1_5mm * 4
+        self.sun_hub_dia = self.motor_output_hole_PCD + self.motor_output_hole_dia + self.standard_clearance_1_5mm * self.sun_hub_clearance_multiple
 
         #----------------------- Bearings------------------------------------
         IdrequiredMM = self.module_b * (self.Ns + self.Np_b) + self.bearingIDClearanceMM
@@ -4685,7 +4687,7 @@ class compoundPlanetaryActuator:
         #----------------------------------
         # Mass: cpg_sun
         #----------------------------------
-        sun_hub_dia = motor_output_hole_PCD + motor_output_hole_dia + standard_clearance_1_5mm * 4
+        sun_hub_dia = motor_output_hole_PCD + motor_output_hole_dia + standard_clearance_1_5mm * self.sun_hub_clearance_multiple
 
         sun_shaft_dia    = sun_shaft_bearing_ID
         sun_shaft_height = sun_shaft_bearing_width + 2 * standard_clearance_1_5mm
@@ -6759,6 +6761,7 @@ class doubleStagePlanetaryActuator:
         self.case_mounting_hole_wall_overlap            = self.design_params["case_mounting_hole_wall_overlap"] # 0.5
         self.bearing_mount_wall_bolt_dia_multiple       = self.design_params["bearing_mount_wall_bolt_dia_multiple"] # 2
         self.planet_bearing_gap                         = self.design_params["planet_bearing_gap"] # 1.0
+        self.sun_hub_clearance_multiple                 = self.design_params["sun_hub_clearance_multiple"] # 4
 
         ## --------------------------------------------------------------------
         ## Motor, Driver, and Base Plate Dimensions
@@ -6857,7 +6860,7 @@ class doubleStagePlanetaryActuator:
         self.carrier_PCD1 = (self.Np1 + self.Ns1) * self.module1
         self.fw_s1_used = self.fw_p1 + self.clearance_planet + self.sec_carrier_thickness1 + self.standard_clearance_1_5mm
         self.case_dist1 = self.sec_carrier_thickness1 + self.clearance_planet + self.sun_coupler_hub_thickness1 - self.case_mounting_surface_height
-        self.sun_hub_dia1 = self.motor_output_hole_PCD + self.motor_output_hole_dia + self.standard_clearance_1_5mm * 4
+        self.sun_hub_dia1 = self.motor_output_hole_PCD + self.motor_output_hole_dia + self.standard_clearance_1_5mm * self.sun_hub_clearance_multiple
 
         ## --------------------------------------------------------------------
         ## Stage 1 - Fastener and Detailed Feature Dimensions
@@ -8879,7 +8882,7 @@ class doubleStagePlanetaryActuator:
         #----------------------------------
         # Mass: dspg_sun
         #----------------------------------
-        sun_hub_dia = motor_output_hole_PCD + motor_output_hole_dia + standard_clearance_1_5mm * 4
+        sun_hub_dia = motor_output_hole_PCD + motor_output_hole_dia + standard_clearance_1_5mm * self.sun_hub_clearance_multiple
 
         sun_shaft_dia    = sun_shaft_bearing_ID
         sun_shaft_height = sun_shaft_bearing_width + 2 * standard_clearance_1_5mm
