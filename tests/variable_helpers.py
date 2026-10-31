@@ -81,6 +81,13 @@ def _branches_cpg(a):
             "ring grown to the bearing": not a.Nr * a.module_s + 5 * 2 > a.bearing_OD}
 
 
+def _branches_icpg(a):
+    # sun_hub_dia is capped at the rotor OD, but the rotor mount holes' PCD + dia + 4 clearances is well below it for every
+    # motor in motors.json (RO100 84 of 113.5 mm, RO80 72 of 92.6, RO60 55 of 73.8): the cap is never reached
+    return {"sun length: the motor-height floor applies": a.fw_s_used == a.motor_height,
+            "stator-height cap applies": a.torque_carried_fraction < 1.0}
+
+
 def _branches_isspg(a):
     return {"carrier / ring hub: the ring hub reaches its 3 mm minimum": a.carrier_thickness_mid != 6,
             "stator-height cap applies": a.torque_carried_fraction < 1.0}
@@ -146,6 +153,14 @@ GEARBOXES = {
         extra=[("RI100", (28, 44, 28, 116, 100, 1.2, 1.2, 4))],     # module 1.2: the planet stack is under the cap
         branches=_branches_inwpg_dependent,
         params_name="inwpg_params_dependent.json"),
+    "icpg": Gearbox(
+        "icpg", "ICPG", "icpg_equations", "internalcompoundPlanetaryGearbox",
+        counts={"input": 25, "optimisation": 5, "fixed": 48, "dependent": 39}, code_only=29,
+        set_gears=_set_cpg,
+        from_opt=lambda p: (p[2], p[3], p[4], p[5], p[6], p[7], p[1]),   # [gr, n, Ns, Np_b, Np_s, Nr, m_b, m_s]
+        extra=[("RO100", (30, 30, 30, 90, 1.2, 1.2, 3))],         # module 1.2: short gears, the sun length hits the motor-height floor
+        branches=_branches_icpg,
+        config_file="motor_config.json"),
     "isspg_compact": Gearbox(
         "isspg_compact", "ISSPG", "isspg_compact_equations", "planetaryGearbox",
         counts={"input": 24, "optimisation": 4, "fixed": 57, "dependent": 60}, code_only=30,

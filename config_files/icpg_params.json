@@ -69,6 +69,7 @@
         "Motor_case_thickness"                                   : 3,
         "tight_clearance_3DP"                                    : 0.4,
         "loose_clearance_3DP"                                    : 0.8,
+        "planet_bearing_gap": 1.0,
         "ring_gear_thickness_mounting_casing"                    : 4 ,
         "bearing_retainer_hole_dia"                              : 4 ,
         "bearing_retainer_hole_num"                              : 8 ,

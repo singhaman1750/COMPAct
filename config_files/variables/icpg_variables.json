@@ -1,0 +1,2025 @@
+{
+ "gearbox": "icpg",
+ "about": "Every ISSPG icpg variable sorted into input / optimisation / fixed / dependent. 'cad_variables' are the 117 variables ISSPG icpg writes to CADs/ISSPG/isspg_icpg_equations_onshape.txt, in that order (this gearbox has no other equation file); 'code_only' are values the code uses but does not write to the CAD file, plus every config key the CAD does not use; 'unused_config_blocks' are config blocks ISSPG never reads. tests/test_variable_categories.py checks the lists against the code and re-evaluates every formula and lookup; docs/variables/icpg.md is generated from this file (python tools/variables/render.py).",
+ "categories": {
+  "input": "chosen parts and material: the motor's dimensions and torque, the motor driver's mount dimensions, the gear material's allowable stress",
+  "optimisation": "searched by the optimiser: teeth, module, number of planets",
+  "fixed": "constants that don't depend on the design: clearances, wall thicknesses, fastener and bearing choices, feature sizes, the gear standard",
+  "dependent": "computed from the variables above, by a formula, a catalogue lookup (bearings, bolts, nuts) or a rule the code applies (the tooth-stress rule for face widths)"
+ },
+ "confidence": {
+  "high": "the code reads it directly from one source, or computes it with an explicit formula",
+  "medium": "the code is clear, but the category is a judgement call (see the reason)",
+  "low": "can't be decided from the code alone"
+ },
+ "plain_file_aliases": {},
+ "cad_variables": [
+  {
+   "name": "Ns",
+   "attr": "Ns",
+   "category": "optimisation",
+   "subtype": "teeth",
+   "source": {
+    "optimiser": "optimizationInternalCompoundPlanetaryActuator"
+   },
+   "confidence": "high",
+   "reason": "sun teeth: searched by the optimiser loop"
+  },
+  {
+   "name": "Np_b",
+   "attr": "Np_b",
+   "category": "optimisation",
+   "subtype": "teeth",
+   "source": {
+    "optimiser": "optimizationInternalCompoundPlanetaryActuator"
+   },
+   "confidence": "high",
+   "reason": "big planet teeth: searched by the optimiser loop"
+  },
+  {
+   "name": "Np_s",
+   "attr": "Np_s",
+   "category": "optimisation",
+   "subtype": "teeth",
+   "source": {
+    "optimiser": "optimizationInternalCompoundPlanetaryActuator"
+   },
+   "confidence": "high",
+   "reason": "small planet teeth: searched by the optimiser loop"
+  },
+  {
+   "name": "Nr",
+   "attr": "Nr",
+   "category": "dependent",
+   "subtype": "implicit constraint",
+   "formula": "Ns + Np_b + Np_s",
+   "depends_on": [
+    "Ns",
+    "Np_b",
+    "Np_s"
+   ],
+   "confidence": "high",
+   "reason": "implicitly constrained: the coaxial constraint gives Nr = Ns + Np_b + Np_s (with equal modules), which the optimiser sets on the gearbox; the code lists it among the optimisation variables"
+  },
+  {
+   "name": "num_planet",
+   "attr": "num_planet",
+   "category": "optimisation",
+   "subtype": "planets",
+   "source": {
+    "optimiser": "optimizationInternalCompoundPlanetaryActuator"
+   },
+   "confidence": "high",
+   "reason": "number of planets: searched by the optimiser loop"
+  },
+  {
+   "name": "module",
+   "attr": "module",
+   "category": "optimisation",
+   "subtype": "module",
+   "source": {
+    "optimiser": "optimizationInternalCompoundPlanetaryActuator"
+   },
+   "confidence": "high",
+   "reason": "the big module (sun, big planet): searched by the optimiser loop; the CAD file has this one module although the small planet and the ring use the small module module_s (code-only; same pattern as CPG bug 18)"
+  },
+  {
+   "name": "pressure_angle",
+   "attr": "pressure_angle_deg",
+   "category": "fixed",
+   "subtype": "gear standard",
+   "source": {
+    "file": "motor_config.json",
+    "block": "Gear_standard_parameters",
+    "key": "pressureAngleDEG"
+   },
+   "confidence": "high",
+   "reason": "gear standard, the same for every gearbox type"
+  },
+  {
+   "name": "h_a",
+   "attr": "h_a",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "1 * module",
+   "depends_on": [
+    "module"
+   ],
+   "confidence": "high",
+   "reason": "addendum, standard proportion of the module"
+  },
+  {
+   "name": "h_b",
+   "attr": "h_b",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "1.25 * module",
+   "depends_on": [
+    "module"
+   ],
+   "confidence": "high",
+   "reason": "standard proportion of the module (same value as h_f)"
+  },
+  {
+   "name": "clr_tip_root",
+   "attr": "clr_tip_root",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "h_f - h_a",
+   "depends_on": [
+    "h_f",
+    "h_a"
+   ],
+   "confidence": "high",
+   "reason": "tip-root clearance from addendum and dedendum"
+  },
+  {
+   "name": "dp_s",
+   "attr": "dp_s",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "module * Ns",
+   "depends_on": [
+    "module",
+    "Ns"
+   ],
+   "confidence": "high",
+   "reason": "pitch diameter"
+  },
+  {
+   "name": "db_s",
+   "attr": "db_s",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "dp_s * cos(pressure_angle_rad)",
+   "depends_on": [
+    "dp_s",
+    "pressure_angle_rad"
+   ],
+   "confidence": "high",
+   "reason": "base-circle diameter"
+  },
+  {
+   "name": "fw_s_calc",
+   "attr": "fw_s_calc",
+   "category": "dependent",
+   "subtype": "stress rule",
+   "rule": "two stress widths, b = FOS x Ft x qe x qk / (gear_allowable_stress x module): b1 for the sun - big planet mesh (module, Ft from serviceFactor x motor_peak_torque at the sun, qe from the sun-planet contact ratio, qk from Ns) and b2 for the small planet - ring mesh (module_s, qk from Np_s); then, if b1 + b2 < 2 x planet_bearing_width + planet_bearing_gap, each planet gear is raised to at least planet_bearing_width + planet_bearing_gap / 2 (one bearing per gear, half the gap each; mitStressAnalysisMinFacewidth); fw_s_calc = b1; then the two planet steps (big + small + planet_step_gap_mm) must fit the stator height less gear_axial_margin_mm: when they are longer, all four widths are scaled by (stator_height - gear_axial_margin_mm - planet_step_gap_mm) / (big + small), so the capped gears carry the same fraction of the torque",
+   "depends_on": [
+    "module",
+    "module_s",
+    "Ns",
+    "Np_b",
+    "Np_s",
+    "Nr",
+    "num_planet",
+    "pressure_angle",
+    "motor_peak_torque",
+    "gear_allowable_stress",
+    "FOS",
+    "serviceFactor",
+    "stator_height",
+    "gear_axial_margin_mm",
+    "planet_step_gap_mm"
+   ],
+   "confidence": "high",
+   "reason": "sun face width from the tooth-stress rule, scaled by the stator-height cap when it applies: fixed by the optimisation variables, the motor torque, the gear material, the safety factors and the cap"
+  },
+  {
+   "name": "alpha_s",
+   "attr": "alpha_s",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "sqrt(dp_s ** 2 - db_s ** 2) / db_s * 180 / pi - pressure_angle",
+   "depends_on": [
+    "pressure_angle",
+    "db_s",
+    "dp_s"
+   ],
+   "confidence": "high",
+   "reason": "involute angle used to draw the tooth"
+  },
+  {
+   "name": "beta_s",
+   "attr": "beta_s",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "(360 / (4 * Ns) - alpha_s) * 2",
+   "depends_on": [
+    "alpha_s",
+    "Ns"
+   ],
+   "confidence": "high",
+   "reason": "tooth angle used to draw the tooth"
+  },
+  {
+   "name": "dp_p_b",
+   "attr": "dp_p_b",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "module * Np_b",
+   "depends_on": [
+    "module",
+    "Np_b"
+   ],
+   "confidence": "high",
+   "reason": "big-planet pitch diameter"
+  },
+  {
+   "name": "db_p_b",
+   "attr": "db_p_b",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "dp_p_b * cos(pressure_angle_rad)",
+   "depends_on": [
+    "dp_p_b",
+    "pressure_angle_rad"
+   ],
+   "confidence": "high",
+   "reason": "base-circle diameter"
+  },
+  {
+   "name": "fw_p_s",
+   "attr": "fw_p_s",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "fw_r + clearance_planet",
+   "depends_on": [
+    "fw_r",
+    "clearance_planet"
+   ],
+   "confidence": "high",
+   "reason": "small-planet width: the ring width plus a clearance (a formula, not the stress rule)"
+  },
+  {
+   "name": "alpha_p_b",
+   "attr": "alpha_p_b",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "sqrt(dp_p_b ** 2 - db_p_b ** 2) / db_p_b * 180 / pi - pressure_angle",
+   "depends_on": [
+    "pressure_angle",
+    "db_p_b",
+    "dp_p_b"
+   ],
+   "confidence": "high",
+   "reason": "involute angle used to draw the tooth"
+  },
+  {
+   "name": "beta_p_b",
+   "attr": "beta_p_b",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "(360 / (4 * Np_b) - alpha_p_b) * 2",
+   "depends_on": [
+    "alpha_p_b",
+    "Np_b"
+   ],
+   "confidence": "high",
+   "reason": "tooth angle used to draw the tooth"
+  },
+  {
+   "name": "h_f",
+   "attr": "h_f",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "1.25 * module",
+   "depends_on": [
+    "module"
+   ],
+   "confidence": "high",
+   "reason": "dedendum, standard proportion of the module"
+  },
+  {
+   "name": "dp_r",
+   "attr": "dp_r",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "module * Nr",
+   "depends_on": [
+    "module",
+    "Nr"
+   ],
+   "confidence": "high",
+   "reason": "pitch diameter"
+  },
+  {
+   "name": "db_r",
+   "attr": "db_r",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "dp_r * cos(pressure_angle_rad)",
+   "depends_on": [
+    "dp_r",
+    "pressure_angle_rad"
+   ],
+   "confidence": "high",
+   "reason": "base-circle diameter"
+  },
+  {
+   "name": "fw_r",
+   "attr": "fw_r",
+   "category": "dependent",
+   "subtype": "stress rule",
+   "rule": "two stress widths, b = FOS x Ft x qe x qk / (gear_allowable_stress x module): b1 for the sun - big planet mesh (module, Ft from serviceFactor x motor_peak_torque at the sun, qe from the sun-planet contact ratio, qk from Ns) and b2 for the small planet - ring mesh (module_s, qk from Np_s); then, if b1 + b2 < 2 x planet_bearing_width + planet_bearing_gap, each planet gear is raised to at least planet_bearing_width + planet_bearing_gap / 2 (one bearing per gear, half the gap each; mitStressAnalysisMinFacewidth); fw_r = b2 (raised); then the two planet steps (big + small + planet_step_gap_mm) must fit the stator height less gear_axial_margin_mm: when they are longer, all four widths are scaled by (stator_height - gear_axial_margin_mm - planet_step_gap_mm) / (big + small), so the capped gears carry the same fraction of the torque",
+   "depends_on": [
+    "module",
+    "module_s",
+    "Ns",
+    "Np_b",
+    "Np_s",
+    "Nr",
+    "num_planet",
+    "pressure_angle",
+    "motor_peak_torque",
+    "gear_allowable_stress",
+    "FOS",
+    "serviceFactor",
+    "stator_height",
+    "gear_axial_margin_mm",
+    "planet_step_gap_mm",
+    "planet_bearing_width",
+    "planet_bearing_gap"
+   ],
+   "confidence": "high",
+   "reason": "ring face width from the tooth-stress rule (the small planet - ring mesh), raised to hold the planet bearing and scaled by the stator-height cap; the small planet's width fw_p_s is this plus clearance_planet"
+  },
+  {
+   "name": "alpha_r",
+   "attr": "alpha_r",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "sqrt(dp_r ** 2 - db_r ** 2) / db_r * 180 / pi - pressure_angle",
+   "depends_on": [
+    "pressure_angle",
+    "db_r",
+    "dp_r"
+   ],
+   "confidence": "high",
+   "reason": "involute angle used to draw the tooth"
+  },
+  {
+   "name": "beta_r",
+   "attr": "beta_r",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "(360 / (4 * Nr) + alpha_r) * 2",
+   "depends_on": [
+    "alpha_r",
+    "Nr"
+   ],
+   "confidence": "high",
+   "reason": "tooth angle used to draw the tooth"
+  },
+  {
+   "name": "bearing_ID",
+   "attr": "bearing_ID",
+   "category": "dependent",
+   "subtype": "lookup",
+   "lookup": {
+    "function": "bearings_discrete",
+    "args": {
+     "idRequiredMM": "carrier_PCD + bearingIDClearance_3DP"
+    },
+    "method": "getBearingIDMM"
+   },
+   "depends_on": [
+    "carrier_PCD",
+    "bearingIDClearance_3DP"
+   ],
+   "confidence": "high",
+   "reason": "catalogue bearing chosen by bearings_discrete (smallest one that fits); this is its bore"
+  },
+  {
+   "name": "bearing_OD",
+   "attr": "bearing_OD",
+   "category": "dependent",
+   "subtype": "lookup",
+   "lookup": {
+    "function": "bearings_discrete",
+    "args": {
+     "idRequiredMM": "carrier_PCD + bearingIDClearance_3DP"
+    },
+    "method": "getBearingODMM"
+   },
+   "depends_on": [
+    "carrier_PCD",
+    "bearingIDClearance_3DP"
+   ],
+   "confidence": "high",
+   "reason": "catalogue bearing chosen by bearings_discrete (smallest one that fits); this is its outer diameter"
+  },
+  {
+   "name": "bearing_height",
+   "attr": "bearing_height",
+   "category": "dependent",
+   "subtype": "lookup",
+   "lookup": {
+    "function": "bearings_discrete",
+    "args": {
+     "idRequiredMM": "carrier_PCD + bearingIDClearance_3DP"
+    },
+    "method": "getBearingWidthMM"
+   },
+   "depends_on": [
+    "carrier_PCD",
+    "bearingIDClearance_3DP"
+   ],
+   "confidence": "high",
+   "reason": "catalogue bearing chosen by bearings_discrete (smallest one that fits); this is its width"
+  },
+  {
+   "name": "clearance_planet",
+   "attr": "clearance_planet",
+   "category": "fixed",
+   "subtype": "clearance",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "clearance_planet"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "sec_carrier_thickness",
+   "attr": "sec_carrier_thickness",
+   "category": "fixed",
+   "subtype": "wall thickness",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "sec_carrier_thickness"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "sun_coupler_hub_thickness",
+   "attr": "sun_coupler_hub_thickness",
+   "category": "fixed",
+   "subtype": "wall thickness",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "sun_coupler_hub_thickness"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "rotor_mount_hole_PCD",
+   "attr": "rotor_mount_hole_PCD",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.geometry",
+    "key": "motor_rotor_hole_PCD"
+   },
+   "confidence": "high",
+   "reason": "read from the chosen motor's geometry"
+  },
+  {
+   "name": "rotor_mount_hole_dia",
+   "attr": "rotor_mount_hole_dia",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.geometry",
+    "key": "motor_rotor_hole_dia"
+   },
+   "confidence": "high",
+   "reason": "read from the chosen motor's geometry"
+  },
+  {
+   "name": "rotor_mount_hole_num",
+   "attr": "rotor_mount_hole_num",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.geometry",
+    "key": "motor_rotor_hole_num"
+   },
+   "confidence": "high",
+   "reason": "read from the chosen motor's geometry"
+  },
+  {
+   "name": "planet_pin_bolt_dia",
+   "attr": "planet_pin_bolt_dia",
+   "category": "fixed",
+   "subtype": "fastener size",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "planet_pin_bolt_dia"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "planet_pin_socket_head_dia",
+   "attr": "planet_pin_socket_head_dia",
+   "category": "dependent",
+   "subtype": "lookup",
+   "lookup": {
+    "function": "nuts_and_bolts_dimensions",
+    "args": {
+     "bolt_dia": "planet_pin_bolt_dia",
+     "bolt_type": "socket_head"
+    },
+    "field": "bolt_head_dia"
+   },
+   "depends_on": [
+    "planet_pin_bolt_dia"
+   ],
+   "confidence": "high",
+   "reason": "standard socket-head fastener size for the chosen bolt diameter"
+  },
+  {
+   "name": "carrier_PCD",
+   "attr": "carrier_PCD",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "module * (Ns + Np_b)",
+   "depends_on": [
+    "module",
+    "Ns",
+    "Np_b"
+   ],
+   "confidence": "high",
+   "reason": "planet-centre circle (twice the centre distance)"
+  },
+  {
+   "name": "planet_shaft_dia",
+   "attr": "planet_shaft_dia",
+   "category": "fixed",
+   "subtype": "planet part",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "planet_shaft_dia"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "planet_shaft_step_offset",
+   "attr": "planet_shaft_step_offset",
+   "category": "fixed",
+   "subtype": "planet part",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "planet_shaft_step_offset"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "carrier_trapezoidal_support_sun_offset",
+   "attr": "carrier_trapezoidal_support_sun_offset",
+   "category": "fixed",
+   "subtype": "feature size",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "carrier_trapezoidal_support_sun_offset"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "carrier_trapezoidal_support_hole_PCD_offset_bearing_ID",
+   "attr": "carrier_trapezoidal_support_hole_PCD_offset_bearing_ID",
+   "category": "fixed",
+   "subtype": "feature size",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "carrier_trapezoidal_support_hole_PCD_offset_bearing_ID"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "carrier_trapezoidal_support_hole_dia",
+   "attr": "carrier_trapezoidal_support_hole_dia",
+   "category": "fixed",
+   "subtype": "fastener size",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "carrier_trapezoidal_support_hole_dia"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "carrier_trapezoidal_support_hole_socket_head_dia",
+   "attr": "carrier_trapezoidal_support_hole_socket_head_dia",
+   "category": "dependent",
+   "subtype": "lookup",
+   "lookup": {
+    "function": "nuts_and_bolts_dimensions",
+    "args": {
+     "bolt_dia": "carrier_trapezoidal_support_hole_dia",
+     "bolt_type": "socket_head"
+    },
+    "field": "bolt_head_dia"
+   },
+   "depends_on": [
+    "carrier_trapezoidal_support_hole_dia"
+   ],
+   "confidence": "high",
+   "reason": "standard socket-head fastener size for the chosen bolt diameter"
+  },
+  {
+   "name": "carrier_bearing_step_width",
+   "attr": "carrier_bearing_step_width",
+   "category": "fixed",
+   "subtype": "feature size",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "carrier_bearing_step_width"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "standard_clearance_1_5mm",
+   "attr": "standard_clearance_1_5mm",
+   "category": "fixed",
+   "subtype": "clearance",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "standard_clearance_1_5mm"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "standard_fillet_1_5mm",
+   "attr": "standard_fillet_1_5mm",
+   "category": "fixed",
+   "subtype": "feature size",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "standard_fillet_1_5mm"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "sun_shaft_bearing_OD",
+   "attr": "sun_shaft_bearing_OD",
+   "category": "fixed",
+   "subtype": "bearing (chosen part)",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "sun_shaft_bearing_OD"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "sun_shaft_bearing_width",
+   "attr": "sun_shaft_bearing_width",
+   "category": "fixed",
+   "subtype": "bearing (chosen part)",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "sun_shaft_bearing_width"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "sun_shaft_bearing_ID",
+   "attr": "sun_shaft_bearing_ID",
+   "category": "fixed",
+   "subtype": "bearing (chosen part)",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "sun_shaft_bearing_ID"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "standard_bearing_insertion_chamfer",
+   "attr": "standard_bearing_insertion_chamfer",
+   "category": "fixed",
+   "subtype": "feature size",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "standard_bearing_insertion_chamfer"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "carrier_trapezoidal_support_hole_wrench_size",
+   "attr": "carrier_trapezoidal_support_hole_wrench_size",
+   "category": "dependent",
+   "subtype": "lookup",
+   "lookup": {
+    "function": "nuts_and_bolts_dimensions",
+    "args": {
+     "bolt_dia": "carrier_trapezoidal_support_hole_dia",
+     "bolt_type": "socket_head"
+    },
+    "field": "nut_width_across_flats"
+   },
+   "depends_on": [
+    "carrier_trapezoidal_support_hole_dia"
+   ],
+   "confidence": "high",
+   "reason": "standard socket-head fastener size for the chosen bolt diameter"
+  },
+  {
+   "name": "planet_pin_bolt_wrench_size",
+   "attr": "planet_pin_bolt_wrench_size",
+   "category": "dependent",
+   "subtype": "lookup",
+   "lookup": {
+    "function": "nuts_and_bolts_dimensions",
+    "args": {
+     "bolt_dia": "planet_pin_bolt_dia",
+     "bolt_type": "socket_head"
+    },
+    "field": "nut_width_across_flats"
+   },
+   "depends_on": [
+    "planet_pin_bolt_dia"
+   ],
+   "confidence": "high",
+   "reason": "standard socket-head fastener size for the chosen bolt diameter"
+  },
+  {
+   "name": "planet_bearing_OD",
+   "attr": "planet_bearing_OD",
+   "category": "fixed",
+   "subtype": "bearing (chosen part)",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "planet_bearing_OD"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "planet_bearing_width",
+   "attr": "planet_bearing_width",
+   "category": "fixed",
+   "subtype": "bearing (chosen part)",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "planet_bearing_width"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "planet_bore",
+   "attr": "planet_bore",
+   "category": "fixed",
+   "subtype": "planet part",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "planet_bore"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "sun_hub_dia",
+   "attr": "sun_hub_dia",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "(Rotor_OD - standard_clearance_1_5mm * 2) if (rotor_mount_hole_PCD + rotor_mount_hole_dia + standard_clearance_1_5mm * 4) > Rotor_OD else (rotor_mount_hole_PCD + rotor_mount_hole_dia + standard_clearance_1_5mm * 4)",
+   "depends_on": [
+    "Rotor_OD",
+    "standard_clearance_1_5mm",
+    "rotor_mount_hole_PCD",
+    "rotor_mount_hole_dia"
+   ],
+   "confidence": "medium",
+   "reason": "sun hub: sized to the rotor's mount holes plus a hard-coded x 4 clearance margin, capped at the rotor's outer diameter less two clearances (the shared sun-hub margin item the plan still has to decide)"
+  },
+  {
+   "name": "sun_central_bolt_dia",
+   "attr": "sun_central_bolt_dia",
+   "category": "fixed",
+   "subtype": "fastener size",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "sun_central_bolt_dia"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "sun_central_bolt_socket_head_dia",
+   "attr": "sun_central_bolt_socket_head_dia",
+   "category": "dependent",
+   "subtype": "lookup",
+   "lookup": {
+    "function": "nuts_and_bolts_dimensions",
+    "args": {
+     "bolt_dia": "sun_central_bolt_dia",
+     "bolt_type": "socket_head"
+    },
+    "field": "bolt_head_dia"
+   },
+   "depends_on": [
+    "sun_central_bolt_dia"
+   ],
+   "confidence": "high",
+   "reason": "standard socket-head fastener size for the chosen bolt diameter"
+  },
+  {
+   "name": "fw_p_b",
+   "attr": "fw_p_b",
+   "category": "dependent",
+   "subtype": "stress rule",
+   "rule": "two stress widths, b = FOS x Ft x qe x qk / (gear_allowable_stress x module): b1 for the sun - big planet mesh (module, Ft from serviceFactor x motor_peak_torque at the sun, qe from the sun-planet contact ratio, qk from Ns) and b2 for the small planet - ring mesh (module_s, qk from Np_s); then, if b1 + b2 < 2 x planet_bearing_width + planet_bearing_gap, each planet gear is raised to at least planet_bearing_width + planet_bearing_gap / 2 (one bearing per gear, half the gap each; mitStressAnalysisMinFacewidth); fw_p_b = b1 (raised); then the two planet steps (big + small + planet_step_gap_mm) must fit the stator height less gear_axial_margin_mm: when they are longer, all four widths are scaled by (stator_height - gear_axial_margin_mm - planet_step_gap_mm) / (big + small), so the capped gears carry the same fraction of the torque",
+   "depends_on": [
+    "module",
+    "module_s",
+    "Ns",
+    "Np_b",
+    "Np_s",
+    "Nr",
+    "num_planet",
+    "pressure_angle",
+    "motor_peak_torque",
+    "gear_allowable_stress",
+    "FOS",
+    "serviceFactor",
+    "stator_height",
+    "gear_axial_margin_mm",
+    "planet_step_gap_mm",
+    "planet_bearing_width",
+    "planet_bearing_gap"
+   ],
+   "confidence": "high",
+   "reason": "big-planet face width from the tooth-stress rule, raised to hold its bearing and scaled by the stator-height cap"
+  },
+  {
+   "name": "fw_s_used",
+   "attr": "fw_s_used",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "motor_height if ((stator_ID - bearing_OD) / 2 < standard_clearance_1_5mm * 2 and (standard_clearance_1_5mm * 2 + sun_sec_carrier_bearing_height - (sun_bottom_casing_bearing_height + standard_clearance_1_5mm - sun_coupler_hub_thickness) + sec_carrier_thickness + clearance_planet + fw_p_s + fw_p_b) < motor_height) else (standard_clearance_1_5mm * 2 + sun_sec_carrier_bearing_height - (sun_bottom_casing_bearing_height + standard_clearance_1_5mm - sun_coupler_hub_thickness) + sec_carrier_thickness + clearance_planet + fw_p_s + fw_p_b)",
+   "depends_on": [
+    "motor_height",
+    "fw_p_b",
+    "fw_p_s",
+    "standard_clearance_1_5mm",
+    "clearance_planet",
+    "stator_ID",
+    "bearing_OD",
+    "sec_carrier_thickness",
+    "sun_sec_carrier_bearing_height",
+    "sun_coupler_hub_thickness",
+    "sun_bottom_casing_bearing_height"
+   ],
+   "confidence": "medium",
+   "reason": "printed sun length: the stack of bearings, hub, carrier and planet widths, but at least the motor height when the stator's radial clearance around the output bearing is below a hard-coded 2 x standard_clearance_1_5mm (a two-case floor rule; the plan asks whether the 2 is geometry or tuning)"
+  },
+  {
+   "name": "bearing_retainer_thickness",
+   "attr": "bearing_retainer_thickness",
+   "category": "fixed",
+   "subtype": "wall thickness",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "bearing_retainer_thickness"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "dp_p_s",
+   "attr": "dp_p_s",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "module * Np_s",
+   "depends_on": [
+    "module",
+    "Np_s"
+   ],
+   "confidence": "high",
+   "reason": "small-planet pitch diameter (small module)"
+  },
+  {
+   "name": "db_p_s",
+   "attr": "db_p_s",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "dp_p_s * cos(pressure_angle_rad)",
+   "depends_on": [
+    "dp_p_s",
+    "pressure_angle_rad"
+   ],
+   "confidence": "high",
+   "reason": "base-circle diameter"
+  },
+  {
+   "name": "alpha_p_s",
+   "attr": "alpha_p_s",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "sqrt(dp_p_s ** 2 - db_p_s ** 2) / db_p_s * 180 / pi - pressure_angle",
+   "depends_on": [
+    "pressure_angle",
+    "db_p_s",
+    "dp_p_s"
+   ],
+   "confidence": "high",
+   "reason": "involute angle used to draw the tooth"
+  },
+  {
+   "name": "beta_p_s",
+   "attr": "beta_p_s",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "(360 / (4 * Np_s) - alpha_p_s) * 2",
+   "depends_on": [
+    "alpha_p_s",
+    "Np_s"
+   ],
+   "confidence": "high",
+   "reason": "tooth angle used to draw the tooth"
+  },
+  {
+   "name": "tight_clearance_3DP",
+   "attr": "tight_clearance_3DP",
+   "category": "fixed",
+   "subtype": "clearance",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "tight_clearance_3DP"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "loose_clearance_3DP",
+   "attr": "loose_clearance_3DP",
+   "category": "fixed",
+   "subtype": "clearance",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "loose_clearance_3DP"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "sun_bottom_casing_bearing_ID",
+   "attr": "sun_bottom_casing_bearing_ID",
+   "category": "dependent",
+   "subtype": "lookup",
+   "lookup": {
+    "function": "bearings_discrete",
+    "args": {
+     "idRequiredMM": "rotor_mount_hole_PCD + sun_gear_rotor_nut_wrench_size + standard_clearance_1_5mm * 4"
+    },
+    "method": "getBearingIDMM"
+   },
+   "depends_on": [
+    "rotor_mount_hole_PCD",
+    "sun_gear_rotor_nut_wrench_size",
+    "standard_clearance_1_5mm"
+   ],
+   "confidence": "medium",
+   "reason": "catalogue bearing chosen by bearings_discrete (smallest one that fits) (the request has a hard-coded number: x 4 clearance margin); this is its bore"
+  },
+  {
+   "name": "sun_bottom_casing_bearing_OD",
+   "attr": "sun_bottom_casing_bearing_OD",
+   "category": "dependent",
+   "subtype": "lookup",
+   "lookup": {
+    "function": "bearings_discrete",
+    "args": {
+     "idRequiredMM": "rotor_mount_hole_PCD + sun_gear_rotor_nut_wrench_size + standard_clearance_1_5mm * 4"
+    },
+    "method": "getBearingODMM"
+   },
+   "depends_on": [
+    "rotor_mount_hole_PCD",
+    "sun_gear_rotor_nut_wrench_size",
+    "standard_clearance_1_5mm"
+   ],
+   "confidence": "medium",
+   "reason": "catalogue bearing chosen by bearings_discrete (smallest one that fits) (the request has a hard-coded number: x 4 clearance margin); this is its outer diameter"
+  },
+  {
+   "name": "sun_bottom_casing_bearing_height",
+   "attr": "sun_bottom_casing_bearing_height",
+   "category": "dependent",
+   "subtype": "lookup",
+   "lookup": {
+    "function": "bearings_discrete",
+    "args": {
+     "idRequiredMM": "rotor_mount_hole_PCD + sun_gear_rotor_nut_wrench_size + standard_clearance_1_5mm * 4"
+    },
+    "method": "getBearingWidthMM"
+   },
+   "depends_on": [
+    "rotor_mount_hole_PCD",
+    "sun_gear_rotor_nut_wrench_size",
+    "standard_clearance_1_5mm"
+   ],
+   "confidence": "medium",
+   "reason": "catalogue bearing chosen by bearings_discrete (smallest one that fits) (the request has a hard-coded number: x 4 clearance margin); this is its width"
+  },
+  {
+   "name": "sun_gear_rotor_nut_wrench_size",
+   "attr": "sun_gear_rotor_nut_wrench_size",
+   "category": "fixed",
+   "subtype": "fastener size",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "sun_gear_rotor_nut_wrench_size"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "sun_gear_rotor_nut_height",
+   "attr": "sun_gear_rotor_nut_height",
+   "category": "fixed",
+   "subtype": "feature size",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "sun_gear_rotor_nut_height"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "stator_OD",
+   "attr": "stator_OD",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.geometry",
+    "key": "stator_OD"
+   },
+   "confidence": "high",
+   "reason": "read from the chosen motor's geometry"
+  },
+  {
+   "name": "stator_ID",
+   "attr": "stator_ID",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.geometry",
+    "key": "stator_ID"
+   },
+   "confidence": "high",
+   "reason": "read from the chosen motor's geometry"
+  },
+  {
+   "name": "stator_height",
+   "attr": "stator_height",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.geometry",
+    "key": "stator_height"
+   },
+   "confidence": "high",
+   "reason": "read from the chosen motor's geometry"
+  },
+  {
+   "name": "stator_mounting_holes_PCD",
+   "attr": "stator_mounting_holes_PCD",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.geometry",
+    "key": "stator_hole_PCD"
+   },
+   "confidence": "high",
+   "reason": "read from the chosen motor's geometry"
+  },
+  {
+   "name": "stator_top_rotor_top_offset",
+   "attr": "stator_top_rotor_top_offset",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.geometry",
+    "key": "stator_top_rotor_top_offset"
+   },
+   "confidence": "high",
+   "reason": "read from the chosen motor's geometry"
+  },
+  {
+   "name": "stator_mounting_hole_allen_socket_head_dia",
+   "attr": "stator_mounting_hole_allen_socket_head_dia",
+   "category": "fixed",
+   "subtype": "feature size",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "stator_mounting_hole_allen_socket_head_dia"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "stator_hole_dia",
+   "attr": "stator_hole_dia",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.geometry",
+    "key": "stator_hole_dia"
+   },
+   "confidence": "high",
+   "reason": "read from the chosen motor's geometry"
+  },
+  {
+   "name": "bearing_retainer_hole_dia",
+   "attr": "bearing_retainer_hole_dia",
+   "category": "fixed",
+   "subtype": "fastener size",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "bearing_retainer_hole_dia"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "bearing_retainer_hole_num",
+   "attr": "bearing_retainer_hole_num",
+   "category": "fixed",
+   "subtype": "fastener size",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "bearing_retainer_hole_num"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "Rotor_ID",
+   "attr": "Rotor_ID",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.geometry",
+    "key": "rotor_ID"
+   },
+   "confidence": "high",
+   "reason": "read from the chosen motor's geometry"
+  },
+  {
+   "name": "Rotor_OD",
+   "attr": "Rotor_OD",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.geometry",
+    "key": "motor_OD"
+   },
+   "confidence": "high",
+   "reason": "read from the chosen motor's geometry"
+  },
+  {
+   "name": "Rotor_height",
+   "attr": "Rotor_height",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.geometry",
+    "key": "rotor_height"
+   },
+   "confidence": "high",
+   "reason": "read from the chosen motor's geometry"
+  },
+  {
+   "name": "Rotor_bottom_ID",
+   "attr": "Rotor_bottom_ID",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.geometry",
+    "key": "motor_rotor_base_ID"
+   },
+   "confidence": "high",
+   "reason": "read from the chosen motor's geometry"
+  },
+  {
+   "name": "rotor_bottom_thickness",
+   "attr": "rotor_bottom_thickness",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.geometry",
+    "key": "motor_rotor_base_thickness"
+   },
+   "confidence": "high",
+   "reason": "read from the chosen motor's geometry"
+  },
+  {
+   "name": "Rotor_csk_head_upper_dia",
+   "attr": "Rotor_csk_head_upper_dia",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.geometry",
+    "key": "rotorCSKHeadUpperDiaMM"
+   },
+   "confidence": "high",
+   "reason": "read from the chosen motor's geometry"
+  },
+  {
+   "name": "Rotor_csk_head_height",
+   "attr": "Rotor_csk_head_height",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.geometry",
+    "key": "rotorCSKHeadHeightMM"
+   },
+   "confidence": "high",
+   "reason": "read from the chosen motor's geometry"
+  },
+  {
+   "name": "ring_gear_thickness_mounting_casing",
+   "attr": "ring_gear_thickness_mounting_casing",
+   "category": "fixed",
+   "subtype": "wall thickness",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "ring_gear_thickness_mounting_casing"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "motor_casing_thickness",
+   "attr": "Motor_case_thickness",
+   "category": "fixed",
+   "subtype": "wall thickness",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "Motor_case_thickness"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "sun_sec_carrier_bearing_height",
+   "attr": "sun_sec_carrier_bearing_height",
+   "category": "fixed",
+   "subtype": "bearing (chosen part)",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "sun_sec_carrier_bearing_height"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "sun_sec_carrier_bearing_ID",
+   "attr": "sun_sec_carrier_bearing_ID",
+   "category": "fixed",
+   "subtype": "bearing (chosen part)",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "sun_sec_carrier_bearing_ID"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "sun_sec_carrier_bearing_OD",
+   "attr": "sun_sec_carrier_bearing_OD",
+   "category": "fixed",
+   "subtype": "bearing (chosen part)",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "sun_sec_carrier_bearing_OD"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "motor_height",
+   "attr": "motor_height",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.geometry",
+    "key": "motor_height"
+   },
+   "confidence": "high",
+   "reason": "read from the chosen motor's geometry"
+  },
+  {
+   "name": "motor_stator_extrusion_dia",
+   "attr": "motor_stator_extrusion_dia",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.geometry",
+    "key": "motor_stator_extrusion_dia"
+   },
+   "confidence": "high",
+   "reason": "read from the chosen motor's geometry"
+  },
+  {
+   "name": "motor_stator_extrusion_depth",
+   "attr": "motor_stator_extrusion_depth",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.geometry",
+    "key": "motor_stator_extrusion_depth"
+   },
+   "confidence": "high",
+   "reason": "read from the chosen motor's geometry"
+  },
+  {
+   "name": "case_mounting_hole_dia",
+   "attr": "case_mounting_hole_dia",
+   "category": "fixed",
+   "subtype": "fastener size",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "case_mounting_hole_dia"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "case_mounting_hole_wrench_size",
+   "attr": "case_mounting_hole_wrench_size",
+   "category": "fixed",
+   "subtype": "fastener size",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "case_mounting_hole_wrench_size"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "case_mounting_hole_wrench_thickness",
+   "attr": "case_mounting_hole_wrench_thickness",
+   "category": "fixed",
+   "subtype": "fastener size",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "case_mounting_hole_wrench_thickness"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "driver_mount_PCD",
+   "attr": "driver_mount_PCD",
+   "category": "fixed",
+   "subtype": "feature size",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "driver_mount_PCD"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "driver_mount_hole_dia",
+   "attr": "driver_mount_hole_dia",
+   "category": "fixed",
+   "subtype": "fastener size",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "driver_mount_hole_dia"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "driver_mount_wrench_size",
+   "attr": "driver_mount_wrench_size",
+   "category": "fixed",
+   "subtype": "fastener size",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "driver_mount_wrench_size"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "driver_mount_wrench_thickness",
+   "attr": "driver_mount_wrench_thickness",
+   "category": "fixed",
+   "subtype": "fastener size",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "driver_mount_wrench_thickness"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "case_mounting_wrench_size",
+   "attr": "case_mounting_wrench_size",
+   "category": "fixed",
+   "subtype": "fastener size",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "case_mounting_wrench_size"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters: a config value here, where the other types look the size up from the bolt table"
+  },
+  {
+   "name": "case_mounting_hole_allen_socket_dia",
+   "attr": "case_mounting_hole_allen_socket_dia",
+   "category": "fixed",
+   "subtype": "feature size",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "case_mounting_hole_allen_socket_dia"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters: a config value here, where the other types look the size up from the bolt table"
+  },
+  {
+   "name": "clearance_case_mount_holes_shell_thickness",
+   "attr": "clearance_case_mount_holes_shell_thickness",
+   "category": "fixed",
+   "subtype": "clearance",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "clearance_case_mount_holes_shell_thickness"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "motor_case_mounting_hole_dia",
+   "attr": "motor_case_mounting_hole_dia",
+   "category": "fixed",
+   "subtype": "fastener size",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "motor_case_mounting_hole_dia"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "motor_case_wrench_size",
+   "attr": "motor_case_wrench_size",
+   "category": "fixed",
+   "subtype": "fastener size",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "motor_case_wrench_size"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "central_hole_offset_from_motor_mount_PCD",
+   "attr": "central_hole_offset_from_motor_mount_PCD",
+   "category": "fixed",
+   "subtype": "feature size",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "central_hole_offset_from_motor_mount_PCD"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "driver_mount_thickness",
+   "attr": "driver_mount_thickness",
+   "category": "input",
+   "subtype": "driver",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "driver_mount_thickness"
+   },
+   "confidence": "medium",
+   "reason": "motor-driver mount dimension: the runner passes no driver here, so the value comes from this gearbox's own config rather than from the chosen driver (Input / driver for consistency with the other types; the plan asks whether it should be Fixed)"
+  },
+  {
+   "name": "driver_mount_inserts_OD",
+   "attr": "driver_mount_inserts_OD",
+   "category": "input",
+   "subtype": "driver",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "driver_mount_inserts_OD"
+   },
+   "confidence": "medium",
+   "reason": "motor-driver mount dimension: the runner passes no driver here, so the value comes from this gearbox's own config rather than from the chosen driver (Input / driver for consistency with the other types; the plan asks whether it should be Fixed)"
+  },
+  {
+   "name": "driver_upper_holes_dist_from_center",
+   "attr": "driver_upper_holes_dist_from_center",
+   "category": "input",
+   "subtype": "driver",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "driver_upper_holes_dist_from_center"
+   },
+   "confidence": "medium",
+   "reason": "motor-driver mount dimension: the runner passes no driver here, so the value comes from this gearbox's own config rather than from the chosen driver (Input / driver for consistency with the other types; the plan asks whether it should be Fixed)"
+  },
+  {
+   "name": "driver_lower_holes_dist_from_center",
+   "attr": "driver_lower_holes_dist_from_center",
+   "category": "input",
+   "subtype": "driver",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "driver_lower_holes_dist_from_center"
+   },
+   "confidence": "medium",
+   "reason": "motor-driver mount dimension: the runner passes no driver here, so the value comes from this gearbox's own config rather than from the chosen driver (Input / driver for consistency with the other types; the plan asks whether it should be Fixed)"
+  },
+  {
+   "name": "driver_mount_height",
+   "attr": "driver_mount_height",
+   "category": "input",
+   "subtype": "driver",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "driver_mount_height"
+   },
+   "confidence": "medium",
+   "reason": "motor-driver mount dimension: the runner passes no driver here, so the value comes from this gearbox's own config rather than from the chosen driver (Input / driver for consistency with the other types; the plan asks whether it should be Fixed)"
+  },
+  {
+   "name": "motor_mount_driver_hole_num",
+   "attr": "motor_mount_driver_hole_num",
+   "category": "fixed",
+   "subtype": "fastener size",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "motor_mount_driver_hole_num"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "driver_side_holes_dist_from_center",
+   "attr": "driver_side_holes_dist_from_center",
+   "category": "input",
+   "subtype": "driver",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "driver_side_holes_dist_from_center"
+   },
+   "confidence": "medium",
+   "reason": "motor-driver mount dimension: the runner passes no driver here, so the value comes from this gearbox's own config rather than from the chosen driver (Input / driver for consistency with the other types; the plan asks whether it should be Fixed)"
+  }
+ ],
+ "code_only": [
+  {
+   "name": "pressure_angle_rad",
+   "attr": "pressure_angle",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "pressure_angle * pi / 180",
+   "depends_on": [
+    "pressure_angle"
+   ],
+   "confidence": "high",
+   "reason": "pressure angle in radians (code attribute pressure_angle)"
+  },
+  {
+   "name": "motor_peak_torque",
+   "attr": "MaxMotorTorque",
+   "category": "input",
+   "subtype": "motor",
+   "source": {
+    "file": "motors.json",
+    "block": "motors.<motor>.electrical",
+    "key": "peak_torque_Nm"
+   },
+   "confidence": "high",
+   "reason": "motor torque the gears are sized for (peak torque under the default rating setting); sets the face widths"
+  },
+  {
+   "name": "gear_allowable_stress",
+   "attr": "maxGearAllowableStressMPa",
+   "category": "input",
+   "subtype": "material",
+   "source": {
+    "file": "config.json",
+    "block": "Material_properties.<gear material>",
+    "key": "maxAllowableStressMPa"
+   },
+   "confidence": "high",
+   "reason": "allowable tooth stress of the gear material, chosen with the material mode (3dp: PLA, metal: steel); sets the face widths"
+  },
+  {
+   "name": "FOS",
+   "attr": "FOS",
+   "category": "fixed",
+   "subtype": "safety factor",
+   "source": {
+    "file": "motor_config.json",
+    "block": "MIT_params",
+    "key": "FOS"
+   },
+   "confidence": "high",
+   "reason": "factor of safety in the tooth-stress rule (the ISSPG default is 1.2)"
+  },
+  {
+   "name": "serviceFactor",
+   "attr": "serviceFactor",
+   "category": "fixed",
+   "subtype": "safety factor",
+   "source": {
+    "file": "motor_config.json",
+    "block": "MIT_params",
+    "key": "serviceFactor"
+   },
+   "confidence": "high",
+   "reason": "service factor on the motor torque in the tooth-stress rule"
+  },
+  {
+   "name": "planet_bearing_gap",
+   "attr": "planet_bearing_gap",
+   "category": "fixed",
+   "subtype": "clearance",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "planet_bearing_gap"
+   },
+   "confidence": "high",
+   "reason": "axial gap between the two planet bearings (one in each planet gear); with the bearing width it sets the smallest planet and ring width"
+  },
+  {
+   "name": "maxGearboxDiameter",
+   "attr": "maxGearboxDiameter",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "MAX_GB_DIA_MULT_FACTOR * stator_ID",
+   "depends_on": [
+    "MAX_GB_DIA_MULT_FACTOR",
+    "stator_ID"
+   ],
+   "confidence": "high",
+   "reason": "largest gearbox diameter the optimiser may use (gearbox_runner max_diameter): the stator's inner diameter times a factor (the gears sit inside the frameless outrunner)"
+  },
+  {
+   "name": "module_s",
+   "attr": "moduleSmall",
+   "category": "optimisation",
+   "subtype": "module",
+   "source": {
+    "optimiser": "optimizationInternalCompoundPlanetaryActuator"
+   },
+   "confidence": "high",
+   "reason": "the small module (small planet, ring): searched by the optimiser loop and used by the stress rule and the gearbox constraints, but not in the CAD file, which has one module (same pattern as CPG bug 18)"
+  },
+  {
+   "name": "bearingIDClearance_3DP",
+   "attr": "bearingIDClearance_3DP",
+   "category": "fixed",
+   "subtype": "constraint constant",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "bearingIDClearanceMM"
+   },
+   "confidence": "high",
+   "reason": "constant from the ICPG 3DP design parameters"
+  },
+  {
+   "name": "actuator_width",
+   "attr": "actuator_width",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "fw_s_used + bearing_height + sun_coupler_hub_thickness + standard_clearance_1_5mm * 3.5 + sun_bottom_casing_bearing_height + bearing_retainer_thickness",
+   "depends_on": [
+    "bearing_retainer_thickness",
+    "sun_bottom_casing_bearing_height",
+    "sun_coupler_hub_thickness",
+    "standard_clearance_1_5mm",
+    "fw_s_used",
+    "bearing_height"
+   ],
+   "confidence": "high",
+   "reason": "axial width: both motor-case walls plus the motor case height, written to the results CSV"
+  },
+  {
+   "name": "fw_limit_mm",
+   "attr": "fw_limit_mm",
+   "category": "dependent",
+   "subtype": "formula",
+   "formula": "stator_height - gear_axial_margin_mm",
+   "depends_on": [
+    "stator_height",
+    "gear_axial_margin_mm"
+   ],
+   "confidence": "high",
+   "reason": "the widest gear the stator height allows: the stator height less gear_axial_margin_mm (the width cap of the stress rule)"
+  },
+  {
+   "name": "ringRadialWidthMM",
+   "attr": "ringRadialWidthMM",
+   "category": "fixed",
+   "subtype": "constraint constant",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "ringRadialWidthMM"
+   },
+   "confidence": "high",
+   "reason": "read by the code but not written to the CAD file"
+  },
+  {
+   "name": "planetMinDistanceMM",
+   "category": "fixed",
+   "subtype": "constraint constant",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "planetMinDistanceMM"
+   },
+   "confidence": "high",
+   "reason": "read by the code but not written to the CAD file"
+  },
+  {
+   "name": "sCarrierExtrusionDiaMM",
+   "category": "fixed",
+   "subtype": "constraint constant",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "sCarrierExtrusionDiaMM"
+   },
+   "confidence": "high",
+   "reason": "read by the code but not written to the CAD file"
+  },
+  {
+   "name": "sCarrierExtrusionClearanceMM",
+   "category": "fixed",
+   "subtype": "constraint constant",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "sCarrierExtrusionClearanceMM"
+   },
+   "confidence": "high",
+   "reason": "read by the code but not written to the CAD file"
+  },
+  {
+   "name": "carrier_trapezoidal_support_hole_wrench_size_config",
+   "category": "fixed",
+   "subtype": "fastener size",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "carrier_trapezoidal_support_hole_wrench_size"
+   },
+   "confidence": "high",
+   "reason": "config value carrier_trapezoidal_support_hole_wrench_size (the CAD variable of the same name is not read from it): in the config but never read"
+  },
+  {
+   "name": "sun_sec_carrier_bearing_massKG",
+   "category": "fixed",
+   "subtype": "bearing (chosen part)",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "sun_sec_carrier_bearing_massKG"
+   },
+   "confidence": "high",
+   "reason": "in the config but never read"
+  },
+  {
+   "name": "gear_axial_margin_mm",
+   "category": "fixed",
+   "subtype": "feature size",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "gear_axial_margin_mm"
+   },
+   "confidence": "high",
+   "reason": "read by the code but not written to the CAD file"
+  },
+  {
+   "name": "planet_step_gap_mm",
+   "category": "fixed",
+   "subtype": "planet part",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "planet_step_gap_mm"
+   },
+   "confidence": "high",
+   "reason": "read by the code but not written to the CAD file"
+  },
+  {
+   "name": "GEAR_RATIO_MIN",
+   "category": "fixed",
+   "subtype": "search bound",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_optimization_parameters",
+    "key": "GEAR_RATIO_MIN"
+   },
+   "confidence": "high",
+   "reason": "optimiser setting: limits of the search, not a part dimension"
+  },
+  {
+   "name": "GEAR_RATIO_MAX",
+   "category": "fixed",
+   "subtype": "search bound",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_optimization_parameters",
+    "key": "GEAR_RATIO_MAX"
+   },
+   "confidence": "high",
+   "reason": "optimiser setting: limits of the search, not a part dimension"
+  },
+  {
+   "name": "GEAR_RATIO_STEP",
+   "category": "fixed",
+   "subtype": "search bound",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_optimization_parameters",
+    "key": "GEAR_RATIO_STEP"
+   },
+   "confidence": "high",
+   "reason": "optimiser setting: limits of the search, not a part dimension"
+  },
+  {
+   "name": "MODULE_MIN",
+   "category": "fixed",
+   "subtype": "search bound",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_optimization_parameters",
+    "key": "MODULE_MIN"
+   },
+   "confidence": "high",
+   "reason": "optimiser setting: limits of the search, not a part dimension"
+  },
+  {
+   "name": "MODULE_MAX",
+   "category": "fixed",
+   "subtype": "search bound",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_optimization_parameters",
+    "key": "MODULE_MAX"
+   },
+   "confidence": "high",
+   "reason": "optimiser setting: limits of the search, not a part dimension"
+  },
+  {
+   "name": "NUM_PLANET_MIN",
+   "category": "fixed",
+   "subtype": "search bound",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_optimization_parameters",
+    "key": "NUM_PLANET_MIN"
+   },
+   "confidence": "high",
+   "reason": "optimiser setting: limits of the search, not a part dimension"
+  },
+  {
+   "name": "NUM_PLANET_MAX",
+   "category": "fixed",
+   "subtype": "search bound",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_optimization_parameters",
+    "key": "NUM_PLANET_MAX"
+   },
+   "confidence": "high",
+   "reason": "optimiser setting: limits of the search, not a part dimension"
+  },
+  {
+   "name": "NUM_TEETH_SUN_MIN",
+   "category": "fixed",
+   "subtype": "search bound",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_optimization_parameters",
+    "key": "NUM_TEETH_SUN_MIN"
+   },
+   "confidence": "high",
+   "reason": "optimiser setting: limits of the search, not a part dimension"
+  },
+  {
+   "name": "NUM_TEETH_PLANET_MIN",
+   "category": "fixed",
+   "subtype": "search bound",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_optimization_parameters",
+    "key": "NUM_TEETH_PLANET_MIN"
+   },
+   "confidence": "high",
+   "reason": "optimiser setting: limits of the search, not a part dimension"
+  },
+  {
+   "name": "MAX_GB_DIA_MULT_FACTOR",
+   "category": "fixed",
+   "subtype": "search bound",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_optimization_parameters",
+    "key": "MAX_GB_DIA_MULT_FACTOR"
+   },
+   "confidence": "high",
+   "reason": "optimiser setting: limits of the search, not a part dimension"
+  }
+ ],
+ "unused_config_blocks": [
+  {
+   "file": "icpg_params.json",
+   "block": "cpg_design_parameters",
+   "reason": "older design block (19 keys); ICPG reads only cpg_3DP_design_parameters (gearbox_runner)"
+  }
+ ]
+}

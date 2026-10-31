@@ -177,3 +177,30 @@ Automatic first pass from the code (the special cases above take precedence). Ca
 | `cpg_design_parameters` | 19 | **no** | ringRadialWidthMM, planetMinDistanceMM, sCarrierExtrusionDiaMM, sCarrierExtrusionClearanceMM, bearingIDClearanceMM | baseThicknessMM, sCarrierThicknessMM, mainCoverThicknessMM, planetBoreMM, sunBoreMM, couplerRadiusMM, couplerThicknessMM, couplerShaftHeightMM, clearanceMotorandCaseMM, clearanceCarrierPlanetMM, upperHousingHeight, clearanceSCarrierMotorMM, carrierIDClearanceMM, sCarrierIDClearanceMM |
 | `cpg_optimization_parameters` | 10 | yes | GEAR_RATIO_MIN, GEAR_RATIO_MAX, GEAR_RATIO_STEP, MODULE_MIN, MODULE_MAX, NUM_PLANET_MIN, NUM_PLANET_MAX, NUM_TEETH_SUN_MIN, NUM_TEETH_PLANET_MIN, MAX_GB_DIA_MULT_FACTOR | — |
 | `cpg_3DP_design_parameters` | 62 | yes | ringRadialWidthMM, planetMinDistanceMM, sCarrierExtrusionDiaMM, sCarrierExtrusionClearanceMM, bearingIDClearanceMM, carrier_trapezoidal_support_hole_wrench_size, gear_axial_margin_mm, planet_step_gap_mm | sun_sec_carrier_bearing_massKG |
+
+
+## Result (classification done)
+
+Spec: [`config_files/variables/icpg_variables.json`](../../../config_files/variables/icpg_variables.json), page [`docs/variables/icpg.md`](../icpg.md) (generated). Tests: the generic `tests/test_variable_categories.py` (ICPG registered in `tests/variable_helpers.py`) and `tests/test_variable_categories_icpg.py`.
+
+**Counts (CAD variables, 117):** input 25, optimisation 5, fixed 48, dependent 39 (24 formula, 11 lookup, 3 stress rule, 1 implicit constraint). The draft counted the six driver dimensions as fixed (input 19 / fixed 54); they are Input / driver with source = this gearbox's config, as the plan proposes. **Code-only values: 29** (fixed 22, dependent 4: `pressure_angle_rad`, `maxGearboxDiameter`, `actuator_width`, `fw_limit_mm`; input 2; optimisation 1: `module_s`), including `sun_sec_carrier_bearing_massKG` (never used) and `carrier_trapezoidal_support_hole_wrench_size_config` (read but the CAD uses the bolt lookup). Confidence: 135 high, 11 medium, 0 low.
+
+**Medium-confidence entries**
+- The six `driver_*` dimensions (`driver_mount_thickness`, `driver_mount_inserts_OD`, `driver_upper_holes_dist_from_center`, `driver_lower_holes_dist_from_center`, `driver_mount_height`, `driver_side_holes_dist_from_center`; Input / driver): the runner passes no driver (`driver=OMIT`), so the values come from `icpg_params.json`, not from `Motor_drivers`. Plan decision 3: Input (as here, for consistency) or Fixed.
+- `sun_hub_dia` (Dependent / formula): the rotor's mount-hole circle plus a hard-coded `x 4` clearance margin (the shared sun-hub item), capped at the rotor OD less two clearances.
+- `fw_s_used` (Dependent / formula): a two-case floor rule, the motor height when the stator's radial clearance around the output bearing is below a hard-coded `2 x standard_clearance_1_5mm` and the stack is shorter; the plan asks whether the 2 is geometry or tuning.
+- `sun_bottom_casing_bearing_ID` / `_OD` / `_height` (Dependent / lookup): the bearing request is the sun-hub size with the same hard-coded `x 4` margin.
+
+**Config key added** to `cpg_3DP_design_parameters` in `icpg_params.json` (shared name, value that keeps every output bit-identical): `planet_bearing_gap` = 1.0 (was `standard_clearance_1_5mm * 2 / 3` for the pair and `* 1 / 3` per gear; the code reads `planet_bearing_gap` and `planet_bearing_gap / 2`), in `mitStressAnalysisMinFacewidth`. The other shared keys have no counterpart (no motor-case clearance rule, no `bearing_mount_thickness`). Tests show `planet_bearing_gap`, `gear_axial_margin_mm` and `planet_step_gap_mm` (the stator-height cap) each drive exactly their CAD variables.
+
+**Shared tooling changed:** `tests/variable_helpers.py` (ICPG entry and a branch rule; ICPG reads its gear standard and safety factors from `motor_config.json`).
+
+**Results:** `python tests/golden/golden.py check`: All 58 cases match the baseline. `python -m pytest -q`: 1085 passed. No `CADs/` file, no golden baseline touched.
+
+**Open questions**
+1. **Bug-18 pattern**: `module` is `moduleBig`; the small planet and the ring are drawn with it although the stress rule uses `moduleSmall`. Logged, not fixed: `module_s` is a code-only optimisation entry. The plan's `module_b` / `module_s` code change is still open (plan decision 5).
+2. Driver dimensions: Input / driver (medium) or Fixed (plan decision 3).
+3. **The sun-hub cap is unreachable**: `sun_hub_dia` is capped at the rotor OD, but the mount-hole circle + hole diameter + `4 x standard_clearance_1_5mm` is 84 of 113.5 mm (RO100), 72 of 92.6 (RO80) and 55 of 73.8 (RO60), so the cap's branch never applies for any motor in `motors.json`; the branch test lists only the floor rule and the stator-height cap.
+4. `case_mounting_wrench_size` and `case_mounting_hole_allen_socket_dia` are config values (Fixed), not bolt lookups as in other types; the `carrier_trapezoidal_support_hole_wrench_size` config value is read but the CAD uses the lookup.
+5. `cpg_design_parameters` (19 keys) is never read; listed as an unused block. `sun_sec_carrier_bearing_massKG` is in the config and never used.
+6. The mass-only hard-coded numbers (bolt bosses, the 10 mm casing recess, `+ 3` mm ring-bolt length, `1.5 x 4` margins, a 4 g sun-shaft bearing) stay out of scope.

@@ -469,6 +469,7 @@ class internalcompoundPlanetaryActuator:
         # ── Clearance / tolerance constants ───────────────────────────────
         self.clearance_planet                   = self.design_params["clearance_planet"]
         self.standard_clearance_1_5mm           = self.design_params["standard_clearance_1_5mm"]
+        self.planet_bearing_gap                 = self.design_params["planet_bearing_gap"] # 1.0
         self.standard_fillet_1_5mm              = self.design_params["standard_fillet_1_5mm"]
         self.standard_bearing_insertion_chamfer = self.design_params["standard_bearing_insertion_chamfer"]
         self.tight_clearance_3DP                = self.design_params["tight_clearance_3DP"]
@@ -916,11 +917,11 @@ class internalcompoundPlanetaryActuator:
         bMin_ring_mit        = (self.FOS * Ft_rp * qe2 * qk2 / (self.internalcompoundPlanetaryGearbox.maxGearAllowableStressPa * moduleSmall * 0.001))
 
         # Minimum face width constrained by planet bearing accommodation
-        if ((bMin_planetBig_mit + bMin_planetSmall_mit) * 1000 < (self.planet_bearing_width*2 + self.standard_clearance_1_5mm * 2 / 3)):
-            if (bMin_planetBig_mit   * 1000 < (self.planet_bearing_width + self.standard_clearance_1_5mm * 1 / 3)):
-                bMin_planetBig_mit   = (self.planet_bearing_width + self.standard_clearance_1_5mm * 1 / 3) / 1000
-            if (bMin_planetSmall_mit * 1000 < (self.planet_bearing_width + self.standard_clearance_1_5mm * 1 / 3)):
-                bMin_planetSmall_mit = (self.planet_bearing_width + self.standard_clearance_1_5mm * 1 / 3) / 1000
+        if ((bMin_planetBig_mit + bMin_planetSmall_mit) * 1000 < (self.planet_bearing_width*2 + self.planet_bearing_gap)):
+            if (bMin_planetBig_mit   * 1000 < (self.planet_bearing_width + self.planet_bearing_gap / 2)):
+                bMin_planetBig_mit   = (self.planet_bearing_width + self.planet_bearing_gap / 2) / 1000
+            if (bMin_planetSmall_mit * 1000 < (self.planet_bearing_width + self.planet_bearing_gap / 2)):
+                bMin_planetSmall_mit = (self.planet_bearing_width + self.planet_bearing_gap / 2) / 1000
             bMin_ring_mit = bMin_planetSmall_mit
 
         # The gears sit inside the frameless outrunner: the two planet steps (big + small, with a gap)
