@@ -203,7 +203,7 @@ GEARBOXES = {
         "indspg_optimization_parameters", "frameless_inrunner", "double",
         max_diameter=lambda m, d, o: (o["MAX_GB_DIA_MULT_FACTOR"]
                                       * (m.getStator_wire_OD() - d["ring2RadialWidthMM"]*2)),
-        max_diameter_stage1=lambda m, d, o: (m.getRotorIDMM() - d["standard_clearance_1_5mm"]*4),  # inside the rotor
+        max_diameter_stage1=lambda m, d, o: (m.getRotorIDMM() - d["standard_clearance_1_5mm"]*d["max_diameter_stage1_clearance_multiple"]),  # inside the rotor
         driver=OMIT, extra_gearbox_densities={"densityRotor": "Aluminum"}),
 }
 

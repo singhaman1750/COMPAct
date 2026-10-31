@@ -925,13 +925,14 @@
    "attr": "sun_hub_dia1",
    "category": "dependent",
    "subtype": "formula",
-   "formula": "Rotor_ID - 2 * (a1_standard_clearance_1_5mm + 2)",
+   "formula": "Rotor_ID - 2 * (a1_standard_clearance_1_5mm + sun_hub_rotor_gap)",
    "depends_on": [
     "Rotor_ID",
-    "a1_standard_clearance_1_5mm"
+    "a1_standard_clearance_1_5mm",
+    "sun_hub_rotor_gap"
    ],
-   "confidence": "medium",
-   "reason": "sun hub: the rotor's inner diameter less 2 x (standard_clearance_1_5mm + a hard-coded 2); the hard-coded 2 has no config key"
+   "confidence": "high",
+   "reason": "sun hub: the rotor's inner diameter less 2 x (standard_clearance_1_5mm + sun_hub_rotor_gap)"
   },
   {
    "name": "a1_sun_central_bolt_dia",
@@ -970,16 +971,16 @@
    "attr": "fw_s1_used",
    "category": "dependent",
    "subtype": "formula",
-   "formula": "(a1_fw_p + a1_clearance_planet + a1_sec_carrier_thickness + a1_standard_clearance_1_5mm * 2 + a1_standard_clearance_1_5mm * 0.5) if (Rotor_height == 19) else (a1_fw_p + a1_clearance_planet + a1_sec_carrier_thickness + a1_standard_clearance_1_5mm * 2)",
+   "formula": "a1_fw_p + a1_clearance_planet + a1_sec_carrier_thickness + a1_standard_clearance_1_5mm * 2 + a1_standard_clearance_1_5mm * sun1_extra_clearance_multiple",
    "depends_on": [
-    "Rotor_height",
     "a1_standard_clearance_1_5mm",
     "a1_sec_carrier_thickness",
     "a1_fw_p",
-    "a1_clearance_planet"
+    "a1_clearance_planet",
+    "sun1_extra_clearance_multiple"
    ],
-   "confidence": "medium",
-   "reason": "stage-1 sun length: the fixed planet width, clearances and carrier, with a hard-coded 2 x and, for a rotor 19 mm high (RI80), an extra 0.5 x standard_clearance_1_5mm"
+   "confidence": "high",
+   "reason": "stage-1 sun length: the fixed planet width, clearances and carrier, plus a per-motor extra of sun1_extra_clearance_multiple x standard_clearance_1_5mm (RI80 0.5, RI100 0)"
   },
   {
    "name": "a1_bearing_retainer_thickness",
@@ -2212,13 +2213,14 @@
    "attr": "sun_hub_dia1",
    "category": "dependent",
    "subtype": "formula",
-   "formula": "Rotor_ID - 2 * (a1_standard_clearance_1_5mm + 2)",
+   "formula": "Rotor_ID - 2 * (a1_standard_clearance_1_5mm + sun_hub_rotor_gap)",
    "depends_on": [
     "Rotor_ID",
-    "a1_standard_clearance_1_5mm"
+    "a1_standard_clearance_1_5mm",
+    "sun_hub_rotor_gap"
    ],
-   "confidence": "medium",
-   "reason": "same value as a1_sun_hub_dia (the CAD writes it under both stage prefixes); sun hub: the rotor's inner diameter less 2 x (standard_clearance_1_5mm + a hard-coded 2); the hard-coded 2 has no config key",
+   "confidence": "high",
+   "reason": "same value as a1_sun_hub_dia (the CAD writes it under both stage prefixes); sun hub: the rotor's inner diameter less 2 x (standard_clearance_1_5mm + sun_hub_rotor_gap)",
    "alias_of": "a1_sun_hub_dia"
   },
   {
@@ -2822,14 +2824,15 @@
    "attr": "rotor_mount_hole_PCD",
    "category": "dependent",
    "subtype": "formula",
-   "formula": "Rotor_ID - Rotor_csk_head_upper_dia - 2 * 2 - a1_standard_clearance_1_5mm",
+   "formula": "Rotor_ID - Rotor_csk_head_upper_dia - 2 * rotor_mount_hole_wall - a1_standard_clearance_1_5mm",
    "depends_on": [
     "a1_standard_clearance_1_5mm",
     "Rotor_ID",
-    "Rotor_csk_head_upper_dia"
+    "Rotor_csk_head_upper_dia",
+    "rotor_mount_hole_wall"
    ],
-   "confidence": "medium",
-   "reason": "rotor mount-hole circle: the rotor's inner diameter less the countersink head, a hard-coded 2 x 2 mm and one clearance (the hard-coded numbers have no config key)"
+   "confidence": "high",
+   "reason": "rotor mount-hole circle: the rotor's inner diameter less the countersink head, a wall of rotor_mount_hole_wall on each side and one clearance"
   },
   {
    "name": "rotor_mount_hole_dia",
@@ -3029,6 +3032,58 @@
    "reason": "axial gap between the two planet bearings (one in each planet gear); with the bearing width it sets the smallest planet and ring width of both stages; one key for both stages, the plan leaves open whether it should be one per stage (planet_bearing_gap1 / 2)"
   },
   {
+   "name": "sun_hub_rotor_gap",
+   "attr": "sun_hub_rotor_gap",
+   "category": "fixed",
+   "subtype": "clearance",
+   "source": {
+    "file": "indspg_params.json",
+    "block": "indspg_design_parameters_3DP",
+    "key": "sun_hub_rotor_gap"
+   },
+   "confidence": "high",
+   "reason": "extra radial gap between the stage-1 sun hub and the rotor bore, on top of one clearance (2 mm)"
+  },
+  {
+   "name": "rotor_mount_hole_wall",
+   "attr": "rotor_mount_hole_wall",
+   "category": "fixed",
+   "subtype": "wall thickness",
+   "source": {
+    "file": "indspg_params.json",
+    "block": "indspg_design_parameters_3DP",
+    "key": "rotor_mount_hole_wall"
+   },
+   "confidence": "high",
+   "reason": "wall on each side of the rotor mount holes' countersink, which sets the mount-hole circle (2 mm)"
+  },
+  {
+   "name": "sun1_extra_clearance_multiple",
+   "attr": "sun1_extra_clearance_multiple",
+   "category": "fixed",
+   "subtype": "clearance",
+   "source": {
+    "file": "indspg_params.json",
+    "block": "indspg_design_parameters_3DP",
+    "key": "sun1_extra_clearance_multiple",
+    "per_motor": true
+   },
+   "confidence": "high",
+   "reason": "extra stage-1 sun length for this motor, in multiples of standard_clearance_1_5mm (one value per motor: RI100 0, RI80 0.5; replaces a rotor-height == 19 check)"
+  },
+  {
+   "name": "max_diameter_stage1_clearance_multiple",
+   "category": "fixed",
+   "subtype": "clearance",
+   "source": {
+    "file": "indspg_params.json",
+    "block": "indspg_design_parameters_3DP",
+    "key": "max_diameter_stage1_clearance_multiple"
+   },
+   "confidence": "high",
+   "reason": "margin inside the rotor bore for the largest stage-1 diameter, in multiples of standard_clearance_1_5mm (4; read by gearbox_runner)"
+  },
+  {
    "name": "maxGearboxDiameter",
    "attr": "maxGearboxDiameter",
    "category": "dependent",
@@ -3047,13 +3102,14 @@
    "attr": "maxGearboxDiameter_Stg1",
    "category": "dependent",
    "subtype": "formula",
-   "formula": "Rotor_ID - a1_standard_clearance_1_5mm * 4",
+   "formula": "Rotor_ID - a1_standard_clearance_1_5mm * max_diameter_stage1_clearance_multiple",
    "depends_on": [
     "Rotor_ID",
-    "a1_standard_clearance_1_5mm"
+    "a1_standard_clearance_1_5mm",
+    "max_diameter_stage1_clearance_multiple"
    ],
-   "confidence": "medium",
-   "reason": "largest stage-1 diameter the optimiser may use (gearbox_runner max_diameter_stage1): the rotor's inner diameter less 4 x standard_clearance_1_5mm, the 4 hard-coded in gearbox_runner"
+   "confidence": "high",
+   "reason": "largest stage-1 diameter the optimiser may use (gearbox_runner max_diameter_stage1): the rotor's inner diameter less max_diameter_stage1_clearance_multiple x standard_clearance_1_5mm"
   },
   {
    "name": "a1_sun_bottom_casing_bearing_massKg",
