@@ -2,7 +2,7 @@
 standard_clearance_1_5mm: 4 in SSPG, CPG, DSPG, ISSPG (compact, inside) and ICPG, 5 in IDSPG (its CAD's
 value). Raising it on each type's first golden design changes the sun-hub variable it drives (in ISSPG
 inside: the input bearing, which then sets the hub) and nothing outside what depends on the key; in
-SSPG, CPG and DSPG the mass code uses the same key, so the mass changes too."""
+SSPG, CPG, DSPG and IDSPG the mass code uses the same key, so the mass changes too."""
 import json
 
 import pytest
@@ -13,7 +13,7 @@ KEY = "sun_hub_clearance_multiple"
 DRIVES = {"sspg": "sun_hub_dia", "cpg": "sun_hub_dia", "dspg": "a1_sun_hub_dia", "isspg_compact": "sun_hub_dia",
           "isspg_inside": "input_bearing_ID", "icpg": "sun_hub_dia", "idspg": "a1_sun_hub_dia"}
 VALUE = {gb: 5 if gb == "idspg" else 4 for gb in DRIVES}
-MASS_USES_KEY = {"sspg", "cpg", "dspg"}
+MASS_USES_KEY = {"sspg", "cpg", "dspg", "idspg"}
 
 
 def run(monkeypatch, folder, gb, value=None):

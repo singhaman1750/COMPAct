@@ -1851,7 +1851,7 @@ class internaldoubleStagePlanetaryActuator:
         #----------------------------------
         # Mass: idspg_sun
         #----------------------------------
-        sun_hub_dia = self.rotor_mount_hole_PCD + self.rotor_mount_hole_dia + self.standard_clearance_1_5mm * 4
+        sun_hub_dia = self.sun_hub_dia1                                       # the CAD's sun hub (was weighed with a x 4 margin)
 
         sun_shaft_dia    = sun_shaft_bearing_ID
         sun_shaft_height = sun_shaft_bearing_width + 2 * standard_clearance_1_5mm
