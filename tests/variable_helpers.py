@@ -33,10 +33,12 @@ class Gearbox:
     from_opt: Callable                    # golden opt_parameters -> gear set
     extra: list = field(default_factory=list)   # (motor, gear set) reaching other rule branches
     branches: Callable = None             # actuator -> {rule: which branch}
+    params_name: str = None               # the config file, when it is not <gb_type>_params.json
+    config_file: str = "config.json"      # gear standard / MIT factors (the motor config of the frameless types)
 
     @property
     def params_file(self):
-        return f"{self.gb_type}_params.json"
+        return self.params_name or f"{self.gb_type}_params.json"
 
     def golden(self):
         return sorted(p.stem for p in BASELINE_DIR.glob(f"{self.gb_type}__*.json"))
@@ -76,6 +78,11 @@ def _branches_cpg(a):
             "ring grown to the bearing": not a.Nr * a.module_s + 5 * 2 > a.bearing_OD}
 
 
+def _branches_insspg(a):
+    return {"sun support: capped at 21 mm":
+            a.carrier_PCD - (a.planet_shaft_dia + a.planet_shaft_step_offset * 2) - a.standard_clearance_1_5mm * 3 > 21}
+
+
 def _branches_wpg(a):
     # bearing_mount_thickness has a second case, but the bearing is chosen with a bore of at least
     # module * Nr_s + 2 * module + 2 * small_ring_case_thickness, so the first case always applies
@@ -108,6 +115,22 @@ GEARBOXES = {
                ("VT8020_PRO", (24, 40, 26, 90, 1.2, 1.2, 3)),
                ("U10_Plus_KV80", (18, 24, 60, 102, 1.0, 1.0, 3))],   # made up: ring wider than bearing + bolts
         branches=_branches_cpg),
+    "insspg_type_1": Gearbox(
+        "insspg_type_1", "INSSPG", "insspg_type_1_equations", "planetaryGearbox",
+        counts={"input": 12, "optimisation": 4, "fixed": 56, "dependent": 35}, code_only=60,
+        set_gears=_set_sspg,
+        from_opt=lambda p: (p[2], p[3], p[4], p[5], p[1]),           # [gr, n, Ns, Np, Nr, module, ...]
+        extra=[("RI100", (18, 28, 74, 0.5, 4))],                    # small carrier: the sun support is not capped
+        branches=_branches_insspg,
+        params_name="insspg_params.json", config_file="insspg_motor_config.json"),
+    "insspg_type_2": Gearbox(
+        "insspg_type_2", "INSSPG", "insspg_type_2_equations", "planetaryGearbox",
+        counts={"input": 12, "optimisation": 4, "fixed": 56, "dependent": 35}, code_only=60,
+        set_gears=_set_sspg,
+        from_opt=lambda p: (p[2], p[3], p[4], p[5], p[1]),
+        extra=[("RI100", (18, 28, 74, 0.5, 4))],                    # small carrier: the sun support is not capped
+        branches=_branches_insspg,
+        params_name="insspg_params.json", config_file="insspg_motor_config.json"),
     "wpg": Gearbox(
         "wpg", "WPG", "wpg_equations", "wolfromPlanetaryGearbox",
         counts={"input": 18, "optimisation": 5, "fixed": 52, "dependent": 68}, code_only=35,

@@ -85,7 +85,9 @@ def render(spec):
     out += [f"## Config blocks {gb} doesn't read", ""]
     out += [f"- {b['file']} → `{b['block']}`: {b['reason']}" for b in spec["unused_config_blocks"]]
     if spec.get("plain_file_aliases"):
-        if spec.get("plain_files"):
+        if spec.get("plain_file"):
+            intro = f"`{spec['plain_file']}` writes the same values; these names differ there:"
+        elif spec.get("plain_files"):
             files = ", ".join(f"`CADs/{gb}/{f}` ({p[:-1]} names)" for p, f in spec["plain_files"].items())
             intro = f"{files} write the same values without the stage prefix; these names differ there:"
         else:

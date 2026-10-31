@@ -165,7 +165,6 @@ def test_sources_give_the_values(design):
     gb, _, actuator, _, _, onshape = design
     cad, code = entries(gb)
     vals = values(gb, actuator, onshape)
-    config = json.loads((CONFIG / "config.json").read_text(encoding="utf-8"))
     params = json.loads((CONFIG / GEARBOXES[gb].params_file).read_text(encoding="utf-8"))
     motors = json.loads((CONFIG / "motors.json").read_text(encoding="utf-8"))
     material = "metal" if actuator.results_suffix else "3dp"
@@ -181,8 +180,9 @@ def test_sources_give_the_values(design):
             expected = params[s["block"]][s["key"]]
         elif s.get("file") == "motors.json":
             expected = lookup(motors, s["block"])[s["key"]]
-        elif s.get("file") == "config.json":
-            expected = lookup(config, s["block"])[s["key"]]
+        elif s.get("file", "").endswith(".json") and s["file"] not in (GEARBOXES[gb].params_file, "motors.json"):
+            # config.json, or the gearbox's own config file (gear standard, MIT factors, ...)
+            expected = lookup(json.loads((CONFIG / s["file"]).read_text(encoding="utf-8")), s["block"])[s["key"]]
         else:
             continue
         assert vals[e["name"]] == pytest.approx(expected, rel=1e-9), e["name"]
@@ -200,7 +200,7 @@ def test_formulas_and_lookups_give_the_values(design):
             lk = e["lookup"]
             args = {k: (eval(v, env, dict(vals)) if k != "bolt_type" else v) for k, v in lk["args"].items()}
             if lk["function"] == "bearings_discrete":
-                got = getattr(bearings_discrete(args["idRequiredMM"]), lk["method"])()
+                got = getattr(bearings_discrete(**args), lk["method"])()
             else:
                 got = getattr(nuts_and_bolts_dimensions(**args), lk["field"])
         else:

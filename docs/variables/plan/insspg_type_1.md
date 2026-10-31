@@ -167,3 +167,30 @@ Automatic first pass from the code (the special cases above take precedence). Ca
 | `sspg_design_parameters` | 26 | yes | planetMinDistanceMM, sCarrierExtrusionDiaMM, sCarrierExtrusionClearanceMM, bearingIDClearanceMM | carrier1ShaftHeightMM, mainCase2AttachmentHeightMM, baseThicknessMM, sCarrierThicknessMM, mainCoverThicknessMM, planetBoreMM, sunBoreMM, couplerRadiusMM, couplerThicknessMM, couplerShaftHeightMM, clearanceMotorandCaseMM, clearanceRingandCaseMM, clearance1RingandCaseMM, clearanceCarrierPlanetMM, upperHousingHeight, clearanceSCarrierMotorMM, carrierIDClearanceMM, sCarrierIDClearanceMM, smallBearingM… |
 | `sspg_optimization_parameters` | 10 | yes | GEAR_RATIO_MIN, GEAR_RATIO_MAX, GEAR_RATIO_STEP, MODULE_MIN, MODULE_MAX, NUM_PLANET_MIN, NUM_PLANET_MAX, NUM_TEETH_SUN_MIN, NUM_TEETH_PLANET_MIN, MAX_GB_DIA_MULT_FACTOR | — |
 | `sspg_3DP_design_parameters` | 70 | yes | bearing_ID, bearing_OD, bearing_height, rotor_output_hole_PCD, sun_hub_dia, stator_bottom_step_height_, stator_upper_step_height, stator_side_step_OD, stator_mounting_holes_dia, rotor_support_bearing_ID, rotor_support_bearing_OD, rotor_support_bearing_height, rotor_upper_support_bearing_ID, rotor_upper_support_bearing_OD, rotor_upper_support_bearing_height, stator_casing_hole_wrench_size | — |
+
+
+## Result (classification done)
+
+Spec: [`config_files/variables/insspg_type_1_variables.json`](../../../config_files/variables/insspg_type_1_variables.json), page [`docs/variables/insspg_type_1.md`](../insspg_type_1.md) (generated). Tests: the generic `tests/test_variable_categories.py` (INSSPG types 1 and 2 registered in `tests/variable_helpers.py`) and `tests/test_variable_categories_insspg.py` (parametrized over the types that have a spec; type 2 follows in the next commit).
+
+**Counts (CAD variables, 107):** input 12, optimisation 4, fixed 56, dependent 35 (22 formula, 9 lookup, 3 stress rule, 1 implicit constraint). The draft said input 13 / dependent 34: `motor_height` is the sum of three motor heights (`motorLengthMM` = stator top wire + middle + bottom wire), so it is Dependent / formula. **Code-only values: 60** (fixed 54, input 4, dependent 2: `pressure_angle_rad`, `maxGearboxDiameter`). 24 of them are config keys the code never reads, 15 named `<key>_config` because the CAD variable of the same name does not come from them. Confidence: 158 high, 9 medium, 0 low.
+
+**Medium-confidence entries**
+- `rotor_support_bearing_ID` / `_OD` / `_height`, `rotor_upper_support_bearing_ID` / `_OD` / `_height` (Dependent / lookup): the catalogue bearing is requested by outer diameter (`Rotor_ID - 4`, `Stator_ID - 5 x standard_clearance_1_5mm`) with hard-coded 4 and 5; `bearings_discrete` returns the first bearing with OD >= the request, which can exceed it (ISSUES bug 5).
+- `fw_s_used` (Dependent / formula): hard-coded `1.5 x standard_clearance_1_5mm` in type 1 (a hard-coded `2` in type 2).
+- `sun_support_OD` (Dependent / formula): capped at a hard-coded 21 mm, with a hard-coded `x 3` clearance.
+- `maxGearboxDiameter` (code-only, Dependent / formula): `Stator_OD - 5.5 - 2 x standard_clearance_1_5mm - loose_clearance_3DP / 2`, the 5.5 hard-coded in `gearbox_runner`.
+
+**Config key added** to `sspg_3DP_design_parameters` in `insspg_params.json` (shared name, value that keeps every output bit-identical): `planet_bearing_gap` = 1.0 (was `standard_clearance_1_5mm * 2 / 3`; 1.5 * 2 / 3 is exactly 1.0), used by the stress rule in `mitStressAnalysisMinFacewidth` and the Lewis rule's copy. The other shared keys (`clearance_motor_and_case_min`, `case_mounting_hole_wall_overlap`, `bearing_mount_wall_bolt_dia_multiple`) have no counterpart in INSSPG: it has no motor-case clearance, no case bolt-hole shift, and `bearing_mount_thickness` is a config value. A test shows `planet_bearing_gap` drives exactly its CAD variables.
+
+**Shared tooling changed:** `tests/variable_helpers.py` (a gearbox can name its own params file and its own config file; INSSPG entries and a branch rule), `tests/test_variable_categories.py` (sources are read from whichever config file the spec names; `bearings_discrete` lookups can pass `odRequiredMM`), `tools/variables/render.py` (names the plain file of a gearbox whose folder differs from its key).
+
+**Results:** `python tests/golden/golden.py check`: All 58 cases match the baseline. `python -m pytest -q`: 851 passed, 1 skipped (the type-1 / type-2 comparison, which needs both specs). No `CADs/` file, no golden baseline touched.
+
+**Open questions**
+1. The hard-coded 21 and `x 3` (`sun_support_OD`), the type-specific `1.5` / `2` (`fw_s_used`), the 4 and 5 in the rotor bearing requests and the 5.5 in `gearbox_runner` have no shared key and are left in the code (medium). New key names are the plan's open decision 4.
+2. The plan expected 9 fastener sizes "looked up from the bolt table, then overwritten by config values". This class has no bolt lookup: it reads the config values directly, so they are Fixed / config and there is no dead lookup. 15 other 3DP keys (`bearing_ID`, `sun_hub_dia`, `rotor_output_hole_PCD`, the stator step heights, the rotor support bearings, ...) are in the config but the CAD gets those values from the motor, a bearing lookup or a formula; they are listed as code-only `<key>_config` entries.
+3. `bearing_mount_thickness` and `ringRadialWidthMM` are read with `.get` (a missing key gives `None` and the gearbox's value, respectively); both are Fixed / config here (SSPG and CPG compute the first).
+4. `sspg_design_parameters` (26 keys, none also in the 3DP block) is merged into the design parameters; only `ringRadialWidthMM` reaches the CAD, 24 are never read, and `planetMinDistanceMM`, `sCarrierExtrusion*`, `bearingIDClearanceMM` are read without effect.
+5. Types 1 and 2 share this class and config; type 2's spec (next commit) differs in `fw_s_used` only. The mass code, which differs per type, is out of scope.
+6. The runner passes no motor driver: no driver variables exist in the CAD file.
