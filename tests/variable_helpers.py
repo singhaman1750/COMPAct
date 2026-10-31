@@ -162,7 +162,7 @@ GEARBOXES = {
         params_name="inwpg_params_dependent.json"),
     "indspg": Gearbox(
         "indspg", "INDSPG", "indspg_equations", "inrunnerdoubleStagePlanetaryGearbox",
-        counts={"input": 12, "optimisation": 15, "fixed": 109, "dependent": 74}, code_only=44,
+        counts={"input": 12, "optimisation": 15, "fixed": 109, "dependent": 74}, code_only=48,
         set_gears=_set_dspg,
         # [gr, n1, n2, Ns1, Np1, Nr1, Ns2, Np2, Nr2, module1, module2]
         from_opt=lambda p: (p[3], p[4], p[5], p[9], p[1], p[6], p[7], p[8], p[10], p[2]),
@@ -184,7 +184,7 @@ GEARBOXES = {
         config_file="motor_config.json"),
     "isspg_compact": Gearbox(
         "isspg_compact", "ISSPG", "isspg_compact_equations", "planetaryGearbox",
-        counts={"input": 24, "optimisation": 4, "fixed": 57, "dependent": 60}, code_only=31,
+        counts={"input": 24, "optimisation": 4, "fixed": 57, "dependent": 60}, code_only=33,
         set_gears=_set_sspg,
         from_opt=lambda p: (p[2], p[3], p[4], p[5], p[1]),           # [gr, n, Ns, Np, Nr, module, ...]
         extra=[("RO100", (24, 54, 132, 1.2, 3))],        # module 1.2: short gears (the ring hub hits its 3 mm minimum), no width cap
@@ -192,7 +192,7 @@ GEARBOXES = {
         params_name="isspg_params.json", has_plain=False),
     "isspg_inside": Gearbox(
         "isspg_inside", "ISSPG", "isspg_inside_equations", "planetaryGearbox",
-        counts={"input": 26, "optimisation": 4, "fixed": 54, "dependent": 63}, code_only=34,
+        counts={"input": 26, "optimisation": 4, "fixed": 54, "dependent": 63}, code_only=36,
         set_gears=_set_sspg,
         from_opt=lambda p: (p[2], p[3], p[4], p[5], p[1]),           # [gr, n, Ns, Np, Nr, module, ...]
         extra=[("RO100", (30, 60, 150, 1.2, 3))],        # module 1.2: short gears (the ring hub hits its 3 mm minimum), no width cap
@@ -220,7 +220,7 @@ GEARBOXES = {
         extra=[]),
     "insspg_type_1": Gearbox(
         "insspg_type_1", "INSSPG", "insspg_type_1_equations", "planetaryGearbox",
-        counts={"input": 12, "optimisation": 4, "fixed": 56, "dependent": 35}, code_only=60,
+        counts={"input": 12, "optimisation": 4, "fixed": 56, "dependent": 35}, code_only=65,
         set_gears=_set_sspg,
         from_opt=lambda p: (p[2], p[3], p[4], p[5], p[1]),           # [gr, n, Ns, Np, Nr, module, ...]
         extra=[("RI100", (18, 28, 74, 0.5, 4))],                    # small carrier: the sun support is not capped
@@ -228,7 +228,7 @@ GEARBOXES = {
         params_name="insspg_params.json", config_file="insspg_motor_config.json"),
     "insspg_type_2": Gearbox(
         "insspg_type_2", "INSSPG", "insspg_type_2_equations", "planetaryGearbox",
-        counts={"input": 12, "optimisation": 4, "fixed": 56, "dependent": 35}, code_only=60,
+        counts={"input": 12, "optimisation": 4, "fixed": 56, "dependent": 35}, code_only=65,
         set_gears=_set_sspg,
         from_opt=lambda p: (p[2], p[3], p[4], p[5], p[1]),
         extra=[("RI100", (18, 28, 74, 0.5, 4))],                    # small carrier: the sun support is not capped

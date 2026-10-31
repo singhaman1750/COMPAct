@@ -569,6 +569,9 @@ class internalsingleStagePlanetaryActuator:
         self.loose_clearance_3DP                        = self.design_params["loose_clearance_3DP"]
         self.bearing_step_width                         = self.design_params["bearing_step_width"] # 2
         self.planet_bearing_gap                         = self.design_params["planet_bearing_gap"] # 1.0
+        self.carrier_thickness_mid_min                  = self.design_params["carrier_thickness_mid_min"] # 6
+        self.ring_hub_thickness_min                     = self.design_params["ring_hub_thickness_min"] # 3
+        self.output_bearing_ID_clearance                = self.design_params["output_bearing_ID_clearance"] # 20
         self.sun_hub_clearance_multiple                 = self.design_params["sun_hub_clearance_multiple"] # 4
 
         # --- Sun coupler, sun gear & sun gear dimensions ---
@@ -732,7 +735,7 @@ class internalsingleStagePlanetaryActuator:
         # --- Bearing Dimensions ---
 
         # --- Output Bearing Dimensions ---
-        OutputBearingIdrequiredMM  =  self.tight_clearance_3DP + (self.carrier_top_to_mid_nut_wrench_size * 0.5) + self.sun1_bearing_OD + 20#clearnace
+        OutputBearingIdrequiredMM  =  self.tight_clearance_3DP + (self.carrier_top_to_mid_nut_wrench_size * 0.5) + self.sun1_bearing_OD + self.output_bearing_ID_clearance
         outputbearing              = bearings_discrete(OutputBearingIdrequiredMM)
         self.output_bearing_ID     = outputbearing.getBearingIDMM()
         self.output_bearing_OD     = outputbearing.getBearingODMM()
@@ -781,7 +784,7 @@ class internalsingleStagePlanetaryActuator:
         self.carrier_thickness_top = self.output_bearing_width + self.bearing_step_width + self.standard_clearance_1_5mm 
         
         #--- Carrier Thickness Mid ---
-        self.carrier_thickness_mid = 6
+        self.carrier_thickness_mid = self.carrier_thickness_mid_min
 
         # --- Carrier Thickness ---
         self.carrier_thickness = self.carrier_thickness_mid + self.carrier_thickness_top
@@ -792,8 +795,8 @@ class internalsingleStagePlanetaryActuator:
                                     + self.carrier_thickness - (self.motor_case_thickness-self.bearing_step_width)
                                     - self.motor_height
                                     )
-        if self.ring_hub_thickness < 3:
-            self.ring_hub_thickness    = 3
+        if self.ring_hub_thickness < self.ring_hub_thickness_min:
+            self.ring_hub_thickness    = self.ring_hub_thickness_min
             self.carrier_thickness     = ( self.motor_height
                                          + self.ring_hub_thickness
                                          + self.motor_case_thickness
