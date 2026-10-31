@@ -1276,7 +1276,7 @@
    "attr": "fw_s_calc",
    "category": "dependent",
    "subtype": "stress rule",
-   "rule": "b = FOS x |Ft_sp_big| x qe x qk / (gear_allowable_stress x module) on the sun - big planet mesh (mitStressAnalysisMinFacewidth); Ft_sp_big, Ft_rp_big, Ft_rp_small = serviceFactor x motor_peak_torque / (num_planet x pitch radius) with the Wolfrom force ratios (the code takes their absolute values: Ft_rp_small is negative); qe = 1 / contact ratio of the mesh, qk = curve fit in the tooth count of the mesh; then the planet stack (big ring + small ring + clearance_planet) is capped at planet_stack_stator_heights x stator_height: when it is longer, all five widths are scaled by (cap - clearance_planet) / stack, so the capped gears carry the same fraction of the torque; fw_s_calc = b (scaled)",
+   "rule": "b = FOS x |Ft_sp_big| x qe x qk / (gear_allowable_stress x module) on the sun - big planet mesh (mitStressAnalysisMinFacewidth); Ft_sp_big, Ft_rp_big, Ft_rp_small = serviceFactor x motor_peak_torque / (num_planet x pitch radius) with the Wolfrom force ratios (the code takes their absolute values: Ft_rp_small is negative); qe = 1 / contact ratio of the mesh, qk = curve fit in the tooth count of the mesh; then the planet stack (big ring + small ring + clearance_planet) is capped at planet_stack_stator_heights x stator_height: when it is longer, all five widths are scaled by (cap - clearance_planet) / (big ring + small ring), so the capped gears carry the same fraction of the torque; fw_s_calc = b (scaled)",
    "depends_on": [
     "module",
     "module_s",
@@ -1423,7 +1423,7 @@
    "attr": "fw_r_b",
    "category": "dependent",
    "subtype": "stress rule",
-   "rule": "b1 = FOS x |Ft_sp_big| x qe x qk / (gear_allowable_stress x module) (sun - big planet), b2 = the same with |Ft_rp_big| on the big planet - big ring mesh; big-planet width = max(b1, b2) (the big ring takes b2); the small planet takes b3 = FOS x |Ft_rp_small| x qe x qk / (gear_allowable_stress x module_s); if the big and small planets together are below 2 x planet_bearing_width + planet_bearing_gap, each is raised to at least planet_bearing_width + planet_bearing_gap / 2 (the rings take the planets' widths); Ft_sp_big, Ft_rp_big, Ft_rp_small = serviceFactor x motor_peak_torque / (num_planet x pitch radius) with the Wolfrom force ratios (the code takes their absolute values: Ft_rp_small is negative); qe = 1 / contact ratio of the mesh, qk = curve fit in the tooth count of the mesh; then the planet stack (big ring + small ring + clearance_planet) is capped at planet_stack_stator_heights x stator_height: when it is longer, all five widths are scaled by (cap - clearance_planet) / stack, so the capped gears carry the same fraction of the torque; fw_r_b = the big width (scaled)",
+   "rule": "b1 = FOS x |Ft_sp_big| x qe x qk / (gear_allowable_stress x module) (sun - big planet), b2 = the same with |Ft_rp_big| on the big planet - big ring mesh; big-planet width = max(b1, b2); the small planet takes b3 = FOS x |Ft_rp_small| x qe x qk / (gear_allowable_stress x module_s); the big ring takes b2, unless the bearing minimum applies, when it takes the big planet's raised width; if the big and small planets together are below 2 x planet_bearing_width + planet_bearing_gap, each is raised to at least planet_bearing_width + planet_bearing_gap / 2 (the rings take the planets' widths); Ft_sp_big, Ft_rp_big, Ft_rp_small = serviceFactor x motor_peak_torque / (num_planet x pitch radius) with the Wolfrom force ratios (the code takes their absolute values: Ft_rp_small is negative); qe = 1 / contact ratio of the mesh, qk = curve fit in the tooth count of the mesh; then the planet stack (big ring + small ring + clearance_planet) is capped at planet_stack_stator_heights x stator_height: when it is longer, all five widths are scaled by (cap - clearance_planet) / (big ring + small ring), so the capped gears carry the same fraction of the torque; fw_r_b = the big-ring width (scaled)",
    "depends_on": [
     "module",
     "module_s",
@@ -1445,7 +1445,7 @@
     "clearance_planet"
    ],
    "confidence": "high",
-   "reason": "big-ring face width from the tooth-stress rule (the larger of the planet's two meshes), raised to hold the planet bearing and scaled by the planet-stack cap; the big planet's width fw_p_b is a copy of it (the reverse of WPG)"
+   "reason": "big-ring face width from the tooth-stress rule (its own planet - big ring mesh; the big planet's raised width when the bearing minimum applies), scaled by the planet-stack cap; the big planet's width fw_p_b is a copy of it (the reverse of WPG)"
   },
   {
    "name": "dp_r_s",
@@ -1505,7 +1505,7 @@
    "attr": "fw_r_s",
    "category": "dependent",
    "subtype": "stress rule",
-   "rule": "b3 = FOS x |Ft_rp_small| x qe x qk / (gear_allowable_stress x module_s) on the small planet - small ring mesh; if the big and small planets together are below 2 x planet_bearing_width + planet_bearing_gap, each is raised to at least planet_bearing_width + planet_bearing_gap / 2 (the rings take the planets' widths); Ft_sp_big, Ft_rp_big, Ft_rp_small = serviceFactor x motor_peak_torque / (num_planet x pitch radius) with the Wolfrom force ratios (the code takes their absolute values: Ft_rp_small is negative); qe = 1 / contact ratio of the mesh, qk = curve fit in the tooth count of the mesh; then the planet stack (big ring + small ring + clearance_planet) is capped at planet_stack_stator_heights x stator_height: when it is longer, all five widths are scaled by (cap - clearance_planet) / stack, so the capped gears carry the same fraction of the torque; fw_r_s = the small width (scaled)",
+   "rule": "b3 = FOS x |Ft_rp_small| x qe x qk / (gear_allowable_stress x module_s) on the small planet - small ring mesh; if the big and small planets together are below 2 x planet_bearing_width + planet_bearing_gap, each is raised to at least planet_bearing_width + planet_bearing_gap / 2 (the rings take the planets' widths); Ft_sp_big, Ft_rp_big, Ft_rp_small = serviceFactor x motor_peak_torque / (num_planet x pitch radius) with the Wolfrom force ratios (the code takes their absolute values: Ft_rp_small is negative); qe = 1 / contact ratio of the mesh, qk = curve fit in the tooth count of the mesh; then the planet stack (big ring + small ring + clearance_planet) is capped at planet_stack_stator_heights x stator_height: when it is longer, all five widths are scaled by (cap - clearance_planet) / (big ring + small ring), so the capped gears carry the same fraction of the torque; fw_r_s = the small width (scaled)",
    "depends_on": [
     "module",
     "module_s",
