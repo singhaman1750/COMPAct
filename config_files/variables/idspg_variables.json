@@ -875,7 +875,7 @@
     "sun_hub_clearance_multiple"
    ],
    "confidence": "high",
-   "reason": "sun hub: the rotor's mount-hole circle plus hole diameter plus a margin of sun_hub_clearance_multiple x standard_clearance_1_5mm (config, 5 in IDSPG); the mass code still uses 4 (ISSUES: IDSPG sun hub)"
+   "reason": "sun hub: the rotor's mount-hole circle plus hole diameter plus a margin of sun_hub_clearance_multiple x standard_clearance_1_5mm (config, 5 in IDSPG); the stage-1 mass code weighs this same hub (ISSUES bug 23)"
   },
   {
    "name": "a1_sun_central_bolt_dia",
@@ -2057,7 +2057,7 @@
     "sun_hub_clearance_multiple"
    ],
    "confidence": "high",
-   "reason": "same value as a1_sun_hub_dia (the CAD writes it under both stage prefixes); sun hub: the rotor's mount-hole circle plus hole diameter plus a margin of sun_hub_clearance_multiple x standard_clearance_1_5mm (config, 5 in IDSPG); the mass code still uses 4 (ISSUES: IDSPG sun hub)",
+   "reason": "same value as a1_sun_hub_dia (the CAD writes it under both stage prefixes); sun hub: the rotor's mount-hole circle plus hole diameter plus a margin of sun_hub_clearance_multiple x standard_clearance_1_5mm (config, 5 in IDSPG); the stage-1 mass code weighs this same hub (ISSUES bug 23)",
    "alias_of": "a1_sun_hub_dia"
   },
   {
@@ -2889,7 +2889,7 @@
     "key": "sun_hub_clearance_multiple"
    },
    "confidence": "high",
-   "reason": "margin around the sun hub's bolt circle, in multiples of standard_clearance_1_5mm (5); used for the stage-1 sun hub in the CAD (the mass code still uses 4); one shared key name across the gearbox types"
+   "reason": "margin around the sun hub's bolt circle, in multiples of standard_clearance_1_5mm (5); used for the stage-1 sun hub (CAD and stage-1 mass code); one shared key name across the gearbox types"
   },
   {
    "name": "maxGearboxDiameter",

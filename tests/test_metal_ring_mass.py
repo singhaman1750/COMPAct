@@ -480,8 +480,10 @@ def test_idspg_3dp_ring_is_unchanged(stage):
 
 def idspg_sun1_hub_volume_m3(a):
     """The stage-1 sun's coupler hub (aluminium in metal mode): a disc of the hub diameter, minus its
-    share of the central bolt hole (the hole runs through the sun gear and the hub)."""
-    hub_dia = a.rotor_mount_hole_PCD + a.rotor_mount_hole_dia + 4 * a.standard_clearance_1_5mm
+    share of the central bolt hole (the hole runs through the sun gear and the hub). The hub is the CAD's:
+    the rotor's mount-hole circle + hole + sun_hub_clearance_multiple (5) x standard_clearance_1_5mm."""
+    hub_dia = a.rotor_mount_hole_PCD + a.rotor_mount_hole_dia + a.sun_hub_clearance_multiple * a.standard_clearance_1_5mm
+    assert hub_dia == a.sun_hub_dia1
     t, fw = a.sun_coupler_hub_thickness1, a.fw_s1_used
     hub = math.pi / 4 * hub_dia ** 2 * t
     bolt_share = math.pi / 4 * a.sun_central_bolt_dia1 ** 2 * (fw + t) * t / (fw + t)
@@ -512,8 +514,8 @@ def test_idspg_3dp_stage1_sun_is_unchanged():
 
 def test_idspg_metal_optimum_gets_lighter():
     """The re-recorded metal golden design (same gear sets): 3,003 -> 2,429 g (rings 2,543 g, plus the
-    stage-1 sun hub as aluminium)."""
-    assert build_idspg("metal").getMassKG_3DP() == pytest.approx(2.429, abs=0.001)
+    stage-1 sun hub as aluminium), then 2,431 g once the mass code weighs the CAD's wider sun hub."""
+    assert build_idspg("metal").getMassKG_3DP() == pytest.approx(2.431, abs=0.001)
 
 
 # ---- INDSPG --------------------------------------------------------------------------------------

@@ -844,6 +844,18 @@ fix together with bug 21.
 the four fixed numbers are now config keys, `a1_bearing_ID`, `a1_bearing_OD`, `a1_bearing_height` and
 `a1_bearing_massKg` in `indspg_params.json`, read by both the CAD code and the mass code.
 
+### 23. IDSPG — the mass code weighed a narrower sun hub than the CAD draws
+
+**Description:** in `ActuatorandGearbox_IDSPG.py` the CAD's stage-1 sun hub (`sun_hub_dia1`) is the rotor's
+mount-hole circle + hole diameter + **5** × `standard_clearance_1_5mm`, but `getMassKG_3DP_stg1` rebuilt it
+with **4** × (found during the variable classification). The hub was weighed 3 mm narrower than drawn.
+
+**Fixed (2026-10-31):** the mass code uses `self.sun_hub_dia1`, the CAD's value (its margin is now the
+config key `sun_hub_clearance_multiple`, 5 in IDSPG). Same gear sets; the golden RO100 20:1 masses go
+from 1.825 to 1.826 kg (3dp) and 2.429 to 2.431 kg (metal); both IDSPG golden cases re-recorded.
+
+**Status:** fixed.
+
 ## CAD issues
 
 Problems in the CAD models (Onshape / SolidWorks), not in the Python code. Found while checking
