@@ -85,6 +85,8 @@ def test_shared_rules_hold_in_every_gearbox_file():
         spec = json.loads(path.read_text(encoding="utf-8"))
         for e in spec["cad_variables"] + spec["code_only"]:
             for r in rules:
+                if e["name"] in r.get("except", {}).get(spec["gearbox"], []):
+                    continue                        # the same name plays another role in this gearbox (see rules.json)
                 if re.match(r["name_pattern"], e["name"]):
                     assert (e["category"], e["subtype"]) == (r["category"], r["subtype"]), (path.name, e["name"])
 

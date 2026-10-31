@@ -78,6 +78,12 @@ def _branches_cpg(a):
             "ring grown to the bearing": not a.Nr * a.module_s + 5 * 2 > a.bearing_OD}
 
 
+def _branches_inwpg_dependent(a):
+    return {"rotor top bearing: the sun, not the motor minimum, sets the bore":
+            a.module * a.Ns + 2 * a.standard_clearance_1_5mm > a.min_rotor_top_bearing_ID,
+            "planet stack: the cap applies": a.torque_carried_fraction < 1.0}
+
+
 def _branches_incpg_dependent(a):
     return {"rotor top bearing: the sun, not the motor minimum, sets the bore":
             a.module * a.Ns + 2 * a.standard_clearance_1_5mm > a.min_rotor_top_bearing_ID}
@@ -120,6 +126,14 @@ GEARBOXES = {
                ("VT8020_PRO", (24, 40, 26, 90, 1.2, 1.2, 3)),
                ("U10_Plus_KV80", (18, 24, 60, 102, 1.0, 1.0, 3))],   # made up: ring wider than bearing + bolts
         branches=_branches_cpg),
+    "inwpg_dependent": Gearbox(
+        "inwpg_dependent", "INWPG", "inwpg_dependent_equations", "inrunnerWolfromPlanetaryGearbox",
+        counts={"input": 21, "optimisation": 5, "fixed": 59, "dependent": 61}, code_only=27,
+        set_gears=_set_wpg,
+        from_opt=lambda p: (p[2], p[3], p[5], p[4], p[6], p[7], p[8], p[1]),   # [gr, n, Ns, Np_b, Nr_b, Np_s, Nr_s, m_b, m_s]
+        extra=[("RI100", (28, 44, 28, 116, 100, 1.2, 1.2, 4))],     # module 1.2: the planet stack is under the cap
+        branches=_branches_inwpg_dependent,
+        params_name="inwpg_params_dependent.json"),
     "incpg_dependent": Gearbox(
         "incpg_dependent", "INCPG", "incpg_dependent_equations", "inrunnerCompoundPlanetaryGearbox",
         counts={"input": 21, "optimisation": 5, "fixed": 54, "dependent": 54}, code_only=22,

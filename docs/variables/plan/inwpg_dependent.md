@@ -201,3 +201,24 @@ Automatic first pass from the code (the special cases above take precedence). Ca
 |---|---|---|---|---|
 | `inwpg_optimization_parameters` | 13 | yes | GEAR_RATIO_MIN, GEAR_RATIO_MAX, GEAR_RATIO_STEP, MODULE_BIG_MIN, MODULE_BIG_MAX, MODULE_SMALL_MIN, MODULE_SMALL_MAX, NUM_PLANET_MIN, NUM_PLANET_MAX, NUM_TEETH_SUN_MIN, NUM_TEETH_PLANET_BIG_MIN, NUM_TEETH_PLANET_SMALL_MIN, MAX_GB_DIA_MULT_FACTOR | — |
 | `inwpg_3DP_design_parameters` | 63 | yes | planetMinDistanceMM, sCarrierExtrusionDiaMM, sCarrierExtrusionClearanceMM, min_rotor_top_bearing_ID, planet_stack_stator_heights | — |
+
+
+## Result (classification done)
+
+Spec: [`config_files/variables/inwpg_dependent_variables.json`](../../../config_files/variables/inwpg_dependent_variables.json), page [`docs/variables/inwpg_dependent.md`](../inwpg_dependent.md) (generated). Tests: the generic `tests/test_variable_categories.py` (INWPG dependent registered in `tests/variable_helpers.py`) and `tests/test_variable_categories_inwpg.py` (parametrized over the INWPG variants that have a spec; the independent variant follows in its own commit).
+
+**Counts (CAD variables, 146):** input 21, optimisation 5, fixed 59, dependent 61 (32 formula, 24 lookup, 3 stress rule, 2 implicit constraint). The draft said input 22 / fixed 60 / dependent 59: `motor_height` is a sum of three motor heights (Dependent / formula) and `pressure_angle` (radians) is a formula of `pressure_angle_deg`, the Fixed gear standard (the CAD file carries both). **Code-only values: 27** (fixed 21, input 2, dependent 3: `maxGearboxDiameter`, `actuator_width`, `fw_limit_mm`; optimisation 1: `module_s`). Confidence: 173 high, 0 medium, 0 low.
+
+**Config key added** to `inwpg_3DP_design_parameters` in `inwpg_params_dependent.json` (shared name, value that keeps every output bit-identical): `planet_bearing_gap` = 1.0 (was `standard_clearance_1_5mm * 2 / 3` for the pair and `* 1 / 3` per gear; the code reads `planet_bearing_gap` and `planet_bearing_gap / 2`), in `mitStressAnalysisMinFacewidth`. The other shared keys have no counterpart (no motor-case clearance rule, no `bearing_mount_thickness`, `case_mounting_hole_shift = case_mounting_hole_dia / 2`). One internal attribute was added without changing any value: `min_rotor_top_bearing_ID` (the per-motor minimum bore). Tests show `planet_bearing_gap`, `planet_stack_stator_heights` (the planet-stack cap) and `min_rotor_top_bearing_ID` each drive exactly their CAD variables.
+
+**Shared tooling changed:** `rules.json` (a rule can list per-gearbox exceptions: INWPG's `fw_p_b` is a copy of `fw_r_b`, the reverse of WPG, so it is Dependent / formula and not the stress rule the name pattern asks for; this is the plan's tooling item 5 in its simplest form), `tests/variable_helpers.py` (INWPG dependent entry and branch rules), `tests/test_variable_categories.py` (the exception), `tools/variables/render.py` (lists the exceptions); the other gearboxes' pages were regenerated (only the shared-rules list changed).
+
+**Results:** `python tests/golden/golden.py check`: All 58 cases match the baseline. `python -m pytest -q`: 963 passed. No `CADs/` file, no golden baseline touched.
+
+**Open questions**
+1. **Bug-18 pattern**: `module` is `moduleBig`; the small planet and the small ring are drawn with it although the stress rule uses `moduleSmall`. Logged, not fixed: `module_s` is a code-only optimisation entry; `dp_p_s` and `dp_r_s` say so. The plan's `module_b` / `module_s` code change is still open (plan decision 5).
+2. The shared face-width rule is still name-based, with a per-gearbox exception list instead of the source-based check the plan proposed.
+3. The planet-stack cap scales all five widths by `torque_carried_fraction` when the stack is longer than `planet_stack_stator_heights x stator_height`; the spec lists the cap among the dependencies of the three stress widths, and `fw_limit_mm` is a code-only formula.
+4. `bearingIDClearanceMM` is written to the CAD file here (a code-only key in other types): Fixed / config.
+5. `rotorTopBearingConstraint` repeats the top-bearing rule with the same per-motor minimum (inline, not through the new attribute); the constraint method is not part of the CAD values. `rotor_top_bearing_*` are catalogue lookups (Dependent) in this variant.
+6. The CAD and Onshape model issue noted in the plan (the output ring gear and bearing do not move with RI80, CAD 7) concerns the model, not the classification.

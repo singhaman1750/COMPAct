@@ -75,7 +75,8 @@ def render(spec):
         out.append("")
     out += ["## Rules shared by every gearbox", "",
             "From `config_files/variables/rules.json`; the test holds every gearbox's file to them.", ""]
-    out += [f"- names matching `{r['name_pattern']}` are **{TITLES[r['category']]} / {r['subtype']}**: {r['reason']}"
+    out += [f"- names matching `{r['name_pattern']}` are **{TITLES[r['category']]} / {r['subtype']}**: {r['reason']}" +
+            (" Exceptions: " + "; ".join(f"{g}: {', '.join(f'`{n}`' for n in ns)}" for g, ns in r["except"].items()) + "." if r.get("except") else "")
             for r in load_rules()["rules"]]
     out.append("")
     for c in CATEGORIES:

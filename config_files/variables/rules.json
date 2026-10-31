@@ -1,5 +1,5 @@
 {
- "about": "Category rules every gearbox's variables file must follow, so the same kind of variable gets the same category in every gearbox type. A variable whose name matches a pattern must have that category and sub-type (tests/test_variable_categories.py). Add the names a new gearbox uses for the same role to the pattern when that gearbox is classified.",
+ "about": "Category rules every gearbox's variables file must follow, so the same kind of variable gets the same category in every gearbox type. A variable whose name matches a pattern must have that category and sub-type (tests/test_variable_categories.py). Add the names a new gearbox uses for the same role to the pattern when that gearbox is classified. A rule can list exceptions per gearbox (\"except\": {gearbox: [names]}) where the same name plays a different role, e.g. INWPG's fw_p_b is a copy of fw_r_b (the reverse of WPG).",
  "rules": [
   {
    "name_pattern": "^(a[12]_)?Nr(_[bs]|[0-9]*)$",
@@ -11,6 +11,7 @@
    "name_pattern": "^fw_(s_calc|p|p_b|r|r_s)$",
    "category": "dependent",
    "subtype": "stress rule",
+   "except": {"inwpg_dependent": ["fw_p_b"], "inwpg_independent": ["fw_p_b"]},
    "reason": "gear face widths follow from the tooth-stress rule: the optimisation variables, the motor torque, the gear material and the safety factors fix them, and the optimiser always takes the smallest width that passes (widths that are a formula of another width, e.g. CPG's fw_p_s = fw_r + clearance_planet, are dependent / formula)"
   },
   {

@@ -924,6 +924,7 @@ class inrunnerWolfromPlanetaryActuator:
         self.tight_clearance_3DP                        = self.design_params["tight_clearance_3DP"]        
         self.loose_clearance_3DP                        = self.design_params["loose_clearance_3DP"]
         self.bearing_step_width                         = self.design_params["bearing_step_width"] # 2
+        self.planet_bearing_gap                         = self.design_params["planet_bearing_gap"] # 1.0
 
         #-----------Motor----------------------------
         self.motor_OD             = self.motorDiaMM                     # 86.8
@@ -1110,8 +1111,9 @@ class inrunnerWolfromPlanetaryActuator:
 
         #problem if ID is 28 (need to remove that bearing in the table)
         # Large enough for the sun, and at least this motor's minimum bore
+        self.min_rotor_top_bearing_ID = per_motor_value(self.design_params, "min_rotor_top_bearing_ID", self.motor.motorName)
         RotorTopBearingIDrequiredMM   = max(self.module * self.Ns + 2*self.standard_clearance_1_5mm,
-                                            per_motor_value(self.design_params, "min_rotor_top_bearing_ID", self.motor.motorName))
+                                            self.min_rotor_top_bearing_ID)
 
         RotorTopBearings              = bearings_discrete(RotorTopBearingIDrequiredMM)
         self.rotor_top_bearing_ID     = RotorTopBearings.getBearingIDMM()
@@ -2286,11 +2288,11 @@ class inrunnerWolfromPlanetaryActuator:
             bMin_planetBig_mit = bMin_planetBig_mit_2
 
         #------------- Contraint in planet to accomodate its bearings------------------------------------------
-        if ((bMin_planetBig_mit + bMin_planetSmall_mit) * 1000 < (self.planet_bearing_width*2 + self.standard_clearance_1_5mm * 2 / 3)) : 
-            if ((bMin_planetBig_mit) * 1000 < (self.planet_bearing_width + self.standard_clearance_1_5mm * 1 / 3)): 
-                bMin_planetBig_mit = (self.planet_bearing_width + self.standard_clearance_1_5mm * 1 / 3) / 1000
-            if ((bMin_planetSmall_mit) * 1000 < (self.planet_bearing_width + self.standard_clearance_1_5mm * 1 / 3)): 
-                bMin_planetSmall_mit = (self.planet_bearing_width + self.standard_clearance_1_5mm * 1 / 3) / 1000
+        if ((bMin_planetBig_mit + bMin_planetSmall_mit) * 1000 < (self.planet_bearing_width*2 + self.planet_bearing_gap)) : 
+            if ((bMin_planetBig_mit) * 1000 < (self.planet_bearing_width + self.planet_bearing_gap / 2)): 
+                bMin_planetBig_mit = (self.planet_bearing_width + self.planet_bearing_gap / 2) / 1000
+            if ((bMin_planetSmall_mit) * 1000 < (self.planet_bearing_width + self.planet_bearing_gap / 2)): 
+                bMin_planetSmall_mit = (self.planet_bearing_width + self.planet_bearing_gap / 2) / 1000
             bMin_ringBig_mit   = bMin_planetBig_mit
             bMin_ringSmall_mit = bMin_planetSmall_mit
 
