@@ -102,7 +102,7 @@ def _branches_isspg(a):
 
 def _branches_inwpg_dependent(a):
     return {"rotor top bearing: the sun, not the motor minimum, sets the bore":
-            a.module * a.Ns + 2 * a.standard_clearance_1_5mm > a.min_rotor_top_bearing_ID,
+            a.module_b * a.Ns + 2 * a.standard_clearance_1_5mm > a.min_rotor_top_bearing_ID,
             "planet stack: the cap applies": a.torque_carried_fraction < 1.0}
 
 
@@ -112,7 +112,7 @@ def _branches_inwpg_independent(a):
 
 def _branches_incpg_dependent(a):
     return {"rotor top bearing: the sun, not the motor minimum, sets the bore":
-            a.module * a.Ns + 2 * a.standard_clearance_1_5mm > a.min_rotor_top_bearing_ID}
+            a.module_b * a.Ns + 2 * a.standard_clearance_1_5mm > a.min_rotor_top_bearing_ID}
 
 
 def _branches_insspg(a):
@@ -122,9 +122,9 @@ def _branches_insspg(a):
 
 def _branches_wpg(a):
     # bearing_mount_thickness has a second case, but the bearing is chosen with a bore of at least
-    # module * Nr_s + 2 * module + 2 * small_ring_case_thickness, so the first case always applies
+    # module_s * Nr_s + 2 * module_s + 2 * small_ring_case_thickness, so the first case always applies
     return {"sun hub: motor holes wider than the sun tip":
-            a.motor_output_hole_PCD + a.motor_output_hole_CSK_OD + a.standard_clearance_1_5mm * 2 > a.module * a.Ns + 2 * a.module}
+            a.motor_output_hole_PCD + a.motor_output_hole_CSK_OD + a.standard_clearance_1_5mm * 2 > a.module_b * a.Ns + 2 * a.module_b}
 
 
 def _branches_dspg(a):
@@ -236,7 +236,7 @@ GEARBOXES = {
         params_name="insspg_params.json", config_file="insspg_motor_config.json"),
     "wpg": Gearbox(
         "wpg", "WPG", "wpg_equations", "wolfromPlanetaryGearbox",
-        counts={"input": 18, "optimisation": 5, "fixed": 52, "dependent": 68}, code_only=35,
+        counts={"input": 18, "optimisation": 5, "fixed": 52, "dependent": 68}, code_only=36,
         set_gears=_set_wpg,
         # [gr, n, Ns, Np_b, Nr_b, Np_s, Nr_s, module_b, module_s]
         from_opt=lambda p: (p[2], p[3], p[5], p[4], p[6], p[7], p[8], p[1]),

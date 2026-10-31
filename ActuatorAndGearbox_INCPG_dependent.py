@@ -641,7 +641,8 @@ class inrunnerCompoundPlanetaryActuator:
         self.Np_s       = self.inrunnerCompoundPlanetaryGearbox.NpSmall
         self.Nr         = self.Ns + self.Np_b + self.Np_s
         self.num_planet = self.inrunnerCompoundPlanetaryGearbox.numPlanet
-        self.module     = self.inrunnerCompoundPlanetaryGearbox.moduleBig
+        self.module_b   = self.inrunnerCompoundPlanetaryGearbox.moduleBig     # sun and big planet
+        self.module_s   = self.inrunnerCompoundPlanetaryGearbox.moduleSmall   # small planet and ring
 
         #------------------------------------------------------
         # Indepent Constant variables
@@ -763,30 +764,30 @@ class inrunnerCompoundPlanetaryActuator:
         # Gear 
         #---------------------------------------------------
         # --- Gear Profile ---
-        self.h_a          = 1 * self.module
-        self.h_b          = 1.25 * self.module
-        self.h_f          = 1.25 * self.module
+        self.h_a          = 1 * self.module_b
+        self.h_b          = 1.25 * self.module_b
+        self.h_f          = 1.25 * self.module_b
         self.clr_tip_root = self.h_f - self.h_a
 
-        self.dp_s      = self.module * self.Ns
+        self.dp_s      = self.module_b * self.Ns
         self.db_s      = self.dp_s * np.cos((self.pressure_angle))
         self.alpha_s   = (np.sqrt(self.dp_s ** 2 - self.db_s ** 2) / self.db_s) * 180 / np.pi - self.pressure_angle_deg
         self.beta_s    = (360 / (4 * self.Ns) - self.alpha_s) * 2
         self.fw_s_calc = self.inrunnerCompoundPlanetaryGearbox.fwSunMM
 
-        self.dp_p_b    = self.module * self.Np_b
+        self.dp_p_b    = self.module_b * self.Np_b
         self.db_p_b    = self.dp_p_b * np.cos((self.pressure_angle))
         self.alpha_p_b = (np.sqrt(self.dp_p_b ** 2 - self.db_p_b ** 2) / self.db_p_b) * 180 / np.pi - self.pressure_angle_deg
         self.beta_p_b  = (360 / (4 * self.Np_b) - self.alpha_p_b) * 2
         self.fw_p_b    = self.inrunnerCompoundPlanetaryGearbox.fwPlanetBigMM
         
-        self.dp_r    = self.module * self.Nr
+        self.dp_r    = self.module_s * self.Nr
         self.db_r    = self.dp_r * np.cos((self.pressure_angle))
         self.alpha_r = (np.sqrt(self.dp_r ** 2 - self.db_r ** 2) / self.db_r) * 180 / np.pi - self.pressure_angle_deg
         self.beta_r  = (360 / (4 * self.Nr) + self.alpha_r) * 2
         self.fw_r    = self.inrunnerCompoundPlanetaryGearbox.fwRingMM + self.standard_clearance_1_5mm
 
-        self.dp_p_s    = self.module * self.Np_s
+        self.dp_p_s    = self.module_s * self.Np_s
         self.db_p_s    = self.dp_p_s * np.cos((self.pressure_angle))
         self.alpha_p_s = (np.sqrt(self.dp_p_s ** 2 - self.db_p_s ** 2) / self.db_p_s) * 180 / np.pi - self.pressure_angle_deg
         self.beta_p_s  = (360 / (4 * self.Np_s) - self.alpha_p_s) * 2
@@ -816,7 +817,7 @@ class inrunnerCompoundPlanetaryActuator:
         self.sun_hub_dia = self.rotor_ID - 2*self.rotor_hub_thickness
 
         #----------------------- Bearings------------------------------------
-        OutputIDrequiredMM         = self.module * (self.Ns + self.Np_b) + self.bearingIDClearanceMM
+        OutputIDrequiredMM         = self.module_b * (self.Ns + self.Np_b) + self.bearingIDClearanceMM
         OutputBearings             = bearings_discrete(OutputIDrequiredMM)
         self.output_bearing_ID     = OutputBearings.getBearingIDMM()
         self.output_bearing_OD     = OutputBearings.getBearingODMM()
@@ -824,7 +825,7 @@ class inrunnerCompoundPlanetaryActuator:
 
         # Large enough for the sun, and at least this motor's minimum bore
         self.min_rotor_top_bearing_ID = per_motor_value(self.design_params, "min_rotor_top_bearing_ID", self.motor.motorName)
-        RotorTopBearingIDrequiredMM   = max(self.module * self.Ns + 2*self.standard_clearance_1_5mm,
+        RotorTopBearingIDrequiredMM   = max(self.module_b * self.Ns + 2*self.standard_clearance_1_5mm,
                                             self.min_rotor_top_bearing_ID)
 
         RotorTopBearings              = bearings_discrete(RotorTopBearingIDrequiredMM)
@@ -893,7 +894,7 @@ class inrunnerCompoundPlanetaryActuator:
                     f'"Np_s"= {self.Np_s}\n',
                     f'"Nr"= {self.Nr}\n',
                     f'"num_planet"= {self.num_planet}\n',
-                    f'"module"= {self.module}\n',
+                    f'"module"= {self.module_b}\n',
                     f'"pressure_angle"= {self.pressure_angle}\n',
                     f'"pressure_angle_deg"= {self.pressure_angle_deg}\n',
                     f'"clearance_planet"= {self.clearance_planet}\n',
@@ -1035,7 +1036,7 @@ class inrunnerCompoundPlanetaryActuator:
                     f'"Np_s"= {self.Np_s}\n',
                     f'"Nr"= {self.Nr}\n',
                     f'"num_planet"= {self.num_planet}\n',
-                    f'"module"= {self.module}\n',
+                    f'"module"= {self.module_b}\n',
                     f'"pressure_angle"= {self.pressure_angle}\n',
                     f'"pressure_angle_deg"= {self.pressure_angle_deg}\n',
                     f'"clearance_planet"= {self.clearance_planet}\n',
@@ -1179,7 +1180,7 @@ class inrunnerCompoundPlanetaryActuator:
                     f'"Np_s"= {self.Np_s}\n',
                     f'"Nr"= {self.Nr}\n',
                     f'"num_planet"= {self.num_planet}\n',
-                    f'"module"= {self.module}\n',
+                    f'"module"= {self.module_b}\n',
                     f'"pressure_angle"= {self.pressure_angle}\n',
                     f'"pressure_angle_deg"= {self.pressure_angle_deg}\n',
                     f'"clearance_planet"= {self.clearance_planet}\n',
@@ -1320,7 +1321,7 @@ class inrunnerCompoundPlanetaryActuator:
                     f'"Np_s"= {self.Np_s}\n',
                     f'"Nr"= {self.Nr}\n',
                     f'"num_planet"= {self.num_planet}\n',
-                    f'"module"= {self.module}\n',
+                    f'"module"= {self.module_b}\n',
                     f'"pressure_angle"= {self.pressure_angle}\n',
                     f'"pressure_angle_deg"= {self.pressure_angle_deg}\n',
                     f'"clearance_planet"= {self.clearance_planet}\n',

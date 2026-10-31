@@ -74,14 +74,14 @@
   },
   {
    "name": "module",
-   "attr": "module",
+   "attr": "module_b",
    "category": "optimisation",
    "subtype": "module",
    "source": {
     "optimiser": "optimizationInternalCompoundPlanetaryActuator"
    },
    "confidence": "high",
-   "reason": "the big module (sun, big planet): searched by the optimiser loop; the CAD file has this one module although the small planet and the ring use the small module module_s (code-only; same pattern as CPG bug 18)"
+   "reason": "the big module (sun, big planet): searched by the optimiser loop; the CAD file has this one module (code attribute module_b; the small module is module_s, code-only)"
   },
   {
    "name": "pressure_angle",
@@ -297,13 +297,13 @@
    "attr": "dp_r",
    "category": "dependent",
    "subtype": "formula",
-   "formula": "module * Nr",
+   "formula": "module_s * Nr",
    "depends_on": [
-    "module",
+    "module_s",
     "Nr"
    ],
    "confidence": "high",
-   "reason": "pitch diameter"
+   "reason": "ring pitch diameter (small module)"
   },
   {
    "name": "db_r",
@@ -921,9 +921,9 @@
    "attr": "dp_p_s",
    "category": "dependent",
    "subtype": "formula",
-   "formula": "module * Np_s",
+   "formula": "module_s * Np_s",
    "depends_on": [
-    "module",
+    "module_s",
     "Np_s"
    ],
    "confidence": "high",
@@ -1747,14 +1747,14 @@
   },
   {
    "name": "module_s",
-   "attr": "moduleSmall",
+   "attr": "module_s",
    "category": "optimisation",
    "subtype": "module",
    "source": {
     "optimiser": "optimizationInternalCompoundPlanetaryActuator"
    },
    "confidence": "high",
-   "reason": "the small module (small planet, ring): searched by the optimiser loop and used by the stress rule and the gearbox constraints, but not in the CAD file, which has one module (same pattern as CPG bug 18)"
+   "reason": "the small module (small planet, ring): searched by the optimiser loop, but not in the CAD file (which has one module; ISSUES bug 18)"
   },
   {
    "name": "bearingIDClearance_3DP",

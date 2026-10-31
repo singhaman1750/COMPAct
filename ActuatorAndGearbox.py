@@ -4858,7 +4858,8 @@ class wolfromPlanetaryActuator:
         self.Np_s       = self.wolfromPlanetaryGearbox.NpSmall
         self.Nr_b       = self.Ns + self.Np_b * 2
         self.Nr_s       = self.Ns + self.Np_b + self.Np_s
-        self.module     = self.wolfromPlanetaryGearbox.moduleBig
+        self.module_b   = self.wolfromPlanetaryGearbox.moduleBig     # sun, big planet and big ring
+        self.module_s   = self.wolfromPlanetaryGearbox.moduleSmall   # small planet and small ring
         self.num_planet = self.wolfromPlanetaryGearbox.numPlanet
 
         #------------------------
@@ -4980,7 +4981,7 @@ class wolfromPlanetaryActuator:
         self.carrier_trapezoidal_support_hole_dia                   = self.design_params["carrier_trapezoidal_support_hole_dia"]# 3
         self.carrier_bearing_step_width                             = self.design_params["carrier_bearing_step_width"]# 1.5
 
-        self.carrier_PCD = (self.Np_b + self.Ns) * self.module
+        self.carrier_PCD = (self.Np_b + self.Ns) * self.module_b
         
         carrier_trapezoidal_support_hole = nuts_and_bolts_dimensions(bolt_dia=self.carrier_trapezoidal_support_hole_dia, bolt_type="socket_head")
 
@@ -5022,37 +5023,38 @@ class wolfromPlanetaryActuator:
         self.ring_to_chamfer_clearance = self.clearance_planet
 
         # --- Gear profile parameters ---
-        self.h_a = 1 * self.module
-        self.h_f = 1.25 * self.module
-        self.h_b = 1.25 * self.module
+        self.h_a = 1 * self.module_b
+        self.h_f = 1.25 * self.module_b
+        self.h_b = 1.25 * self.module_b
+        self.h_b_s = 1.25 * self.module_s   # small ring tooth depth (small module); not in the CAD file
         self.clr_tip_root = self.h_f - self.h_a
         self.clr_tip_root_s = self.h_f - self.h_a
 
         # --- Ring ---
         # Big
-        self.dp_r_b = self.module * self.Nr_b
+        self.dp_r_b = self.module_b * self.Nr_b
         self.db_r_b = self.dp_r_b * np.cos ( self.pressure_angle )
         self.fw_r_b = self.fw_p_b
         self.alpha_r_b = ( self.dp_r_b ** 2 - self.db_r_b ** 2 )**0.5 / self.db_r_b * 180 / np.pi - self.pressure_angle_deg
         self.beta_r_b = ( 360 / ( 4 * self.Nr_b ) + self.alpha_r_b ) * 2
 
-        self.ring_OD_b = self.Nr_b * self.module + self.ring_radial_thickness * 2
+        self.ring_OD_b = self.Nr_b * self.module_b + self.ring_radial_thickness * 2
 
         # Small
-        self.dp_r_s = self.module * self.Nr_s
+        self.dp_r_s = self.module_s * self.Nr_s
         self.db_r_s = self.dp_r_s * np.cos ( self.pressure_angle )
         self.alpha_r_s = ( self.dp_r_s ** 2 - self.db_r_s ** 2 )**0.5 / self.db_r_s * 180 / np.pi - self.pressure_angle_deg
         self.beta_r_s = ( 360 / ( 4 * self.Nr_s ) + self.alpha_r_s ) * 2
 
         # --- Planet ---
         # Big
-        self.dp_p_b = self.module * self.Np_b
+        self.dp_p_b = self.module_b * self.Np_b
         self.db_p_b = self.dp_p_b * np.cos ( self.pressure_angle )
         self.alpha_p_b = ( self.dp_p_b ** 2 - self.db_p_b ** 2 )**0.5 / self.db_p_b * 180 / np.pi - self.pressure_angle_deg
         self.beta_p_b = ( 360 / ( 4 * self.Np_b ) - self.alpha_p_b ) * 2
 
         # Small
-        self.dp_p_s = self.module * self.Np_s
+        self.dp_p_s = self.module_s * self.Np_s
         self.db_p_s = self.dp_p_s * np.cos ( self.pressure_angle )
         self.alpha_p_s = ( self.dp_p_s ** 2 - self.db_p_s ** 2 )**0.5 / self.db_p_s * 180 / np.pi - self.pressure_angle_deg
         self.beta_p_s = ( 360 / ( 4 * self.Np_s ) - self.alpha_p_s ) * 2
@@ -5060,20 +5062,20 @@ class wolfromPlanetaryActuator:
         self.fw_p_s = self.fw_r_s + self.clearance_planet
 
         # --- Sun gear ---
-        self.dp_s = self.module * self.Ns
+        self.dp_s = self.module_b * self.Ns
         self.db_s = self.dp_s * np.cos ( self.pressure_angle )
         self.alpha_s = ( self.dp_s ** 2 - self.db_s ** 2 )**0.5 / self.db_s * 180 / np.pi - self.pressure_angle_deg
         self.beta_s = ( 360 / ( 4 * self.Ns ) - self.alpha_s ) * 2
 
-        if self.motor_output_hole_PCD + self.motor_output_hole_CSK_OD + self.standard_clearance_1_5mm * 2 > self.module * self.Ns + 2*self.module:
+        if self.motor_output_hole_PCD + self.motor_output_hole_CSK_OD + self.standard_clearance_1_5mm * 2 > self.module_b * self.Ns + 2*self.module_b:
             self.sun_hub_dia = self.motor_output_hole_PCD + self.motor_output_hole_CSK_OD + self.standard_clearance_1_5mm * 2
         else:
-            self.sun_hub_dia = self.module * self.Ns + 2*self.module
+            self.sun_hub_dia = self.module_b * self.Ns + 2*self.module_b
 
         self.fw_s_used = self.fw_p_s + self.fw_p_b + self.clearance_planet + self.sec_carrier_thickness + self.standard_clearance_1_5mm 
 
         # --- Bearing ---
-        IdrequiredMM = self.module * (self.Nr_s) + 2*self.module + 2*self.small_ring_case_thickness
+        IdrequiredMM = self.module_s * (self.Nr_s) + 2*self.module_s + 2*self.small_ring_case_thickness
         Bearings            = bearings_discrete(IdrequiredMM)
         self.bearing_ID     = Bearings.getBearingIDMM()
         self.bearing_OD     = Bearings.getBearingODMM()
@@ -5088,7 +5090,7 @@ class wolfromPlanetaryActuator:
         self.motor_case_OD_base = self.maxGearboxDiameter + 2*self.ring_radial_thickness + self.clearance_motor_and_case * 2 + self.Motor_case_thickness * 2
         self.case_mounting_PCD = self.motor_case_OD_base + self.case_mounting_hole_shift * 2
         self.Motor_case_OD_max = self.case_mounting_PCD + self.case_mounting_hole_allen_socket_dia + self.clearance_case_mount_holes_shell_thickness * 2
-        self.bearing_mount_thickness = (self.output_mounting_hole_dia * self.bearing_mount_wall_bolt_dia_multiple if (self.bearing_OD + self.output_mounting_hole_dia * (2 * self.bearing_mount_wall_bolt_dia_multiple)) > (self.Nr_s * self.module + 2 * self.h_b) else ((self.Nr_s * self.module + 2 * self.h_b - (self.bearing_OD + self.output_mounting_hole_dia * (2 * self.bearing_mount_wall_bolt_dia_multiple))) / 2) + self.output_mounting_hole_dia * self.bearing_mount_wall_bolt_dia_multiple + self.standard_clearance_1_5mm)
+        self.bearing_mount_thickness = (self.output_mounting_hole_dia * self.bearing_mount_wall_bolt_dia_multiple if (self.bearing_OD + self.output_mounting_hole_dia * (2 * self.bearing_mount_wall_bolt_dia_multiple)) > (self.Nr_s * self.module_s + 2 * self.h_b_s) else ((self.Nr_s * self.module_s + 2 * self.h_b_s - (self.bearing_OD + self.output_mounting_hole_dia * (2 * self.bearing_mount_wall_bolt_dia_multiple))) / 2) + self.output_mounting_hole_dia * self.bearing_mount_wall_bolt_dia_multiple + self.standard_clearance_1_5mm)
         self.output_mounting_PCD = self.bearing_OD + self.bearing_mount_thickness
         #self.Motor_case_ID = self.motor_OD + self.clearance_motor_and_case * 2
         self.Motor_case_ID = self.maxGearboxDiameter + self.clearance_motor_and_case * 2 + 2*self.ring_radial_thickness
@@ -5096,7 +5098,7 @@ class wolfromPlanetaryActuator:
         self.gear_casing_big_ring_to_bearing_dist = self.fw_p_s + self.clearance_planet + self.carrier_thickness + self.carrier_bearing_step_width + self.carrier_small_ring_inner_bearing_height - self.bearing_height - self.carrier_bearing_step_width
 
         # --- Carrier ---
-        self.carrier_PCD = ( self.Np_b + self.Ns ) * self.module
+        self.carrier_PCD = ( self.Np_b + self.Ns ) * self.module_b
 
         # Actuator Width
         self.actuator_width = (  self.fw_r_b
@@ -5203,7 +5205,7 @@ class wolfromPlanetaryActuator:
                 f'"h_a" = {self.h_a}\n',
                 f'"h_b" = {self.h_b}\n',
                 f'"h_f" = {self.h_f}\n',
-                f'"module" = {self.module}\n',
+                f'"module" = {self.module_b}\n',
                 f'"motor_OD" = {self.motor_OD}\n',
                 f'"motor_case_OD_base" = {self.motor_case_OD_base}\n',
                 f'"motor_height" = {self.motor_height}\n',
@@ -5355,7 +5357,7 @@ class wolfromPlanetaryActuator:
                 f'"h_a" = {self.h_a}\n',
                 f'"h_b" = {self.h_b}\n',
                 f'"h_f" = {self.h_f}\n',
-                f'"module" = {self.module}\n',
+                f'"module" = {self.module_b}\n',
                 f'"motor_OD" = {self.motor_OD}\n',
                 f'"motor_case_OD_base" = {self.motor_case_OD_base}\n',
                 f'"motor_height" = {self.motor_height}\n',
@@ -5509,7 +5511,7 @@ class wolfromPlanetaryActuator:
                 f'"h_a" = {self.h_a}\n',
                 f'"h_b" = {self.h_b}\n',
                 f'"h_f" = {self.h_f}\n',
-                f'"module" = {self.module}\n',
+                f'"module" = {self.module_b}\n',
                 f'"motor_OD" = {self.motor_OD}\n',
                 f'"motor_case_OD_base" = {self.motor_case_OD_base}\n',
                 f'"motor_height" = {self.motor_height}\n',
@@ -5661,7 +5663,7 @@ class wolfromPlanetaryActuator:
                 f'"h_a" = {self.h_a}\n',
                 f'"h_b" = {self.h_b}\n',
                 f'"h_f" = {self.h_f}\n',
-                f'"module" = {self.module}\n',
+                f'"module" = {self.module_b}\n',
                 f'"motor_OD" = {self.motor_OD}\n',
                 f'"motor_case_OD_base" = {self.motor_case_OD_base}\n',
                 f'"motor_height" = {self.motor_height}\n',

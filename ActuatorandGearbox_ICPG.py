@@ -426,41 +426,42 @@ class internalcompoundPlanetaryActuator:
         self.Np_s       = self.internalcompoundPlanetaryGearbox.NpSmall
         self.Nr         = self.internalcompoundPlanetaryGearbox.Nr
         self.num_planet = self.internalcompoundPlanetaryGearbox.numPlanet
-        self.module     = self.internalcompoundPlanetaryGearbox.moduleBig
+        self.module_b   = self.internalcompoundPlanetaryGearbox.moduleBig     # sun and big planet
+        self.module_s   = self.internalcompoundPlanetaryGearbox.moduleSmall   # small planet and ring
 
         # ── Gear geometry constants ────────────────────────────────────────
         self.pressure_angle     = self.internalcompoundPlanetaryGearbox.getPressureAngleRad()
         self.pressure_angle_deg = self.pressure_angle * 180 / np.pi
 
         # Addendum, dedendum, tip-root clearance
-        self.h_a          = 1    * self.module
-        self.h_b          = 1.25 * self.module
-        self.h_f          = 1.25 * self.module
+        self.h_a          = 1    * self.module_b
+        self.h_b          = 1.25 * self.module_b
+        self.h_f          = 1.25 * self.module_b
         self.clr_tip_root = self.h_f - self.h_a
 
         # Sun gear pitch / base geometry
-        self.dp_s      = self.module * self.Ns
+        self.dp_s      = self.module_b * self.Ns
         self.db_s      = self.dp_s * np.cos(self.pressure_angle)
         self.alpha_s   = (np.sqrt(self.dp_s**2 - self.db_s**2) / self.db_s) * 180 / np.pi - self.pressure_angle_deg
         self.beta_s    = (360 / (4 * self.Ns) - self.alpha_s) * 2
         self.fw_s_calc = self.internalcompoundPlanetaryGearbox.fwSunMM
 
         # Big planet pitch / base geometry
-        self.dp_p_b    = self.module * self.Np_b
+        self.dp_p_b    = self.module_b * self.Np_b
         self.db_p_b    = self.dp_p_b * np.cos(self.pressure_angle)
         self.alpha_p_b = (np.sqrt(self.dp_p_b**2 - self.db_p_b**2) / self.db_p_b) * 180 / np.pi - self.pressure_angle_deg
         self.beta_p_b  = (360 / (4 * self.Np_b) - self.alpha_p_b) * 2
         self.fw_p_b    = self.internalcompoundPlanetaryGearbox.fwPlanetBigMM
 
         # Ring gear pitch / base geometry
-        self.dp_r    = self.module * self.Nr
+        self.dp_r    = self.module_s * self.Nr
         self.db_r    = self.dp_r * np.cos(self.pressure_angle)
         self.alpha_r = (np.sqrt(self.dp_r**2 - self.db_r**2) / self.db_r) * 180 / np.pi - self.pressure_angle_deg
         self.beta_r  = (360 / (4 * self.Nr) + self.alpha_r) * 2
         self.fw_r    = self.internalcompoundPlanetaryGearbox.fwRingMM
 
         # Small planet pitch / base geometry
-        self.dp_p_s    = self.module * self.Np_s
+        self.dp_p_s    = self.module_s * self.Np_s
         self.db_p_s    = self.dp_p_s * np.cos(self.pressure_angle)
         self.alpha_p_s = (np.sqrt(self.dp_p_s**2 - self.db_p_s**2) / self.db_p_s) * 180 / np.pi - self.pressure_angle_deg
         self.beta_p_s  = (360 / (4 * self.Np_s) - self.alpha_p_s) * 2
@@ -602,7 +603,7 @@ class internalcompoundPlanetaryActuator:
         self.sun_hub_dia = cap if sun_hub_dia_calc > self.Rotor_OD else sun_hub_dia_calc
 
         # Carrier PCD and outer bearing selection
-        self.carrier_PCD    = self.module * (self.Ns + self.Np_b)
+        self.carrier_PCD    = self.module_b * (self.Ns + self.Np_b)
         bearing_id_calc     = self.carrier_PCD + self.bearingIDClearance_3DP
         outer_bearing       = bearings_discrete(bearing_id_calc)
         self.bearing_ID     = outer_bearing.getBearingIDMM()
@@ -645,7 +646,7 @@ class internalcompoundPlanetaryActuator:
             f'"Np_s"= {self.Np_s}\n',
             f'"Nr"= {self.Nr}\n',
             f'"num_planet"= {self.num_planet}\n',
-            f'"module"= {self.module}\n',
+            f'"module"= {self.module_b}\n',
             f'"pressure_angle"= {self.pressure_angle_deg}\n',
             f'"h_a"= {self.h_a}\n',
             f'"h_b"= {self.h_b}\n',
@@ -1084,8 +1085,8 @@ class internalcompoundPlanetaryActuator:
         # 1. PLANET GEAR
         # ══════════════════════════════════════════════════════════════════
         # Radii
-        r_planet_big_pitch   = (self.Np_b * self.module / 2) / 1000   # big lobe pitch radius
-        r_planet_small_pitch = (self.Np_s * self.module / 2) / 1000   # small lobe pitch radius
+        r_planet_big_pitch   = (self.Np_b * self.module_b / 2) / 1000   # big lobe pitch radius
+        r_planet_small_pitch = (self.Np_s * self.module_s / 2) / 1000   # small lobe pitch radius
         r_planet_bore        = (self.planet_bore / 2)        / 1000   # central through-bore
         r_planet_bearing_OD  = (self.planet_bearing_OD / 2)  / 1000   # bearing seat outer radius
 
@@ -1107,7 +1108,7 @@ class internalcompoundPlanetaryActuator:
         # 2. SUN GEAR
         # ══════════════════════════════════════════════════════════════════
         # Radii
-        r_sun_pitch         = (self.Ns * self.module / 2)                                   / 1000
+        r_sun_pitch         = (self.Ns * self.module_b / 2)                                   / 1000
         r_sun_base_coupler  = (self.sun_bottom_casing_bearing_ID / 2)                       / 1000
         r_sun_bore          = (self.sun_central_bolt_dia / 2)                               / 1000
         r_sun_removed       = ((self.Rotor_bottom_ID - self.standard_clearance_1_5mm * 4) / 2) / 1000
@@ -1169,7 +1170,7 @@ class internalcompoundPlanetaryActuator:
         # Radii
         r_carrier_outer     = (self.bearing_ID / 2) / 1000
         r_carrier_trapezoid = ((self.bearing_ID
-                                - (self.Ns * self.module + 2 * self.carrier_trapezoidal_support_sun_offset))
+                                - (self.Ns * self.module_b + 2 * self.carrier_trapezoidal_support_sun_offset))
                                / 4) / 1000
 
         # Face width (same as combined planet lobe span)
@@ -1185,7 +1186,7 @@ class internalcompoundPlanetaryActuator:
         # 5. RING GEAR
         # ══════════════════════════════════════════════════════════════════
         # Radii
-        r_ring_pitch          = (self.Nr * self.module / 2) / 1000
+        r_ring_pitch          = (self.Nr * self.module_s / 2) / 1000
         r_ring_outer          = (self.stator_ID / 2) / 1000
         r_ring_mounting_outer = ((self.Rotor_OD + self.standard_clearance_1_5mm
                                   + self.Motor_case_thickness * 2) / 2) / 1000
@@ -1320,7 +1321,7 @@ class internalcompoundPlanetaryActuator:
         print("Np_b = ",                         self.Np_b)
         print("Np_s = ",                         self.Np_s)
         print("Nr = ",                           self.Nr)
-        print("Module = ",                       self.module)
+        print("Module = ",                       self.module_b)
         print("Number of planets = ",            self.num_planet)
         print("Face width of sun gear = ",       round(self.fw_s_used, 2), " mm")
         print("Face width of Big planet = ",     round(self.fw_p_b,    2), " mm")
@@ -1330,7 +1331,7 @@ class internalcompoundPlanetaryActuator:
         print("--------------------------------------------------------------------------")
 
     def printParametersLess(self):
-        vars_ = [self.module, self.Ns, self.Np_b, self.Np_s, self.Nr, self.num_planet]
+        vars_ = [self.module_b, self.Ns, self.Np_b, self.Np_s, self.Nr, self.num_planet]
         print("[m, Ns, NpB, NpS, Nr, numPl]:", vars_)
         print("Gear ratio = ",        self.gearRatio())
         print("Efficiency = ",        round(self.getEfficiency(), 4))

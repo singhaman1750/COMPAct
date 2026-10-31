@@ -50,7 +50,7 @@ def test_optimisation_variables_are_the_gearbox_values(monkeypatch, tmp_path, gb
     assert (v["Ns"], v["Np_b"], v["Np_s"], v["num_planet"], v["module"]) == (g.Ns, g.NpBig, g.NpSmall, g.numPlanet, g.moduleBig)
     assert v["Nr"] == g.Ns + g.NpBig + g.NpSmall                               # the implicit ring constraint
     module_s = next(e for e in SPECS[gb]["code_only"] if e["name"] == "module_s")   # the small module: searched, not in the CAD
-    assert (module_s["category"], module_s["attr"]) == ("optimisation", "moduleSmall") and g.moduleSmall > 0
+    assert (module_s["category"], module_s["attr"]) == ("optimisation", "module_s") and actuator.module_s == g.moduleSmall > 0
     assert (v["fw_s_calc"], v["fw_p_b"]) == pytest.approx((g.fwSunMM, g.fwPlanetBigMM))
     assert v["fw_r"] == pytest.approx(g.fwRingMM + v["standard_clearance_1_5mm"]) and v["fw_p_s"] == v["fw_r"]
 

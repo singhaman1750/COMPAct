@@ -209,7 +209,7 @@ Spec: [`config_files/variables/incpg_dependent_variables.json`](../../../config_
 **Results:** `python tests/golden/golden.py check`: All 58 cases match the baseline. `python -m pytest -q`: 907 passed. No `CADs/` file, no golden baseline touched.
 
 **Open questions**
-1. **Bug-18 pattern**: `module` is `moduleBig`; the small planet and the ring are drawn with it although the stress rule and the gearbox use `moduleSmall`. Logged, not fixed: `module_s` is a code-only optimisation entry; `dp_p_s` and `dp_r` say so. The plan's `module_b` / `module_s` code change (value-identical today) is still open (plan decision 5).
+1. **Bug-18 pattern: fixed (option A, 2026-10-31).** The class now has `module_b` and `module_s`; the small-side gears use `module_s` (spec: `module` has attr `module_b`, `module_s` attr `module_s`; the small-side formulas name `module_s`). The CAD file still writes one `module` (= `module_b`); option B (a second module in the CAD) stays open (ISSUES bug 18).
 2. The shared face-width rule is still name-based, with a per-gearbox exception list (`fw_r` here) instead of the source-based check the plan proposed.
 3. The CAD file carries `pressure_angle` in radians and `pressure_angle_deg` in degrees (every other gearbox writes only the degrees under `pressure_angle`).
 4. `min_rotor_top_bearing_ID` (per motor: RI100 25 mm, RI80 0) is a Fixed code-only value; the top bearing itself is a catalogue lookup (Dependent) in this variant.

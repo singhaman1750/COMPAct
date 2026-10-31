@@ -198,7 +198,7 @@ Spec: [`config_files/variables/icpg_variables.json`](../../../config_files/varia
 **Results:** `python tests/golden/golden.py check`: All 58 cases match the baseline. `python -m pytest -q`: 1085 passed. No `CADs/` file, no golden baseline touched.
 
 **Open questions**
-1. **Bug-18 pattern**: `module` is `moduleBig`; the small planet and the ring are drawn with it although the stress rule uses `moduleSmall`. Logged, not fixed: `module_s` is a code-only optimisation entry. The plan's `module_b` / `module_s` code change is still open (plan decision 5).
+1. **Bug-18 pattern: fixed (option A, 2026-10-31).** The class now has `module_b` and `module_s`; the small-side gears use `module_s` (spec: `module` has attr `module_b`, `module_s` attr `module_s`; the small-side formulas name `module_s`). The CAD file still writes one `module` (= `module_b`); option B (a second module in the CAD) stays open (ISSUES bug 18).
 2. Driver dimensions: Input / driver (medium) or Fixed (plan decision 3).
 3. **The sun-hub cap is unreachable**: `sun_hub_dia` is capped at the rotor OD, but the mount-hole circle + hole diameter + `4 x standard_clearance_1_5mm` is 84 of 113.5 mm (RO100), 72 of 92.6 (RO80) and 55 of 73.8 (RO60), so the cap's branch never applies for any motor in `motors.json`; the branch test lists only the floor rule and the stator-height cap.
 4. `case_mounting_wrench_size` and `case_mounting_hole_allen_socket_dia` are config values (Fixed), not bolt lookups as in other types; the `carrier_trapezoidal_support_hole_wrench_size` config value is read but the CAD uses the lookup.

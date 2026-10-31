@@ -781,7 +781,7 @@ def build_icpg(material):
 
 
 def icpg_ring_steel_volume_m3(a):
-    pcd = a.Nr * a.module
+    pcd = a.Nr * a.module_s
     od = min(pcd + 2 * a.ringRadialWidthMM, a.stator_ID)
     teeth_length = (a.fw_r + 2 * a.standard_clearance_1_5mm
                     - (a.fw_s_used - a.rotor_bottom_thickness - a.stator_height - a.ring_gear_thickness_mounting_casing))

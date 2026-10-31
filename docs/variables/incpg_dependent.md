@@ -71,7 +71,7 @@ From `config_files/variables/rules.json`; the test holds every gearbox's file to
 | 2 | `Np_b` | teeth | optimiser (`optimizationInrunnerCompoundPlanetaryActuator`) |  | high | big planet teeth: searched by the optimiser loop |
 | 3 | `Np_s` | teeth | optimiser (`optimizationInrunnerCompoundPlanetaryActuator`) |  | high | small planet teeth: searched by the optimiser loop |
 | 4 | `num_planet` | planets | optimiser (`optimizationInrunnerCompoundPlanetaryActuator`) |  | high | number of planets: searched by the optimiser loop |
-| 5 | `module` | module | optimiser (`optimizationInrunnerCompoundPlanetaryActuator`) |  | high | the big module (sun, big planet): searched by the optimiser loop; the CAD file has this one module although the small planet and the ring use the small module module_s (code-only; same pattern as CPG bug 18) |
+| 5 | `module` | module | optimiser (`optimizationInrunnerCompoundPlanetaryActuator`) |  | high | the big module (sun, big planet): searched by the optimiser loop; the CAD file has this one module (code attribute module_b; the small module is module_s, code-only) |
 
 ## Fixed (54)
 
@@ -156,12 +156,12 @@ From `config_files/variables/rules.json`; the test holds every gearbox's file to
 | 18 | `alpha_p_b` | formula | `sqrt(dp_p_b ** 2 - db_p_b ** 2) / db_p_b * 180 / pi - pressure_angle_deg` | pressure_angle_deg, db_p_b, dp_p_b | high | involute angle used to draw the tooth |
 | 19 | `beta_p_b` | formula | `(360 / (4 * Np_b) - alpha_p_b) * 2` | alpha_p_b, Np_b | high | tooth angle used to draw the tooth |
 | 20 | `fw_p_b` | stress rule | two stress widths, b = FOS x Ft x qe x qk / (gear_allowable_stress x module): b1 for the sun - big planet mesh (module, Ft from serviceFactor x motor_peak_torque at the sun, qe from the sun-planet contact ratio, qk from Ns) and b2 for the small planet - ring mesh (module_s, qk from Np_s); then, if b1 + b2 < 2 x planet_bearing_width + planet_bearing_gap, each planet gear is raised to at least planet_bearing_width + planet_bearing_gap / 2 (one bearing per gear, half the gap each; mitStressAnalysisMinFacewidth); fw_p_b = b1 (raised) | module, module_s, Ns, Np_b, Np_s, Nr, num_planet, pressure_angle, motor_peak_torque, gear_allowable_stress, FOS, serviceFactor, planet_bearing_width, planet_bearing_gap | high | big-planet face width from the tooth-stress rule, raised to hold its bearing |
-| 21 | `dp_r` | formula | `module * Nr` | module, Nr | high | ring pitch diameter, drawn with the CAD file's single module (the ring's own module is module_s, which the CAD file does not carry; same pattern as CPG bug 18) |
+| 21 | `dp_r` | formula | `module_s * Nr` | module_s, Nr | high | ring pitch diameter (small module) |
 | 22 | `db_r` | formula | `dp_r * cos(pressure_angle)` | dp_r, pressure_angle | high | base-circle diameter |
 | 23 | `alpha_r` | formula | `sqrt(dp_r ** 2 - db_r ** 2) / db_r * 180 / pi - pressure_angle_deg` | pressure_angle_deg, db_r, dp_r | high | involute angle used to draw the tooth |
 | 24 | `beta_r` | formula | `(360 / (4 * Nr) + alpha_r) * 2` | alpha_r, Nr | high | tooth angle used to draw the tooth |
 | 25 | `fw_r` | formula | `fw_r_stress + standard_clearance_1_5mm` | fw_r_stress, standard_clearance_1_5mm | high | ring face width: the stress width plus one standard clearance (the small planet's width fw_p_s is a copy of it); the shared face-width rule lists fw_r as an exception for this gearbox |
-| 26 | `dp_p_s` | formula | `module * Np_s` | module, Np_s | high | small-planet pitch diameter, drawn with the CAD file's single module (the small planet's own module is module_s, which the CAD file does not carry; same pattern as CPG bug 18) |
+| 26 | `dp_p_s` | formula | `module_s * Np_s` | module_s, Np_s | high | small-planet pitch diameter (small module) |
 | 27 | `db_p_s` | formula | `dp_p_s * cos(pressure_angle)` | dp_p_s, pressure_angle | high | base-circle diameter |
 | 28 | `alpha_p_s` | formula | `sqrt(dp_p_s ** 2 - db_p_s ** 2) / db_p_s * 180 / pi - pressure_angle_deg` | pressure_angle_deg, db_p_s, dp_p_s | high | involute angle used to draw the tooth |
 | 29 | `beta_p_s` | formula | `(360 / (4 * Np_s) - alpha_p_s) * 2` | alpha_p_s, Np_s | high | tooth angle used to draw the tooth |
@@ -195,7 +195,7 @@ From `config_files/variables/rules.json`; the test holds every gearbox's file to
 
 | # | Variable | Sub-type | Source / formula | Depends on | Confidence | Why |
 |---|---|---|---|---|---|---|
-| 1 | `module_s` | module | optimiser (`optimizationInrunnerCompoundPlanetaryActuator`) |  | high | the small module (small planet, ring): searched by the optimiser loop and used by the stress rule and the gearbox constraints, but not in the CAD file, which has one module (same pattern as CPG bug 18) |
+| 1 | `module_s` | module | optimiser (`optimizationInrunnerCompoundPlanetaryActuator`) |  | high | the small module (small planet, ring): searched by the optimiser loop, but not in the CAD file (which has one module; ISSUES bug 18) |
 | 2 | `fw_r_stress` | stress rule | two stress widths, b = FOS x Ft x qe x qk / (gear_allowable_stress x module): b1 for the sun - big planet mesh (module, Ft from serviceFactor x motor_peak_torque at the sun, qe from the sun-planet contact ratio, qk from Ns) and b2 for the small planet - ring mesh (module_s, qk from Np_s); then, if b1 + b2 < 2 x planet_bearing_width + planet_bearing_gap, each planet gear is raised to at least planet_bearing_width + planet_bearing_gap / 2 (one bearing per gear, half the gap each; mitStressAnalysisMinFacewidth); fw_r_stress = b2 (raised) | module, module_s, Ns, Np_b, Np_s, Nr, num_planet, pressure_angle, motor_peak_torque, gear_allowable_stress, FOS, serviceFactor, planet_bearing_width, planet_bearing_gap | high | the small planet - ring face width from the tooth-stress rule, raised to hold the planet bearing; the CAD's ring width fw_r adds one standard clearance to it |
 | 3 | `motor_peak_torque` | motor | motors.json → motors.<motor>.electrical → `peak_torque_Nm` |  | high | motor torque the gears are sized for (peak torque under the default rating setting); sets the face widths |
 | 4 | `gear_allowable_stress` | material | config.json → Material_properties.<gear material> → `maxAllowableStressMPa` |  | high | allowable tooth stress of the gear material, chosen with the material mode (3dp: PLA, metal: steel); sets the face widths |
