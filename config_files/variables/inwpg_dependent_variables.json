@@ -88,14 +88,14 @@
   },
   {
    "name": "module",
-   "attr": "module",
+   "attr": "module_b",
    "category": "optimisation",
    "subtype": "module",
    "source": {
     "optimiser": "optimizationInrunnerWolfromPlanetaryActuator"
    },
    "confidence": "high",
-   "reason": "the big module (sun, big planet, big ring): searched by the optimiser loop; the CAD file has this one module although the small planet and small ring use the small module module_s (code-only; same pattern as CPG bug 18)"
+   "reason": "the big module (sun, big planet, big ring): searched by the optimiser loop; the CAD file has this one module (code attribute module_b; the small module is module_s, code-only)"
   },
   {
    "name": "pressure_angle",
@@ -1470,13 +1470,13 @@
    "attr": "dp_r_s",
    "category": "dependent",
    "subtype": "formula",
-   "formula": "module * Nr_s",
+   "formula": "module_s * Nr_s",
    "depends_on": [
-    "module",
+    "module_s",
     "Nr_s"
    ],
    "confidence": "high",
-   "reason": "small-ring pitch diameter, drawn with the CAD file's single module (the small gears' own module is module_s, which the CAD file does not carry; same pattern as CPG bug 18)"
+   "reason": "small-ring pitch diameter (small module)"
   },
   {
    "name": "db_r_s",
@@ -1552,13 +1552,13 @@
    "attr": "dp_p_s",
    "category": "dependent",
    "subtype": "formula",
-   "formula": "module * Np_s",
+   "formula": "module_s * Np_s",
    "depends_on": [
-    "module",
+    "module_s",
     "Np_s"
    ],
    "confidence": "high",
-   "reason": "small-planet pitch diameter, drawn with the CAD file's single module (the small gears' own module is module_s, which the CAD file does not carry; same pattern as CPG bug 18)"
+   "reason": "small-planet pitch diameter (small module)"
   },
   {
    "name": "db_p_s",
@@ -1786,13 +1786,13 @@
    "lookup": {
     "function": "bearings_discrete",
     "args": {
-     "idRequiredMM": "module * Nr_s + 2 * module + 2 * small_ring_radial_width"
+     "idRequiredMM": "module_s * Nr_s + 2 * module_s + 2 * small_ring_radial_width"
     },
     "method": "getBearingIDMM"
    },
    "depends_on": [
     "small_ring_radial_width",
-    "module",
+    "module_s",
     "Nr_s"
    ],
    "confidence": "high",
@@ -1806,13 +1806,13 @@
    "lookup": {
     "function": "bearings_discrete",
     "args": {
-     "idRequiredMM": "module * Nr_s + 2 * module + 2 * small_ring_radial_width"
+     "idRequiredMM": "module_s * Nr_s + 2 * module_s + 2 * small_ring_radial_width"
     },
     "method": "getBearingODMM"
    },
    "depends_on": [
     "small_ring_radial_width",
-    "module",
+    "module_s",
     "Nr_s"
    ],
    "confidence": "high",
@@ -1826,13 +1826,13 @@
    "lookup": {
     "function": "bearings_discrete",
     "args": {
-     "idRequiredMM": "module * Nr_s + 2 * module + 2 * small_ring_radial_width"
+     "idRequiredMM": "module_s * Nr_s + 2 * module_s + 2 * small_ring_radial_width"
     },
     "method": "getBearingWidthMM"
    },
    "depends_on": [
     "small_ring_radial_width",
-    "module",
+    "module_s",
     "Nr_s"
    ],
    "confidence": "high",
@@ -2112,14 +2112,14 @@
  "code_only": [
   {
    "name": "module_s",
-   "attr": "moduleSmall",
+   "attr": "module_s",
    "category": "optimisation",
    "subtype": "module",
    "source": {
     "optimiser": "optimizationInrunnerWolfromPlanetaryActuator"
    },
    "confidence": "high",
-   "reason": "the small module (small planet, small ring): searched by the optimiser loop and used by the stress rule and the gearbox constraints, but not in the CAD file, which has one module (same pattern as CPG bug 18)"
+   "reason": "the small module (small planet, small ring): searched by the optimiser loop, but not in the CAD file (which has one module; ISSUES bug 18)"
   },
   {
    "name": "motor_peak_torque",
