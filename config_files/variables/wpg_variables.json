@@ -904,7 +904,7 @@
     "Np_s"
    ],
    "confidence": "high",
-   "reason": "small-planet pitch diameter (small module)"
+   "reason": "small-planet pitch diameter, drawn with the CAD file's single module (the small gears' own module is module_s, which the CAD file does not carry; same pattern as CPG bug 18)"
   },
   {
    "name": "dp_r_b",
@@ -930,7 +930,7 @@
     "Nr_s"
    ],
    "confidence": "high",
-   "reason": "computed by the code: module * Nr_s"
+   "reason": "small-ring pitch diameter, drawn with the CAD file's single module (the small gears' own module is module_s, which the CAD file does not carry; same pattern as CPG bug 18)"
   },
   {
    "name": "dp_s",
@@ -1041,7 +1041,7 @@
    "attr": "fw_p_b",
    "category": "dependent",
    "subtype": "stress rule",
-   "rule": "b1 = FOS x Ft_sp_big x qe x qk / (gear_allowable_stress x module) (sun - big planet), b2 = the same with Ft_rp_big on the big planet - big ring mesh; big-planet width = max(b1, b2); small-planet width b3 = FOS x Ft_rp_small x qe x qk / (gear_allowable_stress x module_s) (small planet - small ring); if b_big + b_small < 2 x planet_bearing_width + planet_bearing_gap, each is raised to at least planet_bearing_width + planet_bearing_gap / 2; Ft_sp_big, Ft_rp_big, Ft_rp_small = serviceFactor x motor_peak_torque / (num_planet x pitch radius) with the Wolfrom force ratios; qe = 1 / contact ratio of the mesh, qk = curve fit in the tooth count of the mesh; fw_p_b = the big-planet width",
+   "rule": "b1 = FOS x |Ft_sp_big| x qe x qk / (gear_allowable_stress x module) (sun - big planet), b2 = the same with |Ft_rp_big| on the big planet - big ring mesh; big-planet width = max(b1, b2); small-planet width b3 = FOS x |Ft_rp_small| x qe x qk / (gear_allowable_stress x module_s) (small planet - small ring); if b_big + b_small < 2 x planet_bearing_width + planet_bearing_gap, each is raised to at least planet_bearing_width + planet_bearing_gap / 2; Ft_sp_big, Ft_rp_big, Ft_rp_small = serviceFactor x motor_peak_torque / (num_planet x pitch radius) with the Wolfrom force ratios (the code takes their absolute values: Ft_rp_small is negative); qe = 1 / contact ratio of the mesh, qk = curve fit in the tooth count of the mesh; fw_p_b = the big-planet width",
    "depends_on": [
     "module",
     "module_s",
@@ -1092,7 +1092,7 @@
    "attr": "fw_r_s",
    "category": "dependent",
    "subtype": "stress rule",
-   "rule": "b3 = FOS x Ft_rp_small x qe x qk / (gear_allowable_stress x module_s) on the small planet - small ring mesh, with the same planet-bearing minimum as the planets (each gear at least planet_bearing_width + planet_bearing_gap / 2 when the two together are below 2 x planet_bearing_width + planet_bearing_gap); Ft_sp_big, Ft_rp_big, Ft_rp_small = serviceFactor x motor_peak_torque / (num_planet x pitch radius) with the Wolfrom force ratios; qe = 1 / contact ratio of the mesh, qk = curve fit in the tooth count of the mesh; fw_r_s = the small width",
+   "rule": "b3 = FOS x |Ft_rp_small| x qe x qk / (gear_allowable_stress x module_s) on the small planet - small ring mesh, with the same planet-bearing minimum as the planets (each gear at least planet_bearing_width + planet_bearing_gap / 2 when the two together are below 2 x planet_bearing_width + planet_bearing_gap); Ft_sp_big, Ft_rp_big, Ft_rp_small = serviceFactor x motor_peak_torque / (num_planet x pitch radius) with the Wolfrom force ratios (the code takes their absolute values: Ft_rp_small is negative); qe = 1 / contact ratio of the mesh, qk = curve fit in the tooth count of the mesh; fw_r_s = the small width",
    "depends_on": [
     "module",
     "module_s",
@@ -1118,7 +1118,7 @@
    "attr": "fw_s_calc",
    "category": "dependent",
    "subtype": "stress rule",
-   "rule": "b = FOS x Ft_sp_big x qe x qk / (gear_allowable_stress x module) on the sun - big planet mesh (mitStressAnalysisMinFacewidth); Ft_sp_big, Ft_rp_big, Ft_rp_small = serviceFactor x motor_peak_torque / (num_planet x pitch radius) with the Wolfrom force ratios; qe = 1 / contact ratio of the mesh, qk = curve fit in the tooth count of the mesh; fw_s_calc = b",
+   "rule": "b = FOS x |Ft_sp_big| x qe x qk / (gear_allowable_stress x module) on the sun - big planet mesh (mitStressAnalysisMinFacewidth); Ft_sp_big, Ft_rp_big, Ft_rp_small = serviceFactor x motor_peak_torque / (num_planet x pitch radius) with the Wolfrom force ratios (the code takes their absolute values: Ft_rp_small is negative); qe = 1 / contact ratio of the mesh, qk = curve fit in the tooth count of the mesh; fw_s_calc = b",
    "depends_on": [
     "module",
     "Ns",
