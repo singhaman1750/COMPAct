@@ -180,7 +180,9 @@
     "serviceFactor",
     "stator_height",
     "gear_axial_margin_mm",
-    "planet_step_gap_mm"
+    "planet_step_gap_mm",
+    "planet_bearing_width",
+    "planet_bearing_gap"
    ],
    "confidence": "high",
    "reason": "sun face width from the tooth-stress rule, scaled by the stator-height cap when it applies: fixed by the optimisation variables, the motor torque, the gear material, the safety factors and the cap"

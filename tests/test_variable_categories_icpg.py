@@ -129,3 +129,24 @@ def test_planet_bearing_gap_comes_from_the_config(monkeypatch, tmp_path):
     assert more["fw_p_b"] == 12.5 and more["fw_r"] == base["fw_r"] and more["fw_s_calc"] == base["fw_s_calc"]
     changed = {k for k in base if base[k] != more[k]}
     assert {"fw_p_b", "fw_s_used"} <= changed <= downstream_of(GB, "planet_bearing_gap")
+
+
+def test_sun_width_depends_on_the_planet_bearing_minimum_through_the_cap(monkeypatch, tmp_path):
+    """The stator-height cap scales all four widths, including the sun's, by a factor that depends on the planets' widths, which
+    the planet-bearing minimum can raise. On the metal golden design a 21 mm gap (each planet at least 3.5 + 10.5 = 14 mm) pushes
+    the two planet steps past the cap (14 + 14 + 1.5 > 28.5): the factor drops below 1 and the sun width shrinks with it, so
+    fw_s_calc changes with planet_bearing_gap and the spec lists that dependency."""
+    def run(gap, folder):
+        folder.mkdir()
+        actuator, _, _, onshape = design(monkeypatch, folder, f"{GB}__RO100__10__metal")
+        if gap is not None:
+            onshape = rerun(actuator, folder, planet_bearing_gap=gap).items()
+        return {n: float(x) for n, x in onshape}, actuator
+
+    base, act = run(None, tmp_path / "a")
+    more, more_act = run(21.0, tmp_path / "b")
+    assert act.torque_carried_fraction == 1.0 and more_act.torque_carried_fraction < 1.0
+    assert more["fw_s_calc"] < base["fw_s_calc"]
+    assert {"planet_bearing_width", "planet_bearing_gap"} <= set(BY_NAME["fw_s_calc"]["depends_on"])
+    changed = {k for k in base if base[k] != more[k]}
+    assert {"fw_s_calc", "fw_p_b", "fw_r"} <= changed <= downstream_of(GB, "planet_bearing_gap")
