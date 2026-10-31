@@ -799,6 +799,42 @@ Changes INDSPG masses (all golden cases for 1).
 **Status:** open (found 2026-10-31 during the INDSPG metal-mode review; the metal split leaves these
 volumes as they are and weighs them as aluminium).
 
+### 22. INDSPG — stage-1 output bearing is fixed, and the carrier mass uses a different bearing
+
+**Description:** in `ActuatorandGearbox_INDSPG.py`, the stage-1 output bearing (inside the stator's wire
+opening; the stage-2 sun step passes through its bore) is hard-coded as an inch thin bearing,
+38.1 × 47.625 × 4.763 mm, 22.7 g, for every motor and every design:
+1. **CAD side** (`bearing1_ID/OD/height`, L425-427, written as `a1_bearing_*` and `a2_bearing1_*`): fixed
+   values, marked "TODO: if possible extract it from bearing selection".
+2. **Mass side** (`getMassKG_3DP_stg1`, L1588-1598): a table lookup runs
+   (`required ID = module × (Ns + Np) + bearingIDClearanceMM`), then `Bearing_*_stg1_*` are overwritten
+   with the fixed values. But the lookup's locals (`bearing_ID`, `bearing_height`, L1651-1654) still size
+   the stage-1 carrier (`carrier_OD`, `vol_carrier_disk`, `sec_carrier_OD`, L1691-1787), so the carrier
+   is weighed for a different bearing than the CAD draws:
+
+   | Golden design | Lookup bearing (carrier mass) | Fixed bearing (CAD, bearing mass) |
+   |---|---|---|
+   | RI100 3dp (Ns 26, Np 25, m 0.5) | 40 × 50 × 6 | 38.1 × 47.625 × 4.763 |
+   | RI80 3dp, RI100 metal (Ns 21, Np 24, m 0.5) | 35 × 47 × 7 | 38.1 × 47.625 × 4.763 |
+3. **No fit check:** nothing checks that the fixed bearing suits the stage-1 gear set; its bore
+   (`bearing1_ID − 3 × 1.5` = 33.6 mm) is smaller than the stage-1 ring side in all golden designs, which is
+   what makes `bearing_support_vol3` negative (bug 21, item 1).
+
+The bearing is not in the `bearings_discrete` table (which has the other inch sizes 44.45 × 53.975 and
+63.5 × 76.2), so a plain lookup could never return it.
+
+**Reproduce:** weigh a golden INDSPG design and compare the locals `bearing_ID` / `bearing_height` in
+`getMassKG_3DP_stg1` with `self.bearing1_ID` / `self.bearing1_height`.
+
+**Probable fix:** decide with the Onshape model (and the designer: was the thin inch bearing chosen on
+purpose?) between a per-design lookup (add the inch bearing to the table if it should stay selectable) and
+the fixed bearing used consistently, i.e. the carrier mass on `bearing1_*`. Either changes INDSPG masses;
+fix together with bug 21.
+
+**Status:** open (found 2026-10-31 during the variable-classification review). Step 1 done (value-identical):
+the four fixed numbers are now config keys, `a1_bearing_ID`, `a1_bearing_OD`, `a1_bearing_height` and
+`a1_bearing_massKg` in `indspg_params.json`, read by both the CAD code and the mass code.
+
 ## CAD issues
 
 Problems in the CAD models (Onshape / SolidWorks), not in the Python code. Found while checking
