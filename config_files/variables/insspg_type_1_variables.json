@@ -1217,15 +1217,16 @@
     "function": "bearings_discrete",
     "args": {
      "idRequiredMM": "0",
-     "odRequiredMM": "Rotor_ID - 4"
+     "odRequiredMM": "Rotor_ID - rotor_support_bearing_OD_clearance"
     },
     "method": "getBearingIDMM"
    },
    "depends_on": [
-    "Rotor_ID"
+    "Rotor_ID",
+    "rotor_support_bearing_OD_clearance"
    ],
-   "confidence": "medium",
-   "reason": "catalogue bearing whose outer diameter is at least Rotor_ID - 4 (first one in the table; bearings_discrete returns the first bearing with OD >= the request, which can exceed it, ISSUES bug 5); the 4 is hard-coded; this is its bore"
+   "confidence": "high",
+   "reason": "catalogue bearing whose outer diameter is at least Rotor_ID - rotor_support_bearing_OD_clearance (first one in the table; bearings_discrete returns the first bearing with OD >= the request, which can exceed it, ISSUES bug 5); this is its bore"
   },
   {
    "name": "rotor_support_bearing_OD",
@@ -1236,15 +1237,16 @@
     "function": "bearings_discrete",
     "args": {
      "idRequiredMM": "0",
-     "odRequiredMM": "Rotor_ID - 4"
+     "odRequiredMM": "Rotor_ID - rotor_support_bearing_OD_clearance"
     },
     "method": "getBearingODMM"
    },
    "depends_on": [
-    "Rotor_ID"
+    "Rotor_ID",
+    "rotor_support_bearing_OD_clearance"
    ],
-   "confidence": "medium",
-   "reason": "catalogue bearing whose outer diameter is at least Rotor_ID - 4 (first one in the table; bearings_discrete returns the first bearing with OD >= the request, which can exceed it, ISSUES bug 5); the 4 is hard-coded; this is its outer diameter"
+   "confidence": "high",
+   "reason": "catalogue bearing whose outer diameter is at least Rotor_ID - rotor_support_bearing_OD_clearance (first one in the table; bearings_discrete returns the first bearing with OD >= the request, which can exceed it, ISSUES bug 5); this is its outer diameter"
   },
   {
    "name": "rotor_support_bearing_height",
@@ -1255,15 +1257,16 @@
     "function": "bearings_discrete",
     "args": {
      "idRequiredMM": "0",
-     "odRequiredMM": "Rotor_ID - 4"
+     "odRequiredMM": "Rotor_ID - rotor_support_bearing_OD_clearance"
     },
     "method": "getBearingWidthMM"
    },
    "depends_on": [
-    "Rotor_ID"
+    "Rotor_ID",
+    "rotor_support_bearing_OD_clearance"
    ],
-   "confidence": "medium",
-   "reason": "catalogue bearing whose outer diameter is at least Rotor_ID - 4 (first one in the table; bearings_discrete returns the first bearing with OD >= the request, which can exceed it, ISSUES bug 5); the 4 is hard-coded; this is its width"
+   "confidence": "high",
+   "reason": "catalogue bearing whose outer diameter is at least Rotor_ID - rotor_support_bearing_OD_clearance (first one in the table; bearings_discrete returns the first bearing with OD >= the request, which can exceed it, ISSUES bug 5); this is its width"
   },
   {
    "name": "rotor_upper_support_bearing_ID",
@@ -1274,16 +1277,17 @@
     "function": "bearings_discrete",
     "args": {
      "idRequiredMM": "0",
-     "odRequiredMM": "Stator_ID - standard_clearance_1_5mm * 5"
+     "odRequiredMM": "Stator_ID - standard_clearance_1_5mm * rotor_upper_support_bearing_clearance_multiple"
     },
     "method": "getBearingIDMM"
    },
    "depends_on": [
     "Stator_ID",
-    "standard_clearance_1_5mm"
+    "standard_clearance_1_5mm",
+    "rotor_upper_support_bearing_clearance_multiple"
    ],
-   "confidence": "medium",
-   "reason": "catalogue bearing whose outer diameter is at least Stator_ID - 5 x standard_clearance_1_5mm (first one in the table, ISSUES bug 5); the 5 is hard-coded; this is its bore"
+   "confidence": "high",
+   "reason": "catalogue bearing whose outer diameter is at least Stator_ID - rotor_upper_support_bearing_clearance_multiple x standard_clearance_1_5mm (first one in the table, ISSUES bug 5); this is its bore"
   },
   {
    "name": "rotor_upper_support_bearing_OD",
@@ -1294,16 +1298,17 @@
     "function": "bearings_discrete",
     "args": {
      "idRequiredMM": "0",
-     "odRequiredMM": "Stator_ID - standard_clearance_1_5mm * 5"
+     "odRequiredMM": "Stator_ID - standard_clearance_1_5mm * rotor_upper_support_bearing_clearance_multiple"
     },
     "method": "getBearingODMM"
    },
    "depends_on": [
     "Stator_ID",
-    "standard_clearance_1_5mm"
+    "standard_clearance_1_5mm",
+    "rotor_upper_support_bearing_clearance_multiple"
    ],
-   "confidence": "medium",
-   "reason": "catalogue bearing whose outer diameter is at least Stator_ID - 5 x standard_clearance_1_5mm (first one in the table, ISSUES bug 5); the 5 is hard-coded; this is its outer diameter"
+   "confidence": "high",
+   "reason": "catalogue bearing whose outer diameter is at least Stator_ID - rotor_upper_support_bearing_clearance_multiple x standard_clearance_1_5mm (first one in the table, ISSUES bug 5); this is its outer diameter"
   },
   {
    "name": "rotor_upper_support_bearing_height",
@@ -1314,16 +1319,17 @@
     "function": "bearings_discrete",
     "args": {
      "idRequiredMM": "0",
-     "odRequiredMM": "Stator_ID - standard_clearance_1_5mm * 5"
+     "odRequiredMM": "Stator_ID - standard_clearance_1_5mm * rotor_upper_support_bearing_clearance_multiple"
     },
     "method": "getBearingWidthMM"
    },
    "depends_on": [
     "Stator_ID",
-    "standard_clearance_1_5mm"
+    "standard_clearance_1_5mm",
+    "rotor_upper_support_bearing_clearance_multiple"
    ],
-   "confidence": "medium",
-   "reason": "catalogue bearing whose outer diameter is at least Stator_ID - 5 x standard_clearance_1_5mm (first one in the table, ISSUES bug 5); the 5 is hard-coded; this is its width"
+   "confidence": "high",
+   "reason": "catalogue bearing whose outer diameter is at least Stator_ID - rotor_upper_support_bearing_clearance_multiple x standard_clearance_1_5mm (first one in the table, ISSUES bug 5); this is its width"
   },
   {
    "name": "Rotor_tight_clearance",
@@ -1366,7 +1372,7 @@
     "sun_coupler_hub_thickness"
    ],
    "confidence": "medium",
-   "reason": "printed sun length, type 1: the sun length from the rotor support bearing, the carrier and clearances, with a hard-coded 1.5 x standard_clearance_1_5mm; type 2 uses a different rule"
+   "reason": "printed sun length, type 1: the sun length from the rotor support bearing, the carrier and clearances, with a hard-coded 1.5 x standard_clearance_1_5mm; type 2 uses a different rule; kept hard-coded on purpose until the designer explains it (docs/designer_questions.md, Q1)"
   },
   {
    "name": "ringRadialWidthMM",
@@ -1386,15 +1392,17 @@
    "attr": "sun_support_OD",
    "category": "dependent",
    "subtype": "formula",
-   "formula": "21 if 21 < carrier_PCD - (planet_shaft_dia + planet_shaft_step_offset * 2) - standard_clearance_1_5mm * 3 else carrier_PCD - (planet_shaft_dia + planet_shaft_step_offset * 2) - standard_clearance_1_5mm * 3",
+   "formula": "sun_support_OD_max if sun_support_OD_max < carrier_PCD - (planet_shaft_dia + planet_shaft_step_offset * 2) - standard_clearance_1_5mm * sun_support_clearance_multiple else carrier_PCD - (planet_shaft_dia + planet_shaft_step_offset * 2) - standard_clearance_1_5mm * sun_support_clearance_multiple",
    "depends_on": [
     "carrier_PCD",
     "standard_clearance_1_5mm",
     "planet_shaft_dia",
-    "planet_shaft_step_offset"
+    "planet_shaft_step_offset",
+    "sun_support_OD_max",
+    "sun_support_clearance_multiple"
    ],
-   "confidence": "medium",
-   "reason": "sun support outer diameter: the space inside the planet shafts, capped at a hard-coded 21 mm (the 21 and the x 3 clearance are not in the config)"
+   "confidence": "high",
+   "reason": "sun support outer diameter: the space inside the planet shafts less sun_support_clearance_multiple clearances, capped at sun_support_OD_max"
   },
   {
    "name": "stator_casing_hole_dia",
@@ -1580,6 +1588,70 @@
    "reason": "axial gap between the two planet bearings (one in each planet gear); with the bearing width it sets the smallest planet and ring widths"
   },
   {
+   "name": "rotor_support_bearing_OD_clearance",
+   "attr": "rotor_support_bearing_OD_clearance",
+   "category": "fixed",
+   "subtype": "clearance",
+   "source": {
+    "file": "insspg_params.json",
+    "block": "sspg_3DP_design_parameters",
+    "key": "rotor_support_bearing_OD_clearance"
+   },
+   "confidence": "high",
+   "reason": "how much smaller than the rotor bore the rotor support bearing's outer diameter is requested (4 mm; ISSUES bug 5: the lookup returns the first bearing with OD >= the request)"
+  },
+  {
+   "name": "rotor_upper_support_bearing_clearance_multiple",
+   "attr": "rotor_upper_support_bearing_clearance_multiple",
+   "category": "fixed",
+   "subtype": "clearance",
+   "source": {
+    "file": "insspg_params.json",
+    "block": "sspg_3DP_design_parameters",
+    "key": "rotor_upper_support_bearing_clearance_multiple"
+   },
+   "confidence": "high",
+   "reason": "margin below the stator bore for the rotor upper support bearing's outer diameter, in multiples of standard_clearance_1_5mm (5)"
+  },
+  {
+   "name": "sun_support_OD_max",
+   "attr": "sun_support_OD_max",
+   "category": "fixed",
+   "subtype": "feature size",
+   "source": {
+    "file": "insspg_params.json",
+    "block": "sspg_3DP_design_parameters",
+    "key": "sun_support_OD_max"
+   },
+   "confidence": "high",
+   "reason": "cap on the sun support's outer diameter (21 mm)"
+  },
+  {
+   "name": "sun_support_clearance_multiple",
+   "attr": "sun_support_clearance_multiple",
+   "category": "fixed",
+   "subtype": "clearance",
+   "source": {
+    "file": "insspg_params.json",
+    "block": "sspg_3DP_design_parameters",
+    "key": "sun_support_clearance_multiple"
+   },
+   "confidence": "high",
+   "reason": "margin between the sun support and the planet shafts, in multiples of standard_clearance_1_5mm (3)"
+  },
+  {
+   "name": "max_diameter_stator_OD_margin",
+   "category": "fixed",
+   "subtype": "clearance",
+   "source": {
+    "file": "insspg_params.json",
+    "block": "sspg_3DP_design_parameters",
+    "key": "max_diameter_stator_OD_margin"
+   },
+   "confidence": "high",
+   "reason": "margin below the stator's outer diameter for the largest gearbox diameter the optimiser may use (5.5 mm; read by gearbox_runner)"
+  },
+  {
    "name": "stator_mid_height",
    "attr": "stator_mid_height",
    "category": "input",
@@ -1610,14 +1682,15 @@
    "attr": "maxGearboxDiameter",
    "category": "dependent",
    "subtype": "formula",
-   "formula": "Stator_OD - 5.5 - standard_clearance_1_5mm * 2 - loose_clearance_3DP / 2",
+   "formula": "Stator_OD - max_diameter_stator_OD_margin - standard_clearance_1_5mm * 2 - loose_clearance_3DP / 2",
    "depends_on": [
     "Stator_OD",
     "standard_clearance_1_5mm",
-    "loose_clearance_3DP"
+    "loose_clearance_3DP",
+    "max_diameter_stator_OD_margin"
    ],
-   "confidence": "medium",
-   "reason": "largest gearbox diameter the optimiser may use (gearbox_runner max_diameter): the stator's outer diameter less a hard-coded 5.5 mm and two clearances"
+   "confidence": "high",
+   "reason": "largest gearbox diameter the optimiser may use (gearbox_runner max_diameter): the stator's outer diameter less max_diameter_stator_OD_margin and two clearances"
   },
   {
    "name": "planetMinDistanceMM",

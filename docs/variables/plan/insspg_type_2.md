@@ -154,5 +154,5 @@ Spec: [`config_files/variables/insspg_type_2_variables.json`](../../../config_fi
 **Results:** `python tests/golden/golden.py check`: All 58 cases match the baseline. `python -m pytest -q`: 881 passed. No `CADs/` file, no golden baseline touched, no code or config change in this commit.
 
 **Open questions (beyond type 1's)**
-1. The hard-coded `2` in type 2's `fw_s_used` has no shared key (plan decision 4).
+1. The hard-coded `2` in type 2's `fw_s_used` has no shared key (plan decision 4). **Decided (2026-10-31):** kept in the code with a `TODO` comment until the designer explains it ([docs/designer_questions.md](../../designer_questions.md), Q2).
 2. The mass code differs per type (`_getMassKG_3DP_type2`: extra sun-shaft bearing masses, casing features, ISSUES bug 4); it is out of scope for the classification.
