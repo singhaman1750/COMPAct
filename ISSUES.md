@@ -116,6 +116,11 @@ result-changing commit with re-recorded golden baselines.
    results unchanged).
 3. **Motor driver passed inconsistently:** OdrivePro for most types; `None` for INSSPG; not passed
    at all for ICPG and INDSPG.
+   Consequence found by the variable classification (2026-10-31): ICPG still writes six driver-mount
+   CAD variables (`driver_mount_thickness`, `driver_mount_inserts_OD`, `driver_upper_holes_dist_from_center`,
+   `driver_lower_holes_dist_from_center`, `driver_mount_height`, `driver_side_holes_dist_from_center`), but
+   takes them from `icpg_params.json` instead of from the chosen driver (`Motor_drivers`), so changing the
+   driver changes every other type but not ICPG. They are classified Input / driver, as in the other types.
 4. **Different maximum-gearbox-diameter rules:**
    - SSPG, WPG, DSPG: small-motor factor × motor Ø − 2 × ring width (different ring-width keys:
      `ringRadialWidthMM`, `ringRadialWidthMMBig`, `ring_radial_thickness`);

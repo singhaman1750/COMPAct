@@ -36,7 +36,7 @@ def test_shared_rules_reach_icpg():
         assert (BY_NAME[n]["category"], BY_NAME[n]["subtype"]) == ("dependent", "stress rule"), n
     assert (BY_NAME["fw_p_s"]["category"], BY_NAME["fw_p_s"]["subtype"]) == ("dependent", "formula")
     drivers = [e for e in CAD if e["subtype"] == "driver"]
-    assert len(drivers) == 6 and all(e["category"] == "input" and e["confidence"] == "medium" for e in drivers)
+    assert len(drivers) == 6 and all(e["category"] == "input" and e["confidence"] == "high" for e in drivers)   # Input / driver, decided 2026-10-31
     assert all(e["source"]["file"] == "icpg_params.json" for e in drivers)    # the runner passes no driver: the gearbox's own config
 
 
