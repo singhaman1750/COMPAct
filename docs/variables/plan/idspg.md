@@ -269,7 +269,7 @@ Spec: [`config_files/variables/idspg_variables.json`](../../../config_files/vari
 **Medium-confidence entries**
 - `a1_sun_hub_dia`, `a2_sun_hub_dia` (Dependent / formula): the rotor's mount-hole circle plus hole diameter plus a hard-coded `5 x standard_clearance_1_5mm`; the mass code uses `4` (CAD and mass disagree, to be logged); the shared sun-hub margin item the plan still has to decide.
 - `a1_fw_s_used`, `a2_fw_s_used` (and its alias `a1_fw_s_used2`), `a1_ring_gear_relation`, `a2_ring_gear_relation` (Dependent / formula): the axial-fill rules that make the two stages fill the rotor height; the two `ring_gear_relation` values are written for the CAD and not used by the code.
-- `shortfall` (code-only, Fixed): always 0; the code sets it only in a disabled axial-fill case and the stage-2 sun length adds it. Its source is a constant in the code.
+- `shortfall` (code-only, Fixed): always 0; the code sets it only in a disabled axial-fill case and the stage-2 sun length adds it. Its source is a constant in the code. **Removed (2026-11-01):** dead code; the commented Case D notes that it must be added back to `fw_s2_used` if that case returns. Value-identical.
 - `planet_bearing_gap` (code-only, Fixed): one key for both stages; the plan leaves open whether it should be one per stage.
 
 **Config key added** to `idspg_design_parameters_3DP` in `idspg_params.json` (shared name, value that keeps every output bit-identical): `planet_bearing_gap` = 1.0 (was `standard_clearance_1_5mm * 2 / 3` in both stages; 1.5 * 2 / 3 is exactly 1.0), in `mitStressAnalysisMinFacewidth`. The other shared keys have no counterpart (no motor-case clearance rule, no `bearing_mount_thickness`). A test shows `planet_bearing_gap` drives exactly its CAD variables in both stages.

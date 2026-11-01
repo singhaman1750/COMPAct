@@ -51,6 +51,10 @@ sizes the stage-1 carrier with a catalogue bearing (ISSUES bug 22).
 
 - Was this thin-section bearing chosen on purpose, for example to save height inside the stator?
 - Should it stay fixed for every design, or be picked per design from the bearing table, with this bearing added to the table?
+- The stage-1 sun's bottom bearing on RI100 is also an inch thin-section bearing from the config
+  (`a1_sun_bottom_casing_bearing_*`: 44.45 × 53.975 × 4.763 mm, 1¾″ × 2⅛″ × 3/16″), while RI80 takes the
+  catalogue bearing for its rotor's bore (`a1_sun_bottom_casing_bearing_source` in `indspg_params.json`).
+  Was it chosen for the same reason?
 
 **Status:** open.
 

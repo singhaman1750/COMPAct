@@ -1062,9 +1062,8 @@
    "attr": "fw_s2_used",
    "category": "dependent",
    "subtype": "formula",
-   "formula": "bearing_retainer_thickness + a1_standard_clearance_1_5mm + a2_sec_carrier_thickness + a1_clearance_planet + a2_fw_p + shortfall",
+   "formula": "bearing_retainer_thickness + a1_standard_clearance_1_5mm + a2_sec_carrier_thickness + a1_clearance_planet + a2_fw_p",
    "depends_on": [
-    "shortfall",
     "a2_fw_p",
     "a1_clearance_planet",
     "a2_sec_carrier_thickness",
@@ -1072,7 +1071,7 @@
     "a1_standard_clearance_1_5mm"
    ],
    "confidence": "medium",
-   "reason": "stage-2 sun length: retainer, clearances, carrier, planet width and the always-zero shortfall (an axial-fill rule)"
+   "reason": "stage-2 sun length: retainer, clearances, carrier and planet width (an axial-fill rule)"
   },
   {
    "name": "a1_fw_p2",
@@ -2096,9 +2095,8 @@
    "attr": "fw_s2_used",
    "category": "dependent",
    "subtype": "formula",
-   "formula": "bearing_retainer_thickness + a1_standard_clearance_1_5mm + a2_sec_carrier_thickness + a1_clearance_planet + a2_fw_p + shortfall",
+   "formula": "bearing_retainer_thickness + a1_standard_clearance_1_5mm + a2_sec_carrier_thickness + a1_clearance_planet + a2_fw_p",
    "depends_on": [
-    "shortfall",
     "a2_fw_p",
     "a1_clearance_planet",
     "a2_sec_carrier_thickness",
@@ -2106,7 +2104,7 @@
     "a1_standard_clearance_1_5mm"
    ],
    "confidence": "medium",
-   "reason": "same value as a1_fw_s_used2 (the CAD writes it under both stage prefixes); stage-2 sun length: retainer, clearances, carrier, planet width and the always-zero shortfall (an axial-fill rule)",
+   "reason": "same value as a1_fw_s_used2 (the CAD writes it under both stage prefixes); stage-2 sun length: retainer, clearances, carrier and planet width (an axial-fill rule)",
    "alias_of": "a1_fw_s_used2"
   },
   {
@@ -2956,17 +2954,6 @@
    },
    "confidence": "high",
    "reason": "constant from the IDSPG 3DP design parameters (one value for both stages)"
-  },
-  {
-   "name": "shortfall",
-   "attr": "shortfall",
-   "category": "fixed",
-   "subtype": "constraint constant",
-   "source": {
-    "constant": 0
-   },
-   "confidence": "medium",
-   "reason": "always 0: the code sets it only in a disabled axial-fill case (the stage-2 sun length adds it)"
   },
   {
    "name": "sCarrierExtrusionDiaMM_Stg1",

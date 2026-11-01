@@ -4,6 +4,7 @@ config drives exactly its CAD variables. The checks every gearbox gets are in te
 import pytest
 
 import gearbox_runner
+from CommonComponents import bearings_discrete
 from variable_helpers import GEARBOXES, SPECS, downstream_of, equation_lines, golden_design, write_design
 
 GB = "indspg"
@@ -169,6 +170,42 @@ def test_stage1_sun_extra_length_is_per_motor(monkeypatch, tmp_path, motor, extr
     v = {n: float(x) for n, x in onshape}
     assert v["a1_fw_s_used"] == pytest.approx(a.fw_p_1_fix + a.clearance_planet + a.sec_carrier_thickness1
                                               + a.standard_clearance_1_5mm * (2 + extra))
+
+
+BOTTOM_BEARING = ("ID", "OD", "height", "massKg")
+
+
+def bottom_bearing(a):
+    return tuple(getattr(a, f"a1_sun_bottom_casing_bearing_{k}") for k in BOTTOM_BEARING)
+
+
+@pytest.mark.parametrize("motor, source", [("RI100", "config"), ("RI80", "lookup")])
+def test_stage1_sun_bottom_bearing_source_is_per_motor(monkeypatch, tmp_path, motor, source):
+    """a1_sun_bottom_casing_bearing_source (one value per motor) replaces the old rotor-height == 19 check: RI80
+    takes the catalogue bearing for the rotor's bore, RI100 the bearing in the config."""
+    name = next(n for n in GEARBOXES[GB].golden() if f"__{motor}__" in n)
+    a, _, _, _ = design(monkeypatch, tmp_path, name)
+    assert a.a1_sun_bottom_casing_bearing_source == source
+    if source == "lookup":
+        b = bearings_discrete(a.rotor_ID - a.standard_clearance_1_5mm)
+        expected = (b.getBearingIDMM(), b.getBearingODMM(), b.getBearingWidthMM(), b.getBearingMassKG())
+    else:
+        expected = tuple(a.design_params[f"a1_sun_bottom_casing_bearing_{k}"] for k in BOTTOM_BEARING)
+    assert bottom_bearing(a) == expected
+
+
+def test_stage1_sun_bottom_bearing_source_switches_the_bearing(monkeypatch, tmp_path):
+    """Setting RI100 to "lookup" gives it the catalogue bearing for its bore; any other value than "lookup" or
+    "config" is an error."""
+    name = next(n for n in GEARBOXES[GB].golden() if "__RI100__" in n)
+    a, _, _, _ = design(monkeypatch, tmp_path, name)
+    a.design_params["a1_sun_bottom_casing_bearing_source"] = {"RI100": "lookup", "RI80": "lookup"}
+    a.setVariables()
+    b = bearings_discrete(a.rotor_ID - a.standard_clearance_1_5mm)
+    assert bottom_bearing(a) == (b.getBearingIDMM(), b.getBearingODMM(), b.getBearingWidthMM(), b.getBearingMassKG())
+    a.design_params["a1_sun_bottom_casing_bearing_source"] = {"RI100": "catalogue", "RI80": "lookup"}
+    with pytest.raises(ValueError, match="a1_sun_bottom_casing_bearing_source"):
+        a.setVariables()
 
 
 def test_stage1_max_diameter_margin_comes_from_the_config(monkeypatch, tmp_path):

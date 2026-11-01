@@ -82,7 +82,7 @@ def _branches_cpg(a):
 
 
 def _branches_indspg(a):
-    return {"rotor 19 mm high: the bottom bearing is a lookup": a.rotor_height == 19,
+    return {"the bottom bearing is a lookup (per motor)": a.a1_sun_bottom_casing_bearing_source == "lookup",
             "stage 2 sun length: the carrier circle is wider than the stage-1 bearing":
             a.carrier_PCD2 - a.planet_shaft_dia2 - a.planet_shaft_step_offset2 - a.standard_clearance_1_5mm * 2
             > a.bearing1_OD - a.standard_clearance_1_5mm * 2}
@@ -162,14 +162,14 @@ GEARBOXES = {
         params_name="inwpg_params_dependent.json"),
     "indspg": Gearbox(
         "indspg", "INDSPG", "indspg_equations", "inrunnerdoubleStagePlanetaryGearbox",
-        counts={"input": 12, "optimisation": 15, "fixed": 109, "dependent": 74}, code_only=48,
+        counts={"input": 12, "optimisation": 15, "fixed": 109, "dependent": 74}, code_only=49,
         set_gears=_set_dspg,
         # [gr, n1, n2, Ns1, Np1, Nr1, Ns2, Np2, Nr2, module1, module2]
         from_opt=lambda p: (p[3], p[4], p[5], p[9], p[1], p[6], p[7], p[8], p[10], p[2]),
         extra=[], branches=_branches_indspg, config_file="indspg_motor_config.json"),
     "idspg": Gearbox(
         "idspg", "IDSPG", "idspg_equations", "internaldoubleStagePlanetaryGearbox",
-        counts={"input": 20, "optimisation": 15, "fixed": 79, "dependent": 84}, code_only=52,
+        counts={"input": 20, "optimisation": 15, "fixed": 79, "dependent": 84}, code_only=51,
         set_gears=_set_dspg,
         # [gr, n1, n2, Ns1, Np1, Nr1, Ns2, Np2, Nr2, module1, module2]
         from_opt=lambda p: (p[3], p[4], p[5], p[9], p[1], p[6], p[7], p[8], p[10], p[2]),

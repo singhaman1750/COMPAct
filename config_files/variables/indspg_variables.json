@@ -2756,11 +2756,11 @@
    "depends_on": [
     "Rotor_ID",
     "a1_standard_clearance_1_5mm",
-    "Rotor_height"
+    "a1_sun_bottom_casing_bearing_source"
    ],
-   "confidence": "medium",
-   "reason": "a two-case value: when the rotor is 19 mm high (RI80) the bearing is the catalogue one for the rotor's bore, otherwise (RI100) the config value a1_sun_bottom_casing_bearing_ID; catalogue bearing chosen by bearings_discrete for the bore the stage needs (smallest one that fits); this is its bore",
-   "when": "Rotor_height == 19",
+   "confidence": "high",
+   "reason": "the stage-1 sun's bottom bearing, chosen per motor by a1_sun_bottom_casing_bearing_source: the catalogue bearing for the rotor's bore (smallest that fits, RI80) or the config value a1_sun_bottom_casing_bearing_ID (RI100, an inch thin-section bearing); this is its bore",
+   "when": "a1_sun_bottom_casing_bearing_source == \"lookup\"",
    "otherwise": {
     "file": "indspg_params.json",
     "block": "indspg_design_parameters_3DP",
@@ -2782,11 +2782,11 @@
    "depends_on": [
     "Rotor_ID",
     "a1_standard_clearance_1_5mm",
-    "Rotor_height"
+    "a1_sun_bottom_casing_bearing_source"
    ],
-   "confidence": "medium",
-   "reason": "a two-case value: when the rotor is 19 mm high (RI80) the bearing is the catalogue one for the rotor's bore, otherwise (RI100) the config value a1_sun_bottom_casing_bearing_OD; catalogue bearing chosen by bearings_discrete for the bore the stage needs (smallest one that fits); this is its outer diameter",
-   "when": "Rotor_height == 19",
+   "confidence": "high",
+   "reason": "the stage-1 sun's bottom bearing, chosen per motor by a1_sun_bottom_casing_bearing_source: the catalogue bearing for the rotor's bore (smallest that fits, RI80) or the config value a1_sun_bottom_casing_bearing_OD (RI100, an inch thin-section bearing); this is its outer diameter",
+   "when": "a1_sun_bottom_casing_bearing_source == \"lookup\"",
    "otherwise": {
     "file": "indspg_params.json",
     "block": "indspg_design_parameters_3DP",
@@ -2808,11 +2808,11 @@
    "depends_on": [
     "Rotor_ID",
     "a1_standard_clearance_1_5mm",
-    "Rotor_height"
+    "a1_sun_bottom_casing_bearing_source"
    ],
-   "confidence": "medium",
-   "reason": "a two-case value: when the rotor is 19 mm high (RI80) the bearing is the catalogue one for the rotor's bore, otherwise (RI100) the config value a1_sun_bottom_casing_bearing_height; catalogue bearing chosen by bearings_discrete for the bore the stage needs (smallest one that fits); this is its width",
-   "when": "Rotor_height == 19",
+   "confidence": "high",
+   "reason": "the stage-1 sun's bottom bearing, chosen per motor by a1_sun_bottom_casing_bearing_source: the catalogue bearing for the rotor's bore (smallest that fits, RI80) or the config value a1_sun_bottom_casing_bearing_height (RI100, an inch thin-section bearing); this is its width",
+   "when": "a1_sun_bottom_casing_bearing_source == \"lookup\"",
    "otherwise": {
     "file": "indspg_params.json",
     "block": "indspg_design_parameters_3DP",
@@ -3072,6 +3072,20 @@
    "reason": "extra stage-1 sun length for this motor, in multiples of standard_clearance_1_5mm (one value per motor: RI100 0, RI80 0.5; replaces a rotor-height == 19 check)"
   },
   {
+   "name": "a1_sun_bottom_casing_bearing_source",
+   "attr": "a1_sun_bottom_casing_bearing_source",
+   "category": "fixed",
+   "subtype": "bearing (chosen part)",
+   "source": {
+    "file": "indspg_params.json",
+    "block": "indspg_design_parameters_3DP",
+    "key": "a1_sun_bottom_casing_bearing_source",
+    "per_motor": true
+   },
+   "confidence": "high",
+   "reason": "where the stage-1 sun's bottom bearing comes from, per motor: \"lookup\" (catalogue bearing for the rotor's bore; RI80) or \"config\" (the a1_sun_bottom_casing_bearing_* values; RI100); replaces a rotor-height == 19 check"
+  },
+  {
    "name": "max_diameter_stage1_clearance_multiple",
    "category": "fixed",
    "subtype": "clearance",
@@ -3126,11 +3140,11 @@
    "depends_on": [
     "Rotor_ID",
     "a1_standard_clearance_1_5mm",
-    "Rotor_height"
+    "a1_sun_bottom_casing_bearing_source"
    ],
-   "confidence": "medium",
-   "reason": "a two-case value: when the rotor is 19 mm high (RI80) the bearing is the catalogue one for the rotor's bore, otherwise (RI100) the config value a1_sun_bottom_casing_bearing_massKg; catalogue bearing chosen by bearings_discrete for the bore the stage needs (smallest one that fits); this is its mass",
-   "when": "Rotor_height == 19",
+   "confidence": "high",
+   "reason": "the stage-1 sun's bottom bearing, chosen per motor by a1_sun_bottom_casing_bearing_source: the catalogue bearing for the rotor's bore (smallest that fits, RI80) or the config value a1_sun_bottom_casing_bearing_massKg (RI100, an inch thin-section bearing); this is its mass",
+   "when": "a1_sun_bottom_casing_bearing_source == \"lookup\"",
    "otherwise": {
     "file": "indspg_params.json",
     "block": "indspg_design_parameters_3DP",
