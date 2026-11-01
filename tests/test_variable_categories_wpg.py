@@ -2,6 +2,8 @@
 stress-rule face widths follow what they depend on, and every number moved to the config drives exactly
 its CAD variables (and the mass where it should). The checks every gearbox gets are in
 test_variable_categories.py."""
+import math
+
 import pytest
 
 from variable_helpers import GEARBOXES, SPECS, downstream_of, equation_lines, golden_design, write_design
@@ -35,7 +37,7 @@ def test_shared_rules_reach_wpg():
         assert (BY_NAME[n]["category"], BY_NAME[n]["subtype"]) == ("dependent", "stress rule"), n
     for n in ("fw_r_b", "fw_p_s"):                  # a copy of fw_p_b, and fw_r_s + clearance_planet
         assert (BY_NAME[n]["category"], BY_NAME[n]["subtype"]) == ("dependent", "formula"), n
-    assert BY_NAME["clearance_motor_and_case"]["confidence"] == "medium"
+    assert BY_NAME["clearance_motor_and_case"]["confidence"] == "high"
 
 
 def test_optimisation_variables_are_the_gearbox_values(monkeypatch, tmp_path):
@@ -84,9 +86,9 @@ def test_stress_rule_widths_follow_what_they_depend_on(monkeypatch, tmp_path, wh
 
 
 def test_motor_case_clearance_comes_from_the_config(monkeypatch, tmp_path):
-    """clearance_motor_and_case_min (config) is the CAD's motor-to-case gap (a constant there) and the
-    minimum in the case mass: raising it from 5 to 7 changes clearance_motor_and_case and exactly the CAD
-    variables downstream of it, and the mass (on a design whose big ring is narrower than the motor)."""
+    """clearance_motor_and_case_min (config) is the gap between the big ring's wall and the motor case, in
+    the CAD and the mass code: raising it from 5 to 7 changes clearance_motor_and_case and exactly the CAD
+    variables downstream of it, and the mass."""
     def run(minimum, folder):
         folder.mkdir()
         actuator, _, _, onshape = design(monkeypatch, folder, "wpg__U8_Lite__20")
@@ -101,6 +103,29 @@ def test_motor_case_clearance_comes_from_the_config(monkeypatch, tmp_path):
     assert changed == downstream_of("wpg", "clearance_motor_and_case_min") & set(base)
     assert {"clearance_motor_and_case", "Motor_case_ID", "motor_case_OD_base", "case_mounting_PCD", "Motor_case_OD_max"} <= changed
     assert more_mass > base_mass
+
+
+def test_one_big_ring_wall_value():
+    """The CAD's ring_radial_thickness, the gearbox class's big ring wall (also in the mass code) and the
+    runner's maxGearboxDiameter all read ringRadialWidthMMBig."""
+    spec = next(e for e in CAD if e["name"] == "ring_radial_thickness")["source"]
+    assert spec["key"] == "ringRadialWidthMMBig"
+
+
+@pytest.mark.parametrize("name", GEARBOXES["wpg"].golden())
+def test_mass_code_motor_case_is_the_cad_case(monkeypatch, tmp_path, name):
+    """The mass code sizes the motor case as the CAD does (from maxGearboxDiameter), so the case mass is
+    the volume of the CAD's case: on a small motor, where the gearbox may be wider than the motor, as on
+    the others. The ring wall is one value everywhere."""
+    actuator, _, _, _ = design(monkeypatch, tmp_path, name)
+    assert actuator.ring_radial_thickness == actuator.design_params["ringRadialWidthMMBig"] == actuator.ring1RadialWidthMM
+    actuator.getMassKG_3DP()
+    case_ID = actuator.Motor_case_ID
+    case_OD = actuator.motor_case_OD_base
+    height = actuator.motorLengthMM + actuator.case_mounting_surface_height + actuator.standard_clearance_1_5mm
+    volume = (math.pi * (case_OD / 2) ** 2 * actuator.base_plate_thickness
+              + math.pi * ((case_OD / 2) ** 2 - (case_ID / 2) ** 2) * height) * 1e-9
+    assert actuator.Motor_case_mass == pytest.approx(volume * actuator.wolfromPlanetaryGearbox.densityStructure, rel=1e-12)
 
 
 def test_case_mounting_hole_overlap_comes_from_the_config(monkeypatch, tmp_path):

@@ -45,7 +45,7 @@
     "wpg_3DP_design_parameters":{        
         "planetMinDistanceMM"                                   : 7.5,
         "ringRadialWidthMMSmall"                                : 5.0,
-        "ringRadialWidthMMBig"                                  : 5.0,
+        "ringRadialWidthMMBig"                                  : 5,
         "sCarrierExtrusionDiaMM"                                : 12,
         "sCarrierExtrusionClearanceMM"                          : 2,
         "gearbox_casing_thickness"                              : 4, 
@@ -92,7 +92,6 @@
         "planet_bearing_width"                                   : 3.5,
         "planet_bore"                                            : 10,
 
-        "ring_radial_thickness"                                  : 5,
         "gear_casing_thickness"                                  : 4,
         "carrier_thickness"                                      : 6,
         "sec_carrier_thickness"                                  : 5,

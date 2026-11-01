@@ -760,8 +760,8 @@
    "depends_on": [
     "clearance_motor_and_case_min"
    ],
-   "confidence": "medium",
-   "reason": "radial gap between the motor and the case: the CAD takes the configured minimum as a constant, while the mass code grows it when the big ring is wider than the motor (CAD and mass disagree, to be logged); the case is sized from maxGearboxDiameter, not from the chosen design"
+   "confidence": "high",
+   "reason": "radial gap between the big ring's wall and the motor case, the configured minimum; the CAD and the mass code both size the case from maxGearboxDiameter, the largest gearbox allowed"
   },
   {
    "name": "clearance_planet",
@@ -1675,10 +1675,10 @@
    "source": {
     "file": "wpg_params.json",
     "block": "wpg_3DP_design_parameters",
-    "key": "ring_radial_thickness"
+    "key": "ringRadialWidthMMBig"
    },
    "confidence": "high",
-   "reason": "constant from the WPG 3DP design parameters"
+   "reason": "wall of the big ring gear; the same config key as the gearbox class (ring1RadialWidthMM) and maxGearboxDiameter"
   },
   {
    "name": "ring_to_chamfer_clearance",
@@ -2150,7 +2150,7 @@
     "key": "clearance_motor_and_case_min"
    },
    "confidence": "high",
-   "reason": "the configured motor-to-case gap: the CAD uses it as a constant (clearance_motor_and_case), the mass code grows it with the big ring"
+   "reason": "the configured gap between the big ring's wall and the motor case (clearance_motor_and_case), used by the CAD and the mass code"
   },
   {
    "name": "case_mounting_hole_wall_overlap",
@@ -2278,7 +2278,7 @@
     "key": "ringRadialWidthMMBig"
    },
    "confidence": "high",
-   "reason": "minimum wall of the big ring gear, read by the gearbox class (ring1RadialWidthMM); also sets maxGearboxDiameter; not written to the CAD file (the CAD ring wall is ring_radial_thickness)"
+   "reason": "minimum wall of the big ring gear, read by the gearbox class (ring1RadialWidthMM) and the runner (maxGearboxDiameter); the CAD's ring_radial_thickness reads the same key"
   },
   {
    "name": "sCarrierExtrusionDiaMM",

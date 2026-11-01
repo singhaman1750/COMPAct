@@ -4969,7 +4969,7 @@ class wolfromPlanetaryActuator:
         self.fw_p_b = self.wolfromPlanetaryGearbox.fwPlanetBigMM
 
         # --- Ring Gear ---
-        self.ring_radial_thickness = self.design_params["ring_radial_thickness"]
+        self.ring_radial_thickness = self.design_params["ringRadialWidthMMBig"]   # the big ring's wall, as in the gearbox class and maxGearboxDiameter
         self.fw_r_s = self.wolfromPlanetaryGearbox.fwRingSmallMM
 
         # --- Gearbox Casing ---
@@ -6407,18 +6407,14 @@ class wolfromPlanetaryActuator:
         #-------------------------------------------------------
         # wpg_motor_casing
         #-------------------------------------------------------
-        ring1_OD  = Nr1 * module1 + ring1_radial_thickness*2
-        motor_OD = self.motorDiaMM
-
-        if (ring1_OD < motor_OD):
-            clearance_motor_and_case = self.clearance_motor_and_case_min
-        else: 
-            clearance_motor_and_case = (ring1_OD - motor_OD)/2 + self.clearance_motor_and_case_min
+        # Same case as the CAD (setVariables): sized from the largest gearbox allowed, with the
+        # configured gap between the ring wall and the case
+        clearance_motor_and_case = self.clearance_motor_and_case_min
 
         motor_height      = self.motorLengthMM
         Motor_case_height = motor_height + case_mounting_surface_height + standard_clearance_1_5mm
 
-        Motor_case_ID     = motor_OD + clearance_motor_and_case * 2
+        Motor_case_ID     = self.maxGearboxDiameter + 2*self.ring_radial_thickness + clearance_motor_and_case * 2
         Motor_case_OD = Motor_case_ID + Motor_case_thickness * 2
 
         Motor_case_volume = ( np.pi * ((Motor_case_OD * 0.5)**2) * base_plate_thickness 
