@@ -27,11 +27,7 @@ Confidence:
 | Dependent | 68 | 4 |
 | **Total** | **143** | **36** |
 
-CAD variables by confidence: high 142, medium 1, low 0
-
-## To review (not high confidence)
-
-- `clearance_motor_and_case` (Dependent, medium): radial gap between the motor and the case: the CAD takes the configured minimum as a constant, while the mass code grows it when the big ring is wider than the motor (CAD and mass disagree, to be logged); the case is sized from maxGearboxDiameter, not from the chosen design
+CAD variables by confidence: high 143, medium 0, low 0
 
 ## Rules shared by every gearbox
 
@@ -113,7 +109,7 @@ From `config_files/variables/rules.json`; the test holds every gearbox's file to
 | 33 | `planet_shaft_dia` | planet part | wpg_params.json → wpg_3DP_design_parameters → `planet_shaft_dia` |  | high | constant from the WPG 3DP design parameters |
 | 34 | `planet_shaft_step_offset` | planet part | wpg_params.json → wpg_3DP_design_parameters → `planet_shaft_step_offset` |  | high | constant from the WPG 3DP design parameters |
 | 35 | `pressure_angle` | gear standard | config.json → Gear_standard_parameters → `pressureAngleDEG` |  | high | gear standard, the same for every gearbox type |
-| 36 | `ring_radial_thickness` | wall thickness | wpg_params.json → wpg_3DP_design_parameters → `ring_radial_thickness` |  | high | constant from the WPG 3DP design parameters |
+| 36 | `ring_radial_thickness` | wall thickness | wpg_params.json → wpg_3DP_design_parameters → `ringRadialWidthMMBig` |  | high | wall of the big ring gear; the same config key as the gearbox class (ring1RadialWidthMM) and maxGearboxDiameter |
 | 37 | `sec_carrier_thickness` | wall thickness | wpg_params.json → wpg_3DP_design_parameters → `sec_carrier_thickness` |  | high | constant from the WPG 3DP design parameters |
 | 38 | `small_ring_case_thickness` | wall thickness | wpg_params.json → wpg_3DP_design_parameters → `small_ring_case_thickness` |  | high | constant from the WPG 3DP design parameters |
 | 39 | `small_ring_output_wall_thickness` | wall thickness | wpg_params.json → wpg_3DP_design_parameters → `small_ring_output_wall_thickness` |  | high | constant from the WPG 3DP design parameters |
@@ -164,7 +160,7 @@ From `config_files/variables/rules.json`; the test holds every gearbox's file to
 | 27 | `case_mounting_hole_shift` | formula | `case_mounting_hole_dia / 2 - case_mounting_hole_wall_overlap` | case_mounting_hole_wall_overlap, case_mounting_hole_dia | high | how far the case bolt circle sits outside the case wall: half the bolt hole, less the configured overlap |
 | 28 | `case_mounting_nut_thickness` | lookup | `nuts_and_bolts_dimensions(bolt_dia=case_mounting_hole_dia, bolt_type=socket_head)` → nut_thickness | case_mounting_hole_dia | high | standard socket-head fastener size for the chosen bolt diameter |
 | 29 | `case_mounting_wrench_size` | lookup | `nuts_and_bolts_dimensions(bolt_dia=case_mounting_hole_dia, bolt_type=socket_head)` → nut_width_across_flats | case_mounting_hole_dia | high | standard socket-head fastener size for the chosen bolt diameter |
-| 30 | `clearance_motor_and_case` | formula | `clearance_motor_and_case_min` | clearance_motor_and_case_min | medium | radial gap between the motor and the case: the CAD takes the configured minimum as a constant, while the mass code grows it when the big ring is wider than the motor (CAD and mass disagree, to be logged); the case is sized from maxGearboxDiameter, not from the chosen design |
+| 30 | `clearance_motor_and_case` | formula | `clearance_motor_and_case_min` | clearance_motor_and_case_min | high | radial gap between the big ring's wall and the motor case, the configured minimum; the CAD and the mass code both size the case from maxGearboxDiameter, the largest gearbox allowed |
 | 31 | `clr_tip_root` | formula | `h_f - h_a` | h_f, h_a | high | tip-root clearance from addendum and dedendum |
 | 32 | `clr_tip_root_s` | formula | `h_f - h_a` | h_f, h_a | high | computed by the code: h_f - h_a |
 | 33 | `db_p_b` | formula | `dp_p_b * cos(pressure_angle_rad)` | dp_p_b, pressure_angle_rad | high | base-circle diameter |
@@ -215,7 +211,7 @@ From `config_files/variables/rules.json`; the test holds every gearbox's file to
 | 5 | `gear_allowable_stress` | material | config.json → Material_properties.<gear material> → `maxAllowableStressMPa` |  | high | allowable tooth stress of the gear material, chosen with the material mode (3dp: PLA, metal: steel); sets the face widths |
 | 6 | `FOS` | safety factor | config.json → MIT_params → `FOS` |  | high | factor of safety in the tooth-stress rule |
 | 7 | `serviceFactor` | safety factor | config.json → MIT_params → `serviceFactor` |  | high | service factor on the motor torque in the tooth-stress rule |
-| 8 | `clearance_motor_and_case_min` | clearance | wpg_params.json → wpg_3DP_design_parameters → `clearance_motor_and_case_min` |  | high | the configured motor-to-case gap: the CAD uses it as a constant (clearance_motor_and_case), the mass code grows it with the big ring |
+| 8 | `clearance_motor_and_case_min` | clearance | wpg_params.json → wpg_3DP_design_parameters → `clearance_motor_and_case_min` |  | high | the configured gap between the big ring's wall and the motor case (clearance_motor_and_case), used by the CAD and the mass code |
 | 9 | `case_mounting_hole_wall_overlap` | clearance | wpg_params.json → wpg_3DP_design_parameters → `case_mounting_hole_wall_overlap` |  | high | how far the case bolt holes overlap the case wall; sets case_mounting_hole_shift |
 | 10 | `bearing_mount_wall_bolt_dia_multiple` | wall thickness | wpg_params.json → wpg_3DP_design_parameters → `bearing_mount_wall_bolt_dia_multiple` |  | high | wall around the output bearing, in output-bolt diameters on each side (CAD and mass code; the two use different ring terms in the comparison, to be logged) |
 | 11 | `planet_bearing_gap` | clearance | wpg_params.json → wpg_3DP_design_parameters → `planet_bearing_gap` |  | high | axial gap between the two planet bearings (one in each planet gear); with the bearing width it sets the smallest planet and ring widths |
@@ -224,7 +220,7 @@ From `config_files/variables/rules.json`; the test holds every gearbox's file to
 | 14 | `actuator_width` | formula | `fw_r_b + clearance_planet + gear_casing_big_ring_to_bearing_dist + carrier_bearing_step_width + bearing_height + case_dist + bearing_retainer_thickness + motor_height + case_mounting_surface_height + standard_clearance_1_5mm + base_plate_thickness` | fw_r_b, clearance_planet, gear_casing_big_ring_to_bearing_dist, carrier_bearing_step_width, bearing_height, case_dist, bearing_retainer_thickness, motor_height, case_mounting_surface_height, standard_clearance_1_5mm, base_plate_thickness | high | axial width without the driver mount, written to the results CSV |
 | 15 | `planetMinDistanceMM` | constraint constant | wpg_params.json → wpg_3DP_design_parameters → `planetMinDistanceMM` |  | high | minimum gap between neighbouring planets; only in the old interference check, which WPG doesn't call |
 | 16 | `ringRadialWidthMMSmall` | wall thickness | wpg_params.json → wpg_3DP_design_parameters → `ringRadialWidthMMSmall` |  | high | minimum wall of the small ring gear, read by the gearbox class (ring2RadialWidthMM); not written to the CAD file (the CAD ring wall is ring_radial_thickness) |
-| 17 | `ringRadialWidthMMBig` | wall thickness | wpg_params.json → wpg_3DP_design_parameters → `ringRadialWidthMMBig` |  | high | minimum wall of the big ring gear, read by the gearbox class (ring1RadialWidthMM); also sets maxGearboxDiameter; not written to the CAD file (the CAD ring wall is ring_radial_thickness) |
+| 17 | `ringRadialWidthMMBig` | wall thickness | wpg_params.json → wpg_3DP_design_parameters → `ringRadialWidthMMBig` |  | high | minimum wall of the big ring gear, read by the gearbox class (ring1RadialWidthMM) and the runner (maxGearboxDiameter); the CAD's ring_radial_thickness reads the same key |
 | 18 | `sCarrierExtrusionDiaMM` | constraint constant | wpg_params.json → wpg_3DP_design_parameters → `sCarrierExtrusionDiaMM` |  | high | carrier extrusion diameter in the planet-interference constraint |
 | 19 | `sCarrierExtrusionClearanceMM` | constraint constant | wpg_params.json → wpg_3DP_design_parameters → `sCarrierExtrusionClearanceMM` |  | high | carrier extrusion clearance in the planet-interference constraint |
 | 20 | `gearbox_casing_thickness` | wall thickness | wpg_params.json → wpg_3DP_design_parameters → `gearbox_casing_thickness` |  | high | gearbox casing wall, read by the actuator class; used by the mass model, not written to the CAD file |
