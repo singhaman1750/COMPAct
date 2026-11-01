@@ -125,3 +125,23 @@ def test_planet_bearing_gap_comes_from_the_config(monkeypatch, tmp_path, gb):
     assert more["fw_p"] == more["fw_r"] == 19.0 and more["fw_s_calc"] == base["fw_s_calc"]
     changed = {k for k in base if base[k] != more[k]}
     assert {"fw_p", "fw_r", "fw_s_used"} <= changed <= downstream_of(gb, "planet_bearing_gap")
+
+
+KEYS = [("carrier_thickness_mid_min", 26, "carrier_thickness_mid"),      # (key, new value, the CAD variable it must move)
+        ("ring_hub_thickness_min", 30, "ring_hub_thickness"),
+        ("output_bearing_ID_clearance", 35, "output_bearing_ID")]
+
+
+@pytest.mark.parametrize("gb", TYPES)
+@pytest.mark.parametrize("key, value, moves", KEYS + [("sun_coupler_hub_extra_thickness", 5, "sun_coupler_hub_thickness")])
+def test_moved_numbers_come_from_the_config(monkeypatch, tmp_path, gb, key, value, moves):
+    """The numbers moved to isspg_params.json (6, 3, 3 and 20, value-identical): each drives the CAD variable it sets and
+    nothing outside what depends on it. ISSPG inside does not read sun_coupler_hub_extra_thickness."""
+    actuator, _, _, onshape = design(monkeypatch, tmp_path, gb, GEARBOXES[gb].golden()[0])
+    base = {n: float(x) for n, x in onshape}
+    more = rerun(actuator, tmp_path, gb, **{key: value})
+    changed = {k for k in base if base[k] != more[k]}
+    if gb == "isspg_inside" and key == "sun_coupler_hub_extra_thickness":
+        assert not changed
+        return
+    assert moves in changed and changed <= downstream_of(gb, key)

@@ -3,6 +3,7 @@ like the name they repeat, the stress-rule face widths follow what they depend o
 config drives exactly its CAD variables. The checks every gearbox gets are in test_variable_categories.py."""
 import pytest
 
+import gearbox_runner
 from variable_helpers import GEARBOXES, SPECS, downstream_of, equation_lines, golden_design, write_design
 
 GB = "indspg"
@@ -143,3 +144,38 @@ def test_output_bearing_mass_comes_from_the_config(monkeypatch, tmp_path):
     assert more == {n: float(x) for n, x in onshape}
     assert actuator.getMassKG_3DP() == pytest.approx(mass + 0.01, abs=1e-12)
     assert actuator.bearing_mass_stg1 == pytest.approx(bearings + 0.01, abs=1e-12)
+
+
+@pytest.mark.parametrize("key, value, moves", [("sun_hub_rotor_gap", 4, "a1_sun_hub_dia"),
+                                               ("rotor_mount_hole_wall", 3, "rotor_mount_hole_PCD")])
+def test_moved_numbers_come_from_the_config(monkeypatch, tmp_path, key, value, moves):
+    """sun_hub_rotor_gap (2) and rotor_mount_hole_wall (2), moved to the config value-identically, drive the CAD variable they
+    set and nothing outside what depends on them."""
+    actuator, _, _, onshape = design(monkeypatch, tmp_path, GEARBOXES[GB].golden()[0])
+    base = {n: float(x) for n, x in onshape}
+    more = rerun(actuator, tmp_path, **{key: value})
+    changed = {k for k in base if base[k] != more[k]}
+    assert moves in changed and changed <= downstream_of(GB, key)
+
+
+@pytest.mark.parametrize("motor, extra", [("RI100", 0), ("RI80", 0.5)])
+def test_stage1_sun_extra_length_is_per_motor(monkeypatch, tmp_path, motor, extra):
+    """sun1_extra_clearance_multiple (one value per motor) replaces the old rotor-height == 19 check: RI80 gets 0.5 extra
+    clearances on the stage-1 sun length, RI100 none."""
+    name = next(n for n in GEARBOXES[GB].golden() if f"__{motor}__" in n)
+    actuator, _, _, onshape = design(monkeypatch, tmp_path, name)
+    a = actuator
+    assert a.sun1_extra_clearance_multiple == extra
+    v = {n: float(x) for n, x in onshape}
+    assert v["a1_fw_s_used"] == pytest.approx(a.fw_p_1_fix + a.clearance_planet + a.sec_carrier_thickness1
+                                              + a.standard_clearance_1_5mm * (2 + extra))
+
+
+def test_stage1_max_diameter_margin_comes_from_the_config(monkeypatch, tmp_path):
+    actuator, _, _, _ = design(monkeypatch, tmp_path, GEARBOXES[GB].golden()[0])
+    rule = gearbox_runner.GEARBOXES[GB].max_diameter_stage1
+    d = dict(actuator.design_params)
+    base = rule(actuator.motor, d, {})
+    assert base == pytest.approx(actuator.motor.getRotorIDMM() - 4 * d["standard_clearance_1_5mm"])
+    d["max_diameter_stage1_clearance_multiple"] += 2
+    assert rule(actuator.motor, d, {}) == pytest.approx(base - 2 * d["standard_clearance_1_5mm"])

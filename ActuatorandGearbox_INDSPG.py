@@ -8,7 +8,7 @@ import numpy as np
 from ActuatorAndGearbox import singleStagePlanetaryGearbox
 
 from CommonComponents import material, bearings_discrete, nuts_and_bolts_dimensions, motor_frameless_inrunner as motor
-from CommonComponents import restores_stdout, cad_path
+from CommonComponents import restores_stdout, cad_path, per_motor_value
 from two_stage_search import stage_designs, pair_counts, pairs_in_ratio_bin, set_stage
 
 
@@ -280,6 +280,9 @@ class inrunnerdoubleStageActuator:
 
         self.bearingIDClearanceMM                       = self.design_params["bearingIDClearanceMM"]
         self.planet_bearing_gap                         = self.design_params["planet_bearing_gap"] # 1.0
+        self.sun_hub_rotor_gap                          = self.design_params["sun_hub_rotor_gap"] # 2
+        self.rotor_mount_hole_wall                      = self.design_params["rotor_mount_hole_wall"] # 2
+        self.sun1_extra_clearance_multiple              = per_motor_value(self.design_params, "sun1_extra_clearance_multiple", self.motor.motorName) # RI100 0, RI80 0.5
 
 
         ## --------------------------------------------------------------------
@@ -354,7 +357,7 @@ class inrunnerdoubleStageActuator:
         self.rotor_mount_hole_num = self.design_params["rotor_mount_hole_num"]
         self.rotor_csk_head_upper_dia = self.design_params["Rotor_csk_head_upper_dia"]
         self.rotor_csk_head_height = self.design_params["Rotor_csk_head_height"]
-        self.rotor_mount_hole_PCD = self.rotor_ID - self.rotor_csk_head_upper_dia - 2*2 - self.standard_clearance_1_5mm # 2.5
+        self.rotor_mount_hole_PCD = self.rotor_ID - self.rotor_csk_head_upper_dia - 2*self.rotor_mount_hole_wall - self.standard_clearance_1_5mm # 2.5
 
         #motor_output_hole_bolt = nuts_and_bolts_dimensions(bolt_dia = self.motor_output_hole_dia, bolt_type="CSK")
 
@@ -450,14 +453,11 @@ class inrunnerdoubleStageActuator:
         
         # Carrier and final assembly dimensions
         self.carrier_PCD1 = (self.Np1 + self.Ns1) * self.module1
-        if self.rotor_height == 19:
-            self.fw_s1_used = self.fw_p_1_fix + self.clearance_planet + self.sec_carrier_thickness1 + self.standard_clearance_1_5mm*2 + self.standard_clearance_1_5mm *0.5
-            
-        else:
-            self.fw_s1_used = self.fw_p_1_fix + self.clearance_planet + self.sec_carrier_thickness1 + self.standard_clearance_1_5mm*2
+        self.fw_s1_used = (self.fw_p_1_fix + self.clearance_planet + self.sec_carrier_thickness1 + self.standard_clearance_1_5mm*2
+                           + self.standard_clearance_1_5mm * self.sun1_extra_clearance_multiple)   # per motor: RI80 0.5, RI100 0
 
         #self.case_dist1 = self.sec_carrier_thickness1 + self.clearance_planet + self.sun_coupler_hub_thickness1 - self.case_mounting_surface_height
-        self.sun_hub_dia1 = self.rotor_ID - 2 * (self.standard_clearance_1_5mm + 2)
+        self.sun_hub_dia1 = self.rotor_ID - 2 * (self.standard_clearance_1_5mm + self.sun_hub_rotor_gap)
 
         ## --------------------------------------------------------------------
         ## Stage 1 - Fastener and Detailed Feature Dimensions

@@ -231,7 +231,7 @@ Spec: [`config_files/variables/isspg_compact_variables.json`](../../../config_fi
 **Results:** `python tests/golden/golden.py check`: All 58 cases match the baseline. `python -m pytest -q`: 1024 passed. No `CADs/` file, no golden baseline touched.
 
 **Open questions**
-1. The hard-coded 6 and 3 (carrier and ring hub), the 3 in `sun_coupler_hub_thickness`, the 20 in the output bearing request and the `x 4` in `sun_hub_dia` are left in the code (medium); the plan proposed new keys (`carrier_thickness_mid_min`, `ring_hub_thickness_min`) to be decided in review (plan decision 4).
+1. The hard-coded 6 and 3 (carrier and ring hub), the 3 in `sun_coupler_hub_thickness`, the 20 in the output bearing request and the `x 4` in `sun_hub_dia` are left in the code (medium); the plan proposed new keys (`carrier_thickness_mid_min`, `ring_hub_thickness_min`) to be decided in review (plan decision 4). **Done (2026-10-31):** config keys `carrier_thickness_mid_min` (6), `ring_hub_thickness_min` (3), `sun_coupler_hub_extra_thickness` (3, compact only) and `output_bearing_ID_clearance` (20) in `isspg_params.json`; the unused `ring_hub_thickness` (5) and `sun_coupler_hub_thickness` (12) keys were removed; value-identical.
 2. `clearance_motor_and_case`, `wire_slot_length` and `wire_slot_radius` are config values here (Fixed), unlike SSPG and CPG (computed / read from the motor): a frameless motor has no wire-slot data.
 3. Width cap: the gears must fit `stator_height - gear_axial_margin_mm`; a wider design is scaled by `torque_carried_fraction`. `fw_limit_mm` is a code-only formula and the margin a code-only Fixed value.
 4. The CAD's `motor_OD` / `motor_height` come from the motor (Input / motor); the file has no wire-slot or driver-mount data of the motor.

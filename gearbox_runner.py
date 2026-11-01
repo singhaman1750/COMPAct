@@ -152,7 +152,7 @@ GEARBOXES = {
         "insspg_motor_config.json", "insspg_params.json",
         ("sspg_design_parameters", "sspg_3DP_design_parameters"), "sspg_optimization_parameters",
         "frameless_inrunner", "single",
-        max_diameter=lambda m, d, o: (m.getStatorODMM() - 5.5 - (d["standard_clearance_1_5mm"])*2
+        max_diameter=lambda m, d, o: (m.getStatorODMM() - d["max_diameter_stator_OD_margin"] - (d["standard_clearance_1_5mm"])*2
                                       - (d["loose_clearance_3DP"])/2),
         driver=None, passes_gearbox_type=True),
     "insspg_type_2": GearboxSpec(
@@ -161,7 +161,7 @@ GEARBOXES = {
         "insspg_motor_config.json", "insspg_params.json",
         ("sspg_design_parameters", "sspg_3DP_design_parameters"), "sspg_optimization_parameters",
         "frameless_inrunner", "single",
-        max_diameter=lambda m, d, o: (m.getStatorODMM() - 5.5 - (d["standard_clearance_1_5mm"])*2
+        max_diameter=lambda m, d, o: (m.getStatorODMM() - d["max_diameter_stator_OD_margin"] - (d["standard_clearance_1_5mm"])*2
                                       - (d["loose_clearance_3DP"])/2),
         driver=None, passes_gearbox_type=True),
     "incpg_dependent": GearboxSpec(
@@ -203,7 +203,7 @@ GEARBOXES = {
         "indspg_optimization_parameters", "frameless_inrunner", "double",
         max_diameter=lambda m, d, o: (o["MAX_GB_DIA_MULT_FACTOR"]
                                       * (m.getStator_wire_OD() - d["ring2RadialWidthMM"]*2)),
-        max_diameter_stage1=lambda m, d, o: (m.getRotorIDMM() - d["standard_clearance_1_5mm"]*4),  # inside the rotor
+        max_diameter_stage1=lambda m, d, o: (m.getRotorIDMM() - d["standard_clearance_1_5mm"]*d["max_diameter_stage1_clearance_multiple"]),  # inside the rotor
         driver=OMIT, extra_gearbox_densities={"densityRotor": "Aluminum"}),
 }
 

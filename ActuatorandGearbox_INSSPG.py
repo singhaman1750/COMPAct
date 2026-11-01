@@ -415,6 +415,10 @@ class singleStagePlanetaryActuator:
         self.loose_clearance_3DP                = self.design_params["loose_clearance_3DP"]
         self.Rotor_tight_clearance              = self.design_params["Rotor_tight_clearance"]
         self.planet_bearing_gap                 = self.design_params["planet_bearing_gap"] # 1.0
+        self.rotor_support_bearing_OD_clearance             = self.design_params["rotor_support_bearing_OD_clearance"] # 4
+        self.rotor_upper_support_bearing_clearance_multiple = self.design_params["rotor_upper_support_bearing_clearance_multiple"] # 5
+        self.sun_support_OD_max                 = self.design_params["sun_support_OD_max"] # 21
+        self.sun_support_clearance_multiple     = self.design_params["sun_support_clearance_multiple"] # 3
 
         # --- Dynamic Bearing Lookup ---
         self.bearingIDClearanceMM = self.design_params.get("bearingIDClearanceMM")
@@ -464,7 +468,7 @@ class singleStagePlanetaryActuator:
 #-------for type 1 rotor suport bearing
         self.bearingIDClearanceMM = self.design_params.get("bearingIDClearanceMM")
         #TODO: this is the most OD the bearing may have, but bearings_discrete(odRequiredMM=...) returns the first bearing with OD >= it, i.e. a bearing larger than the space. See ISSUES.md bug 5.
-        IdrequiredMM_R_S          = (self.Rotor_ID - 4)
+        IdrequiredMM_R_S          = (self.Rotor_ID - self.rotor_support_bearing_OD_clearance)
         Bearings                  = bearings_discrete(idRequiredMM=0, odRequiredMM=IdrequiredMM_R_S)
         
         self.bearing_ID_R_S           = Bearings.getBearingIDMM()
@@ -479,7 +483,7 @@ class singleStagePlanetaryActuator:
 #------for type 1 rotor upper support bearing
         self.bearingIDClearanceMM = self.design_params.get("bearingIDClearanceMM")
         #TODO: this is the most OD the bearing may have, but bearings_discrete(odRequiredMM=...) returns the first bearing with OD >= it, i.e. a bearing larger than the space. See ISSUES.md bug 5.
-        IdrequiredMM_R_U_S              = (self.Stator_ID - self.standard_clearance_1_5mm*5)
+        IdrequiredMM_R_U_S              = (self.Stator_ID - self.standard_clearance_1_5mm*self.rotor_upper_support_bearing_clearance_multiple)
         Bearings                  = bearings_discrete(idRequiredMM=0, odRequiredMM=IdrequiredMM_R_U_S)
         
         self.bearing_ID_R_U_S           = Bearings.getBearingIDMM()
@@ -591,12 +595,13 @@ class singleStagePlanetaryActuator:
         self.carrier_PCD = self.module * (self.Ns + self.Np)
 
         # --- NEW SUN SUPPORT OD ---
-        calculated_sun_support = self.carrier_PCD - (self.planet_shaft_dia + self.planet_shaft_step_offset * 2) - self.standard_clearance_1_5mm * 3
-        self.sun_support_OD = min(calculated_sun_support, 21)
+        calculated_sun_support = self.carrier_PCD - (self.planet_shaft_dia + self.planet_shaft_step_offset * 2) - self.standard_clearance_1_5mm * self.sun_support_clearance_multiple
+        self.sun_support_OD = min(calculated_sun_support, self.sun_support_OD_max)
         # --------------------------
         
         if self.insspg_type == "insspg_type_2":
                 # --- TYPE 2 MATH ---
+                # TODO: what is the 2 mm? Its meaning is not stated; kept hard-coded until the designer explains it (docs/designer_questions.md, Q2)
                 self.fw_s_used = (self.Rotor_height 
                                 - 2 
                                 - self.sun_coupler_hub_thickness 
@@ -608,7 +613,7 @@ class singleStagePlanetaryActuator:
                 # --- TYPE 1 MATH (Original) ---
                 self.fw_s_used = (- self.sun_coupler_hub_thickness
                                   + self.standard_clearance_1_5mm
-                                  + self.standard_clearance_1_5mm*1.5
+                                  + self.standard_clearance_1_5mm*1.5   # TODO: what is this 1.5 x clearance (2.25 mm)? Kept hard-coded until the designer explains it (docs/designer_questions.md, Q1)
                                   + self.rotor_support_bearing_height
                                   + self.standard_clearance_1_5mm
                                   + self.sec_carrier_thickness

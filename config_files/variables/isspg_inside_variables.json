@@ -1608,17 +1608,18 @@
    "lookup": {
     "function": "bearings_discrete",
     "args": {
-     "idRequiredMM": "tight_clearance_3DP + carrier_top_to_mid_nut_wrench_size * 0.5 + sun1_bearing_OD + 20"
+     "idRequiredMM": "tight_clearance_3DP + carrier_top_to_mid_nut_wrench_size * 0.5 + sun1_bearing_OD + output_bearing_ID_clearance"
     },
     "method": "getBearingIDMM"
    },
    "depends_on": [
     "sun1_bearing_OD",
     "tight_clearance_3DP",
-    "carrier_top_to_mid_nut_wrench_size"
+    "carrier_top_to_mid_nut_wrench_size",
+    "output_bearing_ID_clearance"
    ],
-   "confidence": "medium",
-   "reason": "catalogue bearing chosen by bearings_discrete (smallest one that fits) (the request has a hard-coded number: 20 mm clearance); this is its bore"
+   "confidence": "high",
+   "reason": "catalogue bearing chosen by bearings_discrete (smallest one that fits) (the request adds output_bearing_ID_clearance); this is its bore"
   },
   {
    "name": "output_bearing_OD",
@@ -1628,17 +1629,18 @@
    "lookup": {
     "function": "bearings_discrete",
     "args": {
-     "idRequiredMM": "tight_clearance_3DP + carrier_top_to_mid_nut_wrench_size * 0.5 + sun1_bearing_OD + 20"
+     "idRequiredMM": "tight_clearance_3DP + carrier_top_to_mid_nut_wrench_size * 0.5 + sun1_bearing_OD + output_bearing_ID_clearance"
     },
     "method": "getBearingODMM"
    },
    "depends_on": [
     "sun1_bearing_OD",
     "tight_clearance_3DP",
-    "carrier_top_to_mid_nut_wrench_size"
+    "carrier_top_to_mid_nut_wrench_size",
+    "output_bearing_ID_clearance"
    ],
-   "confidence": "medium",
-   "reason": "catalogue bearing chosen by bearings_discrete (smallest one that fits) (the request has a hard-coded number: 20 mm clearance); this is its outer diameter"
+   "confidence": "high",
+   "reason": "catalogue bearing chosen by bearings_discrete (smallest one that fits) (the request adds output_bearing_ID_clearance); this is its outer diameter"
   },
   {
    "name": "output_bearing_width",
@@ -1648,17 +1650,18 @@
    "lookup": {
     "function": "bearings_discrete",
     "args": {
-     "idRequiredMM": "tight_clearance_3DP + carrier_top_to_mid_nut_wrench_size * 0.5 + sun1_bearing_OD + 20"
+     "idRequiredMM": "tight_clearance_3DP + carrier_top_to_mid_nut_wrench_size * 0.5 + sun1_bearing_OD + output_bearing_ID_clearance"
     },
     "method": "getBearingWidthMM"
    },
    "depends_on": [
     "sun1_bearing_OD",
     "tight_clearance_3DP",
-    "carrier_top_to_mid_nut_wrench_size"
+    "carrier_top_to_mid_nut_wrench_size",
+    "output_bearing_ID_clearance"
    ],
-   "confidence": "medium",
-   "reason": "catalogue bearing chosen by bearings_discrete (smallest one that fits) (the request has a hard-coded number: 20 mm clearance); this is its width"
+   "confidence": "high",
+   "reason": "catalogue bearing chosen by bearings_discrete (smallest one that fits) (the request adds output_bearing_ID_clearance); this is its width"
   },
   {
    "name": "sun2_bearing_ID",
@@ -2010,51 +2013,57 @@
    "attr": "carrier_thickness_mid",
    "category": "dependent",
    "subtype": "formula",
-   "formula": "6 if (fw_s_used + clearance_planet + (6 + carrier_thickness_top) - (motor_case_thickness - bearing_step_width) - motor_height) >= 3 else (motor_height + 3 + motor_case_thickness - bearing_step_width - fw_s_used - clearance_planet) - carrier_thickness_top",
+   "formula": "carrier_thickness_mid_min if (fw_s_used + clearance_planet + (carrier_thickness_mid_min + carrier_thickness_top) - (motor_case_thickness - bearing_step_width) - motor_height) >= ring_hub_thickness_min else (motor_height + ring_hub_thickness_min + motor_case_thickness - bearing_step_width - fw_s_used - clearance_planet) - carrier_thickness_top",
    "depends_on": [
     "carrier_thickness_top",
     "motor_height",
     "clearance_planet",
     "fw_s_used",
     "motor_case_thickness",
-    "bearing_step_width"
+    "bearing_step_width",
+    "carrier_thickness_mid_min",
+    "ring_hub_thickness_min"
    ],
-   "confidence": "medium",
-   "reason": "middle carrier plate: a hard-coded 6 mm, or, when the ring hub would be thinner than a hard-coded 3 mm, what remains of the carrier after the top; an iterative two-case rule with two hard-coded numbers"
+   "confidence": "high",
+   "reason": "middle carrier plate: carrier_thickness_mid_min, or, when the ring hub would be thinner than ring_hub_thickness_min, what remains of the carrier after the top (an iterative two-case rule)"
   },
   {
    "name": "carrier_thickness",
    "attr": "carrier_thickness",
    "category": "dependent",
    "subtype": "formula",
-   "formula": "(6 + carrier_thickness_top) if (fw_s_used + clearance_planet + (6 + carrier_thickness_top) - (motor_case_thickness - bearing_step_width) - motor_height) >= 3 else (motor_height + 3 + motor_case_thickness - bearing_step_width - fw_s_used - clearance_planet)",
+   "formula": "(carrier_thickness_mid_min + carrier_thickness_top) if (fw_s_used + clearance_planet + (carrier_thickness_mid_min + carrier_thickness_top) - (motor_case_thickness - bearing_step_width) - motor_height) >= ring_hub_thickness_min else (motor_height + ring_hub_thickness_min + motor_case_thickness - bearing_step_width - fw_s_used - clearance_planet)",
    "depends_on": [
     "carrier_thickness_top",
     "clearance_planet",
     "motor_height",
     "fw_s_used",
     "bearing_step_width",
-    "motor_case_thickness"
+    "motor_case_thickness",
+    "carrier_thickness_mid_min",
+    "ring_hub_thickness_min"
    ],
-   "confidence": "medium",
-   "reason": "carrier thickness: the hard-coded 6 mm middle plate plus the top, or, when the ring hub would be thinner than a hard-coded 3 mm, whatever closes the stack; an iterative two-case rule with two hard-coded numbers"
+   "confidence": "high",
+   "reason": "carrier thickness: carrier_thickness_mid_min plus the top, or, when the ring hub would be thinner than ring_hub_thickness_min, whatever closes the stack (an iterative two-case rule)"
   },
   {
    "name": "ring_hub_thickness",
    "attr": "ring_hub_thickness",
    "category": "dependent",
    "subtype": "formula",
-   "formula": "(fw_s_used + clearance_planet + (6 + carrier_thickness_top) - (motor_case_thickness - bearing_step_width) - motor_height) if (fw_s_used + clearance_planet + (6 + carrier_thickness_top) - (motor_case_thickness - bearing_step_width) - motor_height) >= 3 else 3",
+   "formula": "(fw_s_used + clearance_planet + (carrier_thickness_mid_min + carrier_thickness_top) - (motor_case_thickness - bearing_step_width) - motor_height) if (fw_s_used + clearance_planet + (carrier_thickness_mid_min + carrier_thickness_top) - (motor_case_thickness - bearing_step_width) - motor_height) >= ring_hub_thickness_min else ring_hub_thickness_min",
    "depends_on": [
     "motor_height",
     "motor_case_thickness",
     "bearing_step_width",
     "fw_s_used",
     "clearance_planet",
-    "carrier_thickness_top"
+    "carrier_thickness_top",
+    "carrier_thickness_mid_min",
+    "ring_hub_thickness_min"
    ],
-   "confidence": "medium",
-   "reason": "ring hub thickness: whatever lets the stack reach the motor, but at least a hard-coded 3 mm (the config's ring_hub_thickness is not read); an iterative two-case rule with two hard-coded numbers"
+   "confidence": "high",
+   "reason": "ring hub thickness: whatever lets the stack reach the motor, but at least ring_hub_thickness_min (an iterative two-case rule)"
   },
   {
    "name": "ring_stator_case_thickness",
@@ -2267,6 +2276,57 @@
    "reason": "axial gap between the two planet bearings (one in each planet gear); with the bearing width it sets the smallest planet and ring width"
   },
   {
+   "name": "carrier_thickness_mid_min",
+   "attr": "carrier_thickness_mid_min",
+   "category": "fixed",
+   "subtype": "wall thickness",
+   "source": {
+    "file": "isspg_params.json",
+    "block": "isspg_3DP_design_parameters",
+    "key": "carrier_thickness_mid_min"
+   },
+   "confidence": "high",
+   "reason": "smallest middle carrier plate (6 mm); the plate grows when the ring hub would otherwise be thinner than ring_hub_thickness_min"
+  },
+  {
+   "name": "ring_hub_thickness_min",
+   "attr": "ring_hub_thickness_min",
+   "category": "fixed",
+   "subtype": "wall thickness",
+   "source": {
+    "file": "isspg_params.json",
+    "block": "isspg_3DP_design_parameters",
+    "key": "ring_hub_thickness_min"
+   },
+   "confidence": "high",
+   "reason": "smallest ring hub thickness (3 mm); below it the carrier is thickened to close the stack"
+  },
+  {
+   "name": "sun_coupler_hub_extra_thickness",
+   "category": "fixed",
+   "subtype": "wall thickness",
+   "source": {
+    "file": "isspg_params.json",
+    "block": "isspg_3DP_design_parameters",
+    "key": "sun_coupler_hub_extra_thickness"
+   },
+   "confidence": "high",
+   "reason": "in the config (shared with ISSPG compact) but not read by ISSPG inside, whose sun coupler hub is the input bearing width plus the bearing step"
+  },
+  {
+   "name": "output_bearing_ID_clearance",
+   "attr": "output_bearing_ID_clearance",
+   "category": "fixed",
+   "subtype": "clearance",
+   "source": {
+    "file": "isspg_params.json",
+    "block": "isspg_3DP_design_parameters",
+    "key": "output_bearing_ID_clearance"
+   },
+   "confidence": "high",
+   "reason": "radial room added to the output-bearing bore request beyond the sun bearing and the carrier nut (20 mm)"
+  },
+  {
    "name": "sun_hub_clearance_multiple",
    "attr": "sun_hub_clearance_multiple",
    "category": "fixed",
@@ -2357,18 +2417,6 @@
    "reason": "read by the code but not written to the CAD file"
   },
   {
-   "name": "ring_hub_thickness_config",
-   "category": "fixed",
-   "subtype": "wall thickness",
-   "source": {
-    "file": "isspg_params.json",
-    "block": "isspg_3DP_design_parameters",
-    "key": "ring_hub_thickness"
-   },
-   "confidence": "high",
-   "reason": "config value ring_hub_thickness (the CAD variable of the same name is not read from it): in the config but never read"
-  },
-  {
    "name": "ring_hub_to_case_hole_nut_wrench_size_config",
    "category": "fixed",
    "subtype": "fastener size",
@@ -2427,18 +2475,6 @@
    },
    "confidence": "high",
    "reason": "config value sun_hub_dia (the CAD variable of the same name is not read from it): in the config but never read"
-  },
-  {
-   "name": "sun_coupler_hub_thickness_config",
-   "category": "fixed",
-   "subtype": "wall thickness",
-   "source": {
-    "file": "isspg_params.json",
-    "block": "isspg_3DP_design_parameters",
-    "key": "sun_coupler_hub_thickness"
-   },
-   "confidence": "high",
-   "reason": "config value sun_coupler_hub_thickness (the CAD variable of the same name is not read from it): in the config but never read"
   },
   {
    "name": "case_mounting_hole_shift_config",
