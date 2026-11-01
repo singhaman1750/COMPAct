@@ -3746,8 +3746,8 @@
     "block": "dspg_design_parameters_3DP",
     "key": "bearing_mount_wall_bolt_dia_multiple"
    },
-   "confidence": "medium",
-   "reason": "wall around the output bearing, in output-bolt diameters on each side; one key for both stages (CAD and mass code), the plan leaves open whether it should be one per stage (bearing_mount_wall_bolt_dia_multiple1 / 2)"
+   "confidence": "high",
+   "reason": "wall around the output bearing, in output-bolt diameters on each side; one key for both stages, CAD and mass code (decided 2026-10-31)"
   },
   {
    "name": "planet_bearing_gap",
@@ -3759,8 +3759,8 @@
     "block": "dspg_design_parameters_3DP",
     "key": "planet_bearing_gap"
    },
-   "confidence": "medium",
-   "reason": "axial gap between the two planet bearings in a planet; with the bearing width it sets the smallest planet and ring widths of both stages; one key for both stages, the plan leaves open whether it should be one per stage (planet_bearing_gap1 / 2)"
+   "confidence": "high",
+   "reason": "axial gap between the two planet bearings in a planet; with the bearing width it sets the smallest planet and ring widths of both stages; one key for both stages (decided 2026-10-31)"
   },
   {
    "name": "sun_hub_clearance_multiple",

@@ -1576,8 +1576,8 @@
     "block": "cpg_3DP_design_parameters",
     "key": "driver_mount_thickness"
    },
-   "confidence": "medium",
-   "reason": "motor-driver mount dimension: the runner passes no driver here, so the value comes from this gearbox's own config rather than from the chosen driver (Input / driver for consistency with the other types; the plan asks whether it should be Fixed)"
+   "confidence": "high",
+   "reason": "motor-driver mount dimension: Input / driver, as in the other types (decided 2026-10-31); the runner passes no driver to ICPG, so the value comes from icpg_params.json rather than from the chosen driver (ISSUES \"Unify per-gearbox settings\", item 3)"
   },
   {
    "name": "driver_mount_inserts_OD",
@@ -1589,8 +1589,8 @@
     "block": "cpg_3DP_design_parameters",
     "key": "driver_mount_inserts_OD"
    },
-   "confidence": "medium",
-   "reason": "motor-driver mount dimension: the runner passes no driver here, so the value comes from this gearbox's own config rather than from the chosen driver (Input / driver for consistency with the other types; the plan asks whether it should be Fixed)"
+   "confidence": "high",
+   "reason": "motor-driver mount dimension: Input / driver, as in the other types (decided 2026-10-31); the runner passes no driver to ICPG, so the value comes from icpg_params.json rather than from the chosen driver (ISSUES \"Unify per-gearbox settings\", item 3)"
   },
   {
    "name": "driver_upper_holes_dist_from_center",
@@ -1602,8 +1602,8 @@
     "block": "cpg_3DP_design_parameters",
     "key": "driver_upper_holes_dist_from_center"
    },
-   "confidence": "medium",
-   "reason": "motor-driver mount dimension: the runner passes no driver here, so the value comes from this gearbox's own config rather than from the chosen driver (Input / driver for consistency with the other types; the plan asks whether it should be Fixed)"
+   "confidence": "high",
+   "reason": "motor-driver mount dimension: Input / driver, as in the other types (decided 2026-10-31); the runner passes no driver to ICPG, so the value comes from icpg_params.json rather than from the chosen driver (ISSUES \"Unify per-gearbox settings\", item 3)"
   },
   {
    "name": "driver_lower_holes_dist_from_center",
@@ -1615,8 +1615,8 @@
     "block": "cpg_3DP_design_parameters",
     "key": "driver_lower_holes_dist_from_center"
    },
-   "confidence": "medium",
-   "reason": "motor-driver mount dimension: the runner passes no driver here, so the value comes from this gearbox's own config rather than from the chosen driver (Input / driver for consistency with the other types; the plan asks whether it should be Fixed)"
+   "confidence": "high",
+   "reason": "motor-driver mount dimension: Input / driver, as in the other types (decided 2026-10-31); the runner passes no driver to ICPG, so the value comes from icpg_params.json rather than from the chosen driver (ISSUES \"Unify per-gearbox settings\", item 3)"
   },
   {
    "name": "driver_mount_height",
@@ -1628,8 +1628,8 @@
     "block": "cpg_3DP_design_parameters",
     "key": "driver_mount_height"
    },
-   "confidence": "medium",
-   "reason": "motor-driver mount dimension: the runner passes no driver here, so the value comes from this gearbox's own config rather than from the chosen driver (Input / driver for consistency with the other types; the plan asks whether it should be Fixed)"
+   "confidence": "high",
+   "reason": "motor-driver mount dimension: Input / driver, as in the other types (decided 2026-10-31); the runner passes no driver to ICPG, so the value comes from icpg_params.json rather than from the chosen driver (ISSUES \"Unify per-gearbox settings\", item 3)"
   },
   {
    "name": "motor_mount_driver_hole_num",
@@ -1654,8 +1654,8 @@
     "block": "cpg_3DP_design_parameters",
     "key": "driver_side_holes_dist_from_center"
    },
-   "confidence": "medium",
-   "reason": "motor-driver mount dimension: the runner passes no driver here, so the value comes from this gearbox's own config rather than from the chosen driver (Input / driver for consistency with the other types; the plan asks whether it should be Fixed)"
+   "confidence": "high",
+   "reason": "motor-driver mount dimension: Input / driver, as in the other types (decided 2026-10-31); the runner passes no driver to ICPG, so the value comes from icpg_params.json rather than from the chosen driver (ISSUES \"Unify per-gearbox settings\", item 3)"
   }
  ],
  "code_only": [

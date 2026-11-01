@@ -339,7 +339,7 @@ Spec: [`config_files/variables/dspg_variables.json`](../../../config_files/varia
 **Results:** `python tests/golden/golden.py check`: All 58 cases match the baseline. `python -m pytest -q`: 782 passed. No `CADs/` file, no golden baseline touched.
 
 **Open questions**
-1. One key per stage (`planet_bearing_gap1` / `2`, `bearing_mount_wall_bolt_dia_multiple1` / `2`) or the single shared key used here? (plan decision 1)
+1. One key per stage (`planet_bearing_gap1` / `2`, `bearing_mount_wall_bolt_dia_multiple1` / `2`) or the single shared key used here? (plan decision 1) **Decided (2026-10-31):** one shared key for both stages.
 2. `sun_hub_dia` margin: shared key, and apply to SSPG / CPG too? (plan decision 2) **Done (2026-10-31):** the margin is now the config key `sun_hub_clearance_multiple` (4 in every type with this rule, SSPG and CPG included; 5 in IDSPG, its CAD value), read by the CAD code and the mass code; value-identical; `tests/test_sun_hub_clearance.py`.
 3. `clearance_motor_and_case_min` and `case_mounting_hole_wall_overlap` exist once: stage 2 writes the stage-1 case values, so there is no second copy to key.
 4. `clearance_case_mount_holes_shell_thickness2` is read in stage 2 but never written or used (the CAD writes the stage-1 value under both prefixes): kept as a code-only Fixed value, not removed.

@@ -3028,8 +3028,8 @@
     "block": "indspg_design_parameters_3DP",
     "key": "planet_bearing_gap"
    },
-   "confidence": "medium",
-   "reason": "axial gap between the two planet bearings (one in each planet gear); with the bearing width it sets the smallest planet and ring width of both stages; one key for both stages, the plan leaves open whether it should be one per stage (planet_bearing_gap1 / 2)"
+   "confidence": "high",
+   "reason": "axial gap between the two planet bearings (one in each planet gear); with the bearing width it sets the smallest planet and ring width of both stages; one key for both stages (decided 2026-10-31)"
   },
   {
    "name": "sun_hub_rotor_gap",

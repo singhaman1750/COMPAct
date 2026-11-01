@@ -29,11 +29,6 @@ Confidence:
 
 CAD variables by confidence: high 255, medium 0, low 0
 
-## To review (not high confidence)
-
-- `bearing_mount_wall_bolt_dia_multiple` (Fixed, medium): wall around the output bearing, in output-bolt diameters on each side; one key for both stages (CAD and mass code), the plan leaves open whether it should be one per stage (bearing_mount_wall_bolt_dia_multiple1 / 2)
-- `planet_bearing_gap` (Fixed, medium): axial gap between the two planet bearings in a planet; with the bearing width it sets the smallest planet and ring widths of both stages; one key for both stages, the plan leaves open whether it should be one per stage (planet_bearing_gap1 / 2)
-
 ## Rules shared by every gearbox
 
 From `config_files/variables/rules.json`; the test holds every gearbox's file to them.
@@ -323,8 +318,8 @@ From `config_files/variables/rules.json`; the test holds every gearbox's file to
 |---|---|---|---|---|---|---|
 | 1 | `clearance_motor_and_case_min` | clearance | dspg_params.json → dspg_design_parameters_3DP → `clearance_motor_and_case_min` |  | high | smallest radial gap between the motor and the case (stage 1); sets a1_clearance_motor_and_case (CAD) and the case mass |
 | 2 | `case_mounting_hole_wall_overlap` | clearance | dspg_params.json → dspg_design_parameters_3DP → `case_mounting_hole_wall_overlap` |  | high | how far the case bolt holes overlap the case wall; sets a1_case_mounting_hole_shift |
-| 3 | `bearing_mount_wall_bolt_dia_multiple` | wall thickness | dspg_params.json → dspg_design_parameters_3DP → `bearing_mount_wall_bolt_dia_multiple` |  | medium | wall around the output bearing, in output-bolt diameters on each side; one key for both stages (CAD and mass code), the plan leaves open whether it should be one per stage (bearing_mount_wall_bolt_dia_multiple1 / 2) |
-| 4 | `planet_bearing_gap` | clearance | dspg_params.json → dspg_design_parameters_3DP → `planet_bearing_gap` |  | medium | axial gap between the two planet bearings in a planet; with the bearing width it sets the smallest planet and ring widths of both stages; one key for both stages, the plan leaves open whether it should be one per stage (planet_bearing_gap1 / 2) |
+| 3 | `bearing_mount_wall_bolt_dia_multiple` | wall thickness | dspg_params.json → dspg_design_parameters_3DP → `bearing_mount_wall_bolt_dia_multiple` |  | high | wall around the output bearing, in output-bolt diameters on each side; one key for both stages, CAD and mass code (decided 2026-10-31) |
+| 4 | `planet_bearing_gap` | clearance | dspg_params.json → dspg_design_parameters_3DP → `planet_bearing_gap` |  | high | axial gap between the two planet bearings in a planet; with the bearing width it sets the smallest planet and ring widths of both stages; one key for both stages (decided 2026-10-31) |
 | 5 | `sun_hub_clearance_multiple` | clearance | dspg_params.json → dspg_design_parameters_3DP → `sun_hub_clearance_multiple` |  | high | margin around the sun hub's bolt circle, in multiples of standard_clearance_1_5mm (4); used for the stage-1 sun hub (CAD and stage-1 mass code); one shared key name across the gearbox types |
 | 6 | `bearingIDClearanceMM` | constraint constant | dspg_params.json → dspg_design_parameters_3DP → `bearingIDClearanceMM` |  | high | extra bore when choosing the output bearing of each stage |
 | 7 | `clearance_case_mount_holes_shell_thickness2` | clearance | dspg_params.json → dspg_design_parameters_3DP → `clearance_case_mount_holes_shell_thickness2` |  | high | read in stage 2 but not used: the CAD writes the stage-1 value clearance_case_mount_holes_shell_thickness under both prefixes |
