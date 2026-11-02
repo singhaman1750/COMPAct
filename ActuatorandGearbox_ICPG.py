@@ -472,6 +472,7 @@ class internalcompoundPlanetaryActuator:
         self.standard_clearance_1_5mm           = self.design_params["standard_clearance_1_5mm"]
         self.planet_bearing_gap                 = self.design_params["planet_bearing_gap"] # 1.0
         self.sun_hub_clearance_multiple         = self.design_params["sun_hub_clearance_multiple"] # 4
+        self.stator_bearing_clearance_multiple  = self.design_params["stator_bearing_clearance_multiple"] # 2
         self.standard_fillet_1_5mm              = self.design_params["standard_fillet_1_5mm"]
         self.standard_bearing_insertion_chamfer = self.design_params["standard_bearing_insertion_chamfer"]
         self.tight_clearance_3DP                = self.design_params["tight_clearance_3DP"]
@@ -611,7 +612,9 @@ class internalcompoundPlanetaryActuator:
         self.bearing_OD     = outer_bearing.getBearingODMM()
         self.bearing_height = outer_bearing.getBearingWidthMM()
 
-        # Sun face width (driven by geometry; floor applied when stator radial clearance is tight)
+        # Sun face width (driven by geometry). When the output bearing doesn't fit inside the stator bore with
+        # stator_bearing_clearance_multiple clearances around it, it sits past the motor, so the sun is at least
+        # the motor height.
         fw_s_used_calc        = (self.standard_clearance_1_5mm * 2
                                  + self.sun_sec_carrier_bearing_height
                                  - (self.sun_bottom_casing_bearing_height + self.standard_clearance_1_5mm - self.sun_coupler_hub_thickness)
@@ -621,7 +624,7 @@ class internalcompoundPlanetaryActuator:
                                  + self.fw_p_b)
         fw_s_used_floor       = self.motor_height
         stator_radial_clearance = (self.stator_ID - self.bearing_OD) / 2
-        floor_applies         = stator_radial_clearance < self.standard_clearance_1_5mm * 2
+        floor_applies         = stator_radial_clearance < self.standard_clearance_1_5mm * self.stator_bearing_clearance_multiple
 
         if floor_applies and fw_s_used_calc < fw_s_used_floor:
             self.fw_s_used = fw_s_used_floor

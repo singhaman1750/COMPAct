@@ -23,15 +23,11 @@ Confidence:
 |---|---|---|
 | Input | 25 | 2 |
 | Optimisation | 5 | 1 |
-| Fixed | 48 | 23 |
+| Fixed | 48 | 24 |
 | Dependent | 39 | 4 |
-| **Total** | **117** | **30** |
+| **Total** | **117** | **31** |
 
-CAD variables by confidence: high 116, medium 1, low 0
-
-## To review (not high confidence)
-
-- `fw_s_used` (Dependent, medium): printed sun length: the stack of bearings, hub, carrier and planet widths, but at least the motor height when the stator's radial clearance around the output bearing is below a hard-coded 2 x standard_clearance_1_5mm (a two-case floor rule; the plan asks whether the 2 is geometry or tuning)
+CAD variables by confidence: high 117, medium 0, low 0
 
 ## Rules shared by every gearbox
 
@@ -169,7 +165,7 @@ From `config_files/variables/rules.json`; the test holds every gearbox's file to
 | 29 | `sun_hub_dia` | formula | `(Rotor_OD - standard_clearance_1_5mm * 2) if (rotor_mount_hole_PCD + rotor_mount_hole_dia + standard_clearance_1_5mm * sun_hub_clearance_multiple) > Rotor_OD else (rotor_mount_hole_PCD + rotor_mount_hole_dia + standard_clearance_1_5mm * sun_hub_clearance_multiple)` | Rotor_OD, standard_clearance_1_5mm, rotor_mount_hole_PCD, rotor_mount_hole_dia, sun_hub_clearance_multiple | high | sun hub: sized to the rotor's mount holes plus a margin of sun_hub_clearance_multiple x standard_clearance_1_5mm (config), capped at the rotor's outer diameter less two clearances |
 | 30 | `sun_central_bolt_socket_head_dia` | lookup | `nuts_and_bolts_dimensions(bolt_dia=sun_central_bolt_dia, bolt_type=socket_head)` → bolt_head_dia | sun_central_bolt_dia | high | standard socket-head fastener size for the chosen bolt diameter |
 | 31 | `fw_p_b` | stress rule | two stress widths, b = FOS x Ft x qe x qk / (gear_allowable_stress x module): b1 for the sun - big planet mesh (module, Ft from serviceFactor x motor_peak_torque at the sun, qe from the sun-planet contact ratio, qk from Ns) and b2 for the small planet - ring mesh (module_s, qk from Np_s); then, if b1 + b2 < 2 x planet_bearing_width + planet_bearing_gap, each planet gear is raised to at least planet_bearing_width + planet_bearing_gap / 2 (one bearing per gear, half the gap each; mitStressAnalysisMinFacewidth); fw_p_b = b1 (raised); then the two planet steps (big + small + planet_step_gap_mm) must fit the stator height less gear_axial_margin_mm: when they are longer, all four widths are scaled by (stator_height - gear_axial_margin_mm - planet_step_gap_mm) / (big + small), so the capped gears carry the same fraction of the torque | module, module_s, Ns, Np_b, Np_s, Nr, num_planet, pressure_angle, motor_peak_torque, gear_allowable_stress, FOS, serviceFactor, stator_height, gear_axial_margin_mm, planet_step_gap_mm, planet_bearing_width, planet_bearing_gap | high | big-planet face width from the tooth-stress rule, raised to hold its bearing and scaled by the stator-height cap |
-| 32 | `fw_s_used` | formula | `motor_height if ((stator_ID - bearing_OD) / 2 < standard_clearance_1_5mm * 2 and (standard_clearance_1_5mm * 2 + sun_sec_carrier_bearing_height - (sun_bottom_casing_bearing_height + standard_clearance_1_5mm - sun_coupler_hub_thickness) + sec_carrier_thickness + clearance_planet + fw_p_s + fw_p_b) < motor_height) else (standard_clearance_1_5mm * 2 + sun_sec_carrier_bearing_height - (sun_bottom_casing_bearing_height + standard_clearance_1_5mm - sun_coupler_hub_thickness) + sec_carrier_thickness + clearance_planet + fw_p_s + fw_p_b)` | motor_height, fw_p_b, fw_p_s, standard_clearance_1_5mm, clearance_planet, stator_ID, bearing_OD, sec_carrier_thickness, sun_sec_carrier_bearing_height, sun_coupler_hub_thickness, sun_bottom_casing_bearing_height | medium | printed sun length: the stack of bearings, hub, carrier and planet widths, but at least the motor height when the stator's radial clearance around the output bearing is below a hard-coded 2 x standard_clearance_1_5mm (a two-case floor rule; the plan asks whether the 2 is geometry or tuning) |
+| 32 | `fw_s_used` | formula | `motor_height if ((stator_ID - bearing_OD) / 2 < standard_clearance_1_5mm * stator_bearing_clearance_multiple and (standard_clearance_1_5mm * 2 + sun_sec_carrier_bearing_height - (sun_bottom_casing_bearing_height + standard_clearance_1_5mm - sun_coupler_hub_thickness) + sec_carrier_thickness + clearance_planet + fw_p_s + fw_p_b) < motor_height) else (standard_clearance_1_5mm * 2 + sun_sec_carrier_bearing_height - (sun_bottom_casing_bearing_height + standard_clearance_1_5mm - sun_coupler_hub_thickness) + sec_carrier_thickness + clearance_planet + fw_p_s + fw_p_b)` | motor_height, fw_p_b, fw_p_s, standard_clearance_1_5mm, clearance_planet, stator_ID, bearing_OD, sec_carrier_thickness, sun_sec_carrier_bearing_height, sun_coupler_hub_thickness, sun_bottom_casing_bearing_height, stator_bearing_clearance_multiple | high | printed sun length: the stack of bearings, hub, carrier and planet widths; when the output bearing doesn't fit inside the stator bore with stator_bearing_clearance_multiple clearances around it, it sits past the motor, so the sun is at least the motor height (whether the floor should be the motor height or the stator height plus the rotor bottom, as first written, is designer question Q5) |
 | 33 | `dp_p_s` | formula | `module_s * Np_s` | module_s, Np_s | high | small-planet pitch diameter (small module) |
 | 34 | `db_p_s` | formula | `dp_p_s * cos(pressure_angle_rad)` | dp_p_s, pressure_angle_rad | high | base-circle diameter |
 | 35 | `alpha_p_s` | formula | `sqrt(dp_p_s ** 2 - db_p_s ** 2) / db_p_s * 180 / pi - pressure_angle` | pressure_angle, db_p_s, dp_p_s | high | involute angle used to draw the tooth |
@@ -178,7 +174,7 @@ From `config_files/variables/rules.json`; the test holds every gearbox's file to
 | 38 | `sun_bottom_casing_bearing_OD` | lookup | `bearings_discrete(idRequiredMM=rotor_mount_hole_PCD + sun_gear_rotor_nut_wrench_size + standard_clearance_1_5mm * sun_hub_clearance_multiple)` → getBearingODMM | rotor_mount_hole_PCD, sun_gear_rotor_nut_wrench_size, standard_clearance_1_5mm, sun_hub_clearance_multiple | high | catalogue bearing chosen by bearings_discrete (smallest one that fits) (the request: the hole circle plus the nut plus sun_hub_clearance_multiple x standard_clearance_1_5mm, config); this is its outer diameter |
 | 39 | `sun_bottom_casing_bearing_height` | lookup | `bearings_discrete(idRequiredMM=rotor_mount_hole_PCD + sun_gear_rotor_nut_wrench_size + standard_clearance_1_5mm * sun_hub_clearance_multiple)` → getBearingWidthMM | rotor_mount_hole_PCD, sun_gear_rotor_nut_wrench_size, standard_clearance_1_5mm, sun_hub_clearance_multiple | high | catalogue bearing chosen by bearings_discrete (smallest one that fits) (the request: the hole circle plus the nut plus sun_hub_clearance_multiple x standard_clearance_1_5mm, config); this is its width |
 
-## Used by the code, not written to the CAD file (30)
+## Used by the code, not written to the CAD file (31)
 
 | # | Variable | Sub-type | Source / formula | Depends on | Confidence | Why |
 |---|---|---|---|---|---|---|
@@ -189,29 +185,30 @@ From `config_files/variables/rules.json`; the test holds every gearbox's file to
 | 5 | `serviceFactor` | safety factor | motor_config.json → MIT_params → `serviceFactor` |  | high | service factor on the motor torque in the tooth-stress rule |
 | 6 | `planet_bearing_gap` | clearance | icpg_params.json → cpg_3DP_design_parameters → `planet_bearing_gap` |  | high | axial gap between the two planet bearings (one in each planet gear); with the bearing width it sets the smallest planet and ring width |
 | 7 | `sun_hub_clearance_multiple` | clearance | icpg_params.json → cpg_3DP_design_parameters → `sun_hub_clearance_multiple` |  | high | margin around the sun hub's bolt circle, in multiples of standard_clearance_1_5mm (4); used for the sun hub and the bottom-casing bearing request; one shared key name across the gearbox types |
-| 8 | `maxGearboxDiameter` | formula | `MAX_GB_DIA_MULT_FACTOR * stator_ID` | MAX_GB_DIA_MULT_FACTOR, stator_ID | high | largest gearbox diameter the optimiser may use (gearbox_runner max_diameter): the stator's inner diameter times a factor (the gears sit inside the frameless outrunner) |
-| 9 | `module_s` | module | optimiser (`optimizationInternalCompoundPlanetaryActuator`) |  | high | the small module (small planet, ring): searched by the optimiser loop, but not in the CAD file (which has one module; ISSUES bug 18) |
-| 10 | `bearingIDClearance_3DP` | constraint constant | icpg_params.json → cpg_3DP_design_parameters → `bearingIDClearanceMM` |  | high | constant from the ICPG 3DP design parameters |
-| 11 | `actuator_width` | formula | `fw_s_used + bearing_height + sun_coupler_hub_thickness + standard_clearance_1_5mm * 3.5 + sun_bottom_casing_bearing_height + bearing_retainer_thickness` | bearing_retainer_thickness, sun_bottom_casing_bearing_height, sun_coupler_hub_thickness, standard_clearance_1_5mm, fw_s_used, bearing_height | high | axial width: both motor-case walls plus the motor case height, written to the results CSV |
-| 12 | `fw_limit_mm` | formula | `stator_height - gear_axial_margin_mm` | stator_height, gear_axial_margin_mm | high | the widest gear the stator height allows: the stator height less gear_axial_margin_mm (the width cap of the stress rule) |
-| 13 | `ringRadialWidthMM` | constraint constant | icpg_params.json → cpg_3DP_design_parameters → `ringRadialWidthMM` |  | high | read by the code but not written to the CAD file |
-| 14 | `planetMinDistanceMM` | constraint constant | icpg_params.json → cpg_3DP_design_parameters → `planetMinDistanceMM` |  | high | read by the code but not written to the CAD file |
-| 15 | `sCarrierExtrusionDiaMM` | constraint constant | icpg_params.json → cpg_3DP_design_parameters → `sCarrierExtrusionDiaMM` |  | high | read by the code but not written to the CAD file |
-| 16 | `sCarrierExtrusionClearanceMM` | constraint constant | icpg_params.json → cpg_3DP_design_parameters → `sCarrierExtrusionClearanceMM` |  | high | read by the code but not written to the CAD file |
-| 17 | `carrier_trapezoidal_support_hole_wrench_size_config` | fastener size | icpg_params.json → cpg_3DP_design_parameters → `carrier_trapezoidal_support_hole_wrench_size` |  | high | config value carrier_trapezoidal_support_hole_wrench_size (the CAD variable of the same name is not read from it): in the config but never read |
-| 18 | `sun_sec_carrier_bearing_massKG` | bearing (chosen part) | icpg_params.json → cpg_3DP_design_parameters → `sun_sec_carrier_bearing_massKG` |  | high | in the config but never read |
-| 19 | `gear_axial_margin_mm` | feature size | icpg_params.json → cpg_3DP_design_parameters → `gear_axial_margin_mm` |  | high | read by the code but not written to the CAD file |
-| 20 | `planet_step_gap_mm` | planet part | icpg_params.json → cpg_3DP_design_parameters → `planet_step_gap_mm` |  | high | read by the code but not written to the CAD file |
-| 21 | `GEAR_RATIO_MIN` | search bound | icpg_params.json → cpg_optimization_parameters → `GEAR_RATIO_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 22 | `GEAR_RATIO_MAX` | search bound | icpg_params.json → cpg_optimization_parameters → `GEAR_RATIO_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 23 | `GEAR_RATIO_STEP` | search bound | icpg_params.json → cpg_optimization_parameters → `GEAR_RATIO_STEP` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 24 | `MODULE_MIN` | search bound | icpg_params.json → cpg_optimization_parameters → `MODULE_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 25 | `MODULE_MAX` | search bound | icpg_params.json → cpg_optimization_parameters → `MODULE_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 26 | `NUM_PLANET_MIN` | search bound | icpg_params.json → cpg_optimization_parameters → `NUM_PLANET_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 27 | `NUM_PLANET_MAX` | search bound | icpg_params.json → cpg_optimization_parameters → `NUM_PLANET_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 28 | `NUM_TEETH_SUN_MIN` | search bound | icpg_params.json → cpg_optimization_parameters → `NUM_TEETH_SUN_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 29 | `NUM_TEETH_PLANET_MIN` | search bound | icpg_params.json → cpg_optimization_parameters → `NUM_TEETH_PLANET_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 30 | `MAX_GB_DIA_MULT_FACTOR` | search bound | icpg_params.json → cpg_optimization_parameters → `MAX_GB_DIA_MULT_FACTOR` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 8 | `stator_bearing_clearance_multiple` | clearance | icpg_params.json → cpg_3DP_design_parameters → `stator_bearing_clearance_multiple` |  | high | radial room the output bearing needs inside the stator bore, in multiples of standard_clearance_1_5mm (2); with less, the sun length gets the motor-height floor |
+| 9 | `maxGearboxDiameter` | formula | `MAX_GB_DIA_MULT_FACTOR * stator_ID` | MAX_GB_DIA_MULT_FACTOR, stator_ID | high | largest gearbox diameter the optimiser may use (gearbox_runner max_diameter): the stator's inner diameter times a factor (the gears sit inside the frameless outrunner) |
+| 10 | `module_s` | module | optimiser (`optimizationInternalCompoundPlanetaryActuator`) |  | high | the small module (small planet, ring): searched by the optimiser loop, but not in the CAD file (which has one module; ISSUES bug 18) |
+| 11 | `bearingIDClearance_3DP` | constraint constant | icpg_params.json → cpg_3DP_design_parameters → `bearingIDClearanceMM` |  | high | constant from the ICPG 3DP design parameters |
+| 12 | `actuator_width` | formula | `fw_s_used + bearing_height + sun_coupler_hub_thickness + standard_clearance_1_5mm * 3.5 + sun_bottom_casing_bearing_height + bearing_retainer_thickness` | bearing_retainer_thickness, sun_bottom_casing_bearing_height, sun_coupler_hub_thickness, standard_clearance_1_5mm, fw_s_used, bearing_height | high | axial width: both motor-case walls plus the motor case height, written to the results CSV |
+| 13 | `fw_limit_mm` | formula | `stator_height - gear_axial_margin_mm` | stator_height, gear_axial_margin_mm | high | the widest gear the stator height allows: the stator height less gear_axial_margin_mm (the width cap of the stress rule) |
+| 14 | `ringRadialWidthMM` | constraint constant | icpg_params.json → cpg_3DP_design_parameters → `ringRadialWidthMM` |  | high | read by the code but not written to the CAD file |
+| 15 | `planetMinDistanceMM` | constraint constant | icpg_params.json → cpg_3DP_design_parameters → `planetMinDistanceMM` |  | high | read by the code but not written to the CAD file |
+| 16 | `sCarrierExtrusionDiaMM` | constraint constant | icpg_params.json → cpg_3DP_design_parameters → `sCarrierExtrusionDiaMM` |  | high | read by the code but not written to the CAD file |
+| 17 | `sCarrierExtrusionClearanceMM` | constraint constant | icpg_params.json → cpg_3DP_design_parameters → `sCarrierExtrusionClearanceMM` |  | high | read by the code but not written to the CAD file |
+| 18 | `carrier_trapezoidal_support_hole_wrench_size_config` | fastener size | icpg_params.json → cpg_3DP_design_parameters → `carrier_trapezoidal_support_hole_wrench_size` |  | high | config value carrier_trapezoidal_support_hole_wrench_size (the CAD variable of the same name is not read from it): in the config but never read |
+| 19 | `sun_sec_carrier_bearing_massKG` | bearing (chosen part) | icpg_params.json → cpg_3DP_design_parameters → `sun_sec_carrier_bearing_massKG` |  | high | in the config but never read |
+| 20 | `gear_axial_margin_mm` | feature size | icpg_params.json → cpg_3DP_design_parameters → `gear_axial_margin_mm` |  | high | read by the code but not written to the CAD file |
+| 21 | `planet_step_gap_mm` | planet part | icpg_params.json → cpg_3DP_design_parameters → `planet_step_gap_mm` |  | high | read by the code but not written to the CAD file |
+| 22 | `GEAR_RATIO_MIN` | search bound | icpg_params.json → cpg_optimization_parameters → `GEAR_RATIO_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 23 | `GEAR_RATIO_MAX` | search bound | icpg_params.json → cpg_optimization_parameters → `GEAR_RATIO_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 24 | `GEAR_RATIO_STEP` | search bound | icpg_params.json → cpg_optimization_parameters → `GEAR_RATIO_STEP` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 25 | `MODULE_MIN` | search bound | icpg_params.json → cpg_optimization_parameters → `MODULE_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 26 | `MODULE_MAX` | search bound | icpg_params.json → cpg_optimization_parameters → `MODULE_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 27 | `NUM_PLANET_MIN` | search bound | icpg_params.json → cpg_optimization_parameters → `NUM_PLANET_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 28 | `NUM_PLANET_MAX` | search bound | icpg_params.json → cpg_optimization_parameters → `NUM_PLANET_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 29 | `NUM_TEETH_SUN_MIN` | search bound | icpg_params.json → cpg_optimization_parameters → `NUM_TEETH_SUN_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 30 | `NUM_TEETH_PLANET_MIN` | search bound | icpg_params.json → cpg_optimization_parameters → `NUM_TEETH_PLANET_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 31 | `MAX_GB_DIA_MULT_FACTOR` | search bound | icpg_params.json → cpg_optimization_parameters → `MAX_GB_DIA_MULT_FACTOR` |  | high | optimiser setting: limits of the search, not a part dimension |
 
 ## Config blocks ICPG doesn't read
 

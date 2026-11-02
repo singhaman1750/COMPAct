@@ -79,3 +79,24 @@ the smallest bearing whose OD is at least that value, so each gets a bearing 0.5
 To be gone through together with the designers, not fixed alone.
 
 **Status:** open.
+
+## Q5. ICPG: the motor-height floor on the sun length
+
+`ActuatorandGearbox_ICPG.py`, `setVariables`: when the output bearing doesn't fit inside the stator bore with
+`stator_bearing_clearance_multiple` (2) × 1.5 mm around it, the sun length `fw_s_used` is at least the motor height,
+so the bearing sits past the motor:
+
+```python
+fw_s_used_floor = self.motor_height
+floor_applies   = (self.stator_ID - self.bearing_OD) / 2 < self.standard_clearance_1_5mm * self.stator_bearing_clearance_multiple
+```
+
+The floor was first `stator_height + rotor_bottom_thickness` (commit `1075730`, 2026-06-15) and changed to
+`motor_height` a week later (`2c1fc51`). In every design checked the output bearing is wider than the stator
+bore (RO100: bore 74 mm, bearings 72–110 mm OD), so the condition always holds and the rule is in effect
+"the sun is at least the motor height".
+
+- Which axial position should the floor be: the motor height or the stator height plus the rotor bottom?
+- Is 3 mm of radial room the right test for "the bearing fits inside the stator"?
+
+**Status:** open.

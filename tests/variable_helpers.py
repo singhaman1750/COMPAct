@@ -176,7 +176,7 @@ GEARBOXES = {
         extra=[], config_file="idspg_motor_config.json"),
     "icpg": Gearbox(
         "icpg", "ICPG", "icpg_equations", "internalcompoundPlanetaryGearbox",
-        counts={"input": 25, "optimisation": 5, "fixed": 48, "dependent": 39}, code_only=30,
+        counts={"input": 25, "optimisation": 5, "fixed": 48, "dependent": 39}, code_only=31,
         set_gears=_set_cpg,
         from_opt=lambda p: (p[2], p[3], p[4], p[5], p[6], p[7], p[1]),   # [gr, n, Ns, Np_b, Np_s, Nr, m_b, m_s]
         extra=[("RO100", (30, 30, 30, 90, 1.2, 1.2, 3))],         # module 1.2: short gears, the sun length hits the motor-height floor
