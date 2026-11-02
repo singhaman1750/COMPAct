@@ -925,7 +925,7 @@
     "stator_rotor_top_offset"
    ],
    "confidence": "medium",
-   "reason": "stage-1 sun length: the rotor height and offsets, less the stage-1 bearing, clearances and retainer (an axial-fill rule that makes the stages fill the rotor height)"
+   "reason": "stage-1 sun length: the rotor height and offsets, less the stage-1 bearing, clearances and retainer (an axial-fill rule that makes the stages fill the rotor height) (rule under review: designer question Q6)"
   },
   {
    "name": "a1_Ns2",
@@ -1071,7 +1071,7 @@
     "a1_standard_clearance_1_5mm"
    ],
    "confidence": "medium",
-   "reason": "stage-2 sun length: retainer, clearances, carrier and planet width (an axial-fill rule)"
+   "reason": "stage-2 sun length: retainer, clearances, carrier and planet width (an axial-fill rule) (rule under review: designer question Q6)"
   },
   {
    "name": "a1_fw_p2",
@@ -2104,7 +2104,7 @@
     "a1_standard_clearance_1_5mm"
    ],
    "confidence": "medium",
-   "reason": "same value as a1_fw_s_used2 (the CAD writes it under both stage prefixes); stage-2 sun length: retainer, clearances, carrier and planet width (an axial-fill rule)",
+   "reason": "same value as a1_fw_s_used2 (the CAD writes it under both stage prefixes); stage-2 sun length: retainer, clearances, carrier and planet width (an axial-fill rule) (rule under review: designer question Q6)",
    "alias_of": "a1_fw_s_used2"
   },
   {
@@ -2734,7 +2734,7 @@
     "a1_ring_gear_thickness_mounting_casing"
    ],
    "confidence": "medium",
-   "reason": "axial-fill check for stage 1: the stator height and mounting casing less the stage-1 stack (a value written for the CAD, not used by the code)"
+   "reason": "axial-fill check for stage 1: the stator height and mounting casing less the stage-1 stack (a value written for the CAD, not used by the code) (rule under review: designer question Q6)"
   },
   {
    "name": "a2_ring_gear_relation",
@@ -2755,7 +2755,7 @@
     "a1_standard_clearance_1_5mm"
    ],
    "confidence": "medium",
-   "reason": "axial-fill check for stage 2: the two stage lengths less the stator, rotor base and extrusion (a value written for the CAD, not used by the code)"
+   "reason": "axial-fill check for stage 2: the two stage lengths less the stator, rotor base and extrusion (a value written for the CAD, not used by the code) (rule under review: designer question Q6)"
   },
   {
    "name": "a1_ring_gear_thickness_mounting_casing",
