@@ -150,3 +150,25 @@ def test_sun_width_depends_on_the_planet_bearing_minimum_through_the_cap(monkeyp
     assert {"planet_bearing_width", "planet_bearing_gap"} <= set(BY_NAME["fw_s_calc"]["depends_on"])
     changed = {k for k in base if base[k] != more[k]}
     assert {"fw_s_calc", "fw_p_b", "fw_r"} <= changed <= downstream_of(GB, "planet_bearing_gap")
+
+
+def test_stator_bearing_clearance_sets_the_sun_length_floor(monkeypatch, tmp_path):
+    """stator_bearing_clearance_multiple (config, 2) is the radial room, in standard clearances, the output bearing
+    needs inside the stator bore. In the short UNCAPPED design the bearing is wider than the bore (negative room), so
+    its sun gets the motor-height floor; with the multiple set below that room the floor is off, the sun is just its
+    stack and only what depends on it changes."""
+    (tmp_path / "a").mkdir(), (tmp_path / "b").mkdir()
+    act, _, _, onshape = design(monkeypatch, tmp_path / "a")
+    base = {n: float(x) for n, x in onshape}
+    room = (act.stator_ID - act.bearing_OD) / 2
+    assert act.stator_bearing_clearance_multiple == 2 and room < act.standard_clearance_1_5mm * 2
+    assert base["fw_s_used"] == act.motor_height
+    b, _, _, _ = design(monkeypatch, tmp_path / "b")
+    multiple = room / b.standard_clearance_1_5mm - 1
+    more = rerun(b, tmp_path / "b", stator_bearing_clearance_multiple=multiple)
+    stack = (b.standard_clearance_1_5mm * 2 + b.sun_sec_carrier_bearing_height
+             - (b.sun_bottom_casing_bearing_height + b.standard_clearance_1_5mm - b.sun_coupler_hub_thickness)
+             + b.sec_carrier_thickness + b.clearance_planet + b.fw_p_s + b.fw_p_b)
+    assert more["fw_s_used"] == pytest.approx(stack) and stack < act.motor_height
+    changed = {k for k in base if base[k] != more[k]}
+    assert "fw_s_used" in changed and changed <= downstream_of(GB, "stator_bearing_clearance_multiple")

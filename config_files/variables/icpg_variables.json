@@ -887,7 +887,7 @@
    "attr": "fw_s_used",
    "category": "dependent",
    "subtype": "formula",
-   "formula": "motor_height if ((stator_ID - bearing_OD) / 2 < standard_clearance_1_5mm * 2 and (standard_clearance_1_5mm * 2 + sun_sec_carrier_bearing_height - (sun_bottom_casing_bearing_height + standard_clearance_1_5mm - sun_coupler_hub_thickness) + sec_carrier_thickness + clearance_planet + fw_p_s + fw_p_b) < motor_height) else (standard_clearance_1_5mm * 2 + sun_sec_carrier_bearing_height - (sun_bottom_casing_bearing_height + standard_clearance_1_5mm - sun_coupler_hub_thickness) + sec_carrier_thickness + clearance_planet + fw_p_s + fw_p_b)",
+   "formula": "motor_height if ((stator_ID - bearing_OD) / 2 < standard_clearance_1_5mm * stator_bearing_clearance_multiple and (standard_clearance_1_5mm * 2 + sun_sec_carrier_bearing_height - (sun_bottom_casing_bearing_height + standard_clearance_1_5mm - sun_coupler_hub_thickness) + sec_carrier_thickness + clearance_planet + fw_p_s + fw_p_b) < motor_height) else (standard_clearance_1_5mm * 2 + sun_sec_carrier_bearing_height - (sun_bottom_casing_bearing_height + standard_clearance_1_5mm - sun_coupler_hub_thickness) + sec_carrier_thickness + clearance_planet + fw_p_s + fw_p_b)",
    "depends_on": [
     "motor_height",
     "fw_p_b",
@@ -899,10 +899,11 @@
     "sec_carrier_thickness",
     "sun_sec_carrier_bearing_height",
     "sun_coupler_hub_thickness",
-    "sun_bottom_casing_bearing_height"
+    "sun_bottom_casing_bearing_height",
+    "stator_bearing_clearance_multiple"
    ],
-   "confidence": "medium",
-   "reason": "printed sun length: the stack of bearings, hub, carrier and planet widths, but at least the motor height when the stator's radial clearance around the output bearing is below a hard-coded 2 x standard_clearance_1_5mm (a two-case floor rule; the plan asks whether the 2 is geometry or tuning)"
+   "confidence": "high",
+   "reason": "printed sun length: the stack of bearings, hub, carrier and planet widths; when the output bearing doesn't fit inside the stator bore with stator_bearing_clearance_multiple clearances around it, it sits past the motor, so the sun is at least the motor height (whether the floor should be the motor height or the stator height plus the rotor bottom, as first written, is designer question Q5)"
   },
   {
    "name": "bearing_retainer_thickness",
@@ -1748,6 +1749,19 @@
    },
    "confidence": "high",
    "reason": "margin around the sun hub's bolt circle, in multiples of standard_clearance_1_5mm (4); used for the sun hub and the bottom-casing bearing request; one shared key name across the gearbox types"
+  },
+  {
+   "name": "stator_bearing_clearance_multiple",
+   "attr": "stator_bearing_clearance_multiple",
+   "category": "fixed",
+   "subtype": "clearance",
+   "source": {
+    "file": "icpg_params.json",
+    "block": "cpg_3DP_design_parameters",
+    "key": "stator_bearing_clearance_multiple"
+   },
+   "confidence": "high",
+   "reason": "radial room the output bearing needs inside the stator bore, in multiples of standard_clearance_1_5mm (2); with less, the sun length gets the motor-height floor"
   },
   {
    "name": "maxGearboxDiameter",

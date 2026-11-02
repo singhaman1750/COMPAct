@@ -29,7 +29,7 @@ Part of [the plan for all actuators](../PLAN.md). Survey only: nothing in the co
 | Where | Number | Proposed key |
 |---|---|---|
 | planet-bearing minimum (L919-923) | 2/3, 1/3 | `planet_bearing_gap` (gap, gap/2 as CPG) |
-| `fw_s_used` floor condition (stator clearance < `1.5 × 2`) | 2 | review: geometry or tuning? |
+| `fw_s_used` floor condition (stator clearance < `1.5 × 2`) | 2 | **Done (2026-11-02):** geometry; config key `stator_bearing_clearance_multiple` (2), value-identical; the floor's datum is designer question Q5 |
 | mass code: bolt bosses (`6 × π × … (7.5/2000)² − (3/2000)²`), casing bearing recess (10 mm), `+ 3` mm ring-bolt length, `1.5 × 4` margins, sun-shaft bearing 4 g | various | mass-only list |
 
 ## Config (`icpg_params.json`)
