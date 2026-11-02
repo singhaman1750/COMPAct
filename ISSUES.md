@@ -403,7 +403,9 @@ INSSPG (both types) and ISSPG compact — first confirm in the Onshape models wh
 selected bearings really don't fit, or whether the `- 4` / `- 1.5 * 5` clearances were meant to
 allow for this. Related to bug 1 (the ID and OD lookups use different tables).
 
-**Status:** open — needs the INSSPG and ISSPG designers to check in Onshape.
+**Status:** open — deferred (2026-11-01): too big a change to make alone; to be done together with the
+ISSPG and INSSPG designers, checking each bearing in the Onshape models (docs/designer_questions.md Q4).
+Until then ISSPG compact's `sun2_bearing_ID`/`_OD`/`_width` stay at medium confidence.
 
 ### 6. INSSPG type 2 — which rotor support bearings it uses is unknown
 

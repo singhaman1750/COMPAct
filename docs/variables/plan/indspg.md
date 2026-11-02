@@ -16,7 +16,7 @@ Part of [the plan for all actuators](../PLAN.md). Survey only: nothing in the co
 | `a1_*` / `a2_*` | two stages, as DSPG / IDSPG; un-prefixed motor and casing names (`stator_*`, `Stator_*`, `Rotor_*`, `needle_*`, …) | one entry per Onshape name |
 | **42 alias pairs** | same attribute under both prefixes | identical classification, `alias_of` |
 | `a1_bearing_ID/OD/height` (+ `a2_bearing1_*` aliases) | **hard-coded 38.1 / 47.625 / 4.763 mm** (an inch thin-section bearing); the mass code repeats it with its mass 22.7 g (L1593-1596) | Fixed / hard-coded, **medium**; propose config keys (e.g. `a1_bearing_ID/OD/height/massKG`) |
-| `a1_sun_bottom_casing_bearing_*` | **looked up, then overwritten by config** (L413-421) | Fixed / config (dead lookup noted) |
+| `a1_sun_bottom_casing_bearing_*` | looked up for a 19 mm rotor (RI80), from the config otherwise (L413-426). **Done (2026-11-01):** chosen per motor by `a1_sun_bottom_casing_bearing_source` (`{RI100: config, RI80: lookup}`), value-identical | Dependent / lookup per motor |
 | `a1_fw_p` | **config `fw_p_1_fix`** (a fixed stage-1 planet width, not the stress rule) | Fixed / config |
 | `a1_fw_r`, `a1_fw_s_calc`, `a2_fw_r`, `a2_fw_s_calc` | MIT stress rule per stage, SSPG-style bearing minimum | Dependent / stress rule |
 | `a1_fw_s_used` | two-case (L451 / L454) with `1.5 × 2 + 1.5 × 0.5` | Dependent / formula, **medium** (× 0.5, × 2) |

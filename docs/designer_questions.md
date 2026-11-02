@@ -51,5 +51,31 @@ sizes the stage-1 carrier with a catalogue bearing (ISSUES bug 22).
 
 - Was this thin-section bearing chosen on purpose, for example to save height inside the stator?
 - Should it stay fixed for every design, or be picked per design from the bearing table, with this bearing added to the table?
+- The stage-1 sun's bottom bearing on RI100 is also an inch thin-section bearing from the config
+  (`a1_sun_bottom_casing_bearing_*`: 44.45 × 53.975 × 4.763 mm, 1¾″ × 2⅛″ × 3/16″), while RI80 takes the
+  catalogue bearing for its rotor's bore (`a1_sun_bottom_casing_bearing_source` in `indspg_params.json`).
+  Was it chosen for the same reason?
+
+**Status:** open.
+
+## Q4. ISSPG compact and INSSPG: bearings picked one size too big (ISSUES bug 5)
+
+Three places know the largest bearing their space can hold, but `bearings_discrete(odRequiredMM=...)` returns
+the smallest bearing whose OD is at least that value, so each gets a bearing 0.5–3.5 mm larger than its space:
+
+| Gearbox / motor | Bearing | Max OD | Picked today | Largest that fits |
+|---|---|---|---|---|
+| ISSPG compact RO100 | sun-2 (`motor_rotor_base_ID`) | 60 | 50×62×6 | 45×58×7 |
+| ISSPG compact RO80 | sun-2 | 51 | 40×52×7 | 40×50×6 |
+| INSSPG RI100 | rotor support (`Rotor_ID - 4`) | 41 | 30×42×7 | 25×37×7 |
+| INSSPG RI100 | rotor upper support (`Stator_ID - 1.5 × 5`) | 49.5 | 40×50×6 | 35×47×7 |
+| INSSPG RI80 | rotor support | 36.5 | 25×37×7 | 20×32×7 |
+| INSSPG RI80 | rotor upper support | 43.5 | 35×47×7 | 30×42×7 |
+
+- In the Onshape models, does the picked bearing really overlap its space, or is the limit a different dimension?
+- Were the `- 4` and `- 1.5 × 5` clearances meant to absorb the larger bearing?
+- If the bearing must fit: is the largest bearing that fits the right choice (it changes the CAD sizes and masses)?
+
+To be gone through together with the designers, not fixed alone.
 
 **Status:** open.

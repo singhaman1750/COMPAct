@@ -283,6 +283,7 @@ class inrunnerdoubleStageActuator:
         self.sun_hub_rotor_gap                          = self.design_params["sun_hub_rotor_gap"] # 2
         self.rotor_mount_hole_wall                      = self.design_params["rotor_mount_hole_wall"] # 2
         self.sun1_extra_clearance_multiple              = per_motor_value(self.design_params, "sun1_extra_clearance_multiple", self.motor.motorName) # RI100 0, RI80 0.5
+        self.a1_sun_bottom_casing_bearing_source        = per_motor_value(self.design_params, "a1_sun_bottom_casing_bearing_source", self.motor.motorName) # RI100 "config", RI80 "lookup"
 
 
         ## --------------------------------------------------------------------
@@ -410,20 +411,23 @@ class inrunnerdoubleStageActuator:
         ## Stage 1 - Component and Casing Calculations
         ## --------------------------------------------------------------------
         
-        # a1_sun_bottom_casing Bearing calculations
-        if self.rotor_height == 19:
-            req_bearing_ID = self.rotor_ID - self.standard_clearance_1_5mm  #TODO: check for bearing selection once all done , THIS IS FIX VALUE
+        # a1_sun_bottom_casing Bearing calculations: per motor, a catalogue bearing for the rotor's bore
+        # ("lookup", RI80) or the bearing in the config ("config", RI100: an inch thin-section bearing)
+        if self.a1_sun_bottom_casing_bearing_source == "lookup":
+            req_bearing_ID = self.rotor_ID - self.standard_clearance_1_5mm
             Bearing_bottom_casing = bearings_discrete(req_bearing_ID)
             self.a1_sun_bottom_casing_bearing_ID = Bearing_bottom_casing.getBearingIDMM()
             self.a1_sun_bottom_casing_bearing_OD = Bearing_bottom_casing.getBearingODMM()
             self.a1_sun_bottom_casing_bearing_height = Bearing_bottom_casing.getBearingWidthMM()
             self.a1_sun_bottom_casing_bearing_massKg = Bearing_bottom_casing.getBearingMassKG()
         
-        else:
+        elif self.a1_sun_bottom_casing_bearing_source == "config":
             self.a1_sun_bottom_casing_bearing_ID = self.design_params["a1_sun_bottom_casing_bearing_ID"]
             self.a1_sun_bottom_casing_bearing_OD = self.design_params["a1_sun_bottom_casing_bearing_OD"]
             self.a1_sun_bottom_casing_bearing_height = self.design_params["a1_sun_bottom_casing_bearing_height"]
             self.a1_sun_bottom_casing_bearing_massKg = self.design_params["a1_sun_bottom_casing_bearing_massKg"]
+        else:
+            raise ValueError(f"a1_sun_bottom_casing_bearing_source must be \"lookup\" or \"config\", not {self.a1_sun_bottom_casing_bearing_source!r}")
             
         # Stage-1 output bearing: a fixed bearing from the config (ISSUES bug 22)
         self.bearing1_ID     = self.design_params["a1_bearing_ID"]

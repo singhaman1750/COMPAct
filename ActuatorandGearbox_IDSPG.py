@@ -442,7 +442,6 @@ class internaldoubleStagePlanetaryActuator:
 
         bearing_too_large = self.bearing2_ID > self.bearing1_OD - self.loose_clearance_3DP * 2
         fw_interference   = self.fw_p1 > FW_P_THRESHOLD
-        shortfall         = 0   # only set in Case D
 
         # Minimum a1_fw_s_used (stator-height floor) — used in Case D check
         a1_fw_s_used_min  = ( self.Rotor_height
@@ -540,6 +539,7 @@ class internaldoubleStagePlanetaryActuator:
         
 
         #     shortfall = max(0, a1_fw_s_used_min - a1_fw_s_used)
+        #     (Case D is off, so there is no shortfall; if it comes back, add it to fw_s2_used below)
 
         # --- final variable all cases ---
         a1_ring_gear_relation = ( self.Stator_height 
@@ -553,7 +553,6 @@ class internaldoubleStagePlanetaryActuator:
                                                     )
         self.fw_s1_used = a1_fw_s_used_min
         self.a1_ring_gear_relation = a1_ring_gear_relation
-        self.shortfall = shortfall  
 
        #-------------------------------------------------------------------------------
 
@@ -758,7 +757,6 @@ class internaldoubleStagePlanetaryActuator:
                             + self.sec_carrier_thickness2
                             + self.clearance_planet
                             + self.fw_p2
-                            + self.shortfall
                             )
         self.a2_ring_gear_relation = ( self.fw_s1_used
                                         + self.standard_clearance_1_5mm
