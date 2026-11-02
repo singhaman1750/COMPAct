@@ -100,3 +100,44 @@ bore (RO100: bore 74 mm, bearings 72–110 mm OD), so the condition always holds
 - Is 3 mm of radial room the right test for "the bearing fits inside the stator"?
 
 **Status:** open.
+
+## Q6. IDSPG: the axial-fill rules for the two stages
+
+`ActuatorandGearbox_IDSPG.py`, `setVariables`. The code once had four cases (A–D) for how the two stages fill
+the motor's height, chosen by whether the stage-2 bearing fits inside the stage-1 bearing and whether the
+stage-1 planet is wider than 15 mm (`FW_P_THRESHOLD`). Cases A, B and D are commented out; only Case C runs,
+for every design:
+
+```python
+a1_fw_s_used  = (Rotor_height + stator_rotor_top_offset + a1_ring_gear_thickness_mounting_casing
+                 - bearing1_height - clearance_planet - carrier_bearing_step_width - bearing_retainer_thickness)
+a1_fw_s_used2 = (bearing_retainer_thickness + standard_clearance_1_5mm + sec_carrier_thickness2
+                 + clearance_planet + fw_p2)                       # also written as a2_fw_s_used
+a1_ring_gear_relation = (Stator_height + a1_ring_gear_thickness_mounting_casing - bearing_retainer_thickness
+                         - bearing1_height - carrier_bearing_step_width - clearance_planet - fw_r1
+                         - clearance_planet * 0.5)
+a2_ring_gear_relation = (a1_fw_s_used + standard_clearance_1_5mm + carrier_bearing_step_width + bearing1_height
+                         + a1_fw_s_used2 - fw_p2 - Stator_height - a1_ring_gear_thickness_mounting_casing
+                         - rotor_bottom_thickness - motor_stator_extrusion_depth)
+```
+
+What the golden designs give (RO100, ratio 20):
+
+| | `a1_fw_s_used` | `a1_fw_s_used2` | `a1_ring_gear_relation` | `a2_ring_gear_relation` |
+|---|---|---|---|---|
+| 3D-printed | 27.2 | 39.19 | 7.02 | 7.5 |
+| metal | 29.2 | 18.0 | 15.75 | 7.5 |
+
+Points from the code:
+- The stage-1 sun length depends only on the rotor and fixed sizes, not on the stage-1 gears.
+- `fw_p2` cancels in `a2_ring_gear_relation`, so it is the same for every design of a motor (7.5 mm here).
+- The two `ring_gear_relation` values are only written to the CAD file; nothing in Python checks them, so a
+  design where either is negative is still accepted.
+
+Questions:
+- Is Case C the intended rule for every design, or should the other cases come back (and when)?
+- Should the stage-2 sun length take up the rest of the motor height, rather than just its own stack?
+- Which CAD features use `a1_ring_gear_relation` and `a2_ring_gear_relation`, and what must they not go below?
+  Should the optimiser reject designs where they do?
+
+**Status:** open.
