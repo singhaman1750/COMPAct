@@ -26,9 +26,9 @@ FILES = ("fits.json", "fits.md", "summary.md")   # plus every table_<material>.c
 # Known issues that affect what the map says (ISSUES.md), as of this release.
 KNOWN_ISSUES = [
     {"id": "metal-overestimate", "materials": ["metal"],
-     "text": "Metal masses are overestimated: the metal mode reuses the 3D-printed shapes, the whole gearbox casing "
-             "is weighed as steel, and planets are as wide as two planet bearings need. This favours compound "
-             "types (CPG) in the metal map. See docs/metal_sspg_mass.md and ISSUES.md 'Material modes'."},
+     "text": "Metal masses are still high: only the ring gears (and some suns) are steel and the housings aluminium, "
+             "but the metal mode reuses the 3D-printed shapes (walls, clearances), and planets are as wide as two "
+             "planet bearings need. See docs/metal_sspg_mass.md and ISSUES.md 'Material modes'."},
     {"id": "bug13", "types": ["indspg"],
      "text": "INDSPG raises instead of reporting 'no design' where it has none (ISSUES.md bug 13); those cases count "
              "as no design."},
