@@ -33,7 +33,9 @@ Choosing a motor and ratio for a requirement:
 For every motor and type, select() samples the type's swept ratios (step 0.01) and keeps the ratios
 where the output peak torque (motor peak x ratio x efficiency x torque_fraction, all from the fits)
 and the output no-load speed (motor no-load speed / ratio) both reach the ask: the window. In it,
-the ratio with the lowest score wins. Where no ratio meets both, the ratio with the smallest
+the ratio with the lowest score wins; the swept designs themselves are judged too, with their
+exact values (method="interp"), since the smooth fit can average a good design away (e.g. a
+torque_fraction that falls steeply). Where no ratio meets both, the ratio with the smallest
 shortfall (1 - torque/ask, plus 1 - speed/ask, each only if short) is kept as a closest miss.
 Candidates that meet the ask come first, best score first; then the misses, smallest shortfall
 first. The 80 % torque rule is not applied here: the torque check already counts torque_fraction,
@@ -95,6 +97,7 @@ class Candidate:
     motor: str
     gb_type: str
     ratio: float                # the chosen ratio: lowest score in the window, or the closest miss
+                                # (flags["swept_design"]: a design of the sweep, valued exactly)
     meets: bool                 # output peak torque and no-load speed both reach the ask
     shortfall: float            # 0 when it meets; else (1 - torque/ask) + (1 - speed/ask), short parts only
     window: list                # [[low, high], ...] ratios (of the swept range) that meet the ask
@@ -296,24 +299,32 @@ class ActuatorMap:
                     continue
                 xs = np.unique(np.round(np.concatenate([np.append(lo + step * np.arange(int((hi - lo) / step + 1e-9) + 1), hi)
                                                          for lo, hi in tf["valid_intervals"]]), 9))
-                q = {k: _fit_values(f, xs) for k, f in tf["quantities"].items()}
-                if "torque_carried_fraction" in q:
-                    q["torque_carried_fraction"] = np.clip(q["torque_carried_fraction"], 0.0, 1.0)
-                frac = q.get("torque_carried_fraction", 1.0)
-                t_out, w_out = tp * xs * q["efficiency"] * frac, w0 / xs
-                score = self._score(q, rule)
-                ok = (t_out >= torque) & (w_out >= speed)
-                short = np.maximum(0, 1 - t_out / torque) + np.maximum(0, 1 - w_out / speed)
+                fits = tf["quantities"]
+
+                def judge(q, x):
+                    if "torque_carried_fraction" in q:
+                        q["torque_carried_fraction"] = np.clip(q["torque_carried_fraction"], 0.0, 1.0)
+                    t, w = tp * x * q["efficiency"] * q.get("torque_carried_fraction", 1.0), w0 / x
+                    return (t, w, self._score(q, rule), (t >= torque) & (w >= speed),
+                            np.maximum(0, 1 - t / torque) + np.maximum(0, 1 - w / speed))
+                t_fit, w_fit, s_fit, ok_fit, sh_fit = judge({k: _fit_values(f, xs) for k, f in fits.items()}, xs)
+                # the swept designs themselves, exact: a design the smooth fit averages away can be the best
+                xd = np.asarray(fits["mass_kg"]["x"], dtype=float)
+                t_d, w_d, s_d, ok_d, sh_d = judge({k: np.interp(xd, f["x"], f["y"]) for k, f in fits.items()}, xd)
+                x_all, ok, score = np.concatenate([xs, xd]), np.concatenate([ok_fit, ok_d]), np.concatenate([s_fit, s_d])
+                t_out, w_out, short = np.concatenate([t_fit, t_d]), np.concatenate([w_fit, w_d]), np.concatenate([sh_fit, sh_d])
                 i = int(np.argmin(np.where(ok, score, np.inf))) if ok.any() else int(np.lexsort((score, short))[0])
-                a = self.actuator(motor, float(xs[i]), material, gb_type=gb, rule=rule)
+                at_design = i >= len(xs)
+                a = self.actuator(motor, float(x_all[i]), material, gb_type=gb, rule=rule,
+                                  method="interp" if at_design else "fit")
                 # the motor could meet the ask at ratios the map (any type) has not swept
-                beyond = (not ok.any() and ideal[0] <= ideal[1]
+                beyond = (not ok_fit.any() and ideal[0] <= ideal[1]
                           and (ideal[1] > cov[-1][1] + 1e-9 or ideal[0] < cov[0][0] - 1e-9))
                 cands.append(Candidate(
-                    motor=motor, gb_type=gb, ratio=float(xs[i]), meets=bool(ok[i]), shortfall=float(short[i]),
-                    window=_runs(xs, ok, step), torque_margin=float(t_out[i] / torque - 1),
+                    motor=motor, gb_type=gb, ratio=float(x_all[i]), meets=bool(ok[i]), shortfall=float(short[i]),
+                    window=_runs(xs, ok_fit, step), torque_margin=float(t_out[i] / torque - 1),
                     speed_margin=float(w_out[i] / speed - 1), score=float(score[i]), actuator=a,
-                    flags={**a.flags, "window_beyond_map": bool(beyond)}))
+                    flags={**a.flags, "window_beyond_map": bool(beyond), "swept_design": bool(at_design)}))
         cands.sort(key=lambda c: (not c.meets, round(c.shortfall, 12), c.score, c.motor, c.gb_type))
         return cands[:top] if top else cands
 

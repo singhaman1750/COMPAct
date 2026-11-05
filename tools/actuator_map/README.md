@@ -161,8 +161,9 @@ python tools/actuator_map/choose.py --torque 30 --speed 25 --no-map   # optimise
 1. **Screening** (default): `ActuatorMap.select()` takes, for every motor and type, the ratios
    where output peak torque (motor peak × ratio × efficiency × torque fraction, from the fits)
    and output no-load speed (motor no-load speed ÷ ratio) both reach the ask, and the lowest score
-   among them. It asks the fits for 2 % more (`--margin`), since they are approximate.
-   Milliseconds for all motors.
+   among them. The swept designs themselves are judged too, with their exact values: the smooth
+   fit can average a good design away (e.g. a torque fraction that falls steeply between designs).
+   It asks for 2 % more (`--margin`), since the values are approximate. Milliseconds for all motors.
 2. **Confirmation**: the first 8 (`--shortlist`) are run through the normal optimiser (as in a
    sweep); torque and speed are recomputed from each real design. A design that misses by a
    little is re-run at a corrected ratio (at most 2 rounds, `--rounds`). About 20 s to a few
@@ -191,6 +192,10 @@ c = cands[0]
 c.motor, c.gb_type, c.ratio, c.meets, c.window      # window: [[low, high], ...] ratios that meet it
 c.torque_margin, c.speed_margin, c.actuator.mass     # c.actuator: as amap.actuator() gives it
 ```
+
+**Checked against `--no-map`** (map v2, all 33 motors, 3dp, 2026-11-05): 10 N m / 60 rad/s →
+MAD_7005_KV115 SSPG 6:1; 30 N m / 25 rad/s → RO100 ISSPG compact 4:1; 100 N m / 10 rad/s → RI100
+INDSPG 23.1:1. The same design both ways, in about 20 s instead of 10–37 minutes.
 
 **Limits:** peak torque and no-load speed are two corner points; meeting both doesn't mean the
 motor gives the peak torque at speed. No-load speeds are `motors.json`'s (KV × 48 V for the framed

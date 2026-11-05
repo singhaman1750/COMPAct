@@ -437,3 +437,17 @@ def test_select_options(small_map):
     with pytest.raises(ValueError):
         amap.select(60.0, 25.0, rule="other")
     assert amap.motor("M")["peak_torque_Nm"] == 12.0
+
+
+def test_select_takes_a_swept_design_the_fit_averages_away(small_map, tmp_path):
+    amap, _ = small_map
+    (fitted,) = amap.select(60.0, 25.0, types=["icpg"])
+    assert not fitted.flags["swept_design"]
+    data = json.loads((path := tmp_path / "fits.json").read_text())
+    mass = data["motors"]["M"]["3dp"]["types"]["icpg"]["quantities"]["mass_kg"]
+    mass["y"][mass["x"].index(7.0)] = 0.2            # one much lighter design; the fit doesn't change
+    path.write_text(json.dumps(data))
+    (c,) = ActuatorMap(tmp_path).select(60.0, 25.0, types=["icpg"])
+    assert c.ratio == 7.0 and c.flags["swept_design"] and c.meets
+    assert c.actuator.mass == pytest.approx(0.2) and c.actuator.flags["method"] == "interp"
+    assert c.window == fitted.window                 # the window still comes from the fits
