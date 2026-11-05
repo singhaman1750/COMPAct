@@ -27,6 +27,20 @@ can be several % off a single design. flags["fit_error_high"] lists the quantiti
 more than 5 % off at some design; optimise with the fits, and read the final design with
 method="interp".
 
+Choosing a motor and ratio for a requirement:
+    cands = amap.select(torque=30.0, speed=25.0, material="3dp")    # output N m and rad/s
+    c = cands[0]; c.motor, c.gb_type, c.ratio, c.meets, c.window, c.actuator.mass
+For every motor and type, select() samples the type's swept ratios (step 0.01) and keeps the ratios
+where the output peak torque (motor peak x ratio x efficiency x torque_fraction, all from the fits)
+and the output no-load speed (motor no-load speed / ratio) both reach the ask: the window. In it,
+the ratio with the lowest score wins. Where no ratio meets both, the ratio with the smallest
+shortfall (1 - torque/ask, plus 1 - speed/ask, each only if short) is kept as a closest miss.
+Candidates that meet the ask come first, best score first; then the misses, smallest shortfall
+first. The 80 % torque rule is not applied here: the torque check already counts torque_fraction,
+and a capped type still pays K_torque_shortfall in its score. No-load speeds are motors.json's
+(KV x 48 V for the framed motors). The map covers only its swept ratios: a window outside them is
+reported in flags["window_beyond_map"] (run tools/actuator_map/select.py --no-map for those).
+
 method="fit" (default) uses the smooth fits (polynomial pieces, differentiable within a piece);
 method="interp" interpolates linearly between the swept designs of the chosen type (exact at the
 designs). derivative=True also returns d(value)/d(ratio) for every value.
@@ -75,6 +89,22 @@ class Actuator:
         return None if self.rated_speed is None else self.rated_speed / RPM_TO_RAD_S
 
 
+@dataclass
+class Candidate:
+    """One (motor, type) answer of ActuatorMap.select()."""
+    motor: str
+    gb_type: str
+    ratio: float                # the chosen ratio: lowest score in the window, or the closest miss
+    meets: bool                 # output peak torque and no-load speed both reach the ask
+    shortfall: float            # 0 when it meets; else (1 - torque/ask) + (1 - speed/ask), short parts only
+    window: list                # [[low, high], ...] ratios (of the swept range) that meet the ask
+    torque_margin: float        # output peak torque / asked - 1 at the chosen ratio
+    speed_margin: float         # output no-load speed / asked - 1 at the chosen ratio
+    score: float
+    actuator: Actuator          # every value at the chosen ratio (as actuator() gives it)
+    flags: dict = field(default_factory=dict)
+
+
 # ---- one fitted quantity ------------------------------------------------------------------------
 
 def _piece(fit, x):
@@ -87,6 +117,27 @@ def _poly(coef, x):
 
 def _dpoly(coef, x):
     return float(sum(k * c * x ** (k - 1) for k, c in enumerate(coef) if k))
+
+
+def _fit_values(fit, xs):
+    """The smooth fit of one quantity at many ratios at once (numpy array)."""
+    idx = np.searchsorted(np.asarray(fit.get("breaks", []), dtype=float), xs, side="right")
+    out = np.empty_like(xs)
+    for i, piece in enumerate(fit["pieces"]):
+        sel = idx == i
+        out[sel] = sum(c * xs[sel] ** k for k, c in enumerate(piece["coef"]))
+    return out
+
+
+def _runs(xs, mask, step):
+    """[[low, high], ...] of the consecutive sampled ratios where mask holds."""
+    runs = []
+    for x, ok in zip(xs, mask):
+        if ok and runs and x - runs[-1][1] <= step * 1.5:
+            runs[-1][1] = round(float(x), 6)
+        elif ok:
+            runs.append([round(float(x), 6)] * 2)
+    return runs
 
 
 def _fit_value(fit, x, method):
@@ -215,6 +266,54 @@ class ActuatorMap:
                 continue
             scored.append((self._score(vals, rule), gb, vals.get("torque_carried_fraction", 1.0)))
         return sorted(scored, key=lambda s: (s[2] < self.min_fraction, s[0], s[1]))
+
+    def motor(self, motor):
+        """The motor's values stored with the map (peak / rated torque, speeds, inertia)."""
+        self._entry(motor, None)
+        return dict(self._motors[motor])
+
+    def select(self, torque, speed, material="3dp", motors=None, types=None, rule="real_width", top=None,
+               step=0.01):
+        """Every (motor, type) of this material ranked for an ask: output peak torque `torque` (N m) and
+        output no-load speed `speed` (rad/s). Returns [Candidate, ...], those meeting the ask first.
+
+        motors / types: only these;  rule: "real_width" (default) or "compact_cost";  top: keep the first n.
+        """
+        if rule not in ("real_width", "compact_cost"):
+            raise ValueError("rule must be 'real_width' or 'compact_cost'")
+        if torque <= 0 or speed <= 0:
+            raise ValueError("torque and speed must be positive")
+        cands = []
+        for motor in (motors or self.motors()):
+            if material not in self._entry(motor, None):
+                continue
+            m = self._motors[motor]
+            tp, w0 = m["peak_torque_Nm"], m["no_load_speed_rpm"] * RPM_TO_RAD_S
+            for gb, tf in self._entry(motor, material)["types"].items():
+                if (types and gb not in types) or (rule == "real_width" and "width_with_driver_m" not in tf["quantities"]):
+                    continue
+                xs = np.unique(np.round(np.concatenate([np.append(lo + step * np.arange(int((hi - lo) / step + 1e-9) + 1), hi)
+                                                         for lo, hi in tf["valid_intervals"]]), 9))
+                q = {k: _fit_values(f, xs) for k, f in tf["quantities"].items()}
+                if "torque_carried_fraction" in q:
+                    q["torque_carried_fraction"] = np.clip(q["torque_carried_fraction"], 0.0, 1.0)
+                frac = q.get("torque_carried_fraction", 1.0)
+                t_out, w_out = tp * xs * q["efficiency"] * frac, w0 / xs
+                score = self._score(q, rule)
+                ok = (t_out >= torque) & (w_out >= speed)
+                short = np.maximum(0, 1 - t_out / torque) + np.maximum(0, 1 - w_out / speed)
+                i = int(np.argmin(np.where(ok, score, np.inf))) if ok.any() else int(np.lexsort((score, short))[0])
+                a = self.actuator(motor, float(xs[i]), material, gb_type=gb, rule=rule)
+                ideal = (torque / tp, w0 / speed)       # the window with efficiency and torque_fraction 1
+                beyond = (not ok.any() and ideal[0] <= ideal[1]
+                          and (ideal[1] > xs[-1] + 1e-9 or ideal[0] < xs[0] - 1e-9))
+                cands.append(Candidate(
+                    motor=motor, gb_type=gb, ratio=float(xs[i]), meets=bool(ok[i]), shortfall=float(short[i]),
+                    window=_runs(xs, ok, step), torque_margin=float(t_out[i] / torque - 1),
+                    speed_margin=float(w_out[i] / speed - 1), score=float(score[i]), actuator=a,
+                    flags={**a.flags, "window_beyond_map": bool(beyond)}))
+        cands.sort(key=lambda c: (not c.meets, round(c.shortfall, 12), c.score, c.motor, c.gb_type))
+        return cands[:top] if top else cands
 
     # -- the main call --
     def actuator(self, motor, ratio, material="3dp", gb_type=None, types=None, rule="real_width",
