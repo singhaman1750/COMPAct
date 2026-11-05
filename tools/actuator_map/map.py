@@ -39,7 +39,7 @@ Candidates that meet the ask come first, best score first; then the misses, smal
 first. The 80 % torque rule is not applied here: the torque check already counts torque_fraction,
 and a capped type still pays K_torque_shortfall in its score. No-load speeds are motors.json's
 (KV x 48 V for the framed motors). The map covers only its swept ratios: a window outside them is
-reported in flags["window_beyond_map"] (run tools/actuator_map/select.py --no-map for those).
+reported in flags["window_beyond_map"] (past the ratios any type of the motor was swept at) (run tools/actuator_map/choose.py --no-map for those).
 
 method="fit" (default) uses the smooth fits (polynomial pieces, differentiable within a piece);
 method="interp" interpolates linearly between the swept designs of the chosen type (exact at the
@@ -289,6 +289,8 @@ class ActuatorMap:
                 continue
             m = self._motors[motor]
             tp, w0 = m["peak_torque_Nm"], m["no_load_speed_rpm"] * RPM_TO_RAD_S
+            ideal = (torque / tp, w0 / speed)       # the window with efficiency and torque_fraction 1
+            cov = self.covered(motor, material)
             for gb, tf in self._entry(motor, material)["types"].items():
                 if (types and gb not in types) or (rule == "real_width" and "width_with_driver_m" not in tf["quantities"]):
                     continue
@@ -304,9 +306,9 @@ class ActuatorMap:
                 short = np.maximum(0, 1 - t_out / torque) + np.maximum(0, 1 - w_out / speed)
                 i = int(np.argmin(np.where(ok, score, np.inf))) if ok.any() else int(np.lexsort((score, short))[0])
                 a = self.actuator(motor, float(xs[i]), material, gb_type=gb, rule=rule)
-                ideal = (torque / tp, w0 / speed)       # the window with efficiency and torque_fraction 1
+                # the motor could meet the ask at ratios the map (any type) has not swept
                 beyond = (not ok.any() and ideal[0] <= ideal[1]
-                          and (ideal[1] > xs[-1] + 1e-9 or ideal[0] < xs[0] - 1e-9))
+                          and (ideal[1] > cov[-1][1] + 1e-9 or ideal[0] < cov[0][0] - 1e-9))
                 cands.append(Candidate(
                     motor=motor, gb_type=gb, ratio=float(xs[i]), meets=bool(ok[i]), shortfall=float(short[i]),
                     window=_runs(xs, ok, step), torque_margin=float(t_out[i] / torque - 1),

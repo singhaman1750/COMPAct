@@ -46,9 +46,10 @@ def _num(x):
         return x
 
 
-def run_case(gb_type, motor, ratio, material="3dp"):
+def run_case(gb_type, motor, ratio, material="3dp", cad_out=None):
     """Optimise one case and return a JSON-ready dict. Infeasible cases and optimiser errors are
-    returned too (feasible False, with `error` set when the optimiser raised)."""
+    returned too (feasible False, with `error` set when the optimiser raised). With `cad_out`, the
+    CAD files the optimiser wrote are copied to that folder (as CADs/<family>/...)."""
     started = time.time()
     result = {"gb_type": gb_type, "motor": motor, "ratio_requested": ratio, "material": material,
               "feasible": False, "error": None}
@@ -84,6 +85,8 @@ def run_case(gb_type, motor, ratio, material="3dp"):
             best_actuator.genEquationFile_editCADdirectly()
         rewritten = (tmp / "CADs_check" / gearbox_family(gb_type) / eq_name).read_bytes()
         cad_vars = parse_cad_vars(written.decode("utf-8"))
+        if cad_out is not None:
+            shutil.copytree(tmp / "CADs", Path(cad_out), dirs_exist_ok=True)
 
         try:
             geo = geometry(gb_type, cad_vars, getattr(best_actuator, "actuator_width", None))
