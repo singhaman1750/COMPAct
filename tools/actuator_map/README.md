@@ -175,4 +175,5 @@ Copies `fits.json`, `fits.md`, `summary.md` and the tables into `tools/actuator_
 (committed; the case files and plots stay in the gitignored run folder) and writes `map.json`
 (the sweep's commit, the grid, case counts, settings, known issues, and warnings such as motors or
 ratios without designs) and a README. Released maps: `maps/v1/` (33 motors, ratios 4–30, 3dp and
-metal; metal masses are overestimated, see its README).
+metal; metal masses are overestimated, see its README) and `maps/v2/` (the same grid, after the steel-ring
+metal fixes for every type, the WPG motor case and the IDSPG sun hub; metal masses are still high, see its README).

@@ -80,7 +80,8 @@ metal case per gearbox type.
    `ring_OD`, `fw_r + clearance_planet` long) is steel, the rest of the casing aluminium
    (`ring_mass` + `gearbox_housing_mass` = `gearbox_casing_mass`); 3dp bit-identical; MN8014 6:1
    metal 1,357 → 1,067 g. **CPG done (2026-10-30):** the same split; U8_Lite 10:1 metal 1,032 → 802 g
-(new gear set). Open for the other types; then re-run the metal map.
+(new gear set). **All other types done (2026-10-31)**; the metal map was re-run as map v2
+   (`tools/actuator_map/maps/v2/`, 2026-11-03).
 2. **Separate thicknesses and clearances for metal mode.** Metal parts don't need the 3D-printing
    clearances (e.g. `loose_clearance_3DP`) and can be thinner than printed ones. Metal mode needs
    its own design settings per gearbox; until then it reuses the 3D-printed shapes.
