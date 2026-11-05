@@ -148,6 +148,55 @@ A ratio where no (allowed) type has designs raises `ValueError` (no extrapolatio
 `best_types(motor, material)` (intervals and switch ratios), `ranking(motor, ratio, material)`.
 All values are SI; speeds also in rpm. The gears' own inertia is not included yet.
 
+## Choose a motor and gearbox for a torque and speed
+
+Give the output peak torque and output no-load speed you need; every motor and gearbox type is
+ranked, and the best designs come with their gear ratio, gearbox parameters and CAD files.
+
+```bash
+python tools/actuator_map/choose.py --torque 30 --speed 25            # N m, rad/s (or --speed_rpm)
+python tools/actuator_map/choose.py --torque 30 --speed 25 --no-map   # optimise everything, no map
+```
+
+1. **Screening** (default): `ActuatorMap.select()` takes, for every motor and type, the ratios
+   where output peak torque (motor peak × ratio × efficiency × torque fraction, from the fits)
+   and output no-load speed (motor no-load speed ÷ ratio) both reach the ask, and the lowest score
+   among them. It asks the fits for 2 % more (`--margin`), since they are approximate.
+   Milliseconds for all motors.
+2. **Confirmation**: the first 8 (`--shortlist`) are run through the normal optimiser (as in a
+   sweep); torque and speed are recomputed from each real design. A design that misses by a
+   little is re-run at a corrected ratio (at most 2 rounds, `--rounds`). About 20 s to a few
+   minutes, mostly DSPG.
+3. **Ranking**: designs that meet the ask, by score (real-width score, or `--rule compact_cost`;
+   both without the ratio-error term, since the ratio is chosen here, not asked); then the closest
+   misses (smallest shortfall: 1 − torque/ask plus 1 − speed/ask, short parts only).
+
+`--no-map` runs the optimiser for every motor and type at every whole ratio from torque ÷ motor
+peak (`--min_ratio` 4 at least) to motor no-load speed ÷ speed (`--max_ratio` 40 at most): 5 to 40
+minutes per ask. Use it for asks outside the map's ratios (the screening prints which motors) or
+to check the screening. Other options: `--material`, `--motors`, `--types`, `--map`, `--top`,
+`--name`, `--workers`.
+
+Output in `runs/select_<name>/` (gitignored): `result.json` (the ask, options, commits, every
+confirmed design ranked, with its table columns, gears and `opt_parameters`) and the CAD equation
+files of every confirmed design in `cads/<motor>__<type>__<ratio>/`. A warning is printed when
+optimiser code or config changed since the map's sweep (screening may then be off; confirmation
+always uses the current code).
+
+In another project (map only, no optimiser):
+
+```python
+cands = amap.select(torque=30.0, speed=25.0, material="3dp")   # [Candidate], meeting the ask first
+c = cands[0]
+c.motor, c.gb_type, c.ratio, c.meets, c.window      # window: [[low, high], ...] ratios that meet it
+c.torque_margin, c.speed_margin, c.actuator.mass     # c.actuator: as amap.actuator() gives it
+```
+
+**Limits:** peak torque and no-load speed are two corner points; meeting both doesn't mean the
+motor gives the peak torque at speed. No-load speeds are `motors.json`'s (KV × 48 V for the framed
+motors). The 80 % torque rule of the map isn't used: the torque check already counts the torque
+fraction, and capped types still pay `K_torque_shortfall` in their score.
+
 ## Plot fit quality
 
 ```bash
