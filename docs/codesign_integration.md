@@ -15,7 +15,7 @@ Two calls do the work:
 | once per chosen actuator, at the end | `final_design(motor, ratio, material, gb_type, cad_dir)` | 0.1 s to ~75 s | the real design: gearbox type, teeth counts, modules, planets, face widths, exact ratio, CAD equation files |
 
 The map is a set of smooth fits to the optimiser's best designs over a grid of motors and ratios
-(map v2: 33 motors, ratios 4–30, 3D-printed and metal), so it is fast enough for the loop. Teeth
+(map v2: 32 motors, ratios 4–30, 3D-printed and metal; RO60 has no design, ISSUES.md bug 16), so it is fast enough for the loop. Teeth
 counts are whole numbers and can't come from a fit, so the final design runs the optimiser once.
 
 ## Setup
@@ -68,7 +68,7 @@ efficiency for an energy cost).
 
 Other useful calls:
 
-- `amap.motors()`: the 33 motor names; `amap.motor(name)` gives the motor's own values.
+- `amap.motors()`: the 32 motor names in the map; `amap.motor(name)` gives the motor's own values.
 - `amap.covered(motor, "3dp")`: the ratio intervals the map covers for that motor.
 - `amap.ranking(motor, ratio, "3dp")`: every gearbox type at that ratio, best first.
 - `amap.actuator(motor, ratio, "3dp", gb_type="cpg")`: a specific type instead of the best one.
