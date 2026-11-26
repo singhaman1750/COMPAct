@@ -132,6 +132,8 @@ Example STL sets are in `CADs/Actuator_STL_files/`. A spreadsheet with a mass an
   and `run()`, which builds and optimises it. The gearbox maths is in `ActuatorAndGearbox*.py`.
 - Tests: `python -m pytest`; the slow golden-output check is described in [tests/README.md](tests/README.md).
 - Known bugs and open tasks: [ISSUES.md](ISSUES.md).
+- Using COMPAct from another project (co-design): `pip install -e` this repo and import
+  `compact_api`; see [docs/codesign_integration.md](docs/codesign_integration.md).
 
 ## Citation
 
