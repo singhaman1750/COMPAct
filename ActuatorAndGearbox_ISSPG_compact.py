@@ -568,6 +568,12 @@ class internalsingleStagePlanetaryActuator:
         self.tight_clearance_3DP                        = self.design_params["tight_clearance_3DP"]        
         self.loose_clearance_3DP                        = self.design_params["loose_clearance_3DP"]
         self.bearing_step_width                         = self.design_params["bearing_step_width"] # 2
+        self.planet_bearing_gap                         = self.design_params["planet_bearing_gap"] # 1.0
+        self.carrier_thickness_mid_min                  = self.design_params["carrier_thickness_mid_min"] # 6
+        self.ring_hub_thickness_min                     = self.design_params["ring_hub_thickness_min"] # 3
+        self.sun_coupler_hub_extra_thickness            = self.design_params["sun_coupler_hub_extra_thickness"] # 3
+        self.output_bearing_ID_clearance                = self.design_params["output_bearing_ID_clearance"] # 20
+        self.sun_hub_clearance_multiple                 = self.design_params["sun_hub_clearance_multiple"] # 4
 
         # --- Sun coupler, sun gear & sun gear dimensions ---
         self.sun1_bearing_ID           = self.design_params["sun1_bearing_ID"]           # 8
@@ -731,7 +737,7 @@ class internalsingleStagePlanetaryActuator:
         # --- Bearing Dimensions ---
 
         # --- Output Bearing Dimensions ---
-        OutputBearingIdrequiredMM  =  self.tight_clearance_3DP + (self.carrier_top_to_mid_nut_wrench_size * 0.5) + self.sun1_bearing_OD + 20#clearnace
+        OutputBearingIdrequiredMM  =  self.tight_clearance_3DP + (self.carrier_top_to_mid_nut_wrench_size * 0.5) + self.sun1_bearing_OD + self.output_bearing_ID_clearance
         outputbearing              = bearings_discrete(OutputBearingIdrequiredMM)
         self.output_bearing_ID     = outputbearing.getBearingIDMM()
         self.output_bearing_OD     = outputbearing.getBearingODMM()
@@ -760,7 +766,7 @@ class internalsingleStagePlanetaryActuator:
         self.sun_hub_nut_wrench_size    = sun_hub_bolt.nut_width_across_flats 
         self.sun_hub_nut_depth          = sun_hub_bolt.nut_thickness
 
-        self.sun_hub_dia = self.motor_rotor_hole_PCD + self.sun_hub_nut_wrench_size + self.standard_clearance_1_5mm * 4
+        self.sun_hub_dia = self.motor_rotor_hole_PCD + self.sun_hub_nut_wrench_size + self.standard_clearance_1_5mm * self.sun_hub_clearance_multiple
         
         sun_central_bolt = nuts_and_bolts_dimensions(bolt_dia = self.sun_central_bolt_dia, bolt_type="socket_head")
         self.sun_central_bolt_socket_head_dia   = sun_central_bolt.bolt_head_dia
@@ -772,7 +778,7 @@ class internalsingleStagePlanetaryActuator:
         self.carrier_thickness_top = self.output_bearing_width + self.bearing_step_width + self.standard_clearance_1_5mm 
         
         #--- Carrier Thickness Mid ---
-        self.carrier_thickness_mid = 6
+        self.carrier_thickness_mid = self.carrier_thickness_mid_min
 
         # --- Carrier Thickness ---
         self.carrier_thickness = self.carrier_thickness_mid + self.carrier_thickness_top
@@ -783,8 +789,8 @@ class internalsingleStagePlanetaryActuator:
                                     + self.carrier_thickness - (self.motor_case_thickness-self.bearing_step_width)
                                     - self.motor_height
                                     )
-        if self.ring_hub_thickness < 3:
-            self.ring_hub_thickness    = 3
+        if self.ring_hub_thickness < self.ring_hub_thickness_min:
+            self.ring_hub_thickness    = self.ring_hub_thickness_min
             self.carrier_thickness     = ( self.motor_height
                                          + self.ring_hub_thickness
                                          + self.motor_case_thickness
@@ -798,7 +804,7 @@ class internalsingleStagePlanetaryActuator:
         self.stator_ring_hub_hole_num        = self.design_params["stator_ring_hub_hole_num"]
 
         #Sun hub thickness
-        self.sun_coupler_hub_thickness =   3 + self.bearing_step_width/2 + self.sun2_bearing_width    
+        self.sun_coupler_hub_thickness =   self.sun_coupler_hub_extra_thickness + self.bearing_step_width/2 + self.sun2_bearing_width    
 
         # --- Motor Casing ---
         self.motor_case_height = ( self.motor_height
@@ -1175,8 +1181,8 @@ class internalsingleStagePlanetaryActuator:
 
 
         #------------- Contraint in planet to accomodate its bearings------------------------------------------
-        if (bMin_planet_mit * 1000 < (self.planet_bearing_width*2 + self.standard_clearance_1_5mm * 2 / 3)) : 
-            bMin_planet_mit = (self.planet_bearing_width*2 + self.standard_clearance_1_5mm * 2 / 3) / 1000
+        if (bMin_planet_mit * 1000 < (self.planet_bearing_width*2 + self.planet_bearing_gap)) : 
+            bMin_planet_mit = (self.planet_bearing_width*2 + self.planet_bearing_gap) / 1000
             bMin_ring_mit = bMin_planet_mit # FT on both are same
 
         bMin_sun_mitMM    = bMin_sun_mit    * 1000
@@ -1342,8 +1348,8 @@ class internalsingleStagePlanetaryActuator:
         # density of materials
         #------------------------------------
         # density of both gears and the structural materials is the same in 3D printed gearbox
-        density_gears     = self.planetaryGearbox.densityGears      # gears; the ring gear (and its casing) counts as a gear
-        density_structure = self.planetaryGearbox.densityStructure  # motor case, carriers, retainers, holders
+        density_gears     = self.planetaryGearbox.densityGears      # gears and the ring gear's ring
+        density_structure = self.planetaryGearbox.densityStructure  # motor case, ring housing, carriers, retainers, sun hub
 
         #------------------------------------
         # Face Width
@@ -1489,7 +1495,19 @@ class internalsingleStagePlanetaryActuator:
                                                     ((ring_stator_ID*0.5)**2)) * ring_stator_height * 1e-9
         ring_hub_volume                  = np.pi * (((ring_hub_OD*0.5)**2) - ((ring_hub_ID)*0.5)**2) * ring_hub_thickness * 1e-9
 
-        ring_mass = (ring_gear_volume + bearing_holding_structure_volume + ring_stator_structure_volume + ring_hub_volume) * density_gears
+        ring_total_volume = ring_gear_volume + bearing_holding_structure_volume + ring_stator_structure_volume + ring_hub_volume
+
+        # Only the ring gear itself (ring PCD to PCD + 2 x module + 2 x ring_stator_case_thickness, the ring the search
+        # allows in maxRingGearOD(); ringFwUsedMM long) is gear material; the rest out to the stator bore, the bearing
+        # holder, the ring-stator tube and the ring hub are structure: steel ring, aluminium housing in metal mode.
+        ring_gear_steel_OD     = min(ring_ID + 2*module + 2*self.ring_stator_case_thickness, ring_OD)
+        ring_gear_steel_volume = np.pi * (((ring_gear_steel_OD*0.5)**2) - ((ring_ID)*0.5)**2) * ringFwUsedMM * 1e-9
+        ring_gear_steel_mass   = ring_gear_steel_volume * density_gears
+        if density_gears == density_structure:  # one material (3D printed): the original sum, bit-identical
+            ring_mass = (ring_gear_volume + bearing_holding_structure_volume + ring_stator_structure_volume + ring_hub_volume) * density_gears
+        else:
+            ring_mass = ring_gear_steel_mass + (ring_total_volume - ring_gear_steel_volume) * density_structure
+        ring_housing_mass = ring_mass - ring_gear_steel_mass
 
         #--------------------------------------
         # Mass: sspg_planet
@@ -1561,7 +1579,20 @@ class internalsingleStagePlanetaryActuator:
         sun_hub_carrier_volume = (np.pi * (((sun_hub_carrier_OD*0.5)**2) - ((sun_hub_carrier_ID*0.5)**2)) * sun_hub_carrier_height)* 1e-9 
 
         sun_volume       = sun_hub_volume + sun_gear_volume + sun_shaft_volume + input_bearing_structure_volume-central_bolt_volume - sun_hub_carrier_volume
-        sun_mass         = sun_volume * density_gears
+
+        # Only the sun gear and the shaft pieces machined with it (sun-1 bearing shaft, input-bearing journal) are gear
+        # material; the hub disc that couples the sun to the rotor (minus the hub-carrier recess cut into it) is
+        # structure: steel sun, aluminium hub in metal mode. The central bolt hole runs through all four pieces, so
+        # each loses its share by length.
+        sun_bolt_length  = fw_s_used + sun_shaft_height + input_bearing_structure_thickness + sun_coupler_hub_thickness
+        sun_steel_volume = (sun_gear_volume + sun_shaft_volume + input_bearing_structure_volume
+                            - central_bolt_volume * (fw_s_used + sun_shaft_height + input_bearing_structure_thickness) / sun_bolt_length)
+        sun_steel_mass   = sun_steel_volume * density_gears
+        if density_gears == density_structure:  # one material (3D printed): the original sum, bit-identical
+            sun_mass = sun_volume * density_gears
+        else:
+            sun_mass = sun_steel_mass + (sun_volume - sun_steel_volume) * density_structure
+        sun_hub_mass = sun_mass - sun_steel_mass
 
         #--------------------------------------
         # Mass: sspg_sec_carrier
@@ -1627,8 +1658,12 @@ class internalsingleStagePlanetaryActuator:
 
         self.Motor_case_mass              = Motor_case_mass
         self.ring_mass                    = ring_mass
+        self.ring_gear_steel_mass         = ring_gear_steel_mass
+        self.ring_housing_mass            = ring_housing_mass
         self.carrier_mass                 = carrier_mass
         self.sun_mass                     = sun_mass
+        self.sun_steel_mass               = sun_steel_mass
+        self.sun_hub_mass                 = sun_hub_mass
         self.sec_carrier_mass             = sec_carrier_mass
         self.planet_mass                  = planet_mass
         self.planet_bearing_combined_mass = planet_bearing_combined_mass
@@ -1669,8 +1704,12 @@ class internalsingleStagePlanetaryActuator:
     def print_mass_of_parts_3DP(self):
         print("Motor_case_mass: ",              1000 * self.Motor_case_mass)
         print("ring_mass: ",                    1000 * self.ring_mass)
+        print("  ring_gear_steel_mass: ",       1000 * self.ring_gear_steel_mass)
+        print("  ring_housing_mass: ",          1000 * self.ring_housing_mass)
         print("carrier_mass: ",                 1000 * self.carrier_mass)
         print("sun_mass: ",                     1000 * self.sun_mass)
+        print("  sun_steel_mass: ",             1000 * self.sun_steel_mass)
+        print("  sun_hub_mass: ",               1000 * self.sun_hub_mass)
         print("sec_carrier_mass: ",             1000 * self.sec_carrier_mass)
         print("planet_mass: ",                  1000 * self.planet_mass)
         print("planet_bearing_combined_mass: ", 1000 * self.planet_bearing_combined_mass)

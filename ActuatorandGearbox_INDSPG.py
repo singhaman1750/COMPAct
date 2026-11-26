@@ -8,7 +8,7 @@ import numpy as np
 from ActuatorAndGearbox import singleStagePlanetaryGearbox
 
 from CommonComponents import material, bearings_discrete, nuts_and_bolts_dimensions, motor_frameless_inrunner as motor
-from CommonComponents import restores_stdout, cad_path
+from CommonComponents import restores_stdout, cad_path, per_motor_value
 from two_stage_search import stage_designs, pair_counts, pairs_in_ratio_bin, set_stage
 
 
@@ -279,6 +279,11 @@ class inrunnerdoubleStageActuator:
         self.bearing_retainer_thickness1                = self.design_params["bearing_retainer_thickness1"] # 2
 
         self.bearingIDClearanceMM                       = self.design_params["bearingIDClearanceMM"]
+        self.planet_bearing_gap                         = self.design_params["planet_bearing_gap"] # 1.0
+        self.sun_hub_rotor_gap                          = self.design_params["sun_hub_rotor_gap"] # 2
+        self.rotor_mount_hole_wall                      = self.design_params["rotor_mount_hole_wall"] # 2
+        self.sun1_extra_clearance_multiple              = per_motor_value(self.design_params, "sun1_extra_clearance_multiple", self.motor.motorName) # RI100 0, RI80 0.5
+        self.a1_sun_bottom_casing_bearing_source        = per_motor_value(self.design_params, "a1_sun_bottom_casing_bearing_source", self.motor.motorName) # RI100 "config", RI80 "lookup"
 
 
         ## --------------------------------------------------------------------
@@ -353,7 +358,7 @@ class inrunnerdoubleStageActuator:
         self.rotor_mount_hole_num = self.design_params["rotor_mount_hole_num"]
         self.rotor_csk_head_upper_dia = self.design_params["Rotor_csk_head_upper_dia"]
         self.rotor_csk_head_height = self.design_params["Rotor_csk_head_height"]
-        self.rotor_mount_hole_PCD = self.rotor_ID - self.rotor_csk_head_upper_dia - 2*2 - self.standard_clearance_1_5mm # 2.5
+        self.rotor_mount_hole_PCD = self.rotor_ID - self.rotor_csk_head_upper_dia - 2*self.rotor_mount_hole_wall - self.standard_clearance_1_5mm # 2.5
 
         #motor_output_hole_bolt = nuts_and_bolts_dimensions(bolt_dia = self.motor_output_hole_dia, bolt_type="CSK")
 
@@ -406,24 +411,29 @@ class inrunnerdoubleStageActuator:
         ## Stage 1 - Component and Casing Calculations
         ## --------------------------------------------------------------------
         
-        # a1_sun_bottom_casing Bearing calculations
-        if self.rotor_height == 19:
-            req_bearing_ID = self.rotor_ID - self.standard_clearance_1_5mm  #TODO: check for bearing selection once all done , THIS IS FIX VALUE
+        # a1_sun_bottom_casing Bearing calculations: per motor, a catalogue bearing for the rotor's bore
+        # ("lookup", RI80) or the bearing in the config ("config", RI100: an inch thin-section bearing)
+        if self.a1_sun_bottom_casing_bearing_source == "lookup":
+            req_bearing_ID = self.rotor_ID - self.standard_clearance_1_5mm
             Bearing_bottom_casing = bearings_discrete(req_bearing_ID)
             self.a1_sun_bottom_casing_bearing_ID = Bearing_bottom_casing.getBearingIDMM()
             self.a1_sun_bottom_casing_bearing_OD = Bearing_bottom_casing.getBearingODMM()
             self.a1_sun_bottom_casing_bearing_height = Bearing_bottom_casing.getBearingWidthMM()
             self.a1_sun_bottom_casing_bearing_massKg = Bearing_bottom_casing.getBearingMassKG()
         
-        else:
+        elif self.a1_sun_bottom_casing_bearing_source == "config":
             self.a1_sun_bottom_casing_bearing_ID = self.design_params["a1_sun_bottom_casing_bearing_ID"]
             self.a1_sun_bottom_casing_bearing_OD = self.design_params["a1_sun_bottom_casing_bearing_OD"]
             self.a1_sun_bottom_casing_bearing_height = self.design_params["a1_sun_bottom_casing_bearing_height"]
             self.a1_sun_bottom_casing_bearing_massKg = self.design_params["a1_sun_bottom_casing_bearing_massKg"]
+        else:
+            raise ValueError(f"a1_sun_bottom_casing_bearing_source must be \"lookup\" or \"config\", not {self.a1_sun_bottom_casing_bearing_source!r}")
             
-        self.bearing1_ID = 38.1                                                                #TODO: if possible extract it from bearing selection once all done , THIS IS FIX VALUE
-        self.bearing1_OD = 47.625
-        self.bearing1_height = 4.763
+        # Stage-1 output bearing: a fixed bearing from the config (ISSUES bug 22)
+        self.bearing1_ID     = self.design_params["a1_bearing_ID"]
+        self.bearing1_OD     = self.design_params["a1_bearing_OD"]
+        self.bearing1_height = self.design_params["a1_bearing_height"]
+        self.bearing1_massKg = self.design_params["a1_bearing_massKg"]
 
 
         #case_mounting_bolt = nuts_and_bolts_dimensions(bolt_dia = self.case_mounting_hole_dia, bolt_type="socket_head")
@@ -447,14 +457,11 @@ class inrunnerdoubleStageActuator:
         
         # Carrier and final assembly dimensions
         self.carrier_PCD1 = (self.Np1 + self.Ns1) * self.module1
-        if self.rotor_height == 19:
-            self.fw_s1_used = self.fw_p_1_fix + self.clearance_planet + self.sec_carrier_thickness1 + self.standard_clearance_1_5mm*2 + self.standard_clearance_1_5mm *0.5
-            
-        else:
-            self.fw_s1_used = self.fw_p_1_fix + self.clearance_planet + self.sec_carrier_thickness1 + self.standard_clearance_1_5mm*2
+        self.fw_s1_used = (self.fw_p_1_fix + self.clearance_planet + self.sec_carrier_thickness1 + self.standard_clearance_1_5mm*2
+                           + self.standard_clearance_1_5mm * self.sun1_extra_clearance_multiple)   # per motor: RI80 0.5, RI100 0
 
         #self.case_dist1 = self.sec_carrier_thickness1 + self.clearance_planet + self.sun_coupler_hub_thickness1 - self.case_mounting_surface_height
-        self.sun_hub_dia1 = self.rotor_ID - 2 * (self.standard_clearance_1_5mm + 2)
+        self.sun_hub_dia1 = self.rotor_ID - 2 * (self.standard_clearance_1_5mm + self.sun_hub_rotor_gap)
 
         ## --------------------------------------------------------------------
         ## Stage 1 - Fastener and Detailed Feature Dimensions
@@ -1495,12 +1502,12 @@ class inrunnerdoubleStageActuator:
         bMin_ring_mit2   = (self.FOS * Ft2 * qe2 * qk2 / (self.inrunnerdoubleStagePlanetaryGearbox.Stage2.maxGearAllowableStressPa * module2 * 0.001))
 
         #------------- Contraint in planet to accomodate its bearings------------------------------------------
-        if (bMin_planet_mit1 * 1000 < (self.planet_bearing_width1*2 + self.standard_clearance_1_5mm * 2 / 3)) : 
-            bMin_planet_mit1 = (self.planet_bearing_width1*2 + self.standard_clearance_1_5mm * 2 / 3) / 1000
+        if (bMin_planet_mit1 * 1000 < (self.planet_bearing_width1*2 + self.planet_bearing_gap)) : 
+            bMin_planet_mit1 = (self.planet_bearing_width1*2 + self.planet_bearing_gap) / 1000
             bMin_ring_mit1 = bMin_planet_mit1 # FT on both are same
 
-        if (bMin_planet_mit2 * 1000 < (self.planet_bearing_width2*2 + self.standard_clearance_1_5mm * 2 / 3)) : 
-            bMin_planet_mit2 = (self.planet_bearing_width2*2 + self.standard_clearance_1_5mm * 2 / 3) / 1000
+        if (bMin_planet_mit2 * 1000 < (self.planet_bearing_width2*2 + self.planet_bearing_gap)) : 
+            bMin_planet_mit2 = (self.planet_bearing_width2*2 + self.planet_bearing_gap) / 1000
             bMin_ring_mit2 = bMin_planet_mit2 # FT on both are same
 
 
@@ -1531,6 +1538,7 @@ class inrunnerdoubleStageActuator:
             self.mitStressAnalysisMinFacewidth()
         self.fw_r1 = self.inrunnerdoubleStagePlanetaryGearbox.Stage1.fwRingMM
         self.fw_r2 = self.inrunnerdoubleStagePlanetaryGearbox.Stage2.fwRingMM      # update the face width of ring gear in stage 1 & 2
+        self.setVariables()  # refresh the derived values the mass model reads (ISSUES bug 19; temporary until the mass is computed from the design)
 
     def getMassKG_3DP_stg1(self):
         module    = self.inrunnerdoubleStagePlanetaryGearbox.Stage1.module
@@ -1547,8 +1555,8 @@ class inrunnerdoubleStageActuator:
         #------------------------------------
         # density of materials
         #------------------------------------
-        density_structure = self.inrunnerdoubleStagePlanetaryGearbox.densityStructure
-        density_gears     = self.inrunnerdoubleStagePlanetaryGearbox.densityGears
+        density_structure = self.inrunnerdoubleStagePlanetaryGearbox.densityStructure  # motor case, ring housing, carriers, retainers, sun hub
+        density_gears     = self.inrunnerdoubleStagePlanetaryGearbox.densityGears      # gears and the ring gears' rings
         density_rotor     = self.inrunnerdoubleStagePlanetaryGearbox.densityRotor
 
         #------------------------------------
@@ -1590,10 +1598,11 @@ class inrunnerdoubleStageActuator:
         WidthBearingMM    = Bearings.getBearingWidthMM()
         BearingMassKG     = Bearings.getBearingMassKG()
 
-        self.Bearing_ID_stg1_MM        = 38.1 # Bearings.getBearingIDMM()
-        self.Bearing_OD_stg1_MM        = 47.625 # Bearings.getBearingODMM()
-        self.Bearing_thickness_stg1_MM = 4.763 # Bearings.getBearingWidthMM()
-        self.Bearing_mass_stg1_KG      = 0.0227 # Bearings.getBearingMassKG()
+        # the fixed stage-1 output bearing (config), not the lookup above (ISSUES bug 22)
+        self.Bearing_ID_stg1_MM        = self.bearing1_ID
+        self.Bearing_OD_stg1_MM        = self.bearing1_OD
+        self.Bearing_thickness_stg1_MM = self.bearing1_height
+        self.Bearing_mass_stg1_KG      = self.bearing1_massKg
 
         #======================================
         # Mass Calculation
@@ -1665,8 +1674,21 @@ class inrunnerdoubleStageActuator:
         bearing_support_vol3 = (np.pi * (self.standard_clearance_1_5mm*2) * (((self.bearing1_ID-self.standard_clearance_1_5mm*3)*0.5)**2 - (((ring_ID+self.loose_clearance_3DP+self.standard_clearance_1_5mm*4)*0.5)**2))) * 1e-9
         step_above_rotor_vol = (np.pi * (step_above_rotor) * ((self.stator_wire_ID*0.5)**2 - ((ring_ID*0.5)**2))) * 1e-9
 
-        # ring teeth and housing weighed together as gear material; to be split into teeth (gear) and housing (structure), see ISSUES.md "Material modes"
-        ring_gear_mass = (ring_gear_volume + top_support_vol + casing_support_vol + bearing_support_vol1 + bearing_support_vol2 + bearing_support_vol3 + step_above_rotor_vol) * density_gears
+        ring_gear_total_volume = (ring_gear_volume + top_support_vol + casing_support_vol + bearing_support_vol1
+                                  + bearing_support_vol2 + bearing_support_vol3 + step_above_rotor_vol)
+
+        # Only the ring gear itself (ring PCD to PCD + 2 x ring_radial_thickness, ringFwUsedMM long) is gear material;
+        # the rest out to the rotor bore, the supports and the step above the rotor are structure: steel ring,
+        # aluminium housing in metal mode. The stage-1 search only keeps ring PCD <= rotor_ID - 6, so the steel
+        # ring is clipped at the bore of ring_gear_volume (rotor_ID - 2 x loose_clearance_3DP).
+        ring_gear_steel_OD     = min(ring_ID + 2*self.ring_radial_thickness, self.rotor_ID - self.loose_clearance_3DP*2)
+        ring_gear_steel_volume = np.pi * ((ring_gear_steel_OD*0.5)**2 - (ring_ID*0.5)**2) * ringFwUsedMM * 1e-9
+        ring_gear_steel_mass   = ring_gear_steel_volume * density_gears
+        if density_gears == density_structure:  # one material (3D printed): the original sum, bit-identical
+            ring_gear_mass = (ring_gear_volume + top_support_vol + casing_support_vol + bearing_support_vol1 + bearing_support_vol2 + bearing_support_vol3 + step_above_rotor_vol) * density_gears
+        else:
+            ring_gear_mass = ring_gear_steel_mass + (ring_gear_total_volume - ring_gear_steel_volume) * density_structure
+        ring_housing_mass = ring_gear_mass - ring_gear_steel_mass
         
 
 
@@ -1739,7 +1761,16 @@ class inrunnerdoubleStageActuator:
         sun_shaft_volume = np.pi * ((sun_shaft_dia*0.5) ** 2) * sun_shaft_height * 1e-9
 
         sun_volume       = sun_hub_volume + sun_gear_volume + sun_shaft_volume
-        sun_mass         = sun_volume * density_gears
+
+        # Only the sun gear and its shaft are gear material; the hub disc that couples the sun to the rotor is
+        # structure: steel sun, aluminium hub in metal mode (no central bolt hole in INDSPG).
+        sun_steel_volume = sun_gear_volume + sun_shaft_volume
+        sun_steel_mass   = sun_steel_volume * density_gears
+        if density_gears == density_structure:  # one material (3D printed): the original sum, bit-identical
+            sun_mass = sun_volume * density_gears
+        else:
+            sun_mass = sun_steel_mass + sun_hub_volume * density_structure
+        sun_hub_mass = sun_mass - sun_steel_mass
 
         #----------------------------------
         # Mass: metal rotor coupling
@@ -1796,9 +1827,13 @@ class inrunnerdoubleStageActuator:
 
         self.Motor_case_mass_stg1              = Motor_case_mass
         self.ring_gear_mass_stg1               = ring_gear_mass
+        self.ring_gear_steel_mass_stg1         = ring_gear_steel_mass
+        self.ring_housing_mass_stg1            = ring_housing_mass
         #self.gearbox_casing_mass_stg1          = gearbox_casing_mass
         self.carrier_mass_stg1                 = carrier_stg1_mass
         self.sun_mass_stg1                     = sun_mass
+        self.sun_steel_mass_stg1               = sun_steel_mass
+        self.sun_hub_mass_stg1                 = sun_hub_mass
         self.rotor_coupler_mass_stg1            = rotor_coupler_mass
         self.sec_carrier_mass_stg1             = sec_carrier_mass
         self.planet_mass_stg1                  = planet_mass
@@ -1841,8 +1876,8 @@ class inrunnerdoubleStageActuator:
         #------------------------------------
         # density of materials
         #------------------------------------
-        density_structure = self.inrunnerdoubleStagePlanetaryGearbox.densityStructure
-        density_gears     = self.inrunnerdoubleStagePlanetaryGearbox.densityGears
+        density_structure = self.inrunnerdoubleStagePlanetaryGearbox.densityStructure  # motor case, ring housing, carriers, retainers, sun hub
+        density_gears     = self.inrunnerdoubleStagePlanetaryGearbox.densityGears      # gears and the ring gears' rings
 
         #------------------------------------
         # Face Width
@@ -1957,8 +1992,16 @@ class inrunnerdoubleStageActuator:
         ring_bearing_step_VOL = np.pi * ( bearing_OD - standard_clearance_1_5mm ) * (standard_clearance_1_5mm)**2 * 1e-9
 
         total_ring_gear_volume = ring_gear_volume + ring_gear_casing_support_volume + ring_bearing_step_volume + ring_gear_bearing_support_volume + ring_casing_step_volume 
-        # ring teeth and housing weighed together as gear material; to be split into teeth (gear) and housing (structure), see ISSUES.md "Material modes"
-        ring_gear_mass = total_ring_gear_volume * density_gears
+
+        # Only the ring gear (ring PCD to ring_OD = PCD + 2 x ring_radial_thickness, fw_r2 long) is gear material;
+        # the casing support, casing step, bearing step and bearing support are structure: steel ring,
+        # aluminium housing in metal mode.
+        ring_gear_steel_mass = ring_gear_volume * density_gears
+        if density_gears == density_structure:  # one material (3D printed): the original sum, bit-identical
+            ring_gear_mass = total_ring_gear_volume * density_gears
+        else:
+            ring_gear_mass = ring_gear_steel_mass + (total_ring_gear_volume - ring_gear_volume) * density_structure
+        ring_housing_mass = ring_gear_mass - ring_gear_steel_mass
 
 
         #----------------------------------
@@ -2031,6 +2074,8 @@ class inrunnerdoubleStageActuator:
 
        # self.gearbox_casing_mass_stg2          = gearbox_casing_mass
         self.ring_gear_mass_stg2                 = ring_gear_mass
+        self.ring_gear_steel_mass_stg2           = ring_gear_steel_mass
+        self.ring_housing_mass_stg2              = ring_housing_mass
         self.carrier_mass_stg2                 = carrier_mass
         self.sec_carrier_mass_stg2             = sec_carrier_mass
         self.planet_mass_stg2                  = planet_mass

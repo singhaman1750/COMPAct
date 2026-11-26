@@ -1,0 +1,238 @@
+# Metal mode: steel ring, aluminium housing, for every gearbox type (plan)
+
+Plan made on 2026-10-30 on the branch `metal-ring-steel-all` (from dev `0dad829`). **Planning only**:
+nothing in the code changes until each step is approved. SSPG (PR #107) and CPG (PR #109) are done;
+this plan covers the 13 other types.
+
+## The rule (the same as SSPG and CPG)
+
+In metal mode only the **ring** is steel; everything else in the gearbox casing is aluminium.
+
+- **Steel ring:** an annulus from the ring's **pitch circle** (`Nr × module` of the gear it meshes
+  with) to **pitch circle + 2 × ring wall**, over the **ring length the mass model uses**.
+- **The rest** of every volume that is now weighed at gear density as part of the casing (bearing
+  holders, mounting structures, fillets, spacer walls, hubs, the part of a thick "ring" volume beyond
+  the ring wall) becomes structure density (aluminium in metal mode).
+- **3D-printed results stay bit-identical**: when gear and structure density are equal (3dp), the
+  code keeps the original expression (the same-density branch used for SSPG / CPG).
+- **The CAD is untouched** (mass only). The results CSV format doesn't change.
+- **Golden check:** only that type's metal golden case may change (lighter, possibly a different gear
+  set); it is re-recorded in the same commit with old → new values. Every other case must stay
+  unchanged.
+- **Tests:** the steel-ring and housing volumes re-derived independently, 3dp unchanged, the new metal
+  optimum.
+
+### One implementation pattern for all types
+
+The geometry doesn't change, only the material of part of it. So in each mass function:
+
+```python
+steel_ring_volume = pi/4 * ((ring_PCD + 2*ring_wall)**2 - ring_PCD**2) * ring_length   # per ring
+if density_gears == density_structure:          # 3D printed: the original expression, bit-identical
+    casing_mass = (all the casing volumes) * density_gears
+else:
+    casing_mass = steel_ring_volume * density_gears + (all the casing volumes - steel_ring_volume) * density_structure
+```
+
+The total volume stays exactly the mass model's; only the steel share changes. The steel ring must
+lie inside the mass model's ring volume (checked by a test).
+
+## Done so far
+
+| Type | Metal golden design | Before → after |
+|---|---|---|
+| SSPG | U8_Lite 6.5:1 | 1,224 → 979 g (new gear set) |
+| CPG | U8_Lite 10:1 | 1,032 → 802 g (new gear set) |
+| DSPG | U8_Lite 20:1 | 1,743 → 1,241 g (same gear sets) |
+| INSSPG type 1 | RI100 6.5:1 | 1,861 → 1,524 g (same gear set) |
+| INSSPG type 2 | RI100 6.5:1 | 1,616 → 1,304 g (same gear set; ring housing still the older formula, ISSUES bug 4) |
+| WPG | U8_Lite 20:1 | 1,748 → 1,238 g (new gear set 56/48/36/152/140; the old set would be 1,167 g but costs more: ratio 19.91, wider gears) |
+| INWPG dependent | RI100 20:1 | 2,410 → 1,718 g (same gear set) |
+| INWPG independent | RI100 20:1 | 2,517 → 1,854 g (same gear set) |
+| IDSPG | RO100 20:1 | 3,003 → 2,429 g (same gear sets; rings 2,543 g, plus the stage-1 sun hub as aluminium) |
+| INDSPG | RI100 20:1 | 2,032 → 1,445 g (same gear sets; rings and the stage-1 sun hub) |
+| ISSPG compact | RO100 6.5:1 | 2,117 → 1,702 g (same gear set; ring 1,939 g, then the sun hub) |
+| ISSPG inside | RO100 6.5:1 | 2,192 → 1,782 g (same gear set; ring 2,025 g, then the sun hub) |
+| INCPG dependent | RI100 10:1 | 1,776 → 1,320 g (same gear set; ring and sun hub) |
+| INCPG independent | RI100 10:1 | 1,848 → 1,423 g (same gear set; ring and sun hub) |
+| ICPG | RO100 10:1 | 2,714 → 2,125 g (same gear set; ring and sun hub) |
+| Sun hubs: INSSPG 1 / 2, INWPG dep / indep | (golden metal) | 1,524 → 1,499 / 1,304 → 1,274 / 1,718 → 1,673 / 1,854 → 1,802 g |
+
+## Overview of the 13 remaining types
+
+Numbers are for each type's golden metal design (the case that will be re-recorded). "At gear density"
+is the casing / ring mass now weighed as steel; the **saving is a rough estimate** (steel ring taken as
+pitch circle + 2 × 5 mm over the ring face width + 1.5 mm; the rest at aluminium), refined per type.
+
+| Type | Golden metal case | Total now | Casing / ring masses now at gear density | Rings | Steel ring (rough) | Saving (rough) | Effort |
+|---|---|---|---|---|---|---|---|
+| WPG | U8_Lite 20:1 | 1,748 g | `gearbox_casing_mass` 596 + `small_ring_mass` 353 | 2 | ~107 g | **~550 g (32 %)** | ~1 h |
+| DSPG | U8_Lite 20:1 | 1,743 g | `gearbox_casing_mass_stg1` 554 + `_stg2` 356 | 2 (one per stage) | ~145 g | **~500 g (29 %)** | ~1 h |
+| ISSPG compact | RO100 6.5:1 | 2,117 g | `ring_mass` 340 | 1 | ~101 g | ~160 g (7 %) | ~45 min |
+| ISSPG inside | RO100 6.5:1 | 2,192 g | `ring_mass` 315 | 1 | ~101 g | ~140 g (6 %) | ~20 min |
+| ICPG | RO100 10:1 | 2,714 g | `ring_gear_mass_kg` 690 | 1 | ~112 g | ~380 g (14 %) | ~45 min |
+| IDSPG | RO100 20:1 | 3,003 g | `ring_gear_mass_stg1` 559 + `_stg2` 364 | 2 | ~197 g | ~480 g (16 %) | ~1 h |
+| INSSPG type 1 | RI100 6.5:1 | 1,861 g | `ring_mass` 580 (3 branches) | 1 | ~99 g | ~320 g (17 %) | ~45 min |
+| INSSPG type 2 | RI100 6.5:1 | 1,616 g | `ring_mass` 533 (3 branches) | 1 | ~86 g | ~290 g (18 %) | ~20 min |
+| INCPG dependent | RI100 10:1 | 1,776 g | `gearbox_casing_mass` 661 | 1 | ~54 g | ~400 g (22 %) | ~45 min |
+| INCPG independent | RI100 10:1 | 1,848 g | `gearbox_casing_mass` 604 | 1 | ~54 g | ~360 g (20 %) | ~20 min |
+| INDSPG | RI100 20:1 | 1,988 g | `ring_gear_mass_stg1` 389 + `_stg2` 576 | 2 | ~142 g | ~540 g (27 %) | ~1 h |
+| INWPG dependent | RI100 20:1 | 2,410 g | `gearbox_casing_mass` 888 + `small_ring_mass` 309 | 2 | ~162 g | **~680 g (28 %)** | ~1 h |
+| INWPG independent | RI100 20:1 | 2,517 g | `gearbox_casing_mass` 790 + `small_ring_mass` 314 | 2 | ~119 g | **~650 g (26 %)** | ~20 min |
+| **Total** | | | | | | | **~9 h** |
+
+Parts already weighed as aluminium are not touched: motor cases (`density_structure`) and the
+inrunner rotor hubs / couplers (`densityAluminum`, `densityRotor`).
+
+## Decisions needed
+
+1. **Thick "ring" volumes.** In many types the mass model's ring volume is **thicker than a ring wall**:
+   it runs to the stator bore (ISSPG, ICPG, IDSPG stage 1), the rotor bore (INDSPG stage 1), the output
+   bearing's bore + 6 mm (WPG big ring), the casing OD (INWPG big ring) or the bearing-holder / mounting OD
+   (INCPG). Proposal (your definition): **steel only from the pitch circle to pitch circle + 2 × ring
+   wall**, the rest of that volume aluminium (a steel ring insert in an aluminium housing).
+   Alternative: the whole toothed volume steel (less saving, less realistic).
+2. **Which ring wall** for types whose mass model has no explicit ring wall: proposal, the type's own
+   config value (`ring_radial_thickness` / `ringRadialWidthMM*` / `small_ring_case_thickness` /
+   `small_ring_radial_width` / `big_ring_radial_thickness`); where a type has none, 5 mm as a new
+   config key (to agree per type).
+3. **Ring length:** the length the mass model already uses for the ring (e.g. `ringFwUsedMM` =
+   face width + clearance), per type.
+4. **Wolfrom output ring** (WPG, INWPG ×2): its volume also holds bearing seats and the output-bearing
+   structure; only its toothed annulus becomes steel.
+5. **PR grouping:** decided: one PR per type (as SSPG / CPG).
+
+## Per type
+
+### WPG (`ActuatorAndGearbox.py`, `wolfromPlanetaryActuator.getMassKG_3DP`) — done
+- **Ring 1 (fixed) in `gearbox_casing_mass`:** steel = the mass model's `ring_gear1` piece (pitch
+  `Nr1 × module1` to `ring_gear1_OD = bearing_ID + 4 × 1.5`, `ring1FwMM` long); bearing holder, spacer
+  wall and case mounting are aluminium. `spacer_wall_for_ring2_*` renamed `spacer_wall_for_ring1_*` (it is
+  built on ring 1's OD; mass model only, not in the CAD).
+- **Ring 2 (output) `small_ring_mass`:** the annulus (pitch to `+ 2 × module2 + 2 × small_ring_case_thickness`)
+  is split by height: `small_ring_gear` (`ring2FwMM`) is steel, `small_ring_carrier_wall`
+  (`carrier_thickness + carrier_bearing_step_width + clearance_planet`) aluminium; the end wall (inner carrier
+  bearing seat) and the output-bearing sleeve are aluminium.
+- Stored: `ring_gear1_mass`, `gearbox_housing_mass`, `small_ring_gear_mass`, `small_ring_housing_mass`. Not
+  printed: WPG copies `print_mass_of_parts_3DP` into its results file, and new rows would change the 3dp results.
+- **Open notes (not changed here):**
+  - Ring 1's mass-model OD is `bearing_ID + 6` (81 mm on the golden design); the CAD (`ring_OD_b`) and the
+    motor-case sizing use pitch + 2 × `ring_radial_thickness` (84 mm). For a large Np1 − Np2 the ring-1 wall
+    could reach zero or go negative (not checked).
+  - End-wall height in the mass model is inner bearing width + step (8.5 mm); the CAD has
+    `small_ring_output_wall_thickness` = 5. The annulus and the end wall may overlap axially.
+  - Unused: `ring1_ID`, `ringFwUsedMM`, `small_ring_gear_casing_thickness`, `Ring1OuterRadiusMM`, `Ring2OuterRadiusMM`.
+  - The search weighs each design with `gear_casing_big_ring_to_bearing_dist` left from the last best
+    design: ISSUES bug 19 (also IDSPG, INDSPG, INWPG).
+
+### DSPG (`ActuatorAndGearbox.py`, `getMassKG_3DP_stg1` L8621, `_stg2` L8913)
+- **Exactly the SSPG pattern, per stage:** `gearbox_casing_mass = (ring + bearing holder + case mounting
+  + fillet) × density_gears` (L8794, L9064); ring = pitch to `pitch + 2 × ring_radial_thickness`,
+  length `ringFwMM + clearance_planet` (L8749-8783, L9013-9053).
+- **Steel:** the existing `ring_volume` of each stage (no thick-ring decision needed).
+
+### ISSPG compact / inside (`ActuatorAndGearbox_ISSPG_compact.py` / `_inside.py`, `getMassKG_3DP`) — done
+- `ring_gear_volume` runs from the pitch circle to the stator bore. Steel = pitch to min(pitch + 2 × module +
+  2 × `ring_stator_case_thickness`, bore), `ringFwUsedMM` long — the ring the search already allows in
+  `maxRingGearOD()` (no separate ring-wall key in ISSPG); the rest of the ring, the bearing holder, the
+  ring-stator tube and the ring hub are aluminium.
+- New `ring_gear_steel_mass` / `ring_housing_mass`, printed under `ring_mass` (log mode only).
+- **Sun:** the sun gear and the shaft pieces machined with it (sun-1 bearing shaft; compact: the input-bearing
+  journal) stay steel; the rotor-coupler hub minus the hub-carrier recess cut into it, and in inside the encoder
+  magnet holder (non-magnetic), are aluminium. The central bolt hole is shared by length. New `sun_steel_mass` /
+  `sun_hub_mass`, printed under `sun_mass`.
+
+### ICPG (`ActuatorandGearbox_ICPG.py`, `getMassKG_3DP`) — done
+- Already split by name (`density_steel` / `density_alum`; casing and carriers aluminium). ICPG reads
+  `ringRadialWidthMM` = 5.0 from `cpg_3DP_design_parameters` (the 3.0 in `cpg_design_parameters` is not read).
+- **Ring:** the teeth piece runs from the pitch circle to the stator bore. Steel = pitch to min(pitch + 2 ×
+  `ringRadialWidthMM`, bore), over the teeth length; the rest of the teeth piece, mounting flange, bearing support,
+  middle section and bolt bosses are aluminium. The search only limits the big-planet envelope to the bore,
+  hence the clip.
+- **Sun:** teeth and support bulge steel; the base flange (rotor-coupler hub, whose rim seats the bottom-casing
+  bearing) minus its pocket aluminium; central bore shared by length.
+- New `ring_steel_mass_kg` / `ring_housing_mass_kg` / `sun_steel_mass_kg` / `sun_hub_mass_kg`, printed in
+  `printVolumeAndMassParameters()`.
+
+### IDSPG (`ActuatorandGearbox_IDSPG.py`, `getMassKG_3DP_stg1` / `_stg2`) — done
+- **Stage 1:** `ring_gear_volume` runs from the pitch circle to the stator bore. Steel = pitch to pitch +
+  2 × `ring1RadialWidthMM` (the minimum wall the stage-1 search keeps: ring PCD ≤ `Stator_ID` − 2 × it), same
+  length; the rest out to the bore, the bearing steps, the top support and the pattern bulge are aluminium.
+- **Stage 2:** the existing `ring_gear_volume` (pitch + 2 × `ring_radial_thickness`) is steel, as DSPG; casing
+  support, bearing step and bearing support are aluminium.
+- New `ring_gear_steel_mass_stg1/2` and `ring_housing_mass_stg1/2`, printed under `ring_gear_mass_stg1/2`.
+- **Stage-1 sun:** the sun gear and its shaft pieces (shaft, carrier-bearing step, bottom bearing support)
+  stay steel; the hub disc that couples the sun to the rotor (Ø `rotor_mount_hole_PCD` + hole + 6,
+  `sun_coupler_hub_thickness1` thick, minus its share of the central bolt hole) is aluminium. New
+  `sun_steel_mass_stg1` / `sun_hub_mass_stg1`. The stage-2 sun (inside `carrier_mass_stg1`) stays steel.
+- **Open:** ISSUES bug 20 (stage-2 bearing step has a negative volume).
+
+### INSSPG type 1 / type 2 (`ActuatorandGearbox_INSSPG.py`, `_getMassKG_3DP_type1` L1218, `_type2` L982)
+- **At gear density:** `ring_mass = ring_vol_net × density_gears`, in **three branches** per type (bearing
+  vs ring size, L1160 / 1173 / 1183 and L1391 / 1403); `ring_vol_net` = ring gear (pitch to
+  `pitch + 2 × ring_radial_thickness`, length `ringFwMM`) + top mount + bearing step + bottom part +
+  bearing support.
+- **Steel:** the existing `ring_gear_volume` in every branch.
+- **Note:** ISSUES bugs 4 / 10 live in these functions; not touched.
+
+### INCPG dependent / independent (`ActuatorAndGearbox_INCPG_*.py`, `getMassKG_3DP`) — done
+- **Ring:** `ring_volume` runs from the pitch circle to `ring_OD_used` (bearing holder or case mounting OD).
+  Steel = pitch to the code's `ring_OD = pitch + module + 2 × ringRadialWidthMM` (3), `fwRingMM + 1.5` long; the
+  rest of the casing is aluminium. New `ring_gear_mass` / `gearbox_housing_mass`.
+- **Sun:** dependent — gear, sun bearing shaft and rotor-top bearing journal steel; hub and rotor-bottom journal
+  (carries the encoder magnet) aluminium. Independent — gear (with the wider step below the teeth) and sun bearing
+  shaft steel; hub and magnet mount shaft aluminium. Central bolt hole shared by length. New `sun_steel_mass` /
+  `sun_hub_mass`.
+- Stored, not printed (the parts printout goes into the results file).
+
+### INDSPG (`ActuatorandGearbox_INDSPG.py`, `getMassKG_3DP_stg1` / `_stg2`) — done
+- **Stage 1:** `ring_gear_volume` runs from the pitch circle to the rotor bore (`rotor_ID − 2 × loose_clearance_3DP`).
+  Steel = pitch to min(pitch + 2 × `ring_radial_thickness`, that bore), `ringFwUsedMM` long — the stage-1 search
+  only keeps ring PCD ≤ `rotor_ID` − 6, so the clip can bind; the rest of the housing is aluminium.
+- **Stage 2:** the existing `ring_gear_volume` (pitch + 2 × `ring_radial_thickness`, `fw_r2`) is steel, as DSPG.
+- **Stage-1 sun:** gear and shaft steel, the rotor-coupler hub (Ø `sun_hub_dia1` × `sun_coupler_hub_thickness1`)
+  aluminium, as IDSPG. The stage-2 sun (inside the stage-1 carrier) stays steel.
+- Stored, not printed (the parts printout goes into the results file).
+- **Open:** ISSUES bug 21 (stage-1 negative volumes, unused stage-2 volumes, possible overlap).
+
+### INWPG dependent / independent (`ActuatorAndGearbox_INWPG_*.py`, `getMassKG_3DP`) — done
+- **Ring 1 in `gearbox_casing_mass`:** the existing `ring_volume` runs from the pitch circle to
+  `gearbox_casing_top_OD` (ring + casing wall). Steel = the ring itself, pitch to the code's
+  `ring_OD = pitch + 2 × module + 2 × ringRadialWidthMMBig`, `ring1FwMM` long (`ring_gear1_volume`); the casing
+  wall around it, bearing holder, case mounting, plate and casing top (/ bottom, dependent) are aluminium.
+- **Ring 2 `small_ring_mass`:** as WPG; `small_ring_gear` (`ring2FwMM`) steel, carrier wall, end wall and
+  output-bearing sleeve aluminium. Ring wall `ringRadialWidthMMSmall` (4).
+- Stored, not printed (the parts printout goes into the results file).
+
+## Order
+
+1. **DSPG** (pure SSPG pattern, biggest framed saving) → 2. **WPG** (two rings, framed) →
+3. **INSSPG type 1 / 2** (existing ring volume, three branches) → 4. **INCPG dependent / independent** →
+5. **INWPG dependent / independent** → 6. **ISSPG compact / inside** → 7. **ICPG** → 8. **IDSPG** →
+9. **INDSPG**. Types with the existing ring volume come first; the thick-ring types need decision 1.
+
+## Sun hubs
+
+Every type used to weigh its whole sun at gear density, including the hub that couples it to the motor rotor.
+Rule now: the sun gear and the shaft pieces machined with it (bearing seats) are steel; the rotor-coupler hub
+and the parts that carry the encoder magnet are aluminium; a central bolt hole is shared by length.
+
+| Type | Sun in metal mode | Golden metal sun |
+|---|---|---|
+| IDSPG (stage 1) | hub aluminium; gear and shaft pieces steel | 224 → 110 g |
+| INDSPG (stage 1) | hub aluminium; gear and shaft steel | 50 → 27 g |
+| ISSPG compact / inside | hub (minus recess) aluminium, inside: magnet holder aluminium; gear, shaft (compact: input-bearing journal) steel | 388 → ~150 / 387 → ~144 g |
+| INCPG / INWPG dependent | hub and rotor-bottom journal (magnet) aluminium; gear, shaft, rotor-top journal steel | 104 → 60 / 118 → ~73 g |
+| INCPG / INWPG independent | hub and magnet mount shaft aluminium; gear (with its step) and shaft steel | 101 → 50 / 212 → ~160 g |
+| INSSPG type 1 / 2 | hub and bottom part aluminium; gear, shaft and upper support steel | 85 → ~61 / 101 → ~71 g |
+| ICPG | base flange (hub, seats the bottom-casing bearing) aluminium; teeth and support bulge steel | 383 → 159 g |
+| **SSPG, CPG, WPG, DSPG** | **kept all steel (decided 2026-10-31):** the motor-coupler hub is small (Ø33 × 4 mm, ~17–19 g) | unchanged |
+
+The second sun of the double-stage types (inside the stage-1 carrier) stays steel.
+
+## After all types
+
+- Update `docs/metal_sspg_mass.md` / ISSUES "Material modes" follow-up 1 (done for all types).
+- Re-run the actuator-map metal sweep (all motors, metal only, ~1 h) and release map v1.1 (metal map
+  without the casing overestimate; the 3dp map is unchanged).
+- Follow-up 2 of "Material modes" (separate metal thicknesses / clearances) stays open.

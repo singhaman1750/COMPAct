@@ -901,7 +901,8 @@ class inrunnerWolfromPlanetaryActuator:
         self.Np_s       = self.inrunnerWolfromPlanetaryGearbox.NpSmall
         self.Nr_b       = self.Ns + self.Np_b * 2
         self.Nr_s       = self.Ns + self.Np_b + self.Np_s
-        self.module     = self.inrunnerWolfromPlanetaryGearbox.moduleBig
+        self.module_b   = self.inrunnerWolfromPlanetaryGearbox.moduleBig     # sun, big planet and big ring
+        self.module_s   = self.inrunnerWolfromPlanetaryGearbox.moduleSmall   # small planet and small ring
         self.num_planet = self.inrunnerWolfromPlanetaryGearbox.numPlanet
 
         #------------------------------------------------------
@@ -924,6 +925,7 @@ class inrunnerWolfromPlanetaryActuator:
         self.tight_clearance_3DP                        = self.design_params["tight_clearance_3DP"]        
         self.loose_clearance_3DP                        = self.design_params["loose_clearance_3DP"]
         self.bearing_step_width                         = self.design_params["bearing_step_width"] # 2
+        self.planet_bearing_gap                         = self.design_params["planet_bearing_gap"] # 1.0
 
         #-----------Motor----------------------------
         self.motor_OD             = self.motorDiaMM                     # 86.8
@@ -1029,15 +1031,15 @@ class inrunnerWolfromPlanetaryActuator:
         # Gear 
         #---------------------------------------------------
         # --- Gear Profile ---
-        self.h_a = 1 * self.module
-        self.h_f = 1.25 * self.module
-        self.h_b = 1.25 * self.module
+        self.h_a = 1 * self.module_b
+        self.h_f = 1.25 * self.module_b
+        self.h_b = 1.25 * self.module_b
         self.clr_tip_root = self.h_f - self.h_a
         self.clr_tip_root_s = self.h_f - self.h_a
 
         # --- Ring ---
         # Big
-        self.dp_r_b = self.module * self.Nr_b
+        self.dp_r_b = self.module_b * self.Nr_b
         self.db_r_b = self.dp_r_b * np.cos ( self.pressure_angle )
         self.alpha_r_b = ( self.dp_r_b ** 2 - self.db_r_b ** 2 )**0.5 / self.db_r_b * 180 / np.pi - self.pressure_angle_deg
         self.beta_r_b = ( 360 / ( 4 * self.Nr_b ) + self.alpha_r_b ) * 2
@@ -1047,7 +1049,7 @@ class inrunnerWolfromPlanetaryActuator:
         #self.ring_OD_b = self.Nr_b * self.module + self.big_ring_radial_width  * 2
 
         # Small
-        self.dp_r_s = self.module * self.Nr_s
+        self.dp_r_s = self.module_s * self.Nr_s
         self.db_r_s = self.dp_r_s * np.cos ( self.pressure_angle )
         self.alpha_r_s = ( self.dp_r_s ** 2 - self.db_r_s ** 2 )**0.5 / self.db_r_s * 180 / np.pi - self.pressure_angle_deg
         self.beta_r_s = ( 360 / ( 4 * self.Nr_s ) + self.alpha_r_s ) * 2
@@ -1055,14 +1057,14 @@ class inrunnerWolfromPlanetaryActuator:
 
         # --- Planet ---
         # Big
-        self.dp_p_b = self.module * self.Np_b
+        self.dp_p_b = self.module_b * self.Np_b
         self.db_p_b = self.dp_p_b * np.cos ( self.pressure_angle )
         self.alpha_p_b = ( self.dp_p_b ** 2 - self.db_p_b ** 2 )**0.5 / self.db_p_b * 180 / np.pi - self.pressure_angle_deg
         self.beta_p_b = ( 360 / ( 4 * self.Np_b ) - self.alpha_p_b ) * 2
         self.fw_p_b = self.fw_r_b
 
         # Small
-        self.dp_p_s = self.module * self.Np_s
+        self.dp_p_s = self.module_s * self.Np_s
         self.db_p_s = self.dp_p_s * np.cos ( self.pressure_angle )
         self.alpha_p_s = ( self.dp_p_s ** 2 - self.db_p_s ** 2 )**0.5 / self.db_p_s * 180 / np.pi - self.pressure_angle_deg
         self.beta_p_s = ( 360 / ( 4 * self.Np_s ) - self.alpha_p_s ) * 2
@@ -1070,7 +1072,7 @@ class inrunnerWolfromPlanetaryActuator:
         self.fw_p_s = self.fw_r_s + self.clearance_planet
 
         # --- Sun gear ---
-        self.dp_s = self.module * self.Ns
+        self.dp_s = self.module_b * self.Ns
         self.db_s = self.dp_s * np.cos ( self.pressure_angle )
         self.alpha_s = ( self.dp_s ** 2 - self.db_s ** 2 )**0.5 / self.db_s * 180 / np.pi - self.pressure_angle_deg
         self.beta_s = ( 360 / ( 4 * self.Ns ) - self.alpha_s ) * 2
@@ -1102,7 +1104,7 @@ class inrunnerWolfromPlanetaryActuator:
         self.sun_hub_dia = self.rotor_ID - 2*self.rotor_hub_thickness 
 
         #----------------------- Bearings------------------------------------
-        OutputIDrequiredMM         = self.module * (self.Nr_s) + 2*self.module + 2*self.small_ring_radial_width 
+        OutputIDrequiredMM         = self.module_s * (self.Nr_s) + 2*self.module_s + 2*self.small_ring_radial_width 
         OutputBearings             = bearings_discrete(OutputIDrequiredMM)
         self.output_bearing_ID     = OutputBearings.getBearingIDMM()
         self.output_bearing_OD     = OutputBearings.getBearingODMM()
@@ -1110,8 +1112,9 @@ class inrunnerWolfromPlanetaryActuator:
 
         #problem if ID is 28 (need to remove that bearing in the table)
         # Large enough for the sun, and at least this motor's minimum bore
-        RotorTopBearingIDrequiredMM   = max(self.module * self.Ns + 2*self.standard_clearance_1_5mm,
-                                            per_motor_value(self.design_params, "min_rotor_top_bearing_ID", self.motor.motorName))
+        self.min_rotor_top_bearing_ID = per_motor_value(self.design_params, "min_rotor_top_bearing_ID", self.motor.motorName)
+        RotorTopBearingIDrequiredMM   = max(self.module_b * self.Ns + 2*self.standard_clearance_1_5mm,
+                                            self.min_rotor_top_bearing_ID)
 
         RotorTopBearings              = bearings_discrete(RotorTopBearingIDrequiredMM)
         self.rotor_top_bearing_ID     = RotorTopBearings.getBearingIDMM()
@@ -1180,7 +1183,7 @@ class inrunnerWolfromPlanetaryActuator:
                     f'"Nr_b"= {self.Nr_b}\n',
                     f'"Nr_s"= {self.Nr_s}\n',
                     f'"num_planet"= {self.num_planet}\n',
-                    f'"module"= {self.module}\n',
+                    f'"module"= {self.module_b}\n',
                     f'"pressure_angle"= {self.pressure_angle}\n',
                     f'"pressure_angle_deg"= {self.pressure_angle_deg}\n',
                     f'"clearance_planet"= {self.clearance_planet}\n',
@@ -1334,7 +1337,7 @@ class inrunnerWolfromPlanetaryActuator:
                     f'"Nr_b"= {self.Nr_b}\n',
                     f'"Nr_s"= {self.Nr_s}\n',
                     f'"num_planet"= {self.num_planet}\n',
-                    f'"module"= {self.module}\n',
+                    f'"module"= {self.module_b}\n',
                     f'"pressure_angle"= {self.pressure_angle}\n',
                     f'"pressure_angle_deg"= {self.pressure_angle_deg}\n',
                     f'"clearance_planet"= {self.clearance_planet}\n',
@@ -1490,7 +1493,7 @@ class inrunnerWolfromPlanetaryActuator:
                     f'"Nr_b"= {self.Nr_b}\n',
                     f'"Nr_s"= {self.Nr_s}\n',
                     f'"num_planet"= {self.num_planet}\n',
-                    f'"module"= {self.module}\n',
+                    f'"module"= {self.module_b}\n',
                     f'"pressure_angle"= {self.pressure_angle}\n',
                     f'"pressure_angle_deg"= {self.pressure_angle_deg}\n',
                     f'"clearance_planet"= {self.clearance_planet}\n',
@@ -1643,7 +1646,7 @@ class inrunnerWolfromPlanetaryActuator:
                     f'"Nr_b"= {self.Nr_b}\n',
                     f'"Nr_s"= {self.Nr_s}\n',
                     f'"num_planet"= {self.num_planet}\n',
-                    f'"module"= {self.module}\n',
+                    f'"module"= {self.module_b}\n',
                     f'"pressure_angle"= {self.pressure_angle}\n',
                     f'"pressure_angle_deg"= {self.pressure_angle_deg}\n',
                     f'"clearance_planet"= {self.clearance_planet}\n',
@@ -2286,11 +2289,11 @@ class inrunnerWolfromPlanetaryActuator:
             bMin_planetBig_mit = bMin_planetBig_mit_2
 
         #------------- Contraint in planet to accomodate its bearings------------------------------------------
-        if ((bMin_planetBig_mit + bMin_planetSmall_mit) * 1000 < (self.planet_bearing_width*2 + self.standard_clearance_1_5mm * 2 / 3)) : 
-            if ((bMin_planetBig_mit) * 1000 < (self.planet_bearing_width + self.standard_clearance_1_5mm * 1 / 3)): 
-                bMin_planetBig_mit = (self.planet_bearing_width + self.standard_clearance_1_5mm * 1 / 3) / 1000
-            if ((bMin_planetSmall_mit) * 1000 < (self.planet_bearing_width + self.standard_clearance_1_5mm * 1 / 3)): 
-                bMin_planetSmall_mit = (self.planet_bearing_width + self.standard_clearance_1_5mm * 1 / 3) / 1000
+        if ((bMin_planetBig_mit + bMin_planetSmall_mit) * 1000 < (self.planet_bearing_width*2 + self.planet_bearing_gap)) : 
+            if ((bMin_planetBig_mit) * 1000 < (self.planet_bearing_width + self.planet_bearing_gap / 2)): 
+                bMin_planetBig_mit = (self.planet_bearing_width + self.planet_bearing_gap / 2) / 1000
+            if ((bMin_planetSmall_mit) * 1000 < (self.planet_bearing_width + self.planet_bearing_gap / 2)): 
+                bMin_planetSmall_mit = (self.planet_bearing_width + self.planet_bearing_gap / 2) / 1000
             bMin_ringBig_mit   = bMin_planetBig_mit
             bMin_ringSmall_mit = bMin_planetSmall_mit
 
@@ -2330,6 +2333,7 @@ class inrunnerWolfromPlanetaryActuator:
             self.AGMAStressAnalysisMinFacewidth()
         elif self.stressAnalysisMethodName == "MIT":
             self.mitStressAnalysisMinFacewidth()
+        self.setVariables()  # refresh the derived values the mass model reads (ISSUES bug 19; temporary until the mass is computed from the design)
 
     def getMassKG_3DP(self):
         module   = self.inrunnerWolfromPlanetaryGearbox.moduleBig  # Module of the gear
@@ -2343,8 +2347,8 @@ class inrunnerWolfromPlanetaryActuator:
         #-----------------------------------------
         # Density
         #-----------------------------------------
-        density_gears     = self.inrunnerWolfromPlanetaryGearbox.densityGears      # gears; the ring gear (and its casing) counts as a gear
-        density_structure = self.inrunnerWolfromPlanetaryGearbox.densityStructure  # motor case, carriers, retainers, holders
+        density_gears     = self.inrunnerWolfromPlanetaryGearbox.densityGears      # gears and the ring gears' rings
+        density_structure = self.inrunnerWolfromPlanetaryGearbox.densityStructure  # motor case, gearbox housing, carriers, retainers, sun hub
         density_aluminum     = self.inrunnerWolfromPlanetaryGearbox.densityAluminum
 
         #-----------------------------------------
@@ -2441,7 +2445,7 @@ class inrunnerWolfromPlanetaryActuator:
         motor_case_mass = motor_case_volume * density_structure
 
         #--------------------------------------
-        # Mass: incpg_gearbox_casing
+        # Mass: inwpg_gearbox_casing
         #--------------------------------------
         # Mass of the gearbox includes the mass of: 
         # 1. Ring gear
@@ -2475,6 +2479,7 @@ class inrunnerWolfromPlanetaryActuator:
         gearbox_casing_bottom_height = self.stator_top_height + standard_clearance_1_5mm/2
 
         ring_volume                      = np.pi * (((gearbox_casing_top_OD*0.5)**2) - ((ring_ID)*0.5)**2) * ring1FwUsedMM * 1e-9
+        ring_gear1_volume                = np.pi * (((ring_OD*0.5)**2) - ((ring_ID)*0.5)**2) * ring1FwUsedMM * 1e-9   # the ring itself, inside ring_volume
         bearing_holding_structure_volume = np.pi * (((bearing_holding_structure_OD*0.5)**2) - 
                                                     ((bearing_holding_structure_ID*0.5)**2)) * bearing_holding_structure_height * 1e-9
         case_mounting_structure_volume   = np.pi * (((case_mounting_structure_OD*0.5)**2) - 
@@ -2485,7 +2490,15 @@ class inrunnerWolfromPlanetaryActuator:
         gearbox_casing_bottom_volume = np.pi * (((motor_case_OD*0.5)**2) - ((motor_case_ID*0.5)**2)) * gearbox_casing_bottom_height * 1e-9
             
         gearbox_casing_volume = ring_volume + bearing_holding_structure_volume + case_mounting_structure_volume + case_mounting_plate_volume + gearbox_casing_top_volume + gearbox_casing_bottom_volume 
-        gearbox_casing_mass = gearbox_casing_volume * density_gears
+        # Only ring gear 1 (ring PCD to ring_OD, ring1FwUsedMM long) is gear material; the rest of the casing
+        # (the casing wall around ring 1, bearing holder, case mounting, plate, casing top / bottom) is
+        # structure: steel ring, aluminium housing in metal mode.
+        ring_gear1_mass = ring_gear1_volume * density_gears
+        if density_gears == density_structure:  # one material (3D printed): the original sum, bit-identical
+            gearbox_casing_mass = gearbox_casing_volume * density_gears
+        else:
+            gearbox_casing_mass = ring_gear1_mass + (gearbox_casing_volume - ring_gear1_volume) * density_structure
+        gearbox_housing_mass = gearbox_casing_mass - ring_gear1_mass
 
         #----------------------------------
         # Mass: small_ring
@@ -2493,6 +2506,10 @@ class inrunnerWolfromPlanetaryActuator:
         small_ring_OD     = module * (Nr2) + 2*module + 2*self.small_ring_radial_width
         small_ring_ID     = module * (Nr2) 
         small_ring_height = ring2FwMM + self.carrier_thickness + bearing_step_width + clearance_planet
+
+        # The annulus in two parts with the same ID / OD: the toothed ring gear 2 and the wall around the carrier
+        small_ring_gear_height         = ring2FwMM
+        small_ring_carrier_wall_height = self.carrier_thickness + bearing_step_width + clearance_planet
 
         small_ring_bearing_structure_OD = small_ring_OD
         small_ring_bearing_structure_ID = self.carrier_ring_bearing_OD
@@ -2507,7 +2524,22 @@ class inrunnerWolfromPlanetaryActuator:
                             + np.pi * (((output_bearing_structure_OD*0.5)**2) - ((output_bearing_structure_ID*0.5)**2)) * output_bearing_structure_height
                             ) * 1e-9
 
-        small_ring_mass = small_ring_volume * density_gears
+        small_ring_gear_volume              = np.pi * (((small_ring_OD*0.5)**2) - ((small_ring_ID)*0.5)**2) * small_ring_gear_height * 1e-9
+        small_ring_carrier_wall_volume      = np.pi * (((small_ring_OD*0.5)**2) - ((small_ring_ID)*0.5)**2) * small_ring_carrier_wall_height * 1e-9
+        small_ring_bearing_structure_volume = np.pi * (((small_ring_bearing_structure_OD*0.5)**2) - ((small_ring_bearing_structure_ID*0.5)**2)) * small_ring_bearing_structure_height * 1e-9
+        output_bearing_structure_volume     = np.pi * (((output_bearing_structure_OD*0.5)**2) - ((output_bearing_structure_ID*0.5)**2)) * output_bearing_structure_height * 1e-9
+
+        # Only ring gear 2 (ring PCD to small_ring_OD, ring2FwMM long) is gear material; the carrier wall,
+        # the end wall (carrier ring bearing seat) and the output-bearing sleeve are structure: steel
+        # ring, aluminium housing in metal mode.
+        small_ring_gear_mass = small_ring_gear_volume * density_gears
+        if density_gears == density_structure:  # one material (3D printed): the original sum, bit-identical
+            small_ring_mass = small_ring_volume * density_gears
+        else:
+            small_ring_mass = small_ring_gear_mass + (small_ring_carrier_wall_volume
+                                                      + small_ring_bearing_structure_volume
+                                                      + output_bearing_structure_volume) * density_structure
+        small_ring_housing_mass = small_ring_mass - small_ring_gear_mass
 
         #----------------------------------
         # Mass: cpg_carrier
@@ -2560,7 +2592,21 @@ class inrunnerWolfromPlanetaryActuator:
                                 *(fw_s_used+sun_shaft_height+sun_rotor_top_bearing_structure_height+sun_coupler_hub_thickness+sun_rotor_bottom_bearing_structure_height))* 1e-9
 
         sun_volume       = sun_hub_volume + sun_rotor_top_bearing_structure_volume+ sun_gear_volume + sun_shaft_volume + sun_rotor_bottom_bearing_structure_volume - central_bolt_volume
-        sun_mass         = sun_volume * density_gears
+
+        # Only the sun gear and the shaft pieces machined with it (sun bearing shaft, rotor-top bearing journal) are gear
+        # material; the hub that couples the sun to the rotor and the rotor-bottom journal (it carries the encoder
+        # magnet) are structure: steel sun, aluminium hub in metal mode. The central bolt hole runs through all five
+        # pieces, so each loses its share by length.
+        sun_bolt_length  = (fw_s_used + sun_shaft_height + sun_rotor_top_bearing_structure_height
+                            + sun_coupler_hub_thickness + sun_rotor_bottom_bearing_structure_height)
+        sun_steel_volume = (sun_gear_volume + sun_shaft_volume + sun_rotor_top_bearing_structure_volume
+                            - central_bolt_volume * (fw_s_used + sun_shaft_height + sun_rotor_top_bearing_structure_height) / sun_bolt_length)
+        sun_steel_mass   = sun_steel_volume * density_gears
+        if density_gears == density_structure:  # one material (3D printed): the original sum, bit-identical
+            sun_mass = sun_volume * density_gears
+        else:
+            sun_mass = sun_steel_mass + (sun_volume - sun_steel_volume) * density_structure
+        sun_hub_mass = sun_mass - sun_steel_mass
 
         #--------------------------------------
         # Mass: inwpg_planet
@@ -2659,9 +2705,15 @@ class inrunnerWolfromPlanetaryActuator:
 
         self.motor_case_mass                    = motor_case_mass
         self.gearbox_casing_mass                = gearbox_casing_mass
+        self.ring_gear1_mass                    = ring_gear1_mass
+        self.gearbox_housing_mass               = gearbox_housing_mass
         self.small_ring_mass                    = small_ring_mass
+        self.small_ring_gear_mass               = small_ring_gear_mass
+        self.small_ring_housing_mass            = small_ring_housing_mass
         self.carrier_mass                       = carrier_mass
         self.sun_mass                           = sun_mass
+        self.sun_steel_mass                     = sun_steel_mass
+        self.sun_hub_mass                       = sun_hub_mass
         self.sec_carrier_mass                   = sec_carrier_mass
         self.planet_mass                        = planet_mass
         self.rotor_hub_mass                     = rotor_hub_mass

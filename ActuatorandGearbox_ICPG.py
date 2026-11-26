@@ -426,41 +426,42 @@ class internalcompoundPlanetaryActuator:
         self.Np_s       = self.internalcompoundPlanetaryGearbox.NpSmall
         self.Nr         = self.internalcompoundPlanetaryGearbox.Nr
         self.num_planet = self.internalcompoundPlanetaryGearbox.numPlanet
-        self.module     = self.internalcompoundPlanetaryGearbox.moduleBig
+        self.module_b   = self.internalcompoundPlanetaryGearbox.moduleBig     # sun and big planet
+        self.module_s   = self.internalcompoundPlanetaryGearbox.moduleSmall   # small planet and ring
 
         # ── Gear geometry constants ────────────────────────────────────────
         self.pressure_angle     = self.internalcompoundPlanetaryGearbox.getPressureAngleRad()
         self.pressure_angle_deg = self.pressure_angle * 180 / np.pi
 
         # Addendum, dedendum, tip-root clearance
-        self.h_a          = 1    * self.module
-        self.h_b          = 1.25 * self.module
-        self.h_f          = 1.25 * self.module
+        self.h_a          = 1    * self.module_b
+        self.h_b          = 1.25 * self.module_b
+        self.h_f          = 1.25 * self.module_b
         self.clr_tip_root = self.h_f - self.h_a
 
         # Sun gear pitch / base geometry
-        self.dp_s      = self.module * self.Ns
+        self.dp_s      = self.module_b * self.Ns
         self.db_s      = self.dp_s * np.cos(self.pressure_angle)
         self.alpha_s   = (np.sqrt(self.dp_s**2 - self.db_s**2) / self.db_s) * 180 / np.pi - self.pressure_angle_deg
         self.beta_s    = (360 / (4 * self.Ns) - self.alpha_s) * 2
         self.fw_s_calc = self.internalcompoundPlanetaryGearbox.fwSunMM
 
         # Big planet pitch / base geometry
-        self.dp_p_b    = self.module * self.Np_b
+        self.dp_p_b    = self.module_b * self.Np_b
         self.db_p_b    = self.dp_p_b * np.cos(self.pressure_angle)
         self.alpha_p_b = (np.sqrt(self.dp_p_b**2 - self.db_p_b**2) / self.db_p_b) * 180 / np.pi - self.pressure_angle_deg
         self.beta_p_b  = (360 / (4 * self.Np_b) - self.alpha_p_b) * 2
         self.fw_p_b    = self.internalcompoundPlanetaryGearbox.fwPlanetBigMM
 
         # Ring gear pitch / base geometry
-        self.dp_r    = self.module * self.Nr
+        self.dp_r    = self.module_s * self.Nr
         self.db_r    = self.dp_r * np.cos(self.pressure_angle)
         self.alpha_r = (np.sqrt(self.dp_r**2 - self.db_r**2) / self.db_r) * 180 / np.pi - self.pressure_angle_deg
         self.beta_r  = (360 / (4 * self.Nr) + self.alpha_r) * 2
         self.fw_r    = self.internalcompoundPlanetaryGearbox.fwRingMM
 
         # Small planet pitch / base geometry
-        self.dp_p_s    = self.module * self.Np_s
+        self.dp_p_s    = self.module_s * self.Np_s
         self.db_p_s    = self.dp_p_s * np.cos(self.pressure_angle)
         self.alpha_p_s = (np.sqrt(self.dp_p_s**2 - self.db_p_s**2) / self.db_p_s) * 180 / np.pi - self.pressure_angle_deg
         self.beta_p_s  = (360 / (4 * self.Np_s) - self.alpha_p_s) * 2
@@ -469,6 +470,9 @@ class internalcompoundPlanetaryActuator:
         # ── Clearance / tolerance constants ───────────────────────────────
         self.clearance_planet                   = self.design_params["clearance_planet"]
         self.standard_clearance_1_5mm           = self.design_params["standard_clearance_1_5mm"]
+        self.planet_bearing_gap                 = self.design_params["planet_bearing_gap"] # 1.0
+        self.sun_hub_clearance_multiple         = self.design_params["sun_hub_clearance_multiple"] # 4
+        self.stator_bearing_clearance_multiple  = self.design_params["stator_bearing_clearance_multiple"] # 2
         self.standard_fillet_1_5mm              = self.design_params["standard_fillet_1_5mm"]
         self.standard_bearing_insertion_chamfer = self.design_params["standard_bearing_insertion_chamfer"]
         self.tight_clearance_3DP                = self.design_params["tight_clearance_3DP"]
@@ -528,7 +532,7 @@ class internalcompoundPlanetaryActuator:
         self.sun_gear_rotor_nut_wrench_size      = self.design_params["sun_gear_rotor_nut_wrench_size"]
         self.sun_gear_rotor_nut_height           = self.design_params["sun_gear_rotor_nut_height"]
         
-        sun_hub_dia_min = self.rotor_mount_hole_PCD + self.sun_gear_rotor_nut_wrench_size + self.standard_clearance_1_5mm * 4
+        sun_hub_dia_min = self.rotor_mount_hole_PCD + self.sun_gear_rotor_nut_wrench_size + self.standard_clearance_1_5mm * self.sun_hub_clearance_multiple
         
         sun_bottom_casing_bearing_ID_required  = sun_hub_dia_min #self.motor_rotor_base_ID
         sun_bottom_casing_bearing              = bearings_discrete(sun_bottom_casing_bearing_ID_required)
@@ -596,19 +600,21 @@ class internalcompoundPlanetaryActuator:
 
         # Sun hub diameter (capped at rotor OD with clearance)
         sun_hub_dia_calc = (self.rotor_mount_hole_PCD + self.rotor_mount_hole_dia
-                            + self.standard_clearance_1_5mm * 4)
+                            + self.standard_clearance_1_5mm * self.sun_hub_clearance_multiple)
         cap              = self.Rotor_OD - self.standard_clearance_1_5mm * 2
         self.sun_hub_dia = cap if sun_hub_dia_calc > self.Rotor_OD else sun_hub_dia_calc
 
         # Carrier PCD and outer bearing selection
-        self.carrier_PCD    = self.module * (self.Ns + self.Np_b)
+        self.carrier_PCD    = self.module_b * (self.Ns + self.Np_b)
         bearing_id_calc     = self.carrier_PCD + self.bearingIDClearance_3DP
         outer_bearing       = bearings_discrete(bearing_id_calc)
         self.bearing_ID     = outer_bearing.getBearingIDMM()
         self.bearing_OD     = outer_bearing.getBearingODMM()
         self.bearing_height = outer_bearing.getBearingWidthMM()
 
-        # Sun face width (driven by geometry; floor applied when stator radial clearance is tight)
+        # Sun face width (driven by geometry). When the output bearing doesn't fit inside the stator bore with
+        # stator_bearing_clearance_multiple clearances around it, it sits past the motor, so the sun is at least
+        # the motor height.
         fw_s_used_calc        = (self.standard_clearance_1_5mm * 2
                                  + self.sun_sec_carrier_bearing_height
                                  - (self.sun_bottom_casing_bearing_height + self.standard_clearance_1_5mm - self.sun_coupler_hub_thickness)
@@ -618,7 +624,7 @@ class internalcompoundPlanetaryActuator:
                                  + self.fw_p_b)
         fw_s_used_floor       = self.motor_height
         stator_radial_clearance = (self.stator_ID - self.bearing_OD) / 2
-        floor_applies         = stator_radial_clearance < self.standard_clearance_1_5mm * 2
+        floor_applies         = stator_radial_clearance < self.standard_clearance_1_5mm * self.stator_bearing_clearance_multiple
 
         if floor_applies and fw_s_used_calc < fw_s_used_floor:
             self.fw_s_used = fw_s_used_floor
@@ -644,7 +650,7 @@ class internalcompoundPlanetaryActuator:
             f'"Np_s"= {self.Np_s}\n',
             f'"Nr"= {self.Nr}\n',
             f'"num_planet"= {self.num_planet}\n',
-            f'"module"= {self.module}\n',
+            f'"module"= {self.module_b}\n',
             f'"pressure_angle"= {self.pressure_angle_deg}\n',
             f'"h_a"= {self.h_a}\n',
             f'"h_b"= {self.h_b}\n',
@@ -916,11 +922,11 @@ class internalcompoundPlanetaryActuator:
         bMin_ring_mit        = (self.FOS * Ft_rp * qe2 * qk2 / (self.internalcompoundPlanetaryGearbox.maxGearAllowableStressPa * moduleSmall * 0.001))
 
         # Minimum face width constrained by planet bearing accommodation
-        if ((bMin_planetBig_mit + bMin_planetSmall_mit) * 1000 < (self.planet_bearing_width*2 + self.standard_clearance_1_5mm * 2 / 3)):
-            if (bMin_planetBig_mit   * 1000 < (self.planet_bearing_width + self.standard_clearance_1_5mm * 1 / 3)):
-                bMin_planetBig_mit   = (self.planet_bearing_width + self.standard_clearance_1_5mm * 1 / 3) / 1000
-            if (bMin_planetSmall_mit * 1000 < (self.planet_bearing_width + self.standard_clearance_1_5mm * 1 / 3)):
-                bMin_planetSmall_mit = (self.planet_bearing_width + self.standard_clearance_1_5mm * 1 / 3) / 1000
+        if ((bMin_planetBig_mit + bMin_planetSmall_mit) * 1000 < (self.planet_bearing_width*2 + self.planet_bearing_gap)):
+            if (bMin_planetBig_mit   * 1000 < (self.planet_bearing_width + self.planet_bearing_gap / 2)):
+                bMin_planetBig_mit   = (self.planet_bearing_width + self.planet_bearing_gap / 2) / 1000
+            if (bMin_planetSmall_mit * 1000 < (self.planet_bearing_width + self.planet_bearing_gap / 2)):
+                bMin_planetSmall_mit = (self.planet_bearing_width + self.planet_bearing_gap / 2) / 1000
             bMin_ring_mit = bMin_planetSmall_mit
 
         # The gears sit inside the frameless outrunner: the two planet steps (big + small, with a gap)
@@ -1064,8 +1070,8 @@ class internalcompoundPlanetaryActuator:
         """
         self.setVariables()  # refresh all derived parameters
 
-        density_steel = self.internalcompoundPlanetaryGearbox.densityGears     # kg/m³ steel
-        density_alum  = self.internalcompoundPlanetaryGearbox.densityStructure  # kg/m³ aluminium
+        density_steel = self.internalcompoundPlanetaryGearbox.densityGears     # kg/m³ steel: gears, the ring gear's ring
+        density_alum  = self.internalcompoundPlanetaryGearbox.densityStructure  # kg/m³ aluminium: casing, carriers, ring housing, sun hub
 
         # ── Face widths converted from mm to m ─────────────────────────────
         fw_sun_m          = self.fw_s_used / 1000
@@ -1083,8 +1089,8 @@ class internalcompoundPlanetaryActuator:
         # 1. PLANET GEAR
         # ══════════════════════════════════════════════════════════════════
         # Radii
-        r_planet_big_pitch   = (self.Np_b * self.module / 2) / 1000   # big lobe pitch radius
-        r_planet_small_pitch = (self.Np_s * self.module / 2) / 1000   # small lobe pitch radius
+        r_planet_big_pitch   = (self.Np_b * self.module_b / 2) / 1000   # big lobe pitch radius
+        r_planet_small_pitch = (self.Np_s * self.module_s / 2) / 1000   # small lobe pitch radius
         r_planet_bore        = (self.planet_bore / 2)        / 1000   # central through-bore
         r_planet_bearing_OD  = (self.planet_bearing_OD / 2)  / 1000   # bearing seat outer radius
 
@@ -1106,7 +1112,7 @@ class internalcompoundPlanetaryActuator:
         # 2. SUN GEAR
         # ══════════════════════════════════════════════════════════════════
         # Radii
-        r_sun_pitch         = (self.Ns * self.module / 2)                                   / 1000
+        r_sun_pitch         = (self.Ns * self.module_b / 2)                                   / 1000
         r_sun_base_coupler  = (self.sun_bottom_casing_bearing_ID / 2)                       / 1000
         r_sun_bore          = (self.sun_central_bolt_dia / 2)                               / 1000
         r_sun_removed       = ((self.Rotor_bottom_ID - self.standard_clearance_1_5mm * 4) / 2) / 1000
@@ -1168,7 +1174,7 @@ class internalcompoundPlanetaryActuator:
         # Radii
         r_carrier_outer     = (self.bearing_ID / 2) / 1000
         r_carrier_trapezoid = ((self.bearing_ID
-                                - (self.Ns * self.module + 2 * self.carrier_trapezoidal_support_sun_offset))
+                                - (self.Ns * self.module_b + 2 * self.carrier_trapezoidal_support_sun_offset))
                                / 4) / 1000
 
         # Face width (same as combined planet lobe span)
@@ -1184,7 +1190,7 @@ class internalcompoundPlanetaryActuator:
         # 5. RING GEAR
         # ══════════════════════════════════════════════════════════════════
         # Radii
-        r_ring_pitch          = (self.Nr * self.module / 2) / 1000
+        r_ring_pitch          = (self.Nr * self.module_s / 2) / 1000
         r_ring_outer          = (self.stator_ID / 2) / 1000
         r_ring_mounting_outer = ((self.Rotor_OD + self.standard_clearance_1_5mm
                                   + self.Motor_case_thickness * 2) / 2) / 1000
@@ -1257,8 +1263,30 @@ class internalcompoundPlanetaryActuator:
         # 8. COMPONENT MASSES
         # ══════════════════════════════════════════════════════════════════
         planet_mass       = self.num_planet * vol_planet_net  * density_steel
-        sun_gear_mass     = vol_sun_net                       * density_steel
-        ring_gear_mass    = vol_ring_net                      * density_steel
+
+        # Only the sun teeth and the support bulge (sec-carrier bearing seat) are gear material; the base flange that
+        # couples the sun to the rotor (minus its pocket) is structure: steel sun, aluminium hub in metal mode. The
+        # central bore runs through the teeth and the flange, so each loses its share by length.
+        vol_sun_steel  = vol_sun_teeth + vol_sun_support_bulge - vol_sun_bore * fw_sun_m / fw_sun_total_m
+        sun_steel_mass = vol_sun_steel * density_steel
+        if density_steel == density_alum:  # one material (3D printed): the original product, bit-identical
+            sun_gear_mass = vol_sun_net * density_steel
+        else:
+            sun_gear_mass = sun_steel_mass + (vol_sun_net - vol_sun_steel) * density_alum
+        sun_hub_mass = sun_gear_mass - sun_steel_mass
+
+        # Only the ring gear itself (ring PCD to PCD + 2 x ringRadialWidthMM, clipped at the stator bore, over the
+        # teeth length) is gear material; the rest of the teeth piece out to the stator bore, the mounting flange,
+        # bearing support, middle section and bolt bosses are structure: steel ring, aluminium housing in metal
+        # mode. The search only limits the big-planet envelope to the bore, hence the clip.
+        r_ring_steel_outer = min(r_ring_pitch + self.ringRadialWidthMM / 1000, r_ring_outer)
+        vol_ring_steel     = math.pi * fw_ring_teeth_m * (r_ring_steel_outer**2 - r_ring_pitch**2)
+        ring_steel_mass    = vol_ring_steel * density_steel
+        if density_steel == density_alum:  # one material (3D printed): the original product, bit-identical
+            ring_gear_mass = vol_ring_net * density_steel
+        else:
+            ring_gear_mass = ring_steel_mass + (vol_ring_net - vol_ring_steel) * density_alum
+        ring_housing_mass = ring_gear_mass - ring_steel_mass
         sec_carrier_mass  = vol_sec_carrier_net               * density_alum
         carrier_mass      = vol_carrier_net                   * density_alum
         motor_casing_mass = vol_casing_net                    * density_alum
@@ -1277,7 +1305,11 @@ class internalcompoundPlanetaryActuator:
         # Store per-component masses for printVolumeAndMassParameters()
         self.planet_mass_kg       = planet_mass
         self.sun_gear_mass_kg     = sun_gear_mass
+        self.sun_steel_mass_kg    = sun_steel_mass
+        self.sun_hub_mass_kg      = sun_hub_mass
         self.ring_gear_mass_kg    = ring_gear_mass
+        self.ring_steel_mass_kg   = ring_steel_mass
+        self.ring_housing_mass_kg = ring_housing_mass
         self.sec_carrier_mass_kg  = sec_carrier_mass
         self.carrier_mass_kg      = carrier_mass
         self.motor_casing_mass_kg = motor_casing_mass
@@ -1293,7 +1325,7 @@ class internalcompoundPlanetaryActuator:
         print("Np_b = ",                         self.Np_b)
         print("Np_s = ",                         self.Np_s)
         print("Nr = ",                           self.Nr)
-        print("Module = ",                       self.module)
+        print("Module = ",                       self.module_b)
         print("Number of planets = ",            self.num_planet)
         print("Face width of sun gear = ",       round(self.fw_s_used, 2), " mm")
         print("Face width of Big planet = ",     round(self.fw_p_b,    2), " mm")
@@ -1303,7 +1335,7 @@ class internalcompoundPlanetaryActuator:
         print("--------------------------------------------------------------------------")
 
     def printParametersLess(self):
-        vars_ = [self.module, self.Ns, self.Np_b, self.Np_s, self.Nr, self.num_planet]
+        vars_ = [self.module_b, self.Ns, self.Np_b, self.Np_s, self.Nr, self.num_planet]
         print("[m, Ns, NpB, NpS, Nr, numPl]:", vars_)
         print("Gear ratio = ",        self.gearRatio())
         print("Efficiency = ",        round(self.getEfficiency(), 4))
@@ -1313,8 +1345,10 @@ class internalcompoundPlanetaryActuator:
     def printVolumeAndMassParameters(self):
         print("── Mass Breakdown (kg) ─────────────────────────────────")
         print("Sun Gear:         ", round(self.sun_gear_mass_kg,     4))
+        print("  steel / hub:    ", round(self.sun_steel_mass_kg,    4), "/", round(self.sun_hub_mass_kg, 4))
         print("Planets:          ", round(self.planet_mass_kg,       4))
         print("Ring Gear:        ", round(self.ring_gear_mass_kg,    4))
+        print("  steel / housing:", round(self.ring_steel_mass_kg,   4), "/", round(self.ring_housing_mass_kg, 4))
         print("Main Carrier:     ", round(self.carrier_mass_kg,      4))
         print("Secondary Carrier:", round(self.sec_carrier_mass_kg,  4))
         print("Motor Casing:     ", round(self.motor_casing_mass_kg, 4))

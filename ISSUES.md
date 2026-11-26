@@ -76,10 +76,20 @@ metal case per gearbox type.
    the outer housing, its mass currently includes the housing around it. In metal mode the teeth
    should be steel and the housing aluminium, so each mass function must compute the two volumes
    separately. Until then, the whole ring part is weighed as steel in metal mode, which
-   overestimates the mass.
+   overestimates the mass. **SSPG done (2026-10-30):** only the ring (ring pitch circle to
+   `ring_OD`, `fw_r + clearance_planet` long) is steel, the rest of the casing aluminium
+   (`ring_mass` + `gearbox_housing_mass` = `gearbox_casing_mass`); 3dp bit-identical; MN8014 6:1
+   metal 1,357 → 1,067 g. **CPG done (2026-10-30):** the same split; U8_Lite 10:1 metal 1,032 → 802 g
+(new gear set). **All other types done (2026-10-31)**; the metal map was re-run as map v2
+   (`tools/actuator_map/maps/v2/`, 2026-11-03).
 2. **Separate thicknesses and clearances for metal mode.** Metal parts don't need the 3D-printing
    clearances (e.g. `loose_clearance_3DP`) and can be thinner than printed ones. Metal mode needs
    its own design settings per gearbox; until then it reuses the 3D-printed shapes.
+
+SSPG analysis of both tasks (2026-10-29): [docs/metal_sspg_mass.md](docs/metal_sspg_mass.md).
+Mass breakdown for U8_Lite 6.5:1 and MN8014 6:1, the saving and confidence of each candidate
+change, and which changes would break the Onshape CAD. Task 1 alone saves about 240–290 g per
+design. Reproduce with `tools/metal_analysis/sspg_mass_whatif.py`.
 
 ### Unify per-gearbox settings (important — most items change results)
 
@@ -107,6 +117,11 @@ result-changing commit with re-recorded golden baselines.
    results unchanged).
 3. **Motor driver passed inconsistently:** OdrivePro for most types; `None` for INSSPG; not passed
    at all for ICPG and INDSPG.
+   Consequence found by the variable classification (2026-10-31): ICPG still writes six driver-mount
+   CAD variables (`driver_mount_thickness`, `driver_mount_inserts_OD`, `driver_upper_holes_dist_from_center`,
+   `driver_lower_holes_dist_from_center`, `driver_mount_height`, `driver_side_holes_dist_from_center`), but
+   takes them from `icpg_params.json` instead of from the chosen driver (`Motor_drivers`), so changing the
+   driver changes every other type but not ICPG. They are classified Input / driver, as in the other types.
 4. **Different maximum-gearbox-diameter rules:**
    - SSPG, WPG, DSPG: small-motor factor × motor Ø − 2 × ring width (different ring-width keys:
      `ringRadialWidthMM`, `ringRadialWidthMMBig`, `ring_radial_thickness`);
@@ -142,6 +157,67 @@ search; re-tune `K_Width` (per mm of whole actuator, not of gear); re-record eve
 (every result changes). Overlaps with bug 15 (`actuator_width` vs the CAD). About 1–2 sessions.
 
 **Status:** future — decided 2026-10-29 to use the map's second score for now.
+
+### Co-design integration — use COMPAct from the co-design repo (planned)
+
+**Decision (2026-10-30):** option 1, a git submodule plus an editable install. Not started.
+
+The co-design repo uses the map in its optimisation loop (smooth values and derivatives), and at
+the end of a run gets the real design for the chosen motor, ratio, material and type: gear
+parameters (teeth, modules, planets, face widths) and the Onshape equation files. Gear
+parameters are discrete, so they come from re-running the optimiser, not from the fits.
+
+In the co-design repo:
+
+```bash
+git submodule add https://github.com/singhaman1750/COMPAct external/COMPAct
+git -C external/COMPAct checkout map-v1        # pin the COMPAct version that built the map
+pip install -e external/COMPAct
+```
+
+```python
+from compact_api import ActuatorMap, final_design, nearest_design
+amap = ActuatorMap()                                   # released map (maps/v1)
+a = amap.actuator("U8_Lite", 9.3, "3dp", derivative=True)               # inside the loop
+d = final_design("U8_Lite", 9.3, "3dp", gb_type="cpg", cad_dir="out/hip")  # at the end
+```
+
+Work in COMPAct:
+1. `pyproject.toml`: a `[project]` section, so `pip install -e` works (root modules + `tools`).
+2. `compact_api.py` at the repo root: the only module co-design imports (avoids clashes with
+   generic names like `tools`); exposes `ActuatorMap` (defaulting to `maps/v1`), `final_design`
+   and `nearest_design`.
+3. `final_design(motor, ratio, material, gb_type, cad_dir)`: runs the optimiser for that case in a
+   temporary folder (like `tools/actuator_map/case.run_case`) and returns the real ratio, named gear
+   parameters, face widths, mass / efficiency / sizes / torque fraction and the CAD variables;
+   writes the equation files to `cad_dir`. Runtime: SSPG ~0.1 s, WPG ~10 s, CPG ~20 s, DSPG up to
+   ~75 s.
+4. `nearest_design(...)`: the nearest swept design from the released table (teeth, modules,
+   planets, values); instant, but only at grid ratios and without face widths or CAD files.
+5. Tests: a fresh-environment install, `import compact_api`, one final design.
+6. A short integration guide for the co-design repo, and a `map-v1` tag after merging.
+
+Why: the submodule pins the exact COMPAct commit, so `final_design` runs the same code that built
+the map; the editable install keeps COMPAct's config paths working without restructuring
+(a full pip package would need the Phase 3b restructuring). After the final design, re-evaluate
+the robot once with its real ratio and mass (they can differ slightly from the map's fit).
+
+### Actuator map — better fits (future)
+
+The fit-quality plots of map v1 (`tools/actuator_map/plot_fit.py`, `maps/v1/plots/`) show three
+weaknesses of the fits (the designs and `method="interp"` are not affected):
+
+1. **End outliers bend the fit.** The first design of a type is often unusually heavy (RI100
+   INDSPG 9.5:1: 1,320 g vs ~1,030 g after it; RO100 IDSPG 7:1). The jump rule needs 3 designs on
+   each side, so it can't split them off. Fix: leave a first / last design far off the trend of the
+   rest out of the fit (keep it for interp).
+2. **Too-flat fits.** The lowest degree within 1 % of the *mean value* is chosen, so a real but
+   small trend can become a flat line (U8_Lite 3dp DSPG efficiency falls 93 → 90 %, fit d0), which
+   gives a zero slope to co-design. Fix: measure the tolerance against the data's spread.
+3. **Wiggle.** A cubic piece can bend between designs (RO100 IDSPG 7–16: a dip and a bump the
+   designs don't have). Fix: allow degree 3 only when it clearly beats degree 2.
+
+Each changes the fits, so it would be a new map release.
 
 ## Bugs
 
@@ -328,7 +404,9 @@ INSSPG (both types) and ISSPG compact — first confirm in the Onshape models wh
 selected bearings really don't fit, or whether the `- 4` / `- 1.5 * 5` clearances were meant to
 allow for this. Related to bug 1 (the ID and OD lookups use different tables).
 
-**Status:** open — needs the INSSPG and ISSPG designers to check in Onshape.
+**Status:** open — deferred (2026-11-01): too big a change to make alone; to be done together with the
+ISSPG and INSSPG designers, checking each bearing in the Onshape models (docs/designer_questions.md Q4).
+Until then ISSPG compact's `sun2_bearing_ID`/`_OD`/`_width` stay at medium confidence.
 
 ### 6. INSSPG type 2 — which rotor support bearings it uses is unknown
 
@@ -582,6 +660,209 @@ the terms), add it for INSSPG, and decide whether it should include the driver m
 types' SSPG value doesn't: Onshape is 9 mm wider). Results CSV changes; designs don't.
 
 **Status:** open.
+
+### 16. RO60 — no design in any gearbox type
+
+The actuator-map sweep (2026-10-29, ratios 4–30) found no design for RO60 in any of its four types
+(ISSPG compact / inside, ICPG, IDSPG), in 3dp and metal; the golden baselines for RO60 also record
+"no design". Not investigated: possibly the motor is too small for the minimum teeth counts and
+gear sizes, possibly a constraint or motor-data problem. The released map v1 leaves RO60 out.
+
+**Status:** open.
+
+### 17. CPG — the mass model and the CAD use different ring thicknesses
+
+The CPG mass model always uses `ringRadialWidthMM` (5 mm) for the ring, while the CAD
+(`compoundPlanetaryActuator.setVariables`) grows the ring to the output bearing when the bearing is
+larger: `ring_radial_thickness = (bearing_OD + 2 x 1.5 - Nr x module) / 2` (4 of the 6 golden CPG
+designs: 6.9-7.0 mm). So the mass model's ring OD, fillet and (in metal mode) steel ring are smaller
+than the CAD's. Found 2026-10-30 while splitting the metal casing (the steel ring follows the mass
+model's 5 mm for now). Fixing it changes 3dp results.
+
+2026-10-30: the CAD rule's hard-coded 5 mm (twice) now reads `ringRadialWidthMM` (written as the
+integer 5 in `cpg_params.json` so the CAD file text is unchanged), so the CAD, the mass model and
+the optimiser's outer-diameter check share one minimum ring wall. The mismatch itself (the mass
+model never grows the ring to the bearing) is still open: planned as a separate PR that changes
+CPG results (3dp and metal; golden re-record).
+
+**Status:** open (planned).
+
+### 18. CPG, WPG, INCPG, INWPG, ICPG — the CAD draws the small-module gears with the big module
+
+`compoundPlanetaryActuator.setVariables` sets `self.module = moduleBig` and uses it for every gear,
+including the ring and the small planet, which mesh with the small module (`dp_r`, `dp_p_s`, the ring
+thickness rule and `ring_OD`); the CAD file has one `module` variable. The mass model uses
+`moduleSmall` for them. No effect today: the geometric constraint
+`(Ns + Np_big) x m_big == (Nr - Np_small) x m_small` is an exact float comparison, so in practice
+only equal modules pass (all 844 CPG designs of the full actuator-map sweep have equal modules).
+It matters as soon as unequal modules are allowed.
+
+**Code fixed (2026-10-30, option A):** the class now has `module_b` (sun, big planet) and
+`module_s` (small planet, ring) instead of `module`; `dp_r`, `dp_p_s`, the bearing-mount check,
+the ring-thickness rule and `ring_OD` use `module_s` (with `h_b_s`). The CAD file still writes one
+`"module"` (= `module_b`), so the Onshape interface is unchanged; golden check unchanged
+(`tests/test_cpg_modules.py` checks unequal modules by hand).
+
+**Same pattern in WPG, INCPG (dependent, independent), INWPG (dependent, independent) and ICPG**
+(found during the variable classification): one `module` (= `moduleBig`) for every gear. **Option A
+done for them too (2026-10-31):** each class has `module_b` (sun, big planet; in the Wolfrom types also
+the big ring) and `module_s` (small planet, and the ring it meshes with: the ring in INCPG / ICPG, the
+small ring in WPG / INWPG). On `module_s`: `dp_p_s`, `dp_r` / `dp_r_s`, the WPG / INWPG output-bearing
+size (`module_s × Nr_s + 2 × module_s + …`), WPG's bearing-mount rule (with `h_b_s`), ICPG's small-planet
+and ring pitch radii in the mass code. The CAD files still write one `"module"` (= `module_b`); golden
+check unchanged; `tests/test_split_modules.py` checks unequal modules by hand.
+
+**Status:** option A done (all six types); option B open: actually allowing unequal modules needs a tolerance in
+the geometric constraint and a second module (and tooth heights) in the CAD file and the Onshape
+model.
+
+### 19. The search weighs designs with values left over from the last best design
+
+**Description:** in five types the mass function reads design-dependent values from `self` that only
+`setVariables()` sets. During the optimiser search `setVariables()` runs only when a new best design is
+found (inside `genEquationFile_editCADdirectly()` / `genEquationFile()`), so every other candidate is
+weighed with the values of the **last best design** (or the constructor's defaults before the first best),
+not its own. A design's mass therefore depends on the search order. The masses reported for the winning
+design are right only where the winner is re-weighed after its own `setVariables()`.
+
+| Type | Stale values read by the mass function | Mass error seen (search vs own `setVariables()`) |
+|---|---|---|
+| WPG (`ActuatorAndGearbox.py`) | `gear_casing_big_ring_to_bearing_dist` (spacer-wall height), `sun_hub_dia` | 38 of 38 designs checked, up to 47 g |
+| IDSPG (`ActuatorandGearbox_IDSPG.py`) | `a1_ring_gear_relation`, `fw_p1`, `fw_p2`, `fw_s1_used`, `fw_s2_used`, `carrier_PCD2` | 150 of 150, up to 257 g |
+| INDSPG (`ActuatorandGearbox_INDSPG.py`) | `Ns1`, `module1`, `fw_p1`, `fw_p2`, `fw_s2_used`, `carrier_PCD2`, `bearing2_OD`, `bearing2_height`, `ring_gear_casing_support_height` | 150 of 150, up to 123 g |
+| INWPG dependent / independent | `output_bearing_ID`, `output_bearing_width` | 18 of 29 / 29 of 41, up to 17 g |
+
+No difference in SSPG, CPG, DSPG, ISSPG (both), ICPG, INSSPG (both) or INCPG (both) on their golden
+cases.
+
+**Effect on results:** re-running the affected golden cases with every design weighed after its own
+`setVariables()` (an approximation of the fix) gives the same optimum in 11 of 12 cases (WPG U8_Lite
+3dp / metal, WPG MN8014, IDSPG RO100 3dp / metal, INDSPG RI100 / RI80 3dp, INWPG dependent /
+independent RI100 3dp / metal). **INDSPG RI100 metal changes:** 19/26/71 + 27/30/87 → 21/24/69 +
+27/36/99 (Ns/Np/Nr per stage, modules 0.5 / 0.6).
+
+**Reproduce:** wrap `getMassKG_3DP` during `optimizeActuator` and, for each call, compare its mass with
+the mass of a deep copy after `copy.setVariables()` (scratch script used for the table above).
+
+**Probable fix:** compute those values inside the mass function from the current design (the same
+formulas `setVariables()` uses, or a shared helper), or call the part of `setVariables()` that sets them
+before weighing. The CAD output does not change; masses during the search do, so affected golden cases
+may need re-recording (INDSPG RI100 metal at least).
+
+**Temporary fix (2026-10-30):** the five `updateFacewidth()` functions end with `self.setVariables()`,
+as ISSPG, ICPG and INSSPG already do, so every candidate is weighed with its own values.
+`tests/test_fresh_design_state.py` weighs a design after another one and compares it with a freshly
+built actuator (fails without the fix in all five types). Golden: INDSPG RI100 metal has a new optimum
+(19/26/71 + 27/30/87 → 21/24/69 + 27/36/99; mass 1.988 → 2.032 kg, eff 0.891 → 0.895, Cost 4.193 →
+4.042); IDSPG RO100 metal and INDSPG RI100 3dp change only the `iter` count (47 → 41, 63 → 62).
+Search time: IDSPG about +50 %, INDSPG about +33 %, WPG / INWPG unchanged. A 156-case sweep of the
+five types (9 motors, ratios 5–30, both materials) ran without new errors (the 6 INDSPG errors at
+ratios 5 / 10 are bug 13 and happen without the fix too).
+
+**Status:** temporary fix done; full fix open: compute these values in the mass functions from the
+current design (as SSPG, CPG, DSPG and INCPG do), then remove the refresh line (the test stays).
+
+### 20. IDSPG stage 2 — the ring bearing step has a negative volume
+
+**Description:** in `ActuatorandGearbox_IDSPG.py`, `getMassKG_3DP_stg2()` adds
+```python
+ring_bearing_step_volume = np.pi * ((bearing_support_OD*0.5)**2 - (ring_OD*0.5)**2) * (standard_clearance_1_5mm) * 1e-9
+```
+with `bearing_support_OD = bearing_OD + 2 × (a2_bearing_retainer_nut_wrench_size + 1.5)` and
+`ring_OD = Nr × module + 2 × ring_radial_thickness`. When the stage-2 ring is larger than the bearing support
+the volume is negative and the mass model subtracts it. Both golden designs (RO100 20:1) have it:
+
+| Golden design | `ring_OD` | `bearing_support_OD` | Volume | Mass |
+|---|---|---|---|---|
+| 3dp | 123.4 | 114.0 | −2.63 cm³ | −3 g (PLA) |
+| metal | 108.4 | 102.9 | −1.37 cm³ | −11 g before the metal split, −4 g after (aluminium) |
+
+**Reproduce:** weigh either golden design and read `ring_bearing_step_volume` in `getMassKG_3DP_stg2()`.
+
+**Probable fix:** the step joins the ring to the bearing support, so its volume should be the annulus
+between the smaller and the larger of the two diameters, or zero when the ring is outside the support
+(check the IDSPG Onshape model for which). Changes IDSPG masses slightly (both golden cases).
+
+**Status:** open (found 2026-10-31 during the IDSPG metal-mode review; not changed by the metal split,
+which weighs the step as aluminium).
+
+### 21. INDSPG — negative volumes in the stage-1 ring housing; unused stage-2 volumes
+
+**Description:** in `ActuatorandGearbox_INDSPG.py`:
+1. **Stage 1, `bearing_support_vol3`** is the annulus from `ring_ID + loose_clearance_3DP + 4 × 1.5` (outer)
+   to `bearing1_ID − 3 × 1.5` (inner), written as `π × h × (inner² − outer²)`; the outer diameter is the
+   larger one in all three golden designs, so the volume is negative:
+
+   | Golden design | "outer" (ring side) | "inner" (bearing side) | `bearing_support_vol3` |
+   |---|---|---|---|
+   | RI100 3dp | 44.8 | 33.6 | −2.07 cm³ |
+   | RI80 3dp | 41.3 | 33.6 | −1.36 cm³ |
+   | RI100 metal | 41.3 | 33.6 | −1.36 cm³ |
+2. **Stage 1, `step_above_rotor_vol`:** the height `step_above_rotor` (a sum and difference of face width,
+   rotor, stator and carrier heights) is negative on the RI100 metal design (−0.42 mm → −0.71 cm³);
+   positive on the 3dp designs (13.7 / 13.3 mm).
+3. **Stage 2:** `ring_gear_chamfer_volume`, `ring_gear_casing_support_vol` (bolt bosses) and
+   `ring_bearing_step_VOL` are computed but not added to `total_ring_gear_volume`.
+4. **Stage 2, possible overlap:** `ring_gear_casing_support_volume` and `ring_casing_step_volume` start at
+   `ring_ID + 3`, inside the ring's OD (`ring_ID + 2 × ring_radial_thickness`); double counting if they sit
+   at the ring teeth's height (needs the CAD).
+
+**Reproduce:** weigh the golden designs and read the locals of `getMassKG_3DP_stg1` / `_stg2`.
+
+**Probable fix:** check each piece against the INDSPG Onshape model: swap the diameters (or drop the piece)
+for 1, clamp the height at zero (or rethink the formula) for 2, add or delete the unused volumes in 3.
+Changes INDSPG masses (all golden cases for 1).
+
+**Status:** open (found 2026-10-31 during the INDSPG metal-mode review; the metal split leaves these
+volumes as they are and weighs them as aluminium).
+
+### 22. INDSPG — stage-1 output bearing is fixed, and the carrier mass uses a different bearing
+
+**Description:** in `ActuatorandGearbox_INDSPG.py`, the stage-1 output bearing (inside the stator's wire
+opening; the stage-2 sun step passes through its bore) is hard-coded as an inch thin bearing,
+38.1 × 47.625 × 4.763 mm, 22.7 g, for every motor and every design:
+1. **CAD side** (`bearing1_ID/OD/height`, L425-427, written as `a1_bearing_*` and `a2_bearing1_*`): fixed
+   values, marked "TODO: if possible extract it from bearing selection".
+2. **Mass side** (`getMassKG_3DP_stg1`, L1588-1598): a table lookup runs
+   (`required ID = module × (Ns + Np) + bearingIDClearanceMM`), then `Bearing_*_stg1_*` are overwritten
+   with the fixed values. But the lookup's locals (`bearing_ID`, `bearing_height`, L1651-1654) still size
+   the stage-1 carrier (`carrier_OD`, `vol_carrier_disk`, `sec_carrier_OD`, L1691-1787), so the carrier
+   is weighed for a different bearing than the CAD draws:
+
+   | Golden design | Lookup bearing (carrier mass) | Fixed bearing (CAD, bearing mass) |
+   |---|---|---|
+   | RI100 3dp (Ns 26, Np 25, m 0.5) | 40 × 50 × 6 | 38.1 × 47.625 × 4.763 |
+   | RI80 3dp, RI100 metal (Ns 21, Np 24, m 0.5) | 35 × 47 × 7 | 38.1 × 47.625 × 4.763 |
+3. **No fit check:** nothing checks that the fixed bearing suits the stage-1 gear set; its bore
+   (`bearing1_ID − 3 × 1.5` = 33.6 mm) is smaller than the stage-1 ring side in all golden designs, which is
+   what makes `bearing_support_vol3` negative (bug 21, item 1).
+
+The bearing is not in the `bearings_discrete` table (which has the other inch sizes 44.45 × 53.975 and
+63.5 × 76.2), so a plain lookup could never return it.
+
+**Reproduce:** weigh a golden INDSPG design and compare the locals `bearing_ID` / `bearing_height` in
+`getMassKG_3DP_stg1` with `self.bearing1_ID` / `self.bearing1_height`.
+
+**Probable fix:** decide with the Onshape model (and the designer: was the thin inch bearing chosen on
+purpose?) between a per-design lookup (add the inch bearing to the table if it should stay selectable) and
+the fixed bearing used consistently, i.e. the carrier mass on `bearing1_*`. Either changes INDSPG masses;
+fix together with bug 21.
+
+**Status:** open (found 2026-10-31 during the variable-classification review). Step 1 done (value-identical):
+the four fixed numbers are now config keys, `a1_bearing_ID`, `a1_bearing_OD`, `a1_bearing_height` and
+`a1_bearing_massKg` in `indspg_params.json`, read by both the CAD code and the mass code.
+
+### 23. IDSPG — the mass code weighed a narrower sun hub than the CAD draws
+
+**Description:** in `ActuatorandGearbox_IDSPG.py` the CAD's stage-1 sun hub (`sun_hub_dia1`) is the rotor's
+mount-hole circle + hole diameter + **5** × `standard_clearance_1_5mm`, but `getMassKG_3DP_stg1` rebuilt it
+with **4** × (found during the variable classification). The hub was weighed 3 mm narrower than drawn.
+
+**Fixed (2026-10-31):** the mass code uses `self.sun_hub_dia1`, the CAD's value (its margin is now the
+config key `sun_hub_clearance_multiple`, 5 in IDSPG). Same gear sets; the golden RO100 20:1 masses go
+from 1.825 to 1.826 kg (3dp) and 2.429 to 2.431 kg (metal); both IDSPG golden cases re-recorded.
+
+**Status:** fixed.
 
 ## CAD issues
 

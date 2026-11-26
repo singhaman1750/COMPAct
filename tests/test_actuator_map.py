@@ -323,3 +323,131 @@ def test_map_py_is_standalone():
                 for n in ast.walk(tree) if isinstance(n, (ast.Import, ast.ImportFrom))
                 for a in (n.names if isinstance(n, ast.Import) else [n])}
     assert imported <= {"json", "math", "dataclasses", "pathlib", "numpy"}, imported
+
+
+# ---- slivers and fit-error flags (release v1) ---------------------------------------------------
+
+from tools.actuator_map.fit import best_in, merge_slivers  # noqa: E402
+
+
+def const_type(lo, hi, mass, fraction=1.0, width=0.05, eff=0.9):
+    """A type with constant fitted values, valid on [lo, hi]."""
+    const = lambda v: {"pieces": [{"from": lo, "coef": [v], "degree": 0}], "breaks": []}  # noqa: E731
+    return {"valid_intervals": [[lo, hi]], "quantities": {
+        "mass_kg": const(mass), "width_with_driver_m": const(width), "efficiency": const(eff),
+        "torque_carried_fraction": const(fraction), "compact_cost": const(mass)}}
+
+
+def test_sliver_between_near_ties_is_merged():
+    types = {"a": const_type(4, 10, 1.00), "b": const_type(4, 10, 0.99)}   # b 1 % better on its sliver
+    ivs, switches = merge_slivers(types, [[4, 6, "a"], [6, 6.3, "b"], [6.3, 10, "a"]], GAINS_FOR_TABLE)
+    assert ivs == [[4, 10, "a"]] and switches == []
+    assert best_in(ivs, 6.1) == "a" and best_in(ivs, 10) == "a" and best_in(ivs, 10.5) is None
+
+
+def test_sliver_is_kept_when_it_really_wins_or_the_80_percent_rule_decides():
+    clear_win = {"a": const_type(4, 10, 1.00), "b": const_type(4, 10, 0.80)}  # b 20 % better: not a near-tie
+    raw = [[4, 6, "a"], [6, 6.3, "b"], [6.3, 10, "a"]]
+    assert merge_slivers(clear_win, raw, GAINS_FOR_TABLE)[0] == raw
+    capped = {"a": const_type(4, 10, 0.99, fraction=0.5), "b": const_type(4, 10, 1.00)}  # a is capped
+    assert merge_slivers(capped, [[4, 6, "a"], [6, 6.3, "b"], [6.3, 10, "a"]], GAINS_FOR_TABLE)[0][1] == [6, 6.3, "b"]
+    not_valid = {"a": const_type(4, 6, 1.00), "b": const_type(6, 10, 0.99), "c": const_type(6.3, 10, 1.0)}
+    assert merge_slivers(not_valid, [[4, 6, "a"], [6, 6.3, "b"], [6.3, 10, "c"]], GAINS_FOR_TABLE)[0][1] == [6, 6.3, "b"]
+
+
+def test_interface_follows_the_merged_best_types_and_flags_big_fit_errors(small_map, tmp_path):
+    amap, _ = small_map
+    for lo, hi, gb in amap.best_types("M", "3dp")[0]:
+        assert amap.actuator("M", (lo + hi) / 2, "3dp").gb_type == gb
+    data = json.loads((amap_path := tmp_path / "fits.json").read_text())
+    tf = data["motors"]["M"]["3dp"]["types"]["idspg"]["quantities"]
+    tf["mass_kg"]["max_rel"], tf["width_with_driver_m"]["max_rel"] = 0.12, 0.01
+    amap_path.write_text(json.dumps(data))
+    flagged = ActuatorMap(tmp_path).actuator("M", 9.0, "3dp", gb_type="idspg")
+    assert "mass_kg" in flagged.flags["fit_error_high"] and "width_with_driver_m" not in flagged.flags["fit_error_high"]
+    assert ActuatorMap(tmp_path).actuator("M", 9.0, "3dp", gb_type="idspg", method="interp").flags["fit_error_high"] == []
+
+
+# ---- select(): a motor, type and ratio for an output torque and speed ---------------------------
+
+W0 = 2400.0 * 2 * 3.141592653589793 / 60   # the test motor's no-load speed, rad/s
+
+
+def _brute(amap, gb, torque, speed, lo, hi):
+    """Ratios on a fine grid where the type meets the ask, from actuator() one ratio at a time."""
+    xs = [round(lo + 0.001 * i, 3) for i in range(int(round((hi - lo) / 0.001)) + 1)]
+    return [x for x in xs if amap.actuator("M", x, "3dp", gb_type=gb).peak_torque >= torque and W0 / x >= speed]
+
+
+def test_select_window_and_lowest_score_ratio(small_map):
+    amap, _ = small_map
+    torque, speed = 60.0, 25.0
+    (c,) = amap.select(torque, speed, types=["icpg"])
+    ok = _brute(amap, "icpg", torque, speed, 4.0, 12.0)
+    assert c.meets and c.shortfall == 0 and len(c.window) == 1
+    assert c.window[0][0] == pytest.approx(ok[0], abs=0.011) and c.window[0][1] == pytest.approx(ok[-1], abs=0.011)
+    # icpg's score grows with the ratio, so the lowest ratio of the window wins
+    assert c.ratio == c.window[0][0]
+    assert c.actuator.peak_torque >= torque and c.actuator.no_load_speed >= speed
+    assert c.torque_margin == pytest.approx(c.actuator.peak_torque / torque - 1)
+    assert c.score == pytest.approx(amap.actuator("M", c.ratio, "3dp", gb_type="icpg").score)
+
+
+def test_select_counts_the_capped_torque_and_ranks_misses_last(small_map):
+    amap, _ = small_map
+    cands = amap.select(60.0, 25.0)
+    by_type = {c.gb_type: c for c in cands}
+    capped = by_type["isspg_inside"]       # 50 % of 12 N m x 7 x 0.96 = 40 N m at most
+    assert not capped.meets and capped.window == [] and capped.shortfall > 0
+    assert [c.meets for c in cands] == sorted((c.meets for c in cands), reverse=True)
+    meeting = [c for c in cands if c.meets]
+    assert [c.score for c in meeting] == sorted(c.score for c in meeting)
+
+
+def test_select_closest_miss_has_the_smallest_shortfall(small_map):
+    amap, _ = small_map
+    torque, speed = 200.0, 25.0            # out of reach of every type
+    cands = amap.select(torque, speed)
+    assert not any(c.meets for c in cands)
+    assert [c.shortfall for c in cands] == sorted(c.shortfall for c in cands)
+    c = next(c for c in cands if c.gb_type == "idspg")
+    xs = [4.0 + 0.01 * i for i in range(801)]
+    a = [amap.actuator("M", x, "3dp", gb_type="idspg") for x in xs]
+    best = min(max(0, 1 - y.peak_torque / torque) + max(0, 1 - y.no_load_speed / speed) for y in a)
+    assert c.shortfall == pytest.approx(best, abs=1e-6)
+
+
+def test_select_flags_a_window_beyond_the_map(small_map):
+    amap, _ = small_map
+    # with efficiency 1 the ask needs ratios 12.5-25: past this map's 12, so --no-map may find a design
+    (c,) = amap.select(150.0, 10.0, types=["icpg"])
+    assert not c.meets and c.flags["window_beyond_map"]
+    (c,) = amap.select(60.0, 25.0, types=["icpg"])
+    assert not c.flags["window_beyond_map"]
+
+
+def test_select_options(small_map):
+    amap, _ = small_map
+    assert len(amap.select(60.0, 25.0, top=2)) == 2
+    assert {c.gb_type for c in amap.select(60.0, 25.0, rule="compact_cost")} == {"icpg", "idspg", "isspg_inside"}
+    assert amap.select(60.0, 25.0, material="metal") == []
+    for bad in ((0.0, 25.0), (60.0, -1.0)):
+        with pytest.raises(ValueError):
+            amap.select(*bad)
+    with pytest.raises(ValueError):
+        amap.select(60.0, 25.0, rule="other")
+    assert amap.motor("M")["peak_torque_Nm"] == 12.0
+
+
+def test_select_takes_a_swept_design_the_fit_averages_away(small_map, tmp_path):
+    amap, _ = small_map
+    (fitted,) = amap.select(60.0, 25.0, types=["icpg"])
+    assert not fitted.flags["swept_design"]
+    data = json.loads((path := tmp_path / "fits.json").read_text())
+    mass = data["motors"]["M"]["3dp"]["types"]["icpg"]["quantities"]["mass_kg"]
+    mass["y"][mass["x"].index(7.0)] = 0.2            # one much lighter design; the fit doesn't change
+    path.write_text(json.dumps(data))
+    (c,) = ActuatorMap(tmp_path).select(60.0, 25.0, types=["icpg"])
+    assert c.ratio == 7.0 and c.flags["swept_design"] and c.meets
+    assert c.actuator.mass == pytest.approx(0.2) and c.actuator.flags["method"] == "interp"
+    assert c.window == fitted.window                 # the window still comes from the fits

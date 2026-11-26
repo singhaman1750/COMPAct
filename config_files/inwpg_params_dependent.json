@@ -33,6 +33,7 @@
         "bearingIDClearanceMM"                               : 10,
         "tight_clearance_3DP"                                : 0.4,
         "loose_clearance_3DP"                                : 0.8,
+        "planet_bearing_gap"                                : 1.0,
         "bearing_step_width"                                 : 2,
 
         "motor_mount_driver_hole_dia"                        : 3,
