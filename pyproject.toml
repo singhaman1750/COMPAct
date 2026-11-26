@@ -1,4 +1,42 @@
-# Tool settings only; this file does not make the repo an installable package.
+# Install for use from another project (co-design), editable only, since the code reads
+# config_files/, CADs/ and the actuator maps from the repo folder:
+#     pip install -e path/to/COMPAct        then: from compact_api import ActuatorMap, final_design
+# See docs/codesign_integration.md.
+
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "compact"
+version = "2.0.0"
+description = "COMPAct: compact planetary gearbox actuator optimiser, with the actuator map for co-design"
+requires-python = ">=3.10"
+dependencies = ["numpy", "matplotlib", "pandas", "requests"]
+
+[tool.setuptools]
+# every module at the repo root (tests/test_compact_api.py checks the list is complete)
+py-modules = [
+    "ActuatorAndGearbox",
+    "ActuatorAndGearbox_INCPG_dependent",
+    "ActuatorAndGearbox_INCPG_independent",
+    "ActuatorAndGearbox_INWPG_dependent",
+    "ActuatorAndGearbox_INWPG_independent",
+    "ActuatorAndGearbox_ISSPG_compact",
+    "ActuatorAndGearbox_ISSPG_inside",
+    "ActuatorandGearbox_ICPG",
+    "ActuatorandGearbox_IDSPG",
+    "ActuatorandGearbox_INDSPG",
+    "ActuatorandGearbox_INSSPG",
+    "CommonComponents",
+    "actOpt",
+    "compact_api",
+    "gearbox_runner",
+    "two_stage_search",
+]
+
+[tool.setuptools.packages.find]
+include = ["tools*"]
 
 [tool.ruff]
 target-version = "py310"
