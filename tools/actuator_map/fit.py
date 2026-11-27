@@ -40,6 +40,8 @@ REPO = Path(__file__).resolve().parents[2]
 if str(REPO) not in sys.path:
     sys.path.insert(0, str(REPO))
 
+from tools.actuator_map.map import RESISTANCE_ALPHA_PER_K, kt_from_kv  # noqa: E402
+from tools.actuator_map.sweep import git_commit  # noqa: E402
 from tools.actuator_map.table import (  # noqa: E402
     MIN_CARRIED_FRACTION_FOR_BEST, NEAR_BEST_REL, OPEN_CAD_ISSUES, RUNS_DIR, build_rows, load_cases, load_gains,
     load_motors)
@@ -408,22 +410,45 @@ def plot(fits, gains, out_dir):
             plt.close(fig)
 
 
+def motor_size_mm(entry):
+    """(diameter, length) of the motor alone, as CommonComponents' motor classes take them."""
+    g = entry["geometry"]
+    if entry["type"] == "framed_outrunner":
+        return g["motorDia"], g["motorLength"]
+    if entry["type"] == "frameless_outrunner":
+        return g["motor_OD"], g["motor_height"]
+    return g["stator_OD"], g["stator_wire_top_height"] + g["stator_mid_height"] + g["stator_wire_bottom_height"]
+
+
 def make_meta(run_name, commit, gains, grid_step, motor_names, motors=None):
     """Everything map.py needs besides the fits: settings, gains and the motors' own values."""
     motors = motors or load_motors()
     motor_values = {}
     for name in sorted(motor_names):
         el, mech = motors[name]["electrical"], motors[name].get("mechanical", {})
+        dia_mm, length_mm = motor_size_mm(motors[name])
         motor_values[name] = {
             "type": motors[name]["type"],
             "peak_torque_Nm": el["peak_torque_Nm"], "rated_torque_Nm": el.get("rated_torque_Nm"),
             "no_load_speed_rpm": el["no_load_speed_rpm"], "rated_speed_rpm": el.get("rated_speed_rpm"),
             "rotor_inertia_kgm2": mech.get("rotor_inertia_kgm2"),
-            "rotor_inertia_basis": mech.get("rotor_inertia_basis")}
+            "rotor_inertia_basis": mech.get("rotor_inertia_basis"),
+            "kv_rpm_per_V": el["kv_rpm_per_V"],
+            "peak_current_A": el["peak_current_A"], "peak_current_basis": el.get("peak_current_basis"),
+            "rated_current_A": el.get("rated_current_A"),
+            "rated_current_basis": el.get("rated_current_basis", "datasheet"),
+            "resistance_ohm": el.get("resistance_ohm"), "resistance_basis": el.get("resistance_basis"),
+            "kt_kv_Nm_per_A": kt_from_kv(el["kv_rpm_per_V"]),
+            "kt_peak_Nm_per_A": el["peak_torque_Nm"] / el["peak_current_A"],
+            "kt_datasheet_Nm_per_A": el.get("kt_Nm_per_A"),
+            "mass_kg": motors[name]["mass_kg"], "diameter_m": dia_mm / 1000, "length_m": length_mm / 1000}
     return {"format": FITS_FORMAT, "run": run_name, "commit": commit, "gains": gains, "grid_step": grid_step,
             "min_carried_fraction_for_best": MIN_CARRIED_FRACTION_FOR_BEST, "near_best_rel": NEAR_BEST_REL,
             "min_best_interval": MIN_BEST_INTERVAL, "fit_error_flag_rel": FIT_ERROR_FLAG_REL,
-            "quantities": list(QUANTITIES), "motors": motor_values}
+            "quantities": list(QUANTITIES), "motors": motor_values,
+            "motor_data_commit": git_commit(), "resistance_alpha_per_K": RESISTANCE_ALPHA_PER_K,
+            "heat_model": "copper loss = 0.75 x resistance_ohm (line-to-line, ~25 C) x I_amp^2, "
+                          "I_amp = motor torque / kt_kv_Nm_per_A; no iron or friction loss"}
 
 
 def main(argv=None):

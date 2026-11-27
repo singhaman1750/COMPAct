@@ -119,8 +119,9 @@ def test_each_motor_type_gets_its_gearbox_types():
 from tools.actuator_map.table import GEAR_VARS, build_rows, summary  # noqa: E402
 
 MOTOR = {"type": "frameless_outrunner",
-         "electrical": {"peak_torque_Nm": 12.0, "rated_torque_Nm": 4.0, "no_load_speed_rpm": 2400.0,
-                        "rated_speed_rpm": 2000.0},
+         "electrical": {"kv_rpm_per_V": 50, "peak_torque_Nm": 12.0, "peak_current_A": 62.0, "rated_torque_Nm": 4.0,
+                        "no_load_speed_rpm": 2400.0, "rated_speed_rpm": 2000.0, "resistance_ohm": 0.143},
+         "mass_kg": 0.71, "geometry": {"motor_OD": 113.5, "motor_height": 36.2},
          "mechanical": {"rotor_inertia_kgm2": 1e-3, "rotor_inertia_basis": "datasheet"}}
 GAINS_FOR_TABLE = {"K_Mass": 1, "K_Eff": -2, "K_Width": 0.2, "K_torque_shortfall": 10, "K_Width_real": 0.05}
 
@@ -451,3 +452,46 @@ def test_select_takes_a_swept_design_the_fit_averages_away(small_map, tmp_path):
     assert c.ratio == 7.0 and c.flags["swept_design"] and c.meets
     assert c.actuator.mass == pytest.approx(0.2) and c.actuator.flags["method"] == "interp"
     assert c.window == fitted.window                 # the window still comes from the fits
+
+
+def test_interface_heat_coefficient_and_motor_values(small_map):
+    amap, rows = small_map
+    m = amap.motor("M")
+    assert m["kt_kv_Nm_per_A"] == pytest.approx(8.27 / 50, rel=1e-3) and m["resistance_ohm"] == 0.143
+    assert m["kt_peak_Nm_per_A"] == pytest.approx(12.0 / 62.0) and m["kt_datasheet_Nm_per_A"] is None
+    assert (m["mass_kg"], m["diameter_m"], m["length_m"]) == (0.71, 0.1135, 0.0362)
+    # copper loss for one motor torque is the same at every ratio: heat x (ratio x efficiency)^2
+    per_motor_torque = set()
+    for ratio in (5.0, 8.0, 11.0):
+        a = amap.actuator("M", ratio, "3dp", derivative=True)
+        per_motor_torque.add(round(a.heat_coefficient * (ratio * a.efficiency) ** 2, 12))
+        assert a.motor_constant == pytest.approx(m["kt_kv_Nm_per_A"] / (0.75 * 0.143) ** 0.5)
+        assert (a.motor_mass, a.motor_dia, a.motor_length) == (0.71, 0.1135, 0.0362)
+        assert a.gearbox_mass == pytest.approx(a.mass - 0.71)
+        h = 1e-5   # the derivative matches a finite difference
+        up, down = (amap.actuator("M", ratio + s, "3dp", gb_type=a.gb_type).heat_coefficient for s in (h, -h))
+        assert a.derivatives["heat_coefficient"] == pytest.approx((up - down) / (2 * h), rel=1e-4)
+    assert len(per_motor_torque) == 1
+    row = next(r for r in rows if r["gb_type"] == "idspg" and r["ratio_requested"] == 9.0)
+    a = amap.actuator("M", 9.0, "3dp", gb_type="idspg", method="interp")
+    assert a.heat_coefficient == pytest.approx(row["heat_coefficient_W_per_Nm2"])
+
+
+def test_interface_fit_error(small_map):
+    amap, _ = small_map
+    err = amap.fit_error("M", "3dp", "icpg", "mass_kg")
+    assert set(err) == {"rms", "rms_rel", "max_abs", "max_rel"} and all(v >= 0 for v in err.values())
+    assert amap.fit_error("M", "3dp", "icpg")["mass_kg"] == err
+    with pytest.raises(KeyError, match="no fit of"):
+        amap.fit_error("M", "3dp", "icpg", "mass")
+
+
+def test_interface_reads_a_map_without_electrical_data(small_map, tmp_path):
+    amap, _ = small_map
+    path = tmp_path / "fits.json"   # as maps before v3
+    data = json.loads(path.read_text())
+    for key in ("kv_rpm_per_V", "resistance_ohm", "mass_kg", "diameter_m", "length_m"):
+        del data["meta"]["motors"]["M"][key]
+    path.write_text(json.dumps(data))
+    a = ActuatorMap(path).actuator("M", 8.0, "3dp")
+    assert a.heat_coefficient is None and a.motor_constant is None and a.gearbox_mass is None
