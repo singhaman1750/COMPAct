@@ -2,9 +2,10 @@
 gearbox design at the end. This is the only module another project needs to import.
 
     from compact_api import ActuatorMap, final_design, nearest_design
-    amap = ActuatorMap()                                    # the latest released map (maps/v2)
+    amap = ActuatorMap()                                    # the latest released map (maps/v3)
     a = amap.actuator("U8_Lite", 9.3, "3dp")                # in the loop: milliseconds, SI units
     a.gb_type, a.mass, a.width, a.dia, a.peak_torque, a.no_load_speed, a.reflected_inertia
+    a.heat_coefficient, a.motor_mass, a.gearbox_mass        # copper loss = heat_coefficient x torque^2
     d = final_design("U8_Lite", 9.3, "3dp", gb_type=a.gb_type, cad_dir="out/hip")   # at the end
     d["gb_type"], d["ratio"], d["gears"], d["face_widths_mm"], d["mass_kg"], d["cad_files"]
 

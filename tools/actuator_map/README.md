@@ -65,6 +65,7 @@ cases without a design). Units are SI; speeds are also in rpm.
 | `rated_torque_out_Nm` | min(motor rated, fraction × motor peak) × ratio × efficiency |
 | `no_load_speed_out_*`, `rated_speed_out_*` | motor speed ÷ ratio (rad/s and rpm) |
 | `reflected_inertia_kgm2` | ratio² × motor rotor inertia (the gears' own inertia not yet included); `rotor_inertia_basis` says datasheet or estimate |
+| `heat_coefficient_W_per_Nm2` | copper loss ÷ output torque²: 0.75 × R ÷ (Kt × ratio × efficiency)², R line-to-line, Kt = 8.27 ÷ KV (`map.py`'s `heat_coefficient`) |
 | `real_width_score` | **the map's rule:** K_Mass·mass + K_Eff·efficiency + K_Width_real·(width with driver, mm) + ratio error + K_torque_shortfall·(1 − fraction), gains from `cost.json` (K_Width_real 0.05) |
 | `compact_cost` | the optimiser's own cost (width = planet face widths), kept as a second rule |
 | `best_by_real_width`, `best_by_compact_cost` | the lowest-score type of that motor, ratio and material, by each rule |
@@ -126,6 +127,8 @@ a.mass, a.width, a.dia           # 0.837 kg, 0.101 m (with driver mount), 0.115 
 a.peak_torque, a.rated_torque    # 34.0 N m, 9.0 N m at the output
 a.no_load_speed                  # rad/s at the output (a.no_load_speed_rpm in rpm)
 a.reflected_inertia              # ratio^2 x rotor inertia, kg m^2
+a.heat_coefficient               # W/(N m)^2: copper loss = this x output torque^2 (maps from v3)
+a.motor_mass, a.gearbox_mass     # kg, the motor alone and the rest (a.motor_dia, a.motor_length in m)
 a.flags                          # torque_capped, no_full_torque_design, near_best, cad_issues, ...
 ```
 
@@ -145,7 +148,9 @@ some design. Optimise with the fits, then read the final design with `method="in
 
 A ratio where no (allowed) type has designs raises `ValueError` (no extrapolation). Helpers:
 `motors()`, `materials(motor)`, `types(motor, material)`, `covered(motor, material)`,
-`best_types(motor, material)` (intervals and switch ratios), `ranking(motor, ratio, material)`.
+`best_types(motor, material)` (intervals and switch ratios), `ranking(motor, ratio, material)`,
+`motor(name)` (the motor's own values), `fit_error(motor, material, gb_type, quantity)` (how far a
+type's fit is from its designs over its whole range: `rms`, `max_abs`, `rms_rel`, `max_rel`).
 All values are SI; speeds also in rpm. The gears' own inertia is not included yet.
 
 ## Choose a motor and gearbox for a torque and speed
@@ -230,4 +235,6 @@ Copies `fits.json`, `fits.md`, `summary.md` and the tables into `tools/actuator_
 (the sweep's commit, the grid, case counts, settings, known issues, and warnings such as motors or
 ratios without designs) and a README. Released maps: `maps/v1/` (33 motors, ratios 4–30, 3dp and
 metal; metal masses are overestimated, see its README) and `maps/v2/` (the same grid, after the steel-ring
-metal fixes for every type, the WPG motor case and the IDSPG sun hub; metal masses are still high, see its README).
+metal fixes for every type, the WPG motor case and the IDSPG sun hub; metal masses are still high, see its README)
+and `maps/v3/` (v2's fits and designs, with the motors' resistance, torque constants, mass and size,
+and the heat coefficient; built by re-running `table.py` and `fit.py` on the `full_v2` run).
