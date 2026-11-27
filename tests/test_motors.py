@@ -8,6 +8,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from CommonComponents import MOTOR_CLASSES, MOTORS_JSON, load_motor, max_gearbox_dia_mult_factor  # noqa: E402
+from tools.actuator_map.map import kt_from_kv, motor_constant  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / "golden"))
 import golden  # noqa: E402
@@ -51,7 +52,7 @@ def test_geometry_sets_every_class_argument(name):
 def test_values_are_positive_numbers(name):
     entry = MOTORS[name]
     numbers = {**entry["geometry"], "mass_kg": entry["mass_kg"]}
-    numbers.update({k: v for k, v in entry["electrical"].items() if not k.endswith("_basis")})
+    numbers.update({k: v for k, v in entry["electrical"].items() if not k.endswith(("_basis", "_source"))})
     for key, value in numbers.items():
         assert isinstance(value, (int, float)) and value > 0, f"{name}.{key} = {value!r}"
     assert entry["source"]
@@ -140,6 +141,35 @@ def test_rated_values_of_framed_motors_say_where_they_come_from():
         el = MOTORS[name]["electrical"]
         for key in ("rated_current_basis", "rated_torque_basis", "rated_speed_basis"):
             assert el[key].split(":")[0] in ("datasheet", "measured", "estimate"), (name, key)
+
+
+@pytest.mark.parametrize("name", NAMES)
+def test_resistance_is_line_to_line_with_its_basis(name):
+    el = MOTORS[name]["electrical"]
+    assert 0.01 < el["resistance_ohm"] < 1
+    assert el["resistance_basis"].startswith("datasheet:") and "line-to-line" in el["resistance_basis"]
+    assert el["peak_current_basis"].startswith("datasheet:")
+    if "kt_Nm_per_A" in el:
+        assert el["kt_basis"].startswith("datasheet:") and el["kt_Nm_per_A"] > 0
+
+
+@pytest.mark.parametrize("name", NAMES)
+def test_motor_constant_is_plausible(name):
+    el = MOTORS[name]["electrical"]
+    assert 0.05 < motor_constant(el["resistance_ohm"], kt_from_kv(el["kv_rpm_per_V"])) < 1.5
+
+
+def test_kt_from_kv():
+    assert kt_from_kv(100) == pytest.approx(0.0827, abs=1e-4)   # 8.27 / KV
+
+
+@pytest.mark.parametrize("name", by_type("framed_outrunner"))
+def test_framed_rated_speed_uses_the_stored_resistance(name):
+    el = MOTORS[name]["electrical"]
+    volts = MOTORS_DATA["system_voltage_V"]
+    expected = el["kv_rpm_per_V"] * (volts - el["rated_current_A"] * el["resistance_ohm"])
+    assert el["rated_speed_rpm"] == pytest.approx(expected, abs=1)
+    assert "resistance_ohm" in el["rated_speed_basis"]
 
 
 def test_unknown_rating_is_rejected():
