@@ -1,7 +1,10 @@
 """compact_api.py, the module other projects (co-design) import: the released map as the default,
 nearest_design() from the map's table, final_design() through the real optimiser (RO100 ISSPG
-compact, about 0.1 s), and pyproject.toml's module list for `pip install -e`.
+compact, about 0.1 s), and pyproject.toml's module list for `pip install -e`. Also: map v3 is map
+v2's fits with the motors' electrical data added.
 """
+import csv
+import json
 import re
 import sys
 from pathlib import Path
@@ -13,6 +16,7 @@ sys.path.insert(0, str(REPO))
 
 import compact_api  # noqa: E402
 from compact_api import ActuatorMap, final_design, nearest_design  # noqa: E402
+from tools.actuator_map.map import heat_coefficient, kt_from_kv  # noqa: E402
 
 
 def test_pyproject_lists_every_root_module():
@@ -28,12 +32,29 @@ def test_default_map_is_the_latest_release():
     assert amap.meta["format"] == 1
     a = amap.actuator("RO100", 6.0, "3dp")
     assert a.gb_type in amap.types("RO100", "3dp") and a.mass > 0
+    assert a.heat_coefficient > 0 and a.motor_mass == 0.71 and amap.motor("RO100")["resistance_ohm"] == 0.143
+
+
+def test_map_v3_is_v2_with_the_motors_electrical_data():
+    v2, v3 = (json.loads((compact_api.MAPS_DIR / v / "fits.json").read_text(encoding="utf-8")) for v in ("v2", "v3"))
+    assert v3["motors"] == v2["motors"]   # the same fits
+    for name, old in v2["meta"]["motors"].items():
+        new = v3["meta"]["motors"][name]
+        assert {k: new[k] for k in old} == old and new["resistance_ohm"] > 0
+    for material in ("3dp", "metal"):
+        rows = []
+        for v in ("v2", "v3"):
+            with open(compact_api.MAPS_DIR / v / f"table_{material}.csv", newline="", encoding="utf-8") as f:
+                rows.append(list(csv.DictReader(f)))
+        assert [{k: r[k] for k in old} for r, old in zip(rows[1], rows[0])] == rows[0]
+        assert len(rows[1]) == len(rows[0]) and all(float(r["heat_coefficient_W_per_Nm2"]) > 0 for r in rows[1])
 
 
 def test_nearest_design_gives_the_best_swept_design():
     d = nearest_design("RO100", 6.2, "3dp")
     assert d["best_by_real_width"] and d["ratio"] == pytest.approx(6.0, abs=0.5)
     assert set(d["gears"]) >= {"ns", "np", "nr", "module", "n_planets"}
+    assert d["heat_coefficient_W_per_Nm2"] > 0
     assert all(isinstance(d["gears"][k], int) for k in ("ns", "np", "nr", "n_planets"))
     own = nearest_design("RO100", 6.2, "3dp", gb_type="icpg")
     assert own["gb_type"] == "icpg" and "np_small" in own["gears"]
@@ -49,6 +70,7 @@ def test_final_design_runs_the_optimiser_and_writes_the_cad_files(tmp_path, monk
     assert d["gears"]["nr"] == d["gears"]["ns"] + 2 * d["gears"]["np"]
     assert "fw_p" in d["face_widths_mm"] and d["face_widths_mm"]["fw_p"] > 0
     assert d["mass_kg"] > 0 and 0 < d["efficiency"] < 1 and d["peak_torque_out_Nm"] > 0
+    assert d["heat_coefficient_W_per_Nm2"] == pytest.approx(heat_coefficient(0.143, kt_from_kv(55), d["ratio"], d["efficiency"]))
     assert not {"ns", "ratio_requested", "best_by_real_width"} & set(d)
     assert d["cad_files"] == [str(tmp_path / "out" / "knee" / "ISSPG" / "isspg_compact_equations_onshape.txt")]
     assert Path(d["cad_files"][0]).is_file()
