@@ -20,7 +20,11 @@
                 "rated_torque_Nm": 0.718,
                 "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
                 "rated_speed_rpm": 4669,
-                "rated_speed_basis": "estimate: KV x (48 V - rated current x 170 mOhm line-to-line); T-Motor 'Internal Resistance', taken as line-to-line"
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x resistance_ohm)",
+                "resistance_ohm": 0.17,
+                "resistance_basis": "datasheet: T-Motor 'Internal Resistance' 170 +- 5 mOhm (re-read 2026-11-27), convention not stated, taken as line-to-line",
+                "resistance_source": "https://store.tmotor.com/product/u8-lite-kv100-u-efficiency.html",
+                "peak_current_basis": "datasheet: peak current; whether phase amplitude, phase RMS or battery current is not stated"
             },
             "mass_kg": 0.238,
             "geometry": {
@@ -58,7 +62,10 @@
                 "rated_torque_Nm": 0.866,
                 "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
                 "rated_speed_rpm": 5162,
-                "rated_speed_basis": "estimate: KV x (48 V - rated current x 105 mOhm line-to-line); T-Motor 'Internal Resistance', taken as line-to-line"
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x resistance_ohm)",
+                "resistance_ohm": 0.105,
+                "resistance_basis": "datasheet: T-Motor 'Internal Resistance', convention not stated, taken as line-to-line",
+                "peak_current_basis": "datasheet: peak current; whether phase amplitude, phase RMS or battery current is not stated"
             },
             "mass_kg": 0.282,
             "geometry": {
@@ -96,7 +103,10 @@
                 "rated_torque_Nm": 0.513,
                 "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
                 "rated_speed_rpm": 3990,
-                "rated_speed_basis": "estimate: KV x (48 V - rated current x 225 mOhm line-to-line); T-Motor 'Internal Resistance', taken as line-to-line"
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x resistance_ohm)",
+                "resistance_ohm": 0.225,
+                "resistance_basis": "datasheet: T-Motor 'Internal Resistance', convention not stated, taken as line-to-line",
+                "peak_current_basis": "datasheet: peak current; whether phase amplitude, phase RMS or battery current is not stated"
             },
             "mass_kg": 0.277,
             "geometry": {
@@ -134,7 +144,10 @@
                 "rated_torque_Nm": 0.731,
                 "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
                 "rated_speed_rpm": 4689,
-                "rated_speed_basis": "estimate: KV x (48 V - rated current x 137.5 mOhm line-to-line); T-Motor 'Internal Resistance', taken as line-to-line"
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x resistance_ohm)",
+                "resistance_ohm": 0.1375,
+                "resistance_basis": "datasheet: T-Motor 'Internal Resistance', convention not stated, taken as line-to-line",
+                "peak_current_basis": "datasheet: peak current; whether phase amplitude, phase RMS or battery current is not stated"
             },
             "mass_kg": 0.253,
             "geometry": {
@@ -172,7 +185,10 @@
                 "rated_torque_Nm": 0.684,
                 "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
                 "rated_speed_rpm": 4701,
-                "rated_speed_basis": "estimate: KV x (48 V - rated current x 137.5 mOhm line-to-line); T-Motor 'Internal Resistance', taken as line-to-line"
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x resistance_ohm)",
+                "resistance_ohm": 0.1375,
+                "resistance_basis": "datasheet: T-Motor 'Internal Resistance', convention not stated, taken as line-to-line",
+                "peak_current_basis": "datasheet: peak current; whether phase amplitude, phase RMS or battery current is not stated"
             },
             "mass_kg": 0.287,
             "geometry": {
@@ -210,7 +226,10 @@
                 "rated_torque_Nm": 1.336,
                 "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
                 "rated_speed_rpm": 3762,
-                "rated_speed_basis": "estimate: KV x (48 V - rated current x 95 mOhm line-to-line); T-Motor 'Internal Resistance', taken as line-to-line"
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x resistance_ohm)",
+                "resistance_ohm": 0.095,
+                "resistance_basis": "datasheet: T-Motor 'Internal Resistance', convention not stated, taken as line-to-line",
+                "peak_current_basis": "datasheet: peak current; whether phase amplitude, phase RMS or battery current is not stated"
             },
             "mass_kg": 0.514,
             "geometry": {
@@ -248,7 +267,11 @@
                 "rated_torque_Nm": 1.103,
                 "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
                 "rated_speed_rpm": 4699,
-                "rated_speed_basis": "estimate: KV x (48 V - rated current x 101 mOhm line-to-line); T-Motor 'Internal Resistance', taken as line-to-line"
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x resistance_ohm)",
+                "resistance_ohm": 0.101,
+                "resistance_basis": "datasheet: T-Motor 'Internal Resistance' 101 +- 5 mOhm (re-read 2026-11-27), convention not stated, taken as line-to-line",
+                "resistance_source": "https://store.tmotor.com/goods.php?id=700",
+                "peak_current_basis": "datasheet: peak current; whether phase amplitude, phase RMS or battery current is not stated"
             },
             "mass_kg": 0.415,
             "geometry": {
@@ -286,7 +309,10 @@
                 "rated_torque_Nm": 0.276,
                 "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
                 "rated_speed_rpm": 7947,
-                "rated_speed_basis": "estimate: KV x (48 V - rated current x 270 mOhm line-to-line); T-Motor 'Internal Resistance', taken as line-to-line"
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x resistance_ohm)",
+                "resistance_ohm": 0.27,
+                "resistance_basis": "datasheet: T-Motor 'Internal Resistance', convention not stated, taken as line-to-line",
+                "peak_current_basis": "datasheet: peak current; whether phase amplitude, phase RMS or battery current is not stated"
             },
             "mass_kg": 0.128,
             "geometry": {
@@ -324,7 +350,10 @@
                 "rated_torque_Nm": 0.462,
                 "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
                 "rated_speed_rpm": 7471,
-                "rated_speed_basis": "estimate: KV x (48 V - rated current x 178 mOhm line-to-line); T-Motor 'Internal Resistance', taken as line-to-line"
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x resistance_ohm)",
+                "resistance_ohm": 0.178,
+                "resistance_basis": "datasheet: T-Motor 'Internal Resistance', convention not stated, taken as line-to-line",
+                "peak_current_basis": "datasheet: peak current; whether phase amplitude, phase RMS or battery current is not stated"
             },
             "mass_kg": 0.159,
             "geometry": {
@@ -362,7 +391,10 @@
                 "rated_torque_Nm": 0.437,
                 "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
                 "rated_speed_rpm": 5366,
-                "rated_speed_basis": "estimate: KV x (48 V - rated current x 288 mOhm line-to-line); T-Motor 'Internal Resistance', taken as line-to-line"
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x resistance_ohm)",
+                "resistance_ohm": 0.288,
+                "resistance_basis": "datasheet: T-Motor 'Internal Resistance', convention not stated, taken as line-to-line",
+                "peak_current_basis": "datasheet: peak current; whether phase amplitude, phase RMS or battery current is not stated"
             },
             "mass_kg": 0.188,
             "geometry": {
@@ -400,7 +432,10 @@
                 "rated_torque_Nm": 1.259,
                 "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
                 "rated_speed_rpm": 4695,
-                "rated_speed_basis": "estimate: KV x (48 V - rated current x 85 mOhm line-to-line); T-Motor 'Internal Resistance', taken as line-to-line"
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x resistance_ohm)",
+                "resistance_ohm": 0.085,
+                "resistance_basis": "datasheet: T-Motor 'Internal Resistance', convention not stated, taken as line-to-line",
+                "peak_current_basis": "datasheet: peak current; whether phase amplitude, phase RMS or battery current is not stated"
             },
             "mass_kg": 0.351,
             "geometry": {
@@ -438,7 +473,10 @@
                 "rated_torque_Nm": 1.485,
                 "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
                 "rated_speed_rpm": 4695,
-                "rated_speed_basis": "estimate: KV x (48 V - rated current x 65 mOhm line-to-line); T-Motor 'Internal Resistance', taken as line-to-line"
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x resistance_ohm)",
+                "resistance_ohm": 0.065,
+                "resistance_basis": "datasheet: T-Motor 'Internal Resistance', convention not stated, taken as line-to-line",
+                "peak_current_basis": "datasheet: peak current; whether phase amplitude, phase RMS or battery current is not stated"
             },
             "mass_kg": 0.392,
             "geometry": {
@@ -476,7 +514,10 @@
                 "rated_torque_Nm": 1.798,
                 "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
                 "rated_speed_rpm": 5645,
-                "rated_speed_basis": "estimate: KV x (48 V - rated current x 45 mOhm line-to-line); T-Motor 'Internal Resistance', taken as line-to-line"
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x resistance_ohm)",
+                "resistance_ohm": 0.045,
+                "resistance_basis": "datasheet: T-Motor 'Internal Resistance', convention not stated, taken as line-to-line",
+                "peak_current_basis": "datasheet: peak current; whether phase amplitude, phase RMS or battery current is not stated"
             },
             "mass_kg": 0.453,
             "geometry": {
@@ -514,7 +555,10 @@
                 "rated_torque_Nm": 1.097,
                 "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
                 "rated_speed_rpm": 4170,
-                "rated_speed_basis": "estimate: KV x (48 V - rated current x 168 mOhm line-to-line); T-Motor 'Internal Resistance', taken as line-to-line"
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x resistance_ohm)",
+                "resistance_ohm": 0.168,
+                "resistance_basis": "datasheet: T-Motor 'Internal Resistance', convention not stated, taken as line-to-line",
+                "peak_current_basis": "datasheet: peak current; whether phase amplitude, phase RMS or battery current is not stated"
             },
             "mass_kg": 0.282,
             "geometry": {
@@ -552,7 +596,10 @@
                 "rated_torque_Nm": 1.059,
                 "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
                 "rated_speed_rpm": 7924,
-                "rated_speed_basis": "estimate: KV x (48 V - rated current x 77 mOhm line-to-line); MAD 'Internal resistance', taken as line-to-line"
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x resistance_ohm)",
+                "resistance_ohm": 0.077,
+                "resistance_basis": "datasheet: MAD 'Internal resistance', convention not stated, taken as line-to-line",
+                "peak_current_basis": "datasheet: peak current; whether phase amplitude, phase RMS or battery current is not stated"
             },
             "mass_kg": 0.255,
             "geometry": {
@@ -590,7 +637,10 @@
                 "rated_torque_Nm": 0.786,
                 "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
                 "rated_speed_rpm": 6984,
-                "rated_speed_basis": "estimate: KV x (48 V - rated current x 120 mOhm line-to-line); MAD 'Internal resistance', taken as line-to-line"
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x resistance_ohm)",
+                "resistance_ohm": 0.12,
+                "resistance_basis": "datasheet: MAD 'Internal resistance', convention not stated, taken as line-to-line",
+                "peak_current_basis": "datasheet: peak current; whether phase amplitude, phase RMS or battery current is not stated"
             },
             "mass_kg": 0.209,
             "geometry": {
@@ -628,7 +678,10 @@
                 "rated_torque_Nm": 0.703,
                 "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
                 "rated_speed_rpm": 8383,
-                "rated_speed_basis": "estimate: KV x (48 V - rated current x 119 mOhm line-to-line); MAD 'Internal resistance', taken as line-to-line"
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x resistance_ohm)",
+                "resistance_ohm": 0.119,
+                "resistance_basis": "datasheet: MAD 'Internal resistance', convention not stated, taken as line-to-line",
+                "peak_current_basis": "datasheet: peak current; whether phase amplitude, phase RMS or battery current is not stated"
             },
             "mass_kg": 0.18,
             "geometry": {
@@ -666,7 +719,10 @@
                 "rated_torque_Nm": 0.566,
                 "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
                 "rated_speed_rpm": 6383,
-                "rated_speed_basis": "estimate: KV x (48 V - rated current x 301 mOhm line-to-line); MAD 'Internal resistance', taken as line-to-line"
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x resistance_ohm)",
+                "resistance_ohm": 0.301,
+                "resistance_basis": "datasheet: MAD 'Internal resistance', convention not stated, taken as line-to-line",
+                "peak_current_basis": "datasheet: peak current; whether phase amplitude, phase RMS or battery current is not stated"
             },
             "mass_kg": 0.163,
             "geometry": {
@@ -704,7 +760,10 @@
                 "rated_torque_Nm": 0.463,
                 "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
                 "rated_speed_rpm": 7497,
-                "rated_speed_basis": "estimate: KV x (48 V - rated current x 163 mOhm line-to-line); MAD 'Internal resistance', taken as line-to-line"
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x resistance_ohm)",
+                "resistance_ohm": 0.163,
+                "resistance_basis": "datasheet: MAD 'Internal resistance', convention not stated, taken as line-to-line",
+                "peak_current_basis": "datasheet: peak current; whether phase amplitude, phase RMS or battery current is not stated"
             },
             "mass_kg": 0.157,
             "geometry": {
@@ -742,7 +801,10 @@
                 "rated_torque_Nm": 0.922,
                 "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
                 "rated_speed_rpm": 4216,
-                "rated_speed_basis": "estimate: KV x (48 V - rated current x 144 mOhm line-to-line); MAD 'Internal resistance', taken as line-to-line"
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x resistance_ohm)",
+                "resistance_ohm": 0.144,
+                "resistance_basis": "datasheet: MAD 'Internal resistance', convention not stated, taken as line-to-line",
+                "peak_current_basis": "datasheet: peak current; whether phase amplitude, phase RMS or battery current is not stated"
             },
             "mass_kg": 0.279,
             "geometry": {
@@ -780,7 +842,10 @@
                 "rated_torque_Nm": 0.348,
                 "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
                 "rated_speed_rpm": 5432,
-                "rated_speed_basis": "estimate: KV x (48 V - rated current x 191 mOhm line-to-line); MAD 'Internal resistance', taken as line-to-line"
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x resistance_ohm)",
+                "resistance_ohm": 0.191,
+                "resistance_basis": "datasheet: MAD 'Internal resistance', convention not stated, taken as line-to-line",
+                "peak_current_basis": "datasheet: peak current; whether phase amplitude, phase RMS or battery current is not stated"
             },
             "mass_kg": 0.196,
             "geometry": {
@@ -818,7 +883,10 @@
                 "rated_torque_Nm": 1.648,
                 "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
                 "rated_speed_rpm": 4678,
-                "rated_speed_basis": "estimate: KV x (48 V - rated current x 61 mOhm line-to-line); MAD 'Internal resistance', taken as line-to-line"
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x resistance_ohm)",
+                "resistance_ohm": 0.061,
+                "resistance_basis": "datasheet: MAD 'Internal resistance', convention not stated, taken as line-to-line",
+                "peak_current_basis": "datasheet: peak current; whether phase amplitude, phase RMS or battery current is not stated"
             },
             "mass_kg": 0.52,
             "geometry": {
@@ -856,7 +924,10 @@
                 "rated_torque_Nm": 0.37,
                 "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
                 "rated_speed_rpm": 7928,
-                "rated_speed_basis": "estimate: KV x (48 V - rated current x 195 mOhm line-to-line); MAD 'Internal resistance', taken as line-to-line"
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x resistance_ohm)",
+                "resistance_ohm": 0.195,
+                "resistance_basis": "datasheet: MAD 'Internal resistance', convention not stated, taken as line-to-line",
+                "peak_current_basis": "datasheet: peak current; whether phase amplitude, phase RMS or battery current is not stated"
             },
             "mass_kg": 0.13,
             "geometry": {
@@ -894,7 +965,10 @@
                 "rated_torque_Nm": 0.341,
                 "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
                 "rated_speed_rpm": 9452,
-                "rated_speed_basis": "estimate: KV x (48 V - rated current x 106 mOhm line-to-line); MAD 'Internal resistance', taken as line-to-line"
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x resistance_ohm)",
+                "resistance_ohm": 0.106,
+                "resistance_basis": "datasheet: MAD 'Internal resistance', convention not stated, taken as line-to-line",
+                "peak_current_basis": "datasheet: peak current; whether phase amplitude, phase RMS or battery current is not stated"
             },
             "mass_kg": 0.1629,
             "geometry": {
@@ -932,7 +1006,10 @@
                 "rated_torque_Nm": 0.815,
                 "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
                 "rated_speed_rpm": 3993,
-                "rated_speed_basis": "estimate: KV x (48 V - rated current x 440 mOhm line-to-line); Vector Technics Rph per phase; line-to-line = 2 x Rph"
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x resistance_ohm)",
+                "resistance_ohm": 0.44,
+                "resistance_basis": "datasheet: Vector Technics Rph per phase; line-to-line = 2 x Rph",
+                "peak_current_basis": "datasheet: peak current; whether phase amplitude, phase RMS or battery current is not stated"
             },
             "mass_kg": 0.21,
             "geometry": {
@@ -970,7 +1047,10 @@
                 "rated_torque_Nm": 1.652,
                 "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
                 "rated_speed_rpm": 4549,
-                "rated_speed_basis": "estimate: KV x (48 V - rated current x 140 mOhm line-to-line); Vector Technics Rph per phase; line-to-line = 2 x Rph"
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x resistance_ohm)",
+                "resistance_ohm": 0.14,
+                "resistance_basis": "datasheet: Vector Technics Rph per phase; line-to-line = 2 x Rph",
+                "peak_current_basis": "datasheet: peak current; whether phase amplitude, phase RMS or battery current is not stated"
             },
             "mass_kg": 0.42,
             "geometry": {
@@ -1008,7 +1088,10 @@
                 "rated_torque_Nm": 0.928,
                 "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
                 "rated_speed_rpm": 4038,
-                "rated_speed_basis": "estimate: KV x (48 V - rated current x 366 mOhm line-to-line); Vector Technics Rph per phase; line-to-line = 2 x Rph"
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x resistance_ohm)",
+                "resistance_ohm": 0.366,
+                "resistance_basis": "datasheet: Vector Technics Rph per phase; line-to-line = 2 x Rph",
+                "peak_current_basis": "datasheet: peak current; whether phase amplitude, phase RMS or battery current is not stated"
             },
             "mass_kg": 0.277,
             "geometry": {
@@ -1046,7 +1129,10 @@
                 "rated_torque_Nm": 1.894,
                 "rated_torque_basis": "estimate: Kt (peak torque / peak current) x rated current",
                 "rated_speed_rpm": 5416,
-                "rated_speed_basis": "estimate: KV x (48 V - rated current x 120 mOhm line-to-line); Vector Technics Rph per phase; line-to-line = 2 x Rph"
+                "rated_speed_basis": "estimate: KV x (48 V - rated current x resistance_ohm)",
+                "resistance_ohm": 0.12,
+                "resistance_basis": "datasheet: Vector Technics Rph per phase; line-to-line = 2 x Rph",
+                "peak_current_basis": "datasheet: peak current; whether phase amplitude, phase RMS or battery current is not stated"
             },
             "mass_kg": 0.566,
             "geometry": {
@@ -1081,7 +1167,13 @@
                 "no_load_speed_basis": "datasheet at 48 V",
                 "rated_torque_Nm": 4.0,
                 "rated_current_A": 20,
-                "rated_speed_rpm": 2000
+                "rated_speed_rpm": 2000,
+                "resistance_ohm": 0.143,
+                "resistance_basis": "datasheet: CubeMars 'Phase To Phase' resistance (line-to-line)",
+                "resistance_source": "https://www.cubemars.com/goods-1159-RO100.html",
+                "kt_Nm_per_A": 0.2,
+                "kt_basis": "datasheet: CubeMars 'Kt'; current convention not stated",
+                "peak_current_basis": "datasheet: CubeMars 'Peak Current (ADC)'; phase amplitude or RMS not stated"
             },
             "mass_kg": 0.71,
             "geometry": {
@@ -1126,7 +1218,13 @@
                 "no_load_speed_basis": "datasheet at 48 V",
                 "rated_torque_Nm": 1.3,
                 "rated_current_A": 15,
-                "rated_speed_rpm": 3600
+                "rated_speed_rpm": 3600,
+                "resistance_ohm": 0.12,
+                "resistance_basis": "datasheet: CubeMars 'Phase To Phase' resistance (line-to-line)",
+                "resistance_source": "https://www.cubemars.com/goods-1158-RO80.html",
+                "kt_Nm_per_A": 0.087,
+                "kt_basis": "datasheet: CubeMars 'Kt'; current convention not stated",
+                "peak_current_basis": "datasheet: CubeMars 'Peak Current (ADC)'; phase amplitude or RMS not stated"
             },
             "mass_kg": 0.352,
             "geometry": {
@@ -1171,7 +1269,13 @@
                 "no_load_speed_basis": "datasheet at 48 V",
                 "rated_torque_Nm": 0.8,
                 "rated_current_A": 8.5,
-                "rated_speed_rpm": 4200
+                "rated_speed_rpm": 4200,
+                "resistance_ohm": 0.3,
+                "resistance_basis": "datasheet: CubeMars 'Phase To Phase' resistance (line-to-line)",
+                "resistance_source": "https://www.cubemars.com/product/ro60-kv115-standard-with-hall-frameless-torque-motor.html",
+                "kt_Nm_per_A": 0.094,
+                "kt_basis": "datasheet: CubeMars 'Kt'; current convention not stated",
+                "peak_current_basis": "datasheet: CubeMars 'Peak Current (ADC)'; phase amplitude or RMS not stated"
             },
             "mass_kg": 0.248,
             "geometry": {
@@ -1216,7 +1320,13 @@
                 "no_load_speed_basis": "datasheet at 48 V",
                 "rated_torque_Nm": 1.76,
                 "rated_current_A": 13.6,
-                "rated_speed_rpm": 2825
+                "rated_speed_rpm": 2825,
+                "resistance_ohm": 0.126,
+                "resistance_basis": "datasheet: CubeMars 'Phase To Phase' resistance (line-to-line)",
+                "resistance_source": "https://www.cubemars.com/goods-859-RI100+KV105.html",
+                "kt_Nm_per_A": 0.129,
+                "kt_basis": "datasheet: CubeMars 'Kt'; current convention not stated",
+                "peak_current_basis": "datasheet: CubeMars 'Peak Current (ADC)'; phase amplitude or RMS not stated"
             },
             "mass_kg": 0.5,
             "geometry": {
@@ -1253,7 +1363,13 @@
                 "no_load_speed_basis": "datasheet at 48 V",
                 "rated_torque_Nm": 1.45,
                 "rated_current_A": 9.4,
-                "rated_speed_rpm": 2430
+                "rated_speed_rpm": 2430,
+                "resistance_ohm": 0.33,
+                "resistance_basis": "datasheet: CubeMars 'Phase To Phase' resistance (line-to-line)",
+                "resistance_source": "https://www.cubemars.com/goods-860-RI80+V20.html",
+                "kt_Nm_per_A": 0.155,
+                "kt_basis": "datasheet: CubeMars 'Kt'; current convention not stated",
+                "peak_current_basis": "datasheet: CubeMars 'Peak Current (ADC)'; phase amplitude or RMS not stated"
             },
             "mass_kg": 0.411,
             "geometry": {

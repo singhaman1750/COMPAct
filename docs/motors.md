@@ -44,7 +44,8 @@ with `_KV<n>` when the model comes in several KV variants). Copy an existing ent
   `motor_frameless_outrunner`, `motor_frameless_inrunner` in `CommonComponents.py`) except the
   performance ones; the classes have no defaults, so nothing is silently guessed.
 - Every motor needs `rated_current_A`, `rated_torque_Nm` and `rated_speed_rpm` in `electrical`
-  (framed motors with a `*_basis` each), and a `mechanical` block:
+  (framed motors with a `*_basis` each), `resistance_ohm` with `resistance_basis` and
+  `peak_current_basis` (see the conventions below), and a `mechanical` block:
   ```json
   "mechanical": {
       "rotor_inertia_kgm2": 0.000117,
@@ -74,8 +75,20 @@ with `_KV<n>` when the model comes in several KV variants). Copy an existing ent
   0.31 × peak current (the median continuous/peak ratio of the motors that publish one), as an
   `estimate`. A 180 s rating is a short-term rating and is not used as rated.
 - **Rated torque (framed):** Kt × rated current, with Kt = peak torque ÷ peak current.
-- **Rated speed (framed):** KV × (48 V − rated current × R), R line-to-line (2 × Rph if the maker
-  gives per-phase resistance). Frameless motors use the datasheet rated speed.
+- **Rated speed (framed):** KV × (48 V − rated current × `resistance_ohm`). Frameless motors use the
+  datasheet rated speed.
+- **Resistance:** `resistance_ohm` is the winding resistance **line-to-line** (between two motor
+  wires), cold (about 25 °C): 2 × Rph if the maker gives it per phase (Vector Technics), the
+  "Phase To Phase" value for CubeMars. T-Motor and MAD give an "Internal Resistance" without saying
+  which; it is taken as line-to-line. `resistance_basis` says which, `resistance_source` where it
+  was read. Hot windings: R(T) = R25 × (1 + 0.00393 × (T − 25 °C)).
+- **Currents and Kt:** no maker says whether its peak current is the phase-current amplitude, the
+  RMS phase current or the battery current (`peak_current_basis`), so Kt = peak torque ÷ peak
+  current has no clear convention (it comes out 1.0–1.35 × the ideal value below, 1.6 × for RI100).
+  CubeMars' own Kt is kept as `kt_Nm_per_A` (`kt_basis`). The actuator map's heat model uses the
+  ideal Kt = 8.27 ÷ KV per amp of phase-current amplitude (KV: rpm per volt of line-to-line peak
+  back-EMF) and copper loss = 0.75 × R × I_amp² (= 1.5 × R × I_rms²), three-phase, sinusoidal.
+  Iron and friction losses are not included.
 - **Rotor inertia:** the maker's value if published (CubeMars frameless); otherwise
   0.26 × mass × (motorDia/2)², calibrated on a measured T-Motor U8 (Lee, Pan, Rouse, IROS 2019),
   about ±30 %. Replace an estimate with a measured value when one is available.
@@ -91,7 +104,8 @@ python -m pytest tests/test_motors.py
 python actOpt.py --motor <new name> --gb_type sspg --gr 6.5
 ```
 `tests/test_motors.py` checks that every entry loads, sets every class argument, has positive values,
-a peak current within 120 A, rated values below peak / no-load, a plausible rotor inertia, and
-geometry that fits (holes and wire slot inside the
+a peak current within 120 A, rated values below peak / no-load, a plausible rotor inertia, a
+resistance with its basis (and framed rated speeds that follow from it), a plausible motor constant,
+and geometry that fits (holes and wire slot inside the
 motor, stator/rotor diameters in the right order). Record the source of each value in
 `motors_draft.md` as well.

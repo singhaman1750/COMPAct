@@ -9,6 +9,7 @@ results/
 
 # Local environments and tool caches
 venv/
+*.egg-info/
 .venv/
 .pytest_cache/
 .ruff_cache/

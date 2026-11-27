@@ -15,7 +15,7 @@ Two calls do the work:
 | once per chosen actuator, at the end | `final_design(motor, ratio, material, gb_type, cad_dir)` | 0.1 s to ~75 s | the real design: gearbox type, teeth counts, modules, planets, face widths, exact ratio, CAD equation files |
 
 The map is a set of smooth fits to the optimiser's best designs over a grid of motors and ratios
-(map v2: 32 motors, ratios 4–30, 3D-printed and metal; RO60 has no design, ISSUES.md bug 16), so it is fast enough for the loop. Teeth
+(map v3: 32 motors, ratios 4–30, 3D-printed and metal; RO60 has no design, ISSUES.md bug 16), so it is fast enough for the loop. Teeth
 counts are whole numbers and can't come from a fit, so the final design runs the optimiser once.
 
 ## Setup
@@ -24,7 +24,7 @@ In the co-design repo, with its Python environment active:
 
 ```bash
 git submodule add https://github.com/singhaman1750/COMPAct external/COMPAct
-git -C external/COMPAct checkout map-v2      # pin the COMPAct version that built the map
+git -C external/COMPAct checkout map-v3      # pin the COMPAct version that built the map
 pip install -e external/COMPAct
 python -c "import compact_api; print(compact_api.ActuatorMap().path)"
 ```
@@ -59,6 +59,10 @@ a = amap.actuator("U8_Lite", 9.3, "3dp")     # motor, ratio, material
 | `peak_torque`, `rated_torque` | N m at the output (`rated_torque` is None if the motor has no rated value) |
 | `no_load_speed`, `rated_speed` | rad/s at the output (`no_load_speed_rpm`, `rated_speed_rpm` also exist) |
 | `reflected_inertia` | kg m², ratio² × motor rotor inertia (the gears' own inertia is not included) |
+| `heat_coefficient` | W/(N m)²: the winding's copper loss = `heat_coefficient` × output torque² (see below) |
+| `motor_constant` | N m/√W, the motor's Km (torque² ÷ copper loss = Km²) |
+| `motor_mass`, `gearbox_mass` | kg, the motor alone and everything else (`mass` is the sum) |
+| `motor_dia`, `motor_length` | m, the motor alone |
 | `score` | COMPAct's score for the design (lower is better) |
 | `flags` | notes: `torque_capped`, `cad_issues`, `fit_error_high`, `near_best`, `rotor_inertia_basis`, ... |
 
@@ -68,7 +72,16 @@ efficiency for an energy cost).
 
 Other useful calls:
 
-- `amap.motors()`: the 32 motor names in the map; `amap.motor(name)` gives the motor's own values.
+- `amap.motors()`: the 32 motor names in the map; `amap.motor(name)` gives the motor's own values:
+  torques, speeds, rotor inertia, KV, peak and rated current, `resistance_ohm` (line-to-line), the
+  torque constants `kt_kv_Nm_per_A` (8.27 ÷ KV), `kt_peak_Nm_per_A` (peak torque ÷ peak current) and
+  `kt_datasheet_Nm_per_A` (CubeMars only), mass, `diameter_m`, `length_m`, and a `*_basis` for
+  each value that is an estimate or has an unclear convention (`rated_current_basis` tells a
+  datasheet value from the 0.31 × peak default).
+- `amap.fit_error(motor, material, gb_type, "mass_kg")`: how far that type's fit is from its swept
+  designs over its whole ratio range (`rms`, `max_abs` in the quantity's units; `rms_rel`,
+  `max_rel` as fractions). It is not the error at one ratio, and it doesn't apply to
+  `method="interp"`, which is exact at the designs.
 - `amap.covered(motor, "3dp")`: the ratio intervals the map covers for that motor.
 - `amap.ranking(motor, ratio, "3dp")`: every gearbox type at that ratio, best first.
 - `amap.actuator(motor, ratio, "3dp", gb_type="cpg")`: a specific type instead of the best one.
@@ -93,6 +106,27 @@ and give that candidate a penalty cost instead of stopping.
 The best type can change between neighbouring ratios, which makes small steps in mass or size.
 CMA-ES handles this. `derivative=True` gives d(value)/d(ratio) for gradient-based optimisers.
 
+### Winding heat and the two-body mass model
+
+`heat_coefficient` gives the copper loss in the motor's windings for an output torque τ:
+`P = heat_coefficient × τ²` (W). It is 0.75 × R ÷ (Kt × ratio × efficiency)², from:
+
+- R: the line-to-line resistance at about 25 °C. For a hot winding multiply by
+  1 + 0.00393 × (T − 25 °C) (`amap.meta["resistance_alpha_per_K"]`).
+- Kt = 8.27 ÷ KV, per amp of phase-current amplitude; copper loss = 0.75 × R × I_amp².
+  Datasheet Kt values (and peak torque ÷ peak current) are 1.0–1.35 × higher for most motors, but no
+  maker says which current they mean, so the map uses the KV value. To use another Kt, scale:
+  `heat_coefficient × (kt_kv / kt_other)²`.
+- The motor driving the load. When the load drives the motor (negative work) the motor torque is
+  τ × efficiency ÷ ratio, so the loss is `heat_coefficient × efficiency⁴ × τ²`.
+- Copper loss only: iron and friction losses are not included. `efficiency` is the map's fixed
+  gearbox efficiency (no load dependence).
+
+For inertia, the motor and the gearbox can be two bodies: `motor_mass` over `motor_length` at the
+motor end, `gearbox_mass` over the rest of `width_body`. This fits framed motors, which sit behind the
+gearbox; a frameless motor sits around or beside the gears inside the housing, so there the
+lengths overlap and one body (`mass` over `width_body`) is closer.
+
 ## At the end: the real gearbox
 
 ```python
@@ -103,6 +137,7 @@ d["gb_type"], d["ratio"]          # e.g. "cpg", 9.257 (the real ratio from the t
 d["gears"]                        # {"ns": 21, "np": 51, "np_small": 30, "nr": 102, "module": 0.7, "n_planets": 3}
 d["face_widths_mm"]               # {"fw_s_calc": ..., "fw_p_b": ..., ...}
 d["mass_kg"], d["efficiency"], d["peak_torque_out_Nm"], d["width_with_driver_m"], d["dia_body_m"]
+d["heat_coefficient_W_per_Nm2"]   # as Actuator.heat_coefficient, for the real ratio and efficiency
 d["cad_files"]                    # the CAD equation files written under cad_dir
 ```
 
@@ -128,6 +163,8 @@ Put the real values back into the robot model and evaluate the final design once
 - **Inertia:** `reflected_inertia` leaves out the gears' own inertia. Rotor inertias of the framed
   motors are estimates (±30 %; `flags["rotor_inertia_basis"]`).
 - **Fixed settings:** 48 V supply; gears sized for the motor's peak torque; ratios 4–30 only.
+- **Heat:** copper loss only, cold resistance; T-Motor and MAD resistances are taken as
+  line-to-line (the makers don't say); see [motors.md](motors.md).
 - **Metal** masses are too high (the metal mode reuses the 3D-printed shapes;
   [metal_sspg_mass.md](metal_sspg_mass.md)).
 - **Open issues:** some types have open CAD issues (`flags["cad_issues"]`), and some 3D-printed

@@ -17,6 +17,8 @@ Output torque and speed (motor values from motors.json, efficiency from COMPAct)
                    (gears capped to carry part of the peak can still carry a smaller rated torque)
     speeds       = motor no-load / rated speed / ratio
     reflected rotor inertia = ratio^2 x motor rotor inertia (the gears' own inertia is not included yet)
+    heat coefficient = copper loss / output torque^2 (map.py's heat_coefficient: line-to-line
+                       resistance, Kt from KV, the motor driving the load)
 
 Two scores pick the best type at each (motor, ratio, material); lower is better:
     compact_cost      the optimiser's own cost (planet face widths for width)
@@ -41,6 +43,8 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[2]
 if str(REPO) not in sys.path:
     sys.path.insert(0, str(REPO))
+
+from tools.actuator_map.map import heat_coefficient, kt_from_kv  # noqa: E402
 
 RUNS_DIR = REPO / "tools" / "actuator_map" / "runs"
 MIN_CARRIED_FRACTION_FOR_BEST = 0.8   # capped designs below this can't be best (if anything else exists)
@@ -81,7 +85,7 @@ COLUMNS = (
     "mass_kg", "width_body_m", "width_with_driver_m", "dia_body_m", "dia_widest_m", "efficiency",
     "torque_carried_fraction", "peak_torque_out_Nm", "rated_torque_out_Nm",
     "no_load_speed_out_rad_s", "rated_speed_out_rad_s", "no_load_speed_out_rpm", "rated_speed_out_rpm",
-    "rotor_inertia_kgm2", "reflected_inertia_kgm2", "rotor_inertia_basis",
+    "rotor_inertia_kgm2", "reflected_inertia_kgm2", "rotor_inertia_basis", "heat_coefficient_W_per_Nm2",
     "real_width_score", "compact_cost", "best_by_real_width", "best_by_compact_cost",
     "near_best_real_width", "near_best_compact", "no_full_torque_design",
     "torque_capped", "geometry_approx", "cad_issues", "commit",
@@ -114,6 +118,7 @@ def make_row(case, motor_entry, gains):
     rated_motor = el.get("rated_torque_Nm")
     rated_speed = el.get("rated_speed_rpm")
     j_rotor = mech.get("rotor_inertia_kgm2")
+    res, kv = el.get("resistance_ohm"), el.get("kv_rpm_per_V")
     return {
         "motor": case["motor"], "motor_type": motor_entry["type"], "material": case["material"], "gb_type": gb,
         "ratio_requested": case["ratio_requested"], "ratio": ratio,
@@ -134,6 +139,7 @@ def make_row(case, motor_entry, gains):
         "rotor_inertia_kgm2": j_rotor,
         "reflected_inertia_kgm2": None if j_rotor is None else ratio ** 2 * j_rotor,
         "rotor_inertia_basis": mech.get("rotor_inertia_basis"),
+        "heat_coefficient_W_per_Nm2": None if res is None or kv is None else heat_coefficient(res, kt_from_kv(kv), ratio, eff),
         "compact_cost": case["cost"],
         "real_width_score": real_score,
         "best_by_real_width": False,

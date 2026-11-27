@@ -14,6 +14,10 @@ reflected inertia are computed from the motor (values stored in fits.json):
     rated_torque  = min(motor rated torque, torque_fraction x motor peak torque) x ratio x efficiency
     speeds        = motor speed / ratio
     reflected_inertia = ratio^2 x motor rotor inertia   (the gears' own inertia is not included)
+    heat_coefficient  = 0.75 x R / (Kt x ratio x efficiency)^2, so that the winding's copper loss is
+                        heat_coefficient x output torque^2 (W; see heat_coefficient() below)
+The motor's own mass, diameter and length are on the Actuator too (motor_mass, ...; gearbox_mass is
+the rest), for a two-body mass model.
 
 The best type at a ratio: every type valid there gets the real-width score from its fitted values,
 a type whose gears carry less than 80 % of the peak torque is only chosen if no type carries 80 %,
@@ -58,6 +62,30 @@ RPM_TO_RAD_S = 2 * math.pi / 60
 SUPPORTED_FORMATS = (1,)
 FITTED = ("mass_kg", "width_body_m", "width_with_driver_m", "dia_body_m", "dia_widest_m",
           "efficiency", "torque_carried_fraction", "compact_cost")
+KT_PER_KV = 15 * math.sqrt(3) / math.pi   # 8.27: Kt (N m/A) x KV (rpm/V), per amp of phase-current amplitude
+RESISTANCE_ALPHA_PER_K = 3.93e-3          # copper: R(T) = R25 x (1 + alpha x (T - 25 C))
+
+
+def kt_from_kv(kv_rpm_per_V):
+    """Torque constant from KV (N m/A, per amp of phase-current amplitude), for a sinusoidal motor whose
+    KV is no-load rpm per volt of line-to-line peak back-EMF. Datasheet Kt values and peak torque /
+    peak current state no current convention, so the map uses this one."""
+    return KT_PER_KV / kv_rpm_per_V
+
+
+def motor_constant(resistance_ohm, kt):
+    """Km (N m/sqrt(W)) at the motor: torque^2 / copper loss = Km^2."""
+    return kt / math.sqrt(0.75 * resistance_ohm)
+
+
+def heat_coefficient(resistance_ohm, kt, ratio, efficiency):
+    """W/(N m)^2 at the output: copper loss = this x output torque^2, at the resistance's temperature.
+
+    Three-phase, sinusoidal: loss = 1.5 x I_rms^2 x R = 0.75 x I_amp^2 x R, R line-to-line, I_amp =
+    motor torque / Kt, motor torque = output torque / (ratio x efficiency) (the motor driving the load;
+    when the load drives the motor it is output torque x efficiency / ratio). Iron and friction losses
+    are not included."""
+    return 0.75 * resistance_ohm / (kt * ratio * efficiency) ** 2
 
 
 @dataclass
@@ -81,6 +109,16 @@ class Actuator:
     score: float                # real-width score (or the optimiser's cost with rule="compact_cost")
     flags: dict = field(default_factory=dict)
     derivatives: dict = field(default_factory=dict)   # d(value)/d(ratio), with derivative=True
+    heat_coefficient: float = None  # W/(N m)^2: copper loss = this x output torque^2 (None: no resistance)
+    motor_constant: float = None    # N m/sqrt(W), the motor's Km (None: no resistance)
+    motor_mass: float = None        # kg, the motor alone (in `mass`)
+    motor_dia: float = None         # m, the motor alone
+    motor_length: float = None      # m, the motor alone, along the axis
+
+    @property
+    def gearbox_mass(self):
+        """kg, everything but the motor: gears, carriers, bearings, housing, driver mount."""
+        return None if self.motor_mass is None else self.mass - self.motor_mass
 
     @property
     def no_load_speed_rpm(self):
@@ -271,9 +309,21 @@ class ActuatorMap:
         return sorted(scored, key=lambda s: (s[2] < self.min_fraction, s[0], s[1]))
 
     def motor(self, motor):
-        """The motor's values stored with the map (peak / rated torque, speeds, inertia)."""
+        """The motor's values stored with the map: torques, speeds, inertia, and (maps from v3) KV,
+        currents, line-to-line resistance, the torque constants, mass and size, with their bases."""
         self._entry(motor, None)
         return dict(self._motors[motor])
+
+    def fit_error(self, motor, material, gb_type, quantity=None):
+        """How far the fit of a type's quantity is from the swept designs, over the type's whole
+        range: {"rms", "max_abs"} in the quantity's units, {"rms_rel", "max_rel"} as fractions
+        (rms_rel of the mean value, max_rel of each design's value). With quantity=None, a dict of
+        every fitted quantity. These describe method="fit"; method="interp" is exact at the designs."""
+        fits = self._type(motor, material, gb_type)["quantities"]
+        if quantity is not None and quantity not in fits:
+            raise KeyError(f"{motor} {material} {gb_type}: no fit of {quantity!r}; fitted: {', '.join(sorted(fits))}")
+        errors = {q: {k: f[k] for k in ("rms", "rms_rel", "max_abs", "max_rel")} for q, f in fits.items()}
+        return errors if quantity is None else errors[quantity]
 
     def select(self, torque, speed, material="3dp", motors=None, types=None, rule="real_width", top=None,
                step=0.01):
@@ -366,6 +416,9 @@ class ActuatorMap:
         tp, tr = m["peak_torque_Nm"], m.get("rated_torque_Nm")
         w0, wr, j = m["no_load_speed_rpm"] * RPM_TO_RAD_S, m.get("rated_speed_rpm"), m.get("rotor_inertia_kgm2")
         wr = None if wr is None else wr * RPM_TO_RAD_S
+        res, kv = m.get("resistance_ohm"), m.get("kv_rpm_per_V")   # not in maps before v3
+        kt = None if kv is None else kt_from_kv(kv)
+        heat = None if res is None or kt is None else heat_coefficient(res, kt, ratio, eta)
 
         peak = tp * ratio * eta * f
         dpeak = tp * (eta * f + ratio * deta * f + ratio * eta * df)
@@ -395,12 +448,15 @@ class ActuatorMap:
             peak_torque=peak, rated_torque=rated, no_load_speed=w0 / ratio,
             rated_speed=None if wr is None else wr / ratio,
             reflected_inertia=None if j is None else ratio ** 2 * j,
-            score=own[0] if own else self._score(v, rule), flags=flags)
+            score=own[0] if own else self._score(v, rule), flags=flags,
+            heat_coefficient=heat, motor_constant=None if heat is None else motor_constant(res, kt),
+            motor_mass=m.get("mass_kg"), motor_dia=m.get("diameter_m"), motor_length=m.get("length_m"))
         if derivative:
             act.derivatives = {
                 "mass": d["mass_kg"], "width": d["width_with_driver_m"], "width_body": d["width_body_m"],
                 "dia": d["dia_body_m"], "dia_widest": d["dia_widest_m"], "efficiency": deta,
                 "torque_fraction": df, "peak_torque": dpeak, "rated_torque": drated,
                 "no_load_speed": -w0 / ratio ** 2, "rated_speed": None if wr is None else -wr / ratio ** 2,
-                "reflected_inertia": None if j is None else 2 * ratio * j}
+                "reflected_inertia": None if j is None else 2 * ratio * j,
+                "heat_coefficient": None if heat is None else -2 * heat * (1 / ratio + deta / eta)}
         return act

@@ -174,40 +174,35 @@ the map; the editable install keeps COMPAct's config paths working without restr
 (a full pip package would need the Phase 3b restructuring). After the final design, re-evaluate
 the robot once with its real ratio and mass (they can differ slightly from the map's fit).
 
-### Co-design requests for the map API (planned)
+### Co-design requests for the map API
 
-Requested by the co-design side on 2026-11-26 (quadruped CMA-ES + convex MPC, using `metal` now).
-Requests 1 and 2 need no new sweep: the map v2 run (`runs/full_v2`, local) can be re-fitted and
-re-released with the extra data as a v2.1 tag, if they are wanted before map v3.
+Requested by the co-design side on 2026-11-26 and 2026-11-27 (quadruped CMA-ES + convex MPC, using
+`metal` now). **Done in map v3 (2026-11-27)**, which is map v2's fits and designs re-released with
+the motors' electrical data (no new sweep; the next map with the metal changes becomes v4):
 
-1. **Motor electrical data and geometry in `ActuatorMap.motor()`.** Add `kv_rpm_per_V`,
-   `peak_current_A`, Kt, line-to-line resistance, motor-only `mass_kg`, and diameter and length.
-   - `fit.make_meta` copies only peak/rated torque, speeds and inertia into `fits.json`; extend it
-     (map.py stays standalone).
-   - Resistance becomes a numeric field in `motors.json` (e.g. `resistance_line_ohm` with a
-     `_basis`), not only text inside `rated_speed_basis`. The 28 framed values come from that
-     text and should be checked against the datasheets; the frameless motors (RO80, RO100, RI80,
-     RI100) need datasheet values from the user.
-   - State the convention in the docs: line-to-line R, so R_phase = R_line / 2 for a wye winding,
-     and copper loss = 1.5 · I_amplitude² · R_phase (amplitude-invariant currents).
-   - Kt: give `kt_peak` = peak torque / peak current (what COMPAct uses; includes saturation, so it
-     is lower than the small-current Kt) and mark it as such; optionally a KV-based value too.
-   - Geometry key names differ by motor family (`motorDia` / `motorLength` for framed,
-     `motor_OD` / `motor_height` for frameless); give one pair, `diameter_m` / `length_m`.
-2. **Public fit-error method**, e.g. `amap.fit_error(motor, material, gb_type, quantity)` returning
-   `rms_rel`, `max_rel`, `rms`, `max_abs` (already in `fits.json`; today only through the private
-   `_fits`). Small, map.py only. The values are over the type's whole ratio range, not local, and
-   don't apply with `method="interp"` (exact at the designs).
-3. **(Optional) Per-part masses and axial positions**, or at least the motor vs gearbox centre of
-   mass along the axis.
-   - Cheap step: motor mass from `motors.json`, gearbox mass = `mass` − motor mass, with the motor
-     at the motor end (its own length) and the gearbox over the rest of `width_body`. Can be added
-     with request 1.
-   - Full step: each type's mass function already keeps per-part masses (names differ across the
-     15 types), but no part positions exist anywhere; they would need per-type axial formulas from
-     the CAD variables, like `geometry.py`'s widths, checked against Onshape (no API calls left
-     this year). Best given by `final_design` only (not fitted in the map). Do after the metal
-     changes for map v3, since those change the part masses.
+1. **Motor data in `ActuatorMap.motor()`:** KV, peak and rated current with their bases,
+   `resistance_ohm` (line-to-line, now a field of every motor in `motors.json`, with basis and
+   source), torque constants from KV, from peak torque ÷ peak current and (CubeMars) from the
+   datasheet, mass, `diameter_m`, `length_m`.
+2. **`amap.fit_error(motor, material, gb_type, quantity)`.**
+3. **Heat model:** `Actuator.heat_coefficient` (copper loss = coefficient × output torque²) and
+   `motor_constant`; a `heat_coefficient_W_per_Nm2` column in the tables, `final_design` and
+   `nearest_design`. Kt = 8.27 ÷ KV (the makers don't say which current their peak current is).
+4. **Two-body mass:** `motor_mass`, `gearbox_mass`, `motor_dia`, `motor_length` on `Actuator`.
+
+Open:
+- **Per-part masses and axial positions** (the full version of 4). Each type's mass function keeps
+  per-part masses (names differ across the 15 types), but no part positions exist anywhere; they
+  would need per-type axial formulas from the CAD variables, like `geometry.py`'s widths, checked
+  against Onshape (no API calls left this year). Best given by `final_design` only (not fitted in
+  the map). Do after the metal changes (map v4), since those change the part masses.
+- **Resistance conventions:** T-Motor and MAD give "Internal Resistance" without a convention
+  (taken as line-to-line); only U8 Lite and U10 II were re-read on the maker's page (2026-11-27;
+  MAD's and Vector Technics' sites could not be read). No maker states its peak-current
+  convention. A measured resistance or Kt for one framed motor would settle the factor-of-2 doubt.
+- **CubeMars data quirks:** RI100's datasheet Kt (0.129) is 1.6 × 8.27/KV; RO60's peak torque ÷
+  peak current (0.060) is well below its datasheet Kt (0.094). The RI80 page's comparison table
+  lists 9.4 A peak current against 27.6 A in its spec block (27.6 used).
 
 ### Actuator map — better fits (future)
 
