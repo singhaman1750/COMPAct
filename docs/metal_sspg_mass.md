@@ -16,7 +16,20 @@ with changed values (see [Reproduce](#reproduce)).
   - With the ring steel, a thinner ring wall (#9) now saves about 20 g.
 - **CPG done too (2026-10-30):** the same split (steel ring of the mass model's 5 mm thickness);
   U8_Lite 10:1 metal 1,032 → 802 g with a new gear set.
-- The other changes (#2–#8) are still open, and #1 is still open for the other gearbox types.
+- **Change #2 done for SSPG (M1, 2026-11-28):** metal planets hold **one** bearing, NSK 688
+  (8 × 16 × 5 mm, 4.02 g; Cr 1,770 N, C0r 710 N, from NSK's 688ADD page), instead of two
+  8 × 12 × 3.5 mm ones with a 1 mm gap. The planet hole is the bearing's 16 mm OD; the pin stays
+  8 mm. Settings in `sspg_params.json`, `sspg_metal_design_parameters`; 3dp keeps two bearings and
+  is bit-identical. Metal has no CAD model, so the Onshape model is unchanged.
+  - Planet and ring 8 → 5 mm wide; U8_Lite 6.5:1 979 → **886 g**, 65.05 → 62.05 mm (same gears);
+    U8_Lite and MN8014 at 5–7:1 about 80–100 g lighter and 3 mm narrower.
+  - New metal-only rim check (`planet_min_rim_tooth_heights` 1.2, `planetHoldsBearingConstraint`):
+    the planet's root circle must hold the bearing with a rim of 1.2 tooth heights (AGMA backup
+    ratio), so at module 0.5 a planet needs at least 40 teeth. At 4:1 the 30/30 design (planet
+    too small for the bearing) gives way to 45/45, about 80 g heavier than map v3.
+  - Known limit (not checked): the peak pin load per planet, about 290 N (U8_Lite) to 490 N
+    (MN8014), against the bearing's static rating of 710 N.
+- The other changes (#3–#8) are still open, and #1 is still open for the other gearbox types.
 - The tables below are the analysis **before** change #1. `tools/metal_analysis/sspg_mass_whatif.py`
   now starts from the code with #1 in it.
 

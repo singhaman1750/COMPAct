@@ -121,7 +121,8 @@ Changes (each type's task goes through them; names differ per type, see
 
 Per type:
 - [x] M0 setup (branch `metal-m0-setup`, 2026-11-27): no results change, all 58 golden cases match
-- [ ] SSPG
+- [ ] SSPG — M1 done (one NSK 688 per planet, rim check; 979 → 886 g at U8_Lite 6.5:1,
+  [docs/metal_sspg_mass.md](docs/metal_sspg_mass.md)); M2–M8 open
 - [ ] CPG
 - [ ] WPG
 - [ ] DSPG

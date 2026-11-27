@@ -560,7 +560,7 @@
    "attr": "fw_p",
    "category": "dependent",
    "subtype": "stress rule",
-   "rule": "b = FOS x Ft x qe x qk / (gear_allowable_stress x module), with Ft = serviceFactor x motor_peak_torque / (num_planet x sun pitch radius), qe = 1 / sun-planet contact ratio, qk = curve fit in Ns (mitStressAnalysisMinFacewidth); fw = max(b, 2 x planet_bearing_width + planet_bearing_gap)",
+   "rule": "b = FOS x Ft x qe x qk / (gear_allowable_stress x module), with Ft = serviceFactor x motor_peak_torque / (num_planet x sun pitch radius), qe = 1 / sun-planet contact ratio, qk = curve fit in Ns (mitStressAnalysisMinFacewidth); fw = max(b, planet_bearings_per_planet x planet_bearing_width + (planet_bearings_per_planet - 1) x planet_bearing_gap)",
    "depends_on": [
     "module",
     "Ns",
@@ -572,6 +572,7 @@
     "gear_allowable_stress",
     "FOS",
     "serviceFactor",
+    "planet_bearings_per_planet",
     "planet_bearing_width",
     "planet_bearing_gap"
    ],
@@ -636,7 +637,7 @@
    "attr": "fw_r",
    "category": "dependent",
    "subtype": "stress rule",
-   "rule": "b = FOS x Ft x qe x qk / (gear_allowable_stress x module), with Ft = serviceFactor x motor_peak_torque / (num_planet x sun pitch radius), qe = 1 / sun-planet contact ratio, qk = curve fit in Ns (mitStressAnalysisMinFacewidth); fw = max(b, 2 x planet_bearing_width + planet_bearing_gap)",
+   "rule": "b = FOS x Ft x qe x qk / (gear_allowable_stress x module), with Ft = serviceFactor x motor_peak_torque / (num_planet x sun pitch radius), qe = 1 / sun-planet contact ratio, qk = curve fit in Ns (mitStressAnalysisMinFacewidth); fw = max(b, planet_bearings_per_planet x planet_bearing_width + (planet_bearings_per_planet - 1) x planet_bearing_gap)",
    "depends_on": [
     "module",
     "Ns",
@@ -648,6 +649,7 @@
     "gear_allowable_stress",
     "FOS",
     "serviceFactor",
+    "planet_bearings_per_planet",
     "planet_bearing_width",
     "planet_bearing_gap"
    ],
@@ -1735,6 +1737,45 @@
    },
    "confidence": "high",
    "reason": "axial gap between the two bearings inside a planet; with them it sets the smallest planet (and ring) face width"
+  },
+  {
+   "name": "planet_bearings_per_planet",
+   "attr": "planet_bearings_per_planet",
+   "category": "fixed",
+   "subtype": "constraint constant",
+   "source": {
+    "file": "sspg_params.json",
+    "block": "sspg_3DP_design_parameters",
+    "key": "planet_bearings_per_planet"
+   },
+   "confidence": "high",
+   "reason": "bearings inside each planet (3dp 2, metal 1); sets the smallest planet (and ring) face width and the bearing count in the mass"
+  },
+  {
+   "name": "planet_bearing_mass_kg",
+   "attr": "planet_bearing_mass_kg",
+   "category": "fixed",
+   "subtype": "bearing (chosen part)",
+   "source": {
+    "file": "sspg_params.json",
+    "block": "sspg_3DP_design_parameters",
+    "key": "planet_bearing_mass_kg"
+   },
+   "confidence": "high",
+   "reason": "mass of one planet bearing (3dp 1 g as before; metal: NSK 688ADD, 4.02 g)"
+  },
+  {
+   "name": "planet_min_rim_tooth_heights",
+   "attr": "planet_min_rim_tooth_heights",
+   "category": "fixed",
+   "subtype": "constraint constant",
+   "source": {
+    "file": "sspg_params.json",
+    "block": "sspg_3DP_design_parameters",
+    "key": "planet_min_rim_tooth_heights"
+   },
+   "confidence": "high",
+   "reason": "smallest planet rim round its bearing, in tooth heights (planetHoldsBearingConstraint); null: not checked (3dp), metal 1.2 (AGMA backup ratio)"
   },
   {
    "name": "sun_hub_clearance_multiple",

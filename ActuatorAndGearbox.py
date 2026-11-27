@@ -148,12 +148,27 @@ class singleStagePlanetaryGearbox:
         
         self.sCarrierExtrusionDiaMM       =  design_params["sCarrierExtrusionDiaMM"]       # 8.0 # mm
         self.sCarrierExtrusionClearanceMM =  design_params["sCarrierExtrusionClearanceMM"] # 1.0 # mm
-    
+
+        # Planet rim round its bearing, in tooth heights (2.25 x module); None: not checked.
+        # Only set where the planet holds its bearing (SSPG metal); other users of this class
+        # (INSSPG, DSPG stages) don't have the key.
+        self.planet_min_rim_tooth_heights = design_params.get("planet_min_rim_tooth_heights")
+        self.planet_bearing_OD            = design_params.get("planet_bearing_OD")
+
     #------------------------------------
     # Constraints
     #------------------------------------
     def geometricConstraint(self):
-        return (self.Ns + 2*self.Np == self.Nr) 
+        return (self.Ns + 2*self.Np == self.Nr)
+
+    # The planet's root circle must hold its bearing with a rim of planet_min_rim_tooth_heights
+    # tooth heights (AGMA backup ratio; below about 1.2 the rim bends and the tooth strength drops)
+    def planetHoldsBearingConstraint(self):
+        if self.planet_min_rim_tooth_heights is None:
+            return True
+        planet_root_dia = self.module * (self.Np - 2.5)
+        min_rim         = self.planet_min_rim_tooth_heights * 2.25 * self.module
+        return planet_root_dia >= self.planet_bearing_OD + 2 * min_rim
     
     def meshingConstraint(self):
         return ((self.Ns + self.Nr) % self.numPlanet == 0)
@@ -2138,6 +2153,8 @@ class singleStagePlanetaryActuator:
         self.planet_bearing_OD        = self.design_params["planet_bearing_OD"] # 12 
         self.planet_bearing_width     = self.design_params["planet_bearing_width"] # 3.5
         self.planet_bearing_gap       = self.design_params["planet_bearing_gap"] # 1.0
+        self.planet_bearings_per_planet = self.design_params["planet_bearings_per_planet"] # 2
+        self.planet_bearing_mass_kg   = self.design_params["planet_bearing_mass_kg"] # 0.001
         self.sun_hub_clearance_multiple = self.design_params["sun_hub_clearance_multiple"] # 4
         self.planet_bore              = self.design_params["planet_bore"] # 10
 
@@ -2966,8 +2983,10 @@ class singleStagePlanetaryActuator:
 
 
         #------------- Contraint in planet to accomodate its bearings------------------------------------------
-        if (bMin_planet_mit * 1000 < (self.planet_bearing_width*2 + self.planet_bearing_gap)) : 
-            bMin_planet_mit = (self.planet_bearing_width*2 + self.planet_bearing_gap) / 1000
+        n_bearings = self.planet_bearings_per_planet
+        planet_bearings_width = n_bearings * self.planet_bearing_width + (n_bearings - 1) * self.planet_bearing_gap
+        if (bMin_planet_mit * 1000 < planet_bearings_width) :
+            bMin_planet_mit = planet_bearings_width / 1000
             bMin_ring_mit = bMin_planet_mit # FT on both are same
 
         bMin_sun_mitMM    = bMin_sun_mit    * 1000
@@ -3321,8 +3340,8 @@ class singleStagePlanetaryActuator:
         #--------------------------------------
         # Mass: sspg_planet_bearing
         #--------------------------------------
-        planet_bearing_mass          = 1 * 0.001 # kg
-        planet_bearing_num           = numPlanet * 2
+        planet_bearing_mass          = self.planet_bearing_mass_kg # kg
+        planet_bearing_num           = numPlanet * self.planet_bearings_per_planet
         planet_bearing_combined_mass = planet_bearing_mass * planet_bearing_num
 
         #--------------------------------------
@@ -9497,7 +9516,8 @@ class optimizationSingleStageActuator:
                                     self.cntrBeforeCons += 1
                                     if (Actuator.planetaryGearbox.geometricConstraint() and 
                                         Actuator.planetaryGearbox.meshingConstraint() and 
-                                        Actuator.planetaryGearbox.noPlanetInterferenceConstraint()):
+                                        Actuator.planetaryGearbox.noPlanetInterferenceConstraint() and
+                                        Actuator.planetaryGearbox.planetHoldsBearingConstraint()):
 
                                         self.totalFeasibleGearboxes += 1
                                         if ((Actuator.planetaryGearbox.gearRatio() >= self.gearRatioIter) and
@@ -9634,7 +9654,8 @@ class optimizationSingleStageActuator:
                                         self.cntrBeforeCons += 1
                                         if (Actuator.planetaryGearbox.geometricConstraint() and 
                                             Actuator.planetaryGearbox.meshingConstraint() and 
-                                            Actuator.planetaryGearbox.noPlanetInterferenceConstraint()):
+                                            Actuator.planetaryGearbox.noPlanetInterferenceConstraint() and
+                                            Actuator.planetaryGearbox.planetHoldsBearingConstraint()):
 
                                             self.totalFeasibleGearboxes += 1
                                             if (Actuator.planetaryGearbox.gearRatio() >= self.gearRatioIter):
