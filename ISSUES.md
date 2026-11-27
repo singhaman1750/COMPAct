@@ -84,7 +84,60 @@ metal case per gearbox type.
    (`tools/actuator_map/maps/v2/`, 2026-11-03).
 2. **Separate thicknesses and clearances for metal mode.** Metal parts don't need the 3D-printing
    clearances (e.g. `loose_clearance_3DP`) and can be thinner than printed ones. Metal mode needs
-   its own design settings per gearbox; until then it reuses the 3D-printed shapes.
+   its own design settings per gearbox; until then it reuses the 3D-printed shapes. Planned as the
+   task list below.
+
+#### Metal: realistic values, one gearbox type at a time (planned 2026-11-27, not started)
+
+Goal: realistic numbers (mass, sizes, efficiency) for metal actuators. Rules:
+- No metal CAD. Metal runs compute the CAD values in memory (the map's diameters need them) but
+  never write into `CADs/` or push to Onshape. The Onshape models are not changed.
+- 3D-printed results, CAD files and the 3D-printed golden cases stay identical. Only the metal
+  golden case of the type being changed is re-recorded, with a mass breakdown of what moved.
+- Every metal value gets a one-line reason. [docs/reference_actuators.md](docs/reference_actuators.md)
+  is a sanity check, not a target.
+- One type per task. The user may add their own changes to a type's task.
+
+Changes (each type's task goes through them; names differ per type, see
+`config_files/variables/<type>_variables.json`):
+- **M0 setup (once, with SSPG):** metal override sections `<type>_metal_design_parameters` /
+  `<type>_metal_optimization_parameters` applied only in metal mode (unknown keys are an error);
+  metal writes no CAD files and `--onshape` refuses metal; `final_design` returns no CAD files for
+  metal.
+- **M1 one planet bearing:** bearings per planet as a setting (3dp 2, metal 1) in the planet width
+  rule and the bearing count; per-bearing mass as a setting (3dp 1 g); a real metal bearing (width,
+  OD, bore, mass) with matching pin and planet hole. Compound / Wolfrom types: big and small planet.
+- **M2 motor-to-case gap** (SSPG `clearance_motor_and_case_min` 5 mm).
+- **M3 plates:** carrier, sun hub, bearing retainer thicknesses.
+- **M4 case:** case wall, base plate, mounting surface.
+- **M5 print clearances** with one clear purpose (SSPG `clearance_planet`); shared ones such as
+  `standard_clearance_1_5mm` only after checking each use.
+- **M6 walls around bolts** (SSPG `bearing_mount_wall_bolt_dia_multiple`).
+- **M7 ring gear wall** (SSPG `ringRadialWidthMM`; also the max-diameter rule that uses it).
+- **M8 smallest module** for metal, only if realistic.
+- **Shared by all types (once, not per type):** G1 friction coefficient for lubricated steel
+  (now 0.3 for both materials); G2 check the steel allowable stress (400 MPa).
+- **After all types:** metal sweep, map v4 (its 3dp part must equal v3).
+
+Per type:
+- [x] M0 setup (branch `metal-m0-setup`, 2026-11-27): no results change, all 58 golden cases match
+- [ ] SSPG
+- [ ] CPG
+- [ ] WPG
+- [ ] DSPG
+- [ ] ISSPG inside
+- [ ] ISSPG compact
+- [ ] ICPG
+- [ ] IDSPG
+- [ ] INSSPG type 1
+- [ ] INSSPG type 2
+- [ ] INCPG dependent
+- [ ] INCPG independent
+- [ ] INWPG dependent
+- [ ] INWPG independent
+- [ ] INDSPG (already counts 1 planet bearing in one of its two mass functions; check why)
+- [ ] G1 friction, G2 steel stress
+- [ ] Metal sweep and map v4
 
 SSPG analysis of both tasks (2026-10-29): [docs/metal_sspg_mass.md](docs/metal_sspg_mass.md).
 Mass breakdown for U8_Lite 6.5:1 and MN8014 6:1, the saving and confidence of each candidate
