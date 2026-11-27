@@ -37,6 +37,10 @@ KNOWN_ISSUES = [
      "text": "INWPG dependent output ring gear and bearing don't move in the CAD (RI80)."},
     {"id": "reflected-inertia", "text": "Reflected inertia is ratio^2 x rotor inertia only; the gears' inertia is not included. "
                                         "Framed motors' rotor inertias are estimates (+-30 %)."},
+    {"id": "heat-model", "text": "heat_coefficient (from v3) is the winding's copper loss only (no iron or friction loss), "
+                                 "with the cold (~25 C) line-to-line resistance and Kt from KV. T-Motor and MAD do not "
+                                 "state their resistance convention (taken as line-to-line), and no maker states whether "
+                                 "its peak current is phase amplitude, RMS or battery current."},
 ]
 
 
@@ -161,6 +165,7 @@ def main(argv=None):
     map_json = {
         "version": args.version, "released": date.today().isoformat(), "released_from_commit": git_commit(),
         "source": map_json_source(run),
+        "motor_data_commit": meta.get("motor_data_commit"),
         "grid": {"motors": run["motors"], "ratios": run["ratios"], "materials": run["materials"]},
         "cases": dict(counts),
         "settings": {k: meta[k] for k in ("format", "gains", "grid_step", "min_carried_fraction_for_best",
