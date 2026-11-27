@@ -147,7 +147,9 @@ types also have `ns_2`, `np_2`, `nr_2`, `module_2`, `n_planets_2` for the second
 `cad_vars` holds every CAD variable and `commit` the COMPAct commit that made the design.
 
 The CAD equation files drive the SolidWorks or Onshape models of that gearbox type (see
-[onshape.md](onshape.md)). `final_design` raises `ValueError` if the optimiser finds no design.
+[onshape.md](onshape.md)). They exist for `"3dp"` only: metal has no CAD model, so for `"metal"`
+`cad_files` is `[]` and `cad_note` says why (`cad_vars` is still filled). `final_design` raises
+`ValueError` if the optimiser finds no design.
 
 `nearest_design(motor, ratio, "3dp")` is an instant alternative: the nearest design that was
 actually swept for the map (grid ratios only, no face widths or CAD files).
