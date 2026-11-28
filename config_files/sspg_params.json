@@ -113,6 +113,7 @@
         "planet_bearings_per_planet"                             : 2,
         "planet_bearing_mass_kg"                                 : 0.001,
         "planet_min_rim_tooth_heights"                           : null,
+        "ring_min_rim_tooth_heights"                             : null,
         "sun_hub_clearance_multiple"                             : 4,
         "planet_bore"                                            : 10,
         "bearing_retainer_thickness"                             : 2,
@@ -131,6 +132,8 @@
         "sec_carrier_thickness"        : 3,
         "sun_coupler_hub_thickness"    : 3,
         "Motor_case_thickness"         : 2,
-        "base_plate_thickness"         : 2.5
+        "base_plate_thickness"         : 2.5,
+        "ringRadialWidthMM"            : 3,
+        "ring_min_rim_tooth_heights"   : 1.2
     }
 }

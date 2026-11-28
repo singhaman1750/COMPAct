@@ -137,7 +137,7 @@ def _branches_dspg(a):
 GEARBOXES = {
     "sspg": Gearbox(
         "sspg", "SSPG", "sspg_equations", "planetaryGearbox",
-        counts={"input": 18, "optimisation": 4, "fixed": 43, "dependent": 48}, code_only=32,
+        counts={"input": 18, "optimisation": 4, "fixed": 42, "dependent": 49}, code_only=33,
         set_gears=_set_sspg,
         from_opt=lambda p: (p[2], p[3], p[4], p[5], p[1]),           # [gr, n, Ns, Np, Nr, module]
         extra=[("U8_Lite", (20, 40, 100, 1.2, 3)), ("MAD_M6C12_KV170", (18, 30, 78, 0.5, 3)),

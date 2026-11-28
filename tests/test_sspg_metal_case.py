@@ -41,4 +41,4 @@ def test_metal_case_is_smaller_narrower_and_lighter():
     a = build("metal")
     assert a.motor_case_OD_base == pytest.approx(96.1 - 2 * 0.5)
     assert a.actuator_width == pytest.approx(59.05 - 1.5)
-    assert a.getMassKG_3DP() * 1000 == pytest.approx(766.2, abs=1)
+    assert a.getMassKG_3DP() * 1000 == pytest.approx(766.2 - 16.7, abs=1)   # M7: 3 mm ring wall

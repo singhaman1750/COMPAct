@@ -43,4 +43,4 @@ def test_metal_actuator_is_narrower_by_the_plates():
     a = build("metal")
     assert a.case_dist == pytest.approx(3.5)
     assert a.actuator_width == pytest.approx(62.05 - (5 - 3) - (4 - 3) - 1.5)
-    assert a.getMassKG_3DP() * 1000 == pytest.approx(766.2, abs=1)
+    assert a.getMassKG_3DP() * 1000 == pytest.approx(749.4, abs=1)   # after M4 and M7

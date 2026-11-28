@@ -62,7 +62,23 @@ with changed values (see [Reproduce](#reproduce)).
   - The case is 1 mm smaller in diameter (U8_Lite 96.1 → 95.1 mm) and the actuator 1.5 mm
     narrower. U8_Lite 6.5:1 812 → **766 g**, 59.05 → 57.55 mm (same gears).
   - At 4–7:1 U8_Lite about 46 g and MN8014 about 48 g lighter, with the same gears.
-- The other changes (#6–#8) are still open, and #1 is still open for the other gearbox types.
+- **Change #9 done for SSPG (M7, 2026-11-28):** metal ring wall (from the pitch circle) =
+  max(**3 mm**, 1.25 × module + 1.2 × 2.25 × module), i.e. the dedendum plus a rim of at least 1.2
+  tooth heights behind the teeth (AGMA backup ratio, as the planet in M1): 3 mm up to module 0.76,
+  3.95 mm at module 1.0, 4.74 mm at 1.2. No module is rejected; a large module gets a thicker ring.
+  3dp keeps the fixed 5 mm (`ring_min_rim_tooth_heights` null).
+  - `getRingWallMM()` gives the wall to the CAD values, the mass and the gearbox's outer radius.
+    The max-diameter rule reads the 3 mm minimum (U8_Lite 77.1 → 81.1 mm ring pitch circle);
+    `ringFitsConstraint()` keeps the ring's outer diameter, with its real wall, within that limit.
+  - The thinner steel ring becomes aluminium housing. Same gear set: U8_Lite 6.5:1 766 → 749 g,
+    MN8014 6:1 854 → 838 g; width and diameter unchanged.
+  - Re-optimised at 4–7:1: 12–18 g lighter; at 4:1 the optimiser goes back to 45/45 planets.
+  - At 6.5:1 (the golden case) the larger limit lets an exact 6.5 set fit (module 0.6, 24/54/132,
+    ring pitch circle 79.2 mm), and the cost's ratio term (10 × ratio error; 6.48 instead of 6.5
+    costs as much as 200 g) picks it over the 6.48 set: 766 → **815 g**, 58.55 mm (U8_Lite);
+    MN8014 930 → 979 g. The 6.48 set is still there at 749 g.
+- Not doing: #6 (print clearances, M5) and the smallest module (M8); #7 (walls round bolts, M6)
+  to be reviewed. #1 is still open for the other gearbox types.
 - The tables below are the analysis **before** change #1. `tools/metal_analysis/sspg_mass_whatif.py`
   now starts from the code with #1 in it.
 

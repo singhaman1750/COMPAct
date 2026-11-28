@@ -1146,15 +1146,16 @@
   {
    "name": "ring_radial_thickness",
    "attr": "ring_radial_thickness",
-   "category": "fixed",
-   "subtype": "wall thickness",
-   "source": {
-    "file": "sspg_params.json",
-    "block": "sspg_3DP_design_parameters",
-    "key": "ringRadialWidthMM"
-   },
+   "category": "dependent",
+   "subtype": "formula",
+   "rule": "getRingWallMM: ringRadialWidthMM if ring_min_rim_tooth_heights is null (3dp), else max(ringRadialWidthMM, 1.25 x module + ring_min_rim_tooth_heights x 2.25 x module) (metal: the dedendum plus a rim of 1.2 tooth heights, at least 3 mm)",
+   "depends_on": [
+    "ringRadialWidthMM",
+    "ring_min_rim_tooth_heights",
+    "module"
+   ],
    "confidence": "high",
-   "reason": "ring gear wall, a copy of ringRadialWidthMM (also used by the gearbox class and the max-diameter rule)"
+   "reason": "ring gear wall from the pitch circle; also the gearbox class's outer ring radius and the steel ring mass"
   },
   {
    "name": "ring_OD",
@@ -1632,7 +1633,7 @@
     "key": "ringRadialWidthMM"
    },
    "confidence": "high",
-   "reason": "ring wall used by the max-diameter rule; written to the CAD as ring_radial_thickness"
+   "reason": "smallest ring wall from the pitch circle (3dp 5 mm, the ring wall; metal 3 mm, the minimum: machined steel ring); used by the max-diameter rule"
   },
   {
    "name": "planetMinDistanceMM",
@@ -1776,6 +1777,19 @@
    },
    "confidence": "high",
    "reason": "smallest planet rim round its bearing, in tooth heights (planetHoldsBearingConstraint); null: not checked (3dp), metal 1.2 (AGMA backup ratio)"
+  },
+  {
+   "name": "ring_min_rim_tooth_heights",
+   "attr": "ring_min_rim_tooth_heights",
+   "category": "fixed",
+   "subtype": "constraint constant",
+   "source": {
+    "file": "sspg_params.json",
+    "block": "sspg_3DP_design_parameters",
+    "key": "ring_min_rim_tooth_heights"
+   },
+   "confidence": "high",
+   "reason": "smallest ring rim behind the teeth, in tooth heights (getRingWallMM, ringFitsConstraint); null: fixed ring wall (3dp), metal 1.2 (AGMA backup ratio)"
   },
   {
    "name": "sun_hub_clearance_multiple",
