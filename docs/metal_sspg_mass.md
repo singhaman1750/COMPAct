@@ -29,7 +29,17 @@ with changed values (see [Reproduce](#reproduce)).
     too small for the bearing) gives way to 45/45, about 80 g heavier than map v3.
   - Known limit (not checked): the peak pin load per planet, about 290 N (U8_Lite) to 490 N
     (MN8014), against the bearing's static rating of 710 N.
-- The other changes (#3–#8) are still open, and #1 is still open for the other gearbox types.
+  - At 3:1 the only design (30-tooth planets, 15 mm) can't hold the bearing, so SSPG metal has no
+    3:1 design any more. 8:1 had none before either.
+- **Change #3 done for SSPG (M2, 2026-11-28):** metal motor-to-case gap
+  (`clearance_motor_and_case_min`) 5 → **2 mm**, since a machined case bore is concentric with the
+  motor mount. Assumes the motor's wires leave from its base, not to the side. 3dp keeps 5 mm.
+  - The case is 6 mm smaller in diameter: U8_Lite 102.1 → 96.1 mm (with the mounting ears
+    113.6 → 107.6 mm), MN8014 102.8 → 96.8 mm.
+  - U8_Lite 6.5:1 886 → **850 g**; at 4–7:1 U8_Lite about 37 g and MN8014 about 38 g lighter,
+    with the same gears and width. Less than the 91 g estimated below, which was made with the
+    whole casing steel.
+- The other changes (#4–#8) are still open, and #1 is still open for the other gearbox types.
 - The tables below are the analysis **before** change #1. `tools/metal_analysis/sspg_mass_whatif.py`
   now starts from the code with #1 in it.
 

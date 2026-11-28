@@ -126,6 +126,7 @@
         "planet_bearing_mass_kg"       : 0.00402,
         "planet_shaft_dia"             : 8,
         "planet_bore"                  : 16,
-        "planet_min_rim_tooth_heights" : 1.2
+        "planet_min_rim_tooth_heights" : 1.2,
+        "clearance_motor_and_case_min" : 2
     }
 }

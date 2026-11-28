@@ -87,7 +87,7 @@ metal case per gearbox type.
    its own design settings per gearbox; until then it reuses the 3D-printed shapes. Planned as the
    task list below.
 
-#### Metal: realistic values, one gearbox type at a time (planned 2026-11-27, not started)
+#### Metal: realistic values, one gearbox type at a time (planned 2026-11-27, in progress)
 
 Goal: realistic numbers (mass, sizes, efficiency) for metal actuators. Rules:
 - No metal CAD. Metal runs compute the CAD values in memory (the map's diameters need them) but
@@ -122,7 +122,8 @@ Changes (each type's task goes through them; names differ per type, see
 Per type:
 - [x] M0 setup (branch `metal-m0-setup`, 2026-11-27): no results change, all 58 golden cases match
 - [ ] SSPG — M1 done (one NSK 688 per planet, rim check; 979 → 886 g at U8_Lite 6.5:1,
-  [docs/metal_sspg_mass.md](docs/metal_sspg_mass.md)); M2–M8 open
+  [docs/metal_sspg_mass.md](docs/metal_sspg_mass.md)); M2 done (motor-to-case gap 2 mm; 886 →
+  850 g, case 6 mm smaller); M3–M8 open
 - [ ] CPG
 - [ ] WPG
 - [ ] DSPG
