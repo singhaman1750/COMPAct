@@ -146,11 +146,41 @@ Per type:
 - [ ] INDSPG (already counts 1 planet bearing in one of its two mass functions; check why)
 - [ ] G1 friction, G2 steel stress
 - [ ] Metal sweep and map v4
+- [ ] Optimiser cost weights (after the weight reduction of all types; see below)
 
 SSPG analysis of both tasks (2026-10-29): [docs/metal_sspg_mass.md](docs/metal_sspg_mass.md).
 Mass breakdown for U8_Lite 6.5:1 and MN8014 6:1, the saving and confidence of each candidate
 change, and which changes would break the Onshape CAD. Task 1 alone saves about 240–290 g per
 design. Reproduce with `tools/metal_analysis/sspg_mass_whatif.py`.
+
+#### Optimiser cost weights (planned 2026-11-28; do after the metal weight reduction of all types)
+
+The cost is `K_Mass x mass + K_Eff x efficiency + K_Width x planet face width + K_gearRatio x
+|ratio error|` (+ `K_torque_shortfall` for ISSPG, ICPG, INWPG). In grams of mass, the width and
+ratio terms dwarf the mass: 1 mm of planet width counts as 200 g, and 0.02 of ratio error as 200 g
+in SSPG. The ratio weight is hardcoded per optimiser and differs: 10 in SSPG, CPG, ISSPG, ICPG,
+INSSPG, INCPG; 1 in WPG, DSPG, IDSPG, INDSPG, INWPG (`cost.json`'s `_help` says 1).
+
+Values to use (the user's choice, 2026-11-28):
+
+| Term | Now | New | Worth |
+|---|---|---|---|
+| Mass | `K_Mass` 1 per kg | 1 per kg | reference |
+| Efficiency | `K_Eff` −2 | −2 | 1 % ≈ 20 g |
+| Width | `K_Width` 0.2 per mm of **planet face width** | **0.01 per mm of actuator width** | 1 mm ≈ 10 g |
+| Ratio error | `K_gearRatio` 10 or 1 per unit, absolute | **1 × \|ratio − requested\| / requested**, all types, from `cost.json` | 1 % ≈ 10 g |
+| Torque shortfall | 10 | 10 | 1 % ≈ 100 g |
+
+What-if (SSPG, U8_Lite and MN8014, 4–7:1, cost function patched only):
+- 3dp: 5 of 10 designs change, 34–67 g lighter (e.g. MN8014 4:1 757 → 690 g, 4 → 3 planets);
+  planets get wider (MN8014 6:1 12.5 → 16.3 mm) but the actuator width moves only −0.7 to +0.8 mm;
+  ratios up to 0.8 % off (5.03, 4.96).
+- Metal: 4–6:1 unchanged (planet width set by the bearing); 6.5:1 goes back to the 6.48 set
+  (815 → 749 g U8_Lite, 979 → 913 g MN8014); 7:1 takes 25/62/149 m0.5 (ratio 6.96, efficiency
+  0.946 → 0.959).
+
+To decide then: the same weights for 3dp (changes the 3dp golden cases and the map: a new map
+version) or metal only. Also align the map's second score (`K_Width_real` 0.05 per mm).
 
 ### Unify per-gearbox settings (important — most items change results)
 
