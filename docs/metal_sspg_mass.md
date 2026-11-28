@@ -52,7 +52,17 @@ with changed values (see [Reproduce](#reproduce)).
     **3 mm narrower**. U8_Lite 6.5:1 850 → **812 g**, 62.05 → 59.05 mm (same gears).
   - At 4–7:1 U8_Lite and MN8014 are about 30–46 g lighter and 3 mm narrower. Same gears except
     at 4:1, where the optimiser now picks 42/42 instead of 45/45 (still holds the bearing).
-- The other changes (#5–#8) are still open, and #1 is still open for the other gearbox types.
+- **Change #5 done for SSPG (M4, 2026-11-28):** metal motor case wall (`Motor_case_thickness`)
+  2.5 → **2 mm** and base plate (`base_plate_thickness`) 4 → **2.5 mm**, machined aluminium; the
+  case mounting surface stays 4 mm (lowering it only moves material from the motor case to the
+  gearbox housing: same width, a few grams heavier). 3dp keeps 2.5 / 4 / 4 mm.
+  - Loads are light: the peak output torque (about 18 N·m) gives about 1 MPa shear in the wall;
+    the motor's reaction torque (at most about 3 N·m) goes through 4 M4 screws in the base plate.
+    In metal the driver's M3 holes would be tapped in the base plate (5 threads at 2.5 mm).
+  - The case is 1 mm smaller in diameter (U8_Lite 96.1 → 95.1 mm) and the actuator 1.5 mm
+    narrower. U8_Lite 6.5:1 812 → **766 g**, 59.05 → 57.55 mm (same gears).
+  - At 4–7:1 U8_Lite about 46 g and MN8014 about 48 g lighter, with the same gears.
+- The other changes (#6–#8) are still open, and #1 is still open for the other gearbox types.
 - The tables below are the analysis **before** change #1. `tools/metal_analysis/sspg_mass_whatif.py`
   now starts from the code with #1 in it.
 

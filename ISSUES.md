@@ -124,7 +124,8 @@ Per type:
 - [ ] SSPG — M1 done (one NSK 688 per planet, rim check; 979 → 886 g at U8_Lite 6.5:1,
   [docs/metal_sspg_mass.md](docs/metal_sspg_mass.md)); M2 done (motor-to-case gap 2 mm; 886 →
   850 g, case 6 mm smaller); M3 done (secondary carrier and sun hub 3 mm, retainer kept 2 mm;
-  850 → 812 g, 3 mm narrower); M4–M8 open
+  850 → 812 g, 3 mm narrower); M4 done (case wall 2 mm, base plate 2.5 mm, mounting surface kept
+  4 mm; 812 → 766 g, 1.5 mm narrower); M5–M8 open
 - [ ] CPG
 - [ ] WPG
 - [ ] DSPG

@@ -54,8 +54,9 @@ def test_metal_ring_is_steel_and_the_housing_aluminium():
     assert a.gearbox_casing_mass == pytest.approx(a.ring_mass + a.gearbox_housing_mass, rel=1e-12)
     # docs/metal_sspg_mass.md: weighing the housing as aluminium instead of steel saved ~236 g here;
     # with one planet bearing (M1: planet and ring 8 -> 5 mm wide), a 2 mm motor-to-case gap (M2,
-    # 5 mm before) and thinner plates (M3: case_dist 6.5 -> 3.5 mm) the housing is smaller, ~153 g
-    assert housing_volume_m3(a) * (7850 - 2700) * 1000 == pytest.approx(153, abs=2)
+    # 5 mm before), thinner plates (M3: case_dist 6.5 -> 3.5 mm) and a 2 mm case wall (M4) the housing
+    # is smaller, ~148 g
+    assert housing_volume_m3(a) * (7850 - 2700) * 1000 == pytest.approx(148, abs=2)
 
 
 def test_3dp_casing_is_unchanged():
@@ -70,9 +71,10 @@ def test_3dp_casing_is_unchanged():
 def test_metal_optimum_gets_lighter():
     """The metal golden design: the optimiser now picks module 0.5 (25/56/137), 979 g after the split
     (1,224 g before), 886 g with one planet bearing (M1), 850 g with a 2 mm motor-to-case gap (M2) and
-    812 g with 3 mm secondary carrier and sun hub (M3)."""
+    812 g with 3 mm secondary carrier and sun hub (M3) and 766 g with a 2 mm case wall and 2.5 mm base
+    plate (M4)."""
     a = build("metal", (25, 56, 137, 0.5, 3))
-    assert a.getMassKG_3DP() == pytest.approx(0.812, abs=0.001)
+    assert a.getMassKG_3DP() == pytest.approx(0.766, abs=0.001)
 
 
 # ---- CPG -----------------------------------------------------------------------------------------

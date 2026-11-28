@@ -328,7 +328,7 @@
     "key": "Motor_case_thickness"
    },
    "confidence": "high",
-   "reason": "constant from the SSPG 3DP design parameters"
+   "reason": "motor case wall (3dp 2.5 mm; metal 2 mm: machined aluminium tube, output torque about 1 MPa shear); sets the case diameter and mass"
   },
   {
    "name": "Motor_case_ID",
@@ -453,7 +453,7 @@
     "key": "base_plate_thickness"
    },
    "confidence": "high",
-   "reason": "constant from the SSPG 3DP design parameters"
+   "reason": "motor case end plate the motor bolts to (3dp 4 mm; metal 2.5 mm: aluminium, M3 driver holes tapped, 5 threads); sets the actuator width and case mass"
   },
   {
    "name": "dp_s",

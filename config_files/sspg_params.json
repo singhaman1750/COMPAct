@@ -129,6 +129,8 @@
         "planet_min_rim_tooth_heights" : 1.2,
         "clearance_motor_and_case_min" : 2,
         "sec_carrier_thickness"        : 3,
-        "sun_coupler_hub_thickness"    : 3
+        "sun_coupler_hub_thickness"    : 3,
+        "Motor_case_thickness"         : 2,
+        "base_plate_thickness"         : 2.5
     }
 }

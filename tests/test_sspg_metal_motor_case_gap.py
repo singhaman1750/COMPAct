@@ -37,7 +37,8 @@ def test_motor_case_gap_per_material(material, gap_mm):
 
 
 def test_metal_case_is_smaller_by_twice_the_gap_change():
-    # 5 mm before M2: case 102.1 mm, mounting PCD and outer diameter 6 mm larger
+    # 5 mm before M2: case 102.1 mm, mounting PCD and outer diameter 6 mm larger (the case wall is
+    # 0.5 mm thinner since M4)
     a = build("metal")
-    assert a.motor_case_OD_base == pytest.approx(102.1 - 2 * 3)
-    assert a.Motor_case_OD_max == pytest.approx(111.6 - 2 * 3)
+    assert a.motor_case_OD_base == pytest.approx(102.1 - 2 * 3 - 2 * 0.5)
+    assert a.Motor_case_OD_max == pytest.approx(111.6 - 2 * 3 - 2 * 0.5)
