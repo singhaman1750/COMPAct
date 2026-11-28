@@ -262,7 +262,7 @@
     "key": "sec_carrier_thickness"
    },
    "confidence": "high",
-   "reason": "constant from the SSPG 3DP design parameters"
+   "reason": "secondary carrier plate (3dp 5 mm; metal 3 mm: aluminium, planet pin load about 290-490 N); sets case_dist, the sun length and the actuator width"
   },
   {
    "name": "sun_coupler_hub_thickness",
@@ -275,7 +275,7 @@
     "key": "sun_coupler_hub_thickness"
    },
    "confidence": "high",
-   "reason": "constant from the SSPG 3DP design parameters"
+   "reason": "sun hub that bolts to the motor (3dp 4 mm; metal 3 mm: steel, motor torque on 4 M4 screws); sets case_dist and the actuator width"
   },
   {
    "name": "clearance_sun_coupler_sec_carrier",

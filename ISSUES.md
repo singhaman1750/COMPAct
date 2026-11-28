@@ -123,7 +123,8 @@ Per type:
 - [x] M0 setup (branch `metal-m0-setup`, 2026-11-27): no results change, all 58 golden cases match
 - [ ] SSPG — M1 done (one NSK 688 per planet, rim check; 979 → 886 g at U8_Lite 6.5:1,
   [docs/metal_sspg_mass.md](docs/metal_sspg_mass.md)); M2 done (motor-to-case gap 2 mm; 886 →
-  850 g, case 6 mm smaller); M3–M8 open
+  850 g, case 6 mm smaller); M3 done (secondary carrier and sun hub 3 mm, retainer kept 2 mm;
+  850 → 812 g, 3 mm narrower); M4–M8 open
 - [ ] CPG
 - [ ] WPG
 - [ ] DSPG

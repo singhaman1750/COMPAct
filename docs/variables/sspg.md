@@ -76,8 +76,8 @@ From `config_files/variables/rules.json`; the test holds every gearbox's file to
 | 1 | `pressure_angle` | gear standard | config.json → Gear_standard_parameters → `pressureAngleDEG` |  | high | gear standard, the same for every gearbox type |
 | 2 | `planet_bore` | planet part | sspg_params.json → sspg_3DP_design_parameters → `planet_bore` |  | high | constant planet bore from the SSPG 3DP design parameters |
 | 3 | `clearance_planet` | clearance | sspg_params.json → sspg_3DP_design_parameters → `clearance_planet` |  | high | constant from the SSPG 3DP design parameters |
-| 4 | `sec_carrier_thickness` | wall thickness | sspg_params.json → sspg_3DP_design_parameters → `sec_carrier_thickness` |  | high | constant from the SSPG 3DP design parameters |
-| 5 | `sun_coupler_hub_thickness` | wall thickness | sspg_params.json → sspg_3DP_design_parameters → `sun_coupler_hub_thickness` |  | high | constant from the SSPG 3DP design parameters |
+| 4 | `sec_carrier_thickness` | wall thickness | sspg_params.json → sspg_3DP_design_parameters → `sec_carrier_thickness` |  | high | secondary carrier plate (3dp 5 mm; metal 3 mm: aluminium, planet pin load about 290-490 N); sets case_dist, the sun length and the actuator width |
+| 5 | `sun_coupler_hub_thickness` | wall thickness | sspg_params.json → sspg_3DP_design_parameters → `sun_coupler_hub_thickness` |  | high | sun hub that bolts to the motor (3dp 4 mm; metal 3 mm: steel, motor torque on 4 M4 screws); sets case_dist and the actuator width |
 | 6 | `clearance_sun_coupler_sec_carrier` | clearance | sspg_params.json → sspg_3DP_design_parameters → `clearance_sun_coupler_sec_carrier` |  | high | constant from the SSPG 3DP design parameters |
 | 7 | `case_mounting_surface_height` | wall thickness | sspg_params.json → sspg_3DP_design_parameters → `case_mounting_surface_height` |  | high | constant from the SSPG 3DP design parameters |
 | 8 | `Motor_case_thickness` | wall thickness | sspg_params.json → sspg_3DP_design_parameters → `Motor_case_thickness` |  | high | constant from the SSPG 3DP design parameters |

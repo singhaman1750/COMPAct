@@ -39,7 +39,20 @@ with changed values (see [Reproduce](#reproduce)).
   - U8_Lite 6.5:1 886 → **850 g**; at 4–7:1 U8_Lite about 37 g and MN8014 about 38 g lighter,
     with the same gears and width. Less than the 91 g estimated below, which was made with the
     whole casing steel.
-- The other changes (#4–#8) are still open, and #1 is still open for the other gearbox types.
+- **Change #4 done for SSPG (M3, 2026-11-28):** metal secondary carrier (`sec_carrier_thickness`,
+  aluminium) 5 → **3 mm** and sun hub (`sun_coupler_hub_thickness`, steel, part of the sun) 4 →
+  **3 mm**; the output bearing retainer stays 2 mm (it takes the output's axial load, and 1.5 mm
+  would save only 3 g). 3dp keeps 5 / 4 / 2 mm.
+  - Loads are light: about 290–490 N per planet pin at peak, shared by the two carrier plates;
+    at most about 3 N·m from the motor on the hub's 4 M4 screws. Not checked in the code.
+  - Assumes the M5 planet-pin nut sits outside the secondary carrier, not threaded into it
+    (3 mm would give about 4 threads). The hub's countersunk M4 heads (about 2.5 mm) leave
+    0.5–1 mm of steel under them.
+  - The housing step `case_dist` 6.5 → 3.5 mm and the sun 2 mm shorter; the actuator is
+    **3 mm narrower**. U8_Lite 6.5:1 850 → **812 g**, 62.05 → 59.05 mm (same gears).
+  - At 4–7:1 U8_Lite and MN8014 are about 30–46 g lighter and 3 mm narrower. Same gears except
+    at 4:1, where the optimiser now picks 42/42 instead of 45/45 (still holds the bearing).
+- The other changes (#5–#8) are still open, and #1 is still open for the other gearbox types.
 - The tables below are the analysis **before** change #1. `tools/metal_analysis/sspg_mass_whatif.py`
   now starts from the code with #1 in it.
 

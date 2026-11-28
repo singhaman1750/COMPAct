@@ -44,10 +44,10 @@ def test_planet_width_and_bearing_mass_follow_the_bearings(material, bearings, m
 
 def test_metal_is_lighter_and_narrower_with_one_bearing():
     # this design with two bearings (before M1): 65.05 mm, 979 g (the old metal golden baseline);
-    # 886 g after M1, 850 g with the 2 mm motor-to-case gap (M2)
+    # 886 g after M1, 850 g with the 2 mm motor-to-case gap (M2), 812 g with thinner plates (M3)
     metal = build("metal")
-    assert metal.actuator_width == pytest.approx(65.05 - 3.0)   # planet 8 -> 5 mm
-    assert metal.getMassKG_3DP() * 1000 == pytest.approx(849.5, abs=1)
+    assert metal.actuator_width == pytest.approx(65.05 - 3.0 - 3.0)   # planet 8 -> 5 mm; plates (M3) 3 mm
+    assert metal.getMassKG_3DP() * 1000 == pytest.approx(812.2, abs=1)
 
 
 @pytest.mark.parametrize("Np, holds", [(45, True), (40, True), (39, False), (30, False)])
