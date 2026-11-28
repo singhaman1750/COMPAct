@@ -208,7 +208,7 @@ def test_sources_give_the_values(design):
             expected = lookup(json.loads((CONFIG / s["file"]).read_text(encoding="utf-8")), s["block"])[s["key"]]
         else:
             continue
-        if isinstance(expected, str):                                   # a setting such as "lookup" / "config"
+        if expected is None or isinstance(expected, str):              # null (a check that is off) or a setting such as "lookup"
             assert vals[e["name"]] == expected, e["name"]
         else:
             assert vals[e["name"]] == pytest.approx(expected, rel=1e-9), e["name"]
