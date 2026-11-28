@@ -77,8 +77,9 @@ with changed values (see [Reproduce](#reproduce)).
     ring pitch circle 79.2 mm), and the cost's ratio term (10 × ratio error; 6.48 instead of 6.5
     costs as much as 200 g) picks it over the 6.48 set: 766 → **815 g**, 58.55 mm (U8_Lite);
     MN8014 930 → 979 g. The 6.48 set is still there at 749 g.
-- Not doing: #6 (print clearances, M5) and the smallest module (M8); #7 (walls round bolts, M6)
-  to be reviewed. #1 is still open for the other gearbox types.
+- Not doing: #6 (print clearances, M5), #7 (walls round bolts, M6: 7 mm instead of 8 mm saves
+  only 7–9 g; 6 mm leaves 1 mm between the tapped M4 holes and the output bearing seat) and the
+  smallest module (M8). SSPG metal is done; #1 is still open for the other gearbox types.
 - The tables below are the analysis **before** change #1. `tools/metal_analysis/sspg_mass_whatif.py`
   now starts from the code with #1 in it.
 

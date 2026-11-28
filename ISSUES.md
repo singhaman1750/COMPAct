@@ -112,8 +112,9 @@ Changes (each type's task goes through them; names differ per type, see
 - **M4 case:** case wall, base plate, mounting surface.
 - **M5 print clearances** with one clear purpose (SSPG `clearance_planet`); shared ones such as
   `standard_clearance_1_5mm` only after checking each use. **Not doing** (user, 2026-11-28).
-- **M6 walls around bolts** (SSPG `bearing_mount_wall_bolt_dia_multiple`). **To review** in detail
-  before deciding (user, 2026-11-28).
+- **M6 walls around bolts** (SSPG `bearing_mount_wall_bolt_dia_multiple`). **Not doing for SSPG**
+  (user, 2026-11-28): 7 mm instead of 8 mm saves only 7–9 g, and 6 mm leaves 1 mm between the
+  tapped M4 hole and the output bearing seat. Review per type.
 - **M7 ring gear wall** (SSPG `ringRadialWidthMM`; also the max-diameter rule that uses it). Metal:
   wall = max(minimum, dedendum + rim of 1.2 tooth heights), so no module is rejected.
 - **M8 smallest module** for metal, only if realistic. **Not doing** (user, 2026-11-28).
@@ -123,13 +124,12 @@ Changes (each type's task goes through them; names differ per type, see
 
 Per type:
 - [x] M0 setup (branch `metal-m0-setup`, 2026-11-27): no results change, all 58 golden cases match
-- [ ] SSPG — M1 done (one NSK 688 per planet, rim check; 979 → 886 g at U8_Lite 6.5:1,
+- [x] SSPG — M1 done (one NSK 688 per planet, rim check; 979 → 886 g at U8_Lite 6.5:1,
   [docs/metal_sspg_mass.md](docs/metal_sspg_mass.md)); M2 done (motor-to-case gap 2 mm; 886 →
   850 g, case 6 mm smaller); M3 done (secondary carrier and sun hub 3 mm, retainer kept 2 mm;
   850 → 812 g, 3 mm narrower); M4 done (case wall 2 mm, base plate 2.5 mm, mounting surface kept
   4 mm; 812 → 766 g, 1.5 mm narrower); M7 done (ring wall max(3 mm, 3.95 × module); 4–7:1
-  12–18 g lighter; at 6.5:1 the exact-ratio set now fits, 766 → 815 g); M6 to review; M5, M8 not
-  doing
+  12–18 g lighter; at 6.5:1 the exact-ratio set now fits, 766 → 815 g); M5, M6, M8 not doing
 - [ ] CPG
 - [ ] WPG
 - [ ] DSPG
