@@ -262,7 +262,7 @@
     "key": "sec_carrier_thickness"
    },
    "confidence": "high",
-   "reason": "constant from the SSPG 3DP design parameters"
+   "reason": "secondary carrier plate (3dp 5 mm; metal 3 mm: aluminium, planet pin load about 290-490 N); sets case_dist, the sun length and the actuator width"
   },
   {
    "name": "sun_coupler_hub_thickness",
@@ -275,7 +275,7 @@
     "key": "sun_coupler_hub_thickness"
    },
    "confidence": "high",
-   "reason": "constant from the SSPG 3DP design parameters"
+   "reason": "sun hub that bolts to the motor (3dp 4 mm; metal 3 mm: steel, motor torque on 4 M4 screws); sets case_dist and the actuator width"
   },
   {
    "name": "clearance_sun_coupler_sec_carrier",
@@ -328,7 +328,7 @@
     "key": "Motor_case_thickness"
    },
    "confidence": "high",
-   "reason": "constant from the SSPG 3DP design parameters"
+   "reason": "motor case wall (3dp 2.5 mm; metal 2 mm: machined aluminium tube, output torque about 1 MPa shear); sets the case diameter and mass"
   },
   {
    "name": "Motor_case_ID",
@@ -453,7 +453,7 @@
     "key": "base_plate_thickness"
    },
    "confidence": "high",
-   "reason": "constant from the SSPG 3DP design parameters"
+   "reason": "motor case end plate the motor bolts to (3dp 4 mm; metal 2.5 mm: aluminium, M3 driver holes tapped, 5 threads); sets the actuator width and case mass"
   },
   {
    "name": "dp_s",
@@ -560,7 +560,7 @@
    "attr": "fw_p",
    "category": "dependent",
    "subtype": "stress rule",
-   "rule": "b = FOS x Ft x qe x qk / (gear_allowable_stress x module), with Ft = serviceFactor x motor_peak_torque / (num_planet x sun pitch radius), qe = 1 / sun-planet contact ratio, qk = curve fit in Ns (mitStressAnalysisMinFacewidth); fw = max(b, 2 x planet_bearing_width + planet_bearing_gap)",
+   "rule": "b = FOS x Ft x qe x qk / (gear_allowable_stress x module), with Ft = serviceFactor x motor_peak_torque / (num_planet x sun pitch radius), qe = 1 / sun-planet contact ratio, qk = curve fit in Ns (mitStressAnalysisMinFacewidth); fw = max(b, planet_bearings_per_planet x planet_bearing_width + (planet_bearings_per_planet - 1) x planet_bearing_gap)",
    "depends_on": [
     "module",
     "Ns",
@@ -572,6 +572,7 @@
     "gear_allowable_stress",
     "FOS",
     "serviceFactor",
+    "planet_bearings_per_planet",
     "planet_bearing_width",
     "planet_bearing_gap"
    ],
@@ -636,7 +637,7 @@
    "attr": "fw_r",
    "category": "dependent",
    "subtype": "stress rule",
-   "rule": "b = FOS x Ft x qe x qk / (gear_allowable_stress x module), with Ft = serviceFactor x motor_peak_torque / (num_planet x sun pitch radius), qe = 1 / sun-planet contact ratio, qk = curve fit in Ns (mitStressAnalysisMinFacewidth); fw = max(b, 2 x planet_bearing_width + planet_bearing_gap)",
+   "rule": "b = FOS x Ft x qe x qk / (gear_allowable_stress x module), with Ft = serviceFactor x motor_peak_torque / (num_planet x sun pitch radius), qe = 1 / sun-planet contact ratio, qk = curve fit in Ns (mitStressAnalysisMinFacewidth); fw = max(b, planet_bearings_per_planet x planet_bearing_width + (planet_bearings_per_planet - 1) x planet_bearing_gap)",
    "depends_on": [
     "module",
     "Ns",
@@ -648,6 +649,7 @@
     "gear_allowable_stress",
     "FOS",
     "serviceFactor",
+    "planet_bearings_per_planet",
     "planet_bearing_width",
     "planet_bearing_gap"
    ],
@@ -1144,15 +1146,16 @@
   {
    "name": "ring_radial_thickness",
    "attr": "ring_radial_thickness",
-   "category": "fixed",
-   "subtype": "wall thickness",
-   "source": {
-    "file": "sspg_params.json",
-    "block": "sspg_3DP_design_parameters",
-    "key": "ringRadialWidthMM"
-   },
+   "category": "dependent",
+   "subtype": "formula",
+   "rule": "getRingWallMM: ringRadialWidthMM if ring_min_rim_tooth_heights is null (3dp), else max(ringRadialWidthMM, 1.25 x module + ring_min_rim_tooth_heights x 2.25 x module) (metal: the dedendum plus a rim of 1.2 tooth heights, at least 3 mm)",
+   "depends_on": [
+    "ringRadialWidthMM",
+    "ring_min_rim_tooth_heights",
+    "module"
+   ],
    "confidence": "high",
-   "reason": "ring gear wall, a copy of ringRadialWidthMM (also used by the gearbox class and the max-diameter rule)"
+   "reason": "ring gear wall from the pitch circle; also the gearbox class's outer ring radius and the steel ring mass"
   },
   {
    "name": "ring_OD",
@@ -1630,7 +1633,7 @@
     "key": "ringRadialWidthMM"
    },
    "confidence": "high",
-   "reason": "ring wall used by the max-diameter rule; written to the CAD as ring_radial_thickness"
+   "reason": "smallest ring wall from the pitch circle (3dp 5 mm, the ring wall; metal 3 mm, the minimum: machined steel ring); used by the max-diameter rule"
   },
   {
    "name": "planetMinDistanceMM",
@@ -1695,7 +1698,7 @@
     "key": "clearance_motor_and_case_min"
    },
    "confidence": "high",
-   "reason": "smallest radial gap between the motor and the case; sets clearance_motor_and_case (CAD) and the case mass"
+   "reason": "smallest radial gap between the motor and the case (3dp 5 mm; metal 2 mm: machined bore concentric with the motor mount); sets clearance_motor_and_case (CAD) and the case mass"
   },
   {
    "name": "case_mounting_hole_wall_overlap",
@@ -1735,6 +1738,58 @@
    },
    "confidence": "high",
    "reason": "axial gap between the two bearings inside a planet; with them it sets the smallest planet (and ring) face width"
+  },
+  {
+   "name": "planet_bearings_per_planet",
+   "attr": "planet_bearings_per_planet",
+   "category": "fixed",
+   "subtype": "constraint constant",
+   "source": {
+    "file": "sspg_params.json",
+    "block": "sspg_3DP_design_parameters",
+    "key": "planet_bearings_per_planet"
+   },
+   "confidence": "high",
+   "reason": "bearings inside each planet (3dp 2, metal 1); sets the smallest planet (and ring) face width and the bearing count in the mass"
+  },
+  {
+   "name": "planet_bearing_mass_kg",
+   "attr": "planet_bearing_mass_kg",
+   "category": "fixed",
+   "subtype": "bearing (chosen part)",
+   "source": {
+    "file": "sspg_params.json",
+    "block": "sspg_3DP_design_parameters",
+    "key": "planet_bearing_mass_kg"
+   },
+   "confidence": "high",
+   "reason": "mass of one planet bearing (3dp 1 g as before; metal: NSK 688ADD, 4.02 g)"
+  },
+  {
+   "name": "planet_min_rim_tooth_heights",
+   "attr": "planet_min_rim_tooth_heights",
+   "category": "fixed",
+   "subtype": "constraint constant",
+   "source": {
+    "file": "sspg_params.json",
+    "block": "sspg_3DP_design_parameters",
+    "key": "planet_min_rim_tooth_heights"
+   },
+   "confidence": "high",
+   "reason": "smallest planet rim round its bearing, in tooth heights (planetHoldsBearingConstraint); null: not checked (3dp), metal 1.2 (AGMA backup ratio)"
+  },
+  {
+   "name": "ring_min_rim_tooth_heights",
+   "attr": "ring_min_rim_tooth_heights",
+   "category": "fixed",
+   "subtype": "constraint constant",
+   "source": {
+    "file": "sspg_params.json",
+    "block": "sspg_3DP_design_parameters",
+    "key": "ring_min_rim_tooth_heights"
+   },
+   "confidence": "high",
+   "reason": "smallest ring rim behind the teeth, in tooth heights (getRingWallMM, ringFitsConstraint); null: fixed ring wall (3dp), metal 1.2 (AGMA backup ratio)"
   },
   {
    "name": "sun_hub_clearance_multiple",

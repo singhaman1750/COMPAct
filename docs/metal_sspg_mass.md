@@ -16,7 +16,70 @@ with changed values (see [Reproduce](#reproduce)).
   - With the ring steel, a thinner ring wall (#9) now saves about 20 g.
 - **CPG done too (2026-10-30):** the same split (steel ring of the mass model's 5 mm thickness);
   U8_Lite 10:1 metal 1,032 → 802 g with a new gear set.
-- The other changes (#2–#8) are still open, and #1 is still open for the other gearbox types.
+- **Change #2 done for SSPG (M1, 2026-11-28):** metal planets hold **one** bearing, NSK 688
+  (8 × 16 × 5 mm, 4.02 g; Cr 1,770 N, C0r 710 N, from NSK's 688ADD page), instead of two
+  8 × 12 × 3.5 mm ones with a 1 mm gap. The planet hole is the bearing's 16 mm OD; the pin stays
+  8 mm. Settings in `sspg_params.json`, `sspg_metal_design_parameters`; 3dp keeps two bearings and
+  is bit-identical. Metal has no CAD model, so the Onshape model is unchanged.
+  - Planet and ring 8 → 5 mm wide; U8_Lite 6.5:1 979 → **886 g**, 65.05 → 62.05 mm (same gears);
+    U8_Lite and MN8014 at 5–7:1 about 80–100 g lighter and 3 mm narrower.
+  - New metal-only rim check (`planet_min_rim_tooth_heights` 1.2, `planetHoldsBearingConstraint`):
+    the planet's root circle must hold the bearing with a rim of 1.2 tooth heights (AGMA backup
+    ratio), so at module 0.5 a planet needs at least 40 teeth. At 4:1 the 30/30 design (planet
+    too small for the bearing) gives way to 45/45, about 80 g heavier than map v3.
+  - Known limit (not checked): the peak pin load per planet, about 290 N (U8_Lite) to 490 N
+    (MN8014), against the bearing's static rating of 710 N.
+  - At 3:1 the only design (30-tooth planets, 15 mm) can't hold the bearing, so SSPG metal has no
+    3:1 design any more. 8:1 had none before either.
+- **Change #3 done for SSPG (M2, 2026-11-28):** metal motor-to-case gap
+  (`clearance_motor_and_case_min`) 5 → **2 mm**, since a machined case bore is concentric with the
+  motor mount. Assumes the motor's wires leave from its base, not to the side. 3dp keeps 5 mm.
+  - The case is 6 mm smaller in diameter: U8_Lite 102.1 → 96.1 mm (with the mounting ears
+    113.6 → 107.6 mm), MN8014 102.8 → 96.8 mm.
+  - U8_Lite 6.5:1 886 → **850 g**; at 4–7:1 U8_Lite about 37 g and MN8014 about 38 g lighter,
+    with the same gears and width. Less than the 91 g estimated below, which was made with the
+    whole casing steel.
+- **Change #4 done for SSPG (M3, 2026-11-28):** metal secondary carrier (`sec_carrier_thickness`,
+  aluminium) 5 → **3 mm** and sun hub (`sun_coupler_hub_thickness`, steel, part of the sun) 4 →
+  **3 mm**; the output bearing retainer stays 2 mm (it takes the output's axial load, and 1.5 mm
+  would save only 3 g). 3dp keeps 5 / 4 / 2 mm.
+  - Loads are light: about 290–490 N per planet pin at peak, shared by the two carrier plates;
+    at most about 3 N·m from the motor on the hub's 4 M4 screws. Not checked in the code.
+  - Assumes the M5 planet-pin nut sits outside the secondary carrier, not threaded into it
+    (3 mm would give about 4 threads). The hub's countersunk M4 heads (about 2.5 mm) leave
+    0.5–1 mm of steel under them.
+  - The housing step `case_dist` 6.5 → 3.5 mm and the sun 2 mm shorter; the actuator is
+    **3 mm narrower**. U8_Lite 6.5:1 850 → **812 g**, 62.05 → 59.05 mm (same gears).
+  - At 4–7:1 U8_Lite and MN8014 are about 30–46 g lighter and 3 mm narrower. Same gears except
+    at 4:1, where the optimiser now picks 42/42 instead of 45/45 (still holds the bearing).
+- **Change #5 done for SSPG (M4, 2026-11-28):** metal motor case wall (`Motor_case_thickness`)
+  2.5 → **2 mm** and base plate (`base_plate_thickness`) 4 → **2.5 mm**, machined aluminium; the
+  case mounting surface stays 4 mm (lowering it only moves material from the motor case to the
+  gearbox housing: same width, a few grams heavier). 3dp keeps 2.5 / 4 / 4 mm.
+  - Loads are light: the peak output torque (about 18 N·m) gives about 1 MPa shear in the wall;
+    the motor's reaction torque (at most about 3 N·m) goes through 4 M4 screws in the base plate.
+    In metal the driver's M3 holes would be tapped in the base plate (5 threads at 2.5 mm).
+  - The case is 1 mm smaller in diameter (U8_Lite 96.1 → 95.1 mm) and the actuator 1.5 mm
+    narrower. U8_Lite 6.5:1 812 → **766 g**, 59.05 → 57.55 mm (same gears).
+  - At 4–7:1 U8_Lite about 46 g and MN8014 about 48 g lighter, with the same gears.
+- **Change #9 done for SSPG (M7, 2026-11-28):** metal ring wall (from the pitch circle) =
+  max(**3 mm**, 1.25 × module + 1.2 × 2.25 × module), i.e. the dedendum plus a rim of at least 1.2
+  tooth heights behind the teeth (AGMA backup ratio, as the planet in M1): 3 mm up to module 0.76,
+  3.95 mm at module 1.0, 4.74 mm at 1.2. No module is rejected; a large module gets a thicker ring.
+  3dp keeps the fixed 5 mm (`ring_min_rim_tooth_heights` null).
+  - `getRingWallMM()` gives the wall to the CAD values, the mass and the gearbox's outer radius.
+    The max-diameter rule reads the 3 mm minimum (U8_Lite 77.1 → 81.1 mm ring pitch circle);
+    `ringFitsConstraint()` keeps the ring's outer diameter, with its real wall, within that limit.
+  - The thinner steel ring becomes aluminium housing. Same gear set: U8_Lite 6.5:1 766 → 749 g,
+    MN8014 6:1 854 → 838 g; width and diameter unchanged.
+  - Re-optimised at 4–7:1: 12–18 g lighter; at 4:1 the optimiser goes back to 45/45 planets.
+  - At 6.5:1 (the golden case) the larger limit lets an exact 6.5 set fit (module 0.6, 24/54/132,
+    ring pitch circle 79.2 mm), and the cost's ratio term (10 × ratio error; 6.48 instead of 6.5
+    costs as much as 200 g) picks it over the 6.48 set: 766 → **815 g**, 58.55 mm (U8_Lite);
+    MN8014 930 → 979 g. The 6.48 set is still there at 749 g.
+- Not doing: #6 (print clearances, M5), #7 (walls round bolts, M6: 7 mm instead of 8 mm saves
+  only 7–9 g; 6 mm leaves 1 mm between the tapped M4 holes and the output bearing seat) and the
+  smallest module (M8). SSPG metal is done; #1 is still open for the other gearbox types.
 - The tables below are the analysis **before** change #1. `tools/metal_analysis/sspg_mass_whatif.py`
   now starts from the code with #1 in it.
 

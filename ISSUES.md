@@ -84,12 +84,103 @@ metal case per gearbox type.
    (`tools/actuator_map/maps/v2/`, 2026-11-03).
 2. **Separate thicknesses and clearances for metal mode.** Metal parts don't need the 3D-printing
    clearances (e.g. `loose_clearance_3DP`) and can be thinner than printed ones. Metal mode needs
-   its own design settings per gearbox; until then it reuses the 3D-printed shapes.
+   its own design settings per gearbox; until then it reuses the 3D-printed shapes. Planned as the
+   task list below.
+
+#### Metal: realistic values, one gearbox type at a time (planned 2026-11-27, in progress)
+
+Goal: realistic numbers (mass, sizes, efficiency) for metal actuators. Rules:
+- No metal CAD. Metal runs compute the CAD values in memory (the map's diameters need them) but
+  never write into `CADs/` or push to Onshape. The Onshape models are not changed.
+- 3D-printed results, CAD files and the 3D-printed golden cases stay identical. Only the metal
+  golden case of the type being changed is re-recorded, with a mass breakdown of what moved.
+- Every metal value gets a one-line reason. [docs/reference_actuators.md](docs/reference_actuators.md)
+  is a sanity check, not a target.
+- One type per task. The user may add their own changes to a type's task.
+
+Changes (each type's task goes through them; names differ per type, see
+`config_files/variables/<type>_variables.json`):
+- **M0 setup (once, with SSPG):** metal override sections `<type>_metal_design_parameters` /
+  `<type>_metal_optimization_parameters` applied only in metal mode (unknown keys are an error);
+  metal writes no CAD files and `--onshape` refuses metal; `final_design` returns no CAD files for
+  metal.
+- **M1 one planet bearing:** bearings per planet as a setting (3dp 2, metal 1) in the planet width
+  rule and the bearing count; per-bearing mass as a setting (3dp 1 g); a real metal bearing (width,
+  OD, bore, mass) with matching pin and planet hole. Compound / Wolfrom types: big and small planet.
+- **M2 motor-to-case gap** (SSPG `clearance_motor_and_case_min` 5 mm).
+- **M3 plates:** carrier, sun hub, bearing retainer thicknesses.
+- **M4 case:** case wall, base plate, mounting surface.
+- **M5 print clearances** with one clear purpose (SSPG `clearance_planet`); shared ones such as
+  `standard_clearance_1_5mm` only after checking each use. **Not doing** (user, 2026-11-28).
+- **M6 walls around bolts** (SSPG `bearing_mount_wall_bolt_dia_multiple`). **Not doing for SSPG**
+  (user, 2026-11-28): 7 mm instead of 8 mm saves only 7–9 g, and 6 mm leaves 1 mm between the
+  tapped M4 hole and the output bearing seat. Review per type.
+- **M7 ring gear wall** (SSPG `ringRadialWidthMM`; also the max-diameter rule that uses it). Metal:
+  wall = max(minimum, dedendum + rim of 1.2 tooth heights), so no module is rejected.
+- **M8 smallest module** for metal, only if realistic. **Not doing** (user, 2026-11-28).
+- **Shared by all types (once, not per type):** G1 friction coefficient for lubricated steel
+  (now 0.3 for both materials); G2 check the steel allowable stress (400 MPa).
+- **After all types:** metal sweep, map v4 (its 3dp part must equal v3).
+
+Per type:
+- [x] M0 setup (branch `metal-m0-setup`, 2026-11-27): no results change, all 58 golden cases match
+- [x] SSPG — M1 done (one NSK 688 per planet, rim check; 979 → 886 g at U8_Lite 6.5:1,
+  [docs/metal_sspg_mass.md](docs/metal_sspg_mass.md)); M2 done (motor-to-case gap 2 mm; 886 →
+  850 g, case 6 mm smaller); M3 done (secondary carrier and sun hub 3 mm, retainer kept 2 mm;
+  850 → 812 g, 3 mm narrower); M4 done (case wall 2 mm, base plate 2.5 mm, mounting surface kept
+  4 mm; 812 → 766 g, 1.5 mm narrower); M7 done (ring wall max(3 mm, 3.95 × module); 4–7:1
+  12–18 g lighter; at 6.5:1 the exact-ratio set now fits, 766 → 815 g); M5, M6, M8 not doing
+- [ ] CPG
+- [ ] WPG
+- [ ] DSPG
+- [ ] ISSPG inside
+- [ ] ISSPG compact
+- [ ] ICPG
+- [ ] IDSPG
+- [ ] INSSPG type 1
+- [ ] INSSPG type 2
+- [ ] INCPG dependent
+- [ ] INCPG independent
+- [ ] INWPG dependent
+- [ ] INWPG independent
+- [ ] INDSPG (already counts 1 planet bearing in one of its two mass functions; check why)
+- [ ] G1 friction, G2 steel stress
+- [ ] Metal sweep and map v4
+- [ ] Optimiser cost weights (after the weight reduction of all types; see below)
 
 SSPG analysis of both tasks (2026-10-29): [docs/metal_sspg_mass.md](docs/metal_sspg_mass.md).
 Mass breakdown for U8_Lite 6.5:1 and MN8014 6:1, the saving and confidence of each candidate
 change, and which changes would break the Onshape CAD. Task 1 alone saves about 240–290 g per
 design. Reproduce with `tools/metal_analysis/sspg_mass_whatif.py`.
+
+#### Optimiser cost weights (planned 2026-11-28; do after the metal weight reduction of all types)
+
+The cost is `K_Mass x mass + K_Eff x efficiency + K_Width x planet face width + K_gearRatio x
+|ratio error|` (+ `K_torque_shortfall` for ISSPG, ICPG, INWPG). In grams of mass, the width and
+ratio terms dwarf the mass: 1 mm of planet width counts as 200 g, and 0.02 of ratio error as 200 g
+in SSPG. The ratio weight is hardcoded per optimiser and differs: 10 in SSPG, CPG, ISSPG, ICPG,
+INSSPG, INCPG; 1 in WPG, DSPG, IDSPG, INDSPG, INWPG (`cost.json`'s `_help` says 1).
+
+Values to use (the user's choice, 2026-11-28):
+
+| Term | Now | New | Worth |
+|---|---|---|---|
+| Mass | `K_Mass` 1 per kg | 1 per kg | reference |
+| Efficiency | `K_Eff` −2 | −2 | 1 % ≈ 20 g |
+| Width | `K_Width` 0.2 per mm of **planet face width** | **0.01 per mm of actuator width** | 1 mm ≈ 10 g |
+| Ratio error | `K_gearRatio` 10 or 1 per unit, absolute | **1 × \|ratio − requested\| / requested**, all types, from `cost.json` | 1 % ≈ 10 g |
+| Torque shortfall | 10 | 10 | 1 % ≈ 100 g |
+
+What-if (SSPG, U8_Lite and MN8014, 4–7:1, cost function patched only):
+- 3dp: 5 of 10 designs change, 34–67 g lighter (e.g. MN8014 4:1 757 → 690 g, 4 → 3 planets);
+  planets get wider (MN8014 6:1 12.5 → 16.3 mm) but the actuator width moves only −0.7 to +0.8 mm;
+  ratios up to 0.8 % off (5.03, 4.96).
+- Metal: 4–6:1 unchanged (planet width set by the bearing); 6.5:1 goes back to the 6.48 set
+  (815 → 749 g U8_Lite, 979 → 913 g MN8014); 7:1 takes 25/62/149 m0.5 (ratio 6.96, efficiency
+  0.946 → 0.959).
+
+To decide then: the same weights for 3dp (changes the 3dp golden cases and the map: a new map
+version) or metal only. Also align the map's second score (`K_Width_real` 0.05 per mm).
 
 ### Unify per-gearbox settings (important — most items change results)
 

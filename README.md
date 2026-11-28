@@ -56,7 +56,8 @@ The terminal shows the chosen design (teeth, module, planets, ratio). Two files 
   width, cost and the mass of every part (`..._metal.csv` in metal mode);
 - `CADs/<TYPE>/<gb_type>_equations*.txt` — the parameters for the CAD model (variants such as
   `incpg_dependent` write into their family's folder, `CADs/INCPG/`). Every run overwrites
-  these; `git checkout -- CADs` restores the committed versions.
+  these; `git checkout -- CADs` restores the committed versions. Metal runs write only the
+  results file (there is no metal CAD model; see [Material modes](#material-modes)).
 
 ## Gearbox types
 
@@ -106,6 +107,9 @@ To add a motor, see [docs/motors.md](docs/motors.md).
 
 Metal mode still uses the 3D-printed part shapes and wall thicknesses, so metal designs come out
 narrower but heavier than they would with metal-specific walls (follow-up in [ISSUES.md](ISSUES.md)).
+Metal mode gives numbers only (mass, sizes, efficiency): it writes no CAD files and `--onshape` is
+3dp only. A gearbox's params file can hold metal-only values in `<gb_type>_metal_design_parameters`
+and `<gb_type>_metal_optimization_parameters`; they override the 3D-printed values in metal mode.
 
 ## CAD models
 

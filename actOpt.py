@@ -84,6 +84,8 @@ if __name__ == "__main__":
                              "(set up Onshape_extension/onshape_models.json and .env first)")
 
     args = parser.parse_args()
+    if args.onshape and not gearbox_runner.WRITES_REPO_CAD[args.material]:
+        parser.error(f"--onshape: {args.material} designs have no CAD model (only 3dp)")
 
     opt_parameters = main(args.motor, args.gb_type, args.gr, args.material)
     if args.onshape:

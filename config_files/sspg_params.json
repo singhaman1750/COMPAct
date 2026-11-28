@@ -110,10 +110,30 @@
         "planet_bearing_OD"                                      : 12, 
         "planet_bearing_width"                                   : 3.5,
         "planet_bearing_gap"                                     : 1.0,
+        "planet_bearings_per_planet"                             : 2,
+        "planet_bearing_mass_kg"                                 : 0.001,
+        "planet_min_rim_tooth_heights"                           : null,
+        "ring_min_rim_tooth_heights"                             : null,
         "sun_hub_clearance_multiple"                             : 4,
         "planet_bore"                                            : 10,
         "bearing_retainer_thickness"                             : 2,
         "tight_clearance_3DP"                                    : 0.4,
         "loose_clearance_3DP"                                    : 0.8
+    },
+    "sspg_metal_design_parameters":{
+        "planet_bearings_per_planet"   : 1,
+        "planet_bearing_width"         : 5,
+        "planet_bearing_OD"            : 16,
+        "planet_bearing_mass_kg"       : 0.00402,
+        "planet_shaft_dia"             : 8,
+        "planet_bore"                  : 16,
+        "planet_min_rim_tooth_heights" : 1.2,
+        "clearance_motor_and_case_min" : 2,
+        "sec_carrier_thickness"        : 3,
+        "sun_coupler_hub_thickness"    : 3,
+        "Motor_case_thickness"         : 2,
+        "base_plate_thickness"         : 2.5,
+        "ringRadialWidthMM"            : 3,
+        "ring_min_rim_tooth_heights"   : 1.2
     }
 }

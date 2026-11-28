@@ -9,13 +9,16 @@ The specs keep every existing difference between types on purpose, so results ar
 see ISSUES.md "Unify per-gearbox settings" for the ones to unify later.
 """
 
+import contextlib
 import importlib
 import json
 import os
+import shutil
+import tempfile
 from dataclasses import dataclass, field
 from typing import Callable, Optional
 
-from CommonComponents import load_motor, max_gearbox_dia_mult_factor
+from CommonComponents import CAD_DIR_ENV, load_motor, max_gearbox_dia_mult_factor
 
 CONFIG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config_files")
 MATERIALS_FILE = "config.json"   # Material_properties for every gearbox type
@@ -30,6 +33,12 @@ MATERIAL_MODES = {
 }
 # Added to the results file names, so metal runs don't overwrite 3dp results.
 RESULTS_SUFFIX = {"3dp": "", "metal": "_metal"}
+# Whether run() may write CAD equation files into the repo's CADs/ folder. Metal has no CAD model
+# (its values aren't drawn in the 3D-printed models), so its files go to a temporary folder.
+WRITES_REPO_CAD = {"3dp": True, "metal": False}
+# Metal-only sections of a gearbox's params file; each overrides keys of the 3D-printed values.
+METAL_DESIGN_KEY = "{gb_type}_metal_design_parameters"
+METAL_OPTIMIZATION_KEY = "{gb_type}_metal_optimization_parameters"
 
 # Optimiser keyword -> key in the gearbox's optimisation parameters, per optimiser kind.
 OPTIMIZER_LIMITS = {
@@ -213,8 +222,19 @@ def _load_json(name):
         return json.load(json_file)
 
 
+def _override(values, params, key, params_file):
+    """`values` updated with params[key] (if present); every key must already be in `values`."""
+    overrides = params.get(key, {})
+    unknown = sorted(set(overrides) - set(values))
+    if unknown:
+        raise ValueError(f"{params_file} {key}: unknown keys {', '.join(unknown)}")
+    return {**values, **overrides}
+
+
 def build(gb_type, motor_name, material="3dp"):
-    """Return (actuator, optimizer) for a gearbox type, motor and material mode."""
+    """Return (actuator, optimizer) for a gearbox type, motor and material mode. In metal mode the
+    params file's metal sections (METAL_DESIGN_KEY, METAL_OPTIMIZATION_KEY) override the 3D-printed
+    values."""
     if gb_type not in GEARBOXES:
         raise ValueError(f"Unknown gearbox type: {gb_type}. Known types: {', '.join(GEARBOXES)}")
     if material not in MATERIAL_MODES:
@@ -228,6 +248,9 @@ def build(gb_type, motor_name, material="3dp"):
     gains = _load_json(COST_FILE)["Cost_gain_parameters"]   # one set of gains for every type
     design["K_torque_shortfall"] = gains["K_torque_shortfall"]  # read by ISSPG, ICPG, INWPG
     opt       = params[spec.optimization_key]
+    if material == "metal":
+        design = _override(design, params, METAL_DESIGN_KEY.format(gb_type=gb_type), spec.params_file)
+        opt    = _override(opt, params, METAL_OPTIMIZATION_KEY.format(gb_type=gb_type), spec.params_file)
     materials = _load_json(MATERIALS_FILE)["Material_properties"]   # one table for every type
     gear_material, structure_material = (materials[name] for name in MATERIAL_MODES[material])
     gear_std  = config["Gear_standard_parameters"]
@@ -275,11 +298,29 @@ def build(gb_type, motor_name, material="3dp"):
 
 def run(gb_type, motor_name, gear_ratio, material="3dp"):
     """Optimise gearbox type `gb_type` for `motor_name` in a material mode ("3dp" or "metal");
-    returns (total_time, opt_parameters)."""
+    returns (total_time, opt_parameters). Metal runs write their CAD equation files into a
+    temporary folder (deleted afterwards) unless $COMPACT_CAD_DIR names one, never into CADs/."""
     actuator, optimizer = build(gb_type, motor_name, material)
-    return optimizer.optimizeActuator(actuator,
-                                      UsePSCasVariable = 0,
-                                      log              = 0,
-                                      csv              = 1,
-                                      printOptParams   = 1,
-                                      gearRatioReq     = gear_ratio)
+    with _cad_dir_for(material):
+        return optimizer.optimizeActuator(actuator,
+                                          UsePSCasVariable = 0,
+                                          log              = 0,
+                                          csv              = 1,
+                                          printOptParams   = 1,
+                                          gearRatioReq     = gear_ratio)
+
+
+@contextlib.contextmanager
+def _cad_dir_for(material):
+    """Points $COMPACT_CAD_DIR at a temporary folder while a material that must not write into
+    CADs/ runs, unless it already points somewhere."""
+    if WRITES_REPO_CAD[material] or os.environ.get(CAD_DIR_ENV):
+        yield
+        return
+    tmp = tempfile.mkdtemp(prefix="compact_metal_cad_")
+    os.environ[CAD_DIR_ENV] = tmp
+    try:
+        yield
+    finally:
+        os.environ.pop(CAD_DIR_ENV, None)
+        shutil.rmtree(tmp, ignore_errors=True)

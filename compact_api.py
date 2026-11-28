@@ -62,6 +62,7 @@ def final_design(motor, ratio, material="3dp", gb_type=None, cad_dir=None, amap=
     gb_type: the type the map chose (Actuator.gb_type); if None, the map's best type at `ratio`
              (`amap`, default the latest released map)
     cad_dir: if given, the CAD equation files are written there, as <cad_dir>/<FAMILY>/...
+             (3dp only: metal has no CAD model, so nothing is written and cad_note says so)
 
     Returns a dict: the map table's columns for this design (gb_type, the real ratio, mass_kg,
     width_*_m, dia_*_m, efficiency, torque_carried_fraction, output torques and speeds, inertias,
@@ -70,15 +71,20 @@ def final_design(motor, ratio, material="3dp", gb_type=None, cad_dir=None, amap=
         face_widths_mm  every face-width CAD variable (fw_*)
         cad_vars        every CAD variable, as in the Onshape equations file
         opt_parameters  the optimiser's own parameter list
-        cad_files       the files written to cad_dir ([] without cad_dir)
+        cad_files       the files written to cad_dir ([] without cad_dir, or for metal)
+        cad_note        why no CAD files were written (metal only)
         seconds         run time
     Raises ValueError when the optimiser finds no design.
     """
     from tools.actuator_map.case import run_case
     from tools.actuator_map.sweep import git_commit
+    from gearbox_runner import WRITES_REPO_CAD
 
     if gb_type is None:
         gb_type = (amap or ActuatorMap()).actuator(motor, ratio, material).gb_type
+    cad_note = None
+    if not WRITES_REPO_CAD.get(material, True):  # an unknown material fails in the run below
+        cad_note, cad_dir = f"{material} designs have no CAD model: no CAD files written", None
     if cad_dir is not None:
         cad_dir = Path(cad_dir).resolve()  # run_case works in a temporary folder
     case = run_case(gb_type, motor, ratio, material, cad_out=cad_dir)
@@ -98,6 +104,8 @@ def final_design(motor, ratio, material="3dp", gb_type=None, cad_dir=None, amap=
         "cad_files": sorted(str(p) for p in Path(cad_dir).rglob("*") if p.is_file()) if cad_dir else [],
         "seconds": case["seconds"],
     })
+    if cad_note:
+        design["cad_note"] = cad_note
     return design
 
 

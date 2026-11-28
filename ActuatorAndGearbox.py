@@ -148,12 +148,38 @@ class singleStagePlanetaryGearbox:
         
         self.sCarrierExtrusionDiaMM       =  design_params["sCarrierExtrusionDiaMM"]       # 8.0 # mm
         self.sCarrierExtrusionClearanceMM =  design_params["sCarrierExtrusionClearanceMM"] # 1.0 # mm
-    
+
+        # Planet rim round its bearing, in tooth heights (2.25 x module); None: not checked.
+        # Only set where the planet holds its bearing (SSPG metal); other users of this class
+        # (INSSPG, DSPG stages) don't have the key.
+        self.planet_min_rim_tooth_heights = design_params.get("planet_min_rim_tooth_heights")
+        self.planet_bearing_OD            = design_params.get("planet_bearing_OD")
+        # Ring rim behind the teeth, in tooth heights; None: fixed ringRadialWidthMM (see getRingWallMM)
+        self.ring_min_rim_tooth_heights   = design_params.get("ring_min_rim_tooth_heights")
+
     #------------------------------------
     # Constraints
     #------------------------------------
     def geometricConstraint(self):
-        return (self.Ns + 2*self.Np == self.Nr) 
+        return (self.Ns + 2*self.Np == self.Nr)
+
+    # The planet's root circle must hold its bearing with a rim of planet_min_rim_tooth_heights
+    # tooth heights (AGMA backup ratio; below about 1.2 the rim bends and the tooth strength drops)
+    def planetHoldsBearingConstraint(self):
+        if self.planet_min_rim_tooth_heights is None:
+            return True
+        planet_root_dia = self.module * (self.Np - 2.5)
+        min_rim         = self.planet_min_rim_tooth_heights * 2.25 * self.module
+        return planet_root_dia >= self.planet_bearing_OD + 2 * min_rim
+
+    # Ring wall from the pitch circle: the dedendum (1.25 x module) plus a rim of
+    # ring_min_rim_tooth_heights tooth heights (AGMA backup ratio), at least ringRadialWidthMM.
+    # None (3dp, DSPG stages): the fixed ringRadialWidthMM.
+    def getRingWallMM(self):
+        if self.ring_min_rim_tooth_heights is None:
+            return self.ringRadialWidthMM
+        min_wall = 1.25 * self.module + self.ring_min_rim_tooth_heights * 2.25 * self.module
+        return max(self.ringRadialWidthMM, min_wall)
     
     def meshingConstraint(self):
         return ((self.Ns + self.Nr) % self.numPlanet == 0)
@@ -499,7 +525,7 @@ class singleStagePlanetaryGearbox:
         return (self.Nr * self.module / 2)
     
     def getOuterRadiusRingMM(self):
-        return ((self.Nr * self.module / 2) + self.ringRadialWidthMM)
+        return ((self.Nr * self.module / 2) + self.getRingWallMM())
     
     def getCarrierRadiusMM(self):
         return (((self.Ns + self.Np + self.Np/2)/2)*self.module)
@@ -517,7 +543,7 @@ class singleStagePlanetaryGearbox:
         return ((self.Nr * self.module / 2)/1000.0)
     
     def getOuterRadiusRingM(self):
-        return (((self.Nr * self.module / 2)/1000.0) + self.ringRadialWidthM)
+        return (((self.Nr * self.module / 2)/1000.0) + self.getRingWallMM() / 1000.0)
 
     def getCarrierRadiusM(self):
         return (((self.Ns + self.Np + self.Np/2)/2)*self.module/1000.0)
@@ -2050,6 +2076,15 @@ class singleStagePlanetaryActuator:
         cost = mass - 2 * eff + 0.2 * width
         return cost
 
+    # The ring's outer diameter, with its real wall (getRingWallMM), stays within the motor: the
+    # max-diameter rule (maxGearboxDiameter = motor limit - 2 x ringRadialWidthMM) assumes the
+    # fixed wall. Only checked when the wall grows with the module (SSPG metal).
+    def ringFitsConstraint(self):
+        gb = self.planetaryGearbox
+        if gb.ring_min_rim_tooth_heights is None:
+            return True
+        return gb.Nr * gb.module + 2 * gb.getRingWallMM() <= self.maxGearboxDiameter + 2 * gb.ringRadialWidthMM
+
     def setVariables(self):
         #------------------------------------------------------
         # Optimization Variables
@@ -2138,6 +2173,8 @@ class singleStagePlanetaryActuator:
         self.planet_bearing_OD        = self.design_params["planet_bearing_OD"] # 12 
         self.planet_bearing_width     = self.design_params["planet_bearing_width"] # 3.5
         self.planet_bearing_gap       = self.design_params["planet_bearing_gap"] # 1.0
+        self.planet_bearings_per_planet = self.design_params["planet_bearings_per_planet"] # 2
+        self.planet_bearing_mass_kg   = self.design_params["planet_bearing_mass_kg"] # 0.001
         self.sun_hub_clearance_multiple = self.design_params["sun_hub_clearance_multiple"] # 4
         self.planet_bore              = self.design_params["planet_bore"] # 10
 
@@ -2197,7 +2234,7 @@ class singleStagePlanetaryActuator:
         self.fw_r    = self.planetaryGearbox.fwRingMM
         self.alpha_r = (np.sqrt(self.dp_r**2 - self.db_r**2) / self.db_r) * 180 / np.pi - self.pressure_angle * 180 / np.pi 
         self.beta_r  = (360 / (4 * self.Nr) + self.alpha_r) * 2
-        self.ring_radial_thickness = self.ringRadialWidthMM
+        self.ring_radial_thickness = self.planetaryGearbox.getRingWallMM()
 
         self.ring_OD = self.dp_r + 2 * self.ring_radial_thickness
 
@@ -2966,8 +3003,10 @@ class singleStagePlanetaryActuator:
 
 
         #------------- Contraint in planet to accomodate its bearings------------------------------------------
-        if (bMin_planet_mit * 1000 < (self.planet_bearing_width*2 + self.planet_bearing_gap)) : 
-            bMin_planet_mit = (self.planet_bearing_width*2 + self.planet_bearing_gap) / 1000
+        n_bearings = self.planet_bearings_per_planet
+        planet_bearings_width = n_bearings * self.planet_bearing_width + (n_bearings - 1) * self.planet_bearing_gap
+        if (bMin_planet_mit * 1000 < planet_bearings_width) :
+            bMin_planet_mit = planet_bearings_width / 1000
             bMin_ring_mit = bMin_planet_mit # FT on both are same
 
         bMin_sun_mitMM    = bMin_sun_mit    * 1000
@@ -3191,7 +3230,7 @@ class singleStagePlanetaryActuator:
         #--------------------------------------
         # Mass: sspg_motor_casing
         #--------------------------------------
-        ring_radial_thickness = self.ringRadialWidthMM
+        ring_radial_thickness = self.planetaryGearbox.getRingWallMM()
 
         ring_OD  = Nr * module + ring_radial_thickness*2
         motor_OD = self.motorDiaMM
@@ -3321,8 +3360,8 @@ class singleStagePlanetaryActuator:
         #--------------------------------------
         # Mass: sspg_planet_bearing
         #--------------------------------------
-        planet_bearing_mass          = 1 * 0.001 # kg
-        planet_bearing_num           = numPlanet * 2
+        planet_bearing_mass          = self.planet_bearing_mass_kg # kg
+        planet_bearing_num           = numPlanet * self.planet_bearings_per_planet
         planet_bearing_combined_mass = planet_bearing_mass * planet_bearing_num
 
         #--------------------------------------
@@ -9497,7 +9536,9 @@ class optimizationSingleStageActuator:
                                     self.cntrBeforeCons += 1
                                     if (Actuator.planetaryGearbox.geometricConstraint() and 
                                         Actuator.planetaryGearbox.meshingConstraint() and 
-                                        Actuator.planetaryGearbox.noPlanetInterferenceConstraint()):
+                                        Actuator.planetaryGearbox.noPlanetInterferenceConstraint() and
+                                        Actuator.planetaryGearbox.planetHoldsBearingConstraint() and
+                                        Actuator.ringFitsConstraint()):
 
                                         self.totalFeasibleGearboxes += 1
                                         if ((Actuator.planetaryGearbox.gearRatio() >= self.gearRatioIter) and
@@ -9634,7 +9675,9 @@ class optimizationSingleStageActuator:
                                         self.cntrBeforeCons += 1
                                         if (Actuator.planetaryGearbox.geometricConstraint() and 
                                             Actuator.planetaryGearbox.meshingConstraint() and 
-                                            Actuator.planetaryGearbox.noPlanetInterferenceConstraint()):
+                                            Actuator.planetaryGearbox.noPlanetInterferenceConstraint() and
+                                            Actuator.planetaryGearbox.planetHoldsBearingConstraint() and
+                                            Actuator.ringFitsConstraint()):
 
                                             self.totalFeasibleGearboxes += 1
                                             if (Actuator.planetaryGearbox.gearRatio() >= self.gearRatioIter):

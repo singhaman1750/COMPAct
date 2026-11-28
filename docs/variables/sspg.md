@@ -23,9 +23,9 @@ Confidence:
 |---|---|---|
 | Input | 18 | 2 |
 | Optimisation | 4 | 0 |
-| Fixed | 43 | 24 |
-| Dependent | 48 | 3 |
-| **Total** | **113** | **29** |
+| Fixed | 42 | 28 |
+| Dependent | 49 | 3 |
+| **Total** | **113** | **33** |
 
 CAD variables by confidence: high 113, medium 0, low 0
 
@@ -69,55 +69,54 @@ From `config_files/variables/rules.json`; the test holds every gearbox's file to
 | 3 | `module` | module | optimiser (`optimizationSingleStageActuator`) |  | high | searched by the optimiser loop (MODULE_MIN..MODULE_MAX, step 0.1) |
 | 4 | `num_planet` | planets | optimiser (`optimizationSingleStageActuator`) |  | high | searched by the optimiser loop (NUM_PLANET_MIN..MAX) |
 
-## Fixed (43)
+## Fixed (42)
 
 | # | Variable | Sub-type | Source / formula | Depends on | Confidence | Why |
 |---|---|---|---|---|---|---|
 | 1 | `pressure_angle` | gear standard | config.json → Gear_standard_parameters → `pressureAngleDEG` |  | high | gear standard, the same for every gearbox type |
 | 2 | `planet_bore` | planet part | sspg_params.json → sspg_3DP_design_parameters → `planet_bore` |  | high | constant planet bore from the SSPG 3DP design parameters |
 | 3 | `clearance_planet` | clearance | sspg_params.json → sspg_3DP_design_parameters → `clearance_planet` |  | high | constant from the SSPG 3DP design parameters |
-| 4 | `sec_carrier_thickness` | wall thickness | sspg_params.json → sspg_3DP_design_parameters → `sec_carrier_thickness` |  | high | constant from the SSPG 3DP design parameters |
-| 5 | `sun_coupler_hub_thickness` | wall thickness | sspg_params.json → sspg_3DP_design_parameters → `sun_coupler_hub_thickness` |  | high | constant from the SSPG 3DP design parameters |
+| 4 | `sec_carrier_thickness` | wall thickness | sspg_params.json → sspg_3DP_design_parameters → `sec_carrier_thickness` |  | high | secondary carrier plate (3dp 5 mm; metal 3 mm: aluminium, planet pin load about 290-490 N); sets case_dist, the sun length and the actuator width |
+| 5 | `sun_coupler_hub_thickness` | wall thickness | sspg_params.json → sspg_3DP_design_parameters → `sun_coupler_hub_thickness` |  | high | sun hub that bolts to the motor (3dp 4 mm; metal 3 mm: steel, motor torque on 4 M4 screws); sets case_dist and the actuator width |
 | 6 | `clearance_sun_coupler_sec_carrier` | clearance | sspg_params.json → sspg_3DP_design_parameters → `clearance_sun_coupler_sec_carrier` |  | high | constant from the SSPG 3DP design parameters |
 | 7 | `case_mounting_surface_height` | wall thickness | sspg_params.json → sspg_3DP_design_parameters → `case_mounting_surface_height` |  | high | constant from the SSPG 3DP design parameters |
-| 8 | `Motor_case_thickness` | wall thickness | sspg_params.json → sspg_3DP_design_parameters → `Motor_case_thickness` |  | high | constant from the SSPG 3DP design parameters |
+| 8 | `Motor_case_thickness` | wall thickness | sspg_params.json → sspg_3DP_design_parameters → `Motor_case_thickness` |  | high | motor case wall (3dp 2.5 mm; metal 2 mm: machined aluminium tube, output torque about 1 MPa shear); sets the case diameter and mass |
 | 9 | `case_mounting_hole_dia` | fastener size | sspg_params.json → sspg_3DP_design_parameters → `case_mounting_hole_dia` |  | high | constant from the SSPG 3DP design parameters |
 | 10 | `clearance_case_mount_holes_shell_thickness` | clearance | sspg_params.json → sspg_3DP_design_parameters → `clearance_case_mount_holes_shell_thickness` |  | high | constant from the SSPG 3DP design parameters |
-| 11 | `base_plate_thickness` | wall thickness | sspg_params.json → sspg_3DP_design_parameters → `base_plate_thickness` |  | high | constant from the SSPG 3DP design parameters |
+| 11 | `base_plate_thickness` | wall thickness | sspg_params.json → sspg_3DP_design_parameters → `base_plate_thickness` |  | high | motor case end plate the motor bolts to (3dp 4 mm; metal 2.5 mm: aluminium, M3 driver holes tapped, 5 threads); sets the actuator width and case mass |
 | 12 | `output_mounting_nut_depth` | fastener size | sspg_params.json → sspg_3DP_design_parameters → `output_mounting_nut_depth` |  | high | constant from the SSPG 3DP design parameters |
 | 13 | `output_mounting_hole_dia` | fastener size | sspg_params.json → sspg_3DP_design_parameters → `output_mounting_hole_dia` |  | high | constant from the SSPG 3DP design parameters |
 | 14 | `case_mounting_bolt_depth` | fastener size | sspg_params.json → sspg_3DP_design_parameters → `case_mounting_bolt_depth` |  | high | constant from the SSPG 3DP design parameters |
 | 15 | `case_mounting_nut_clearance` | clearance | sspg_params.json → sspg_3DP_design_parameters → `case_mounting_nut_clearance` |  | high | constant from the SSPG 3DP design parameters |
 | 16 | `central_hole_offset_from_motor_mount_PCD` | feature size | sspg_params.json → sspg_3DP_design_parameters → `central_hole_offset_from_motor_mount_PCD` |  | high | constant from the SSPG 3DP design parameters |
 | 17 | `air_flow_hole_offset` | feature size | sspg_params.json → sspg_3DP_design_parameters → `air_flow_hole_offset` |  | high | constant from the SSPG 3DP design parameters |
-| 18 | `ring_radial_thickness` | wall thickness | sspg_params.json → sspg_3DP_design_parameters → `ringRadialWidthMM` |  | high | ring gear wall, a copy of ringRadialWidthMM (also used by the gearbox class and the max-diameter rule) |
-| 19 | `ring_to_chamfer_clearance` | clearance | sspg_params.json → sspg_3DP_design_parameters → `ring_to_chamfer_clearance` |  | high | constant from the SSPG 3DP design parameters |
-| 20 | `Motor_case_OD_base_to_chamfer` | feature size | sspg_params.json → sspg_3DP_design_parameters → `Motor_case_OD_base_to_chamfer` |  | high | constant from the SSPG 3DP design parameters |
-| 21 | `pattern_offset_from_motor_case_OD_base` | feature size | sspg_params.json → sspg_3DP_design_parameters → `pattern_offset_from_motor_case_OD_base` |  | high | constant for the decorative/grip pattern on the case |
-| 22 | `pattern_bulge_dia` | feature size | sspg_params.json → sspg_3DP_design_parameters → `pattern_bulge_dia` |  | high | constant for the decorative/grip pattern on the case |
-| 23 | `pattern_num_bulge` | feature size | sspg_params.json → sspg_3DP_design_parameters → `pattern_num_bulge` |  | high | constant for the decorative/grip pattern on the case |
-| 24 | `pattern_depth` | feature size | sspg_params.json → sspg_3DP_design_parameters → `pattern_depth` |  | high | constant for the decorative/grip pattern on the case |
-| 25 | `planet_pin_bolt_dia` | fastener size | sspg_params.json → sspg_3DP_design_parameters → `planet_pin_bolt_dia` |  | high | constant from the SSPG 3DP design parameters |
-| 26 | `planet_shaft_dia` | planet part | sspg_params.json → sspg_3DP_design_parameters → `planet_shaft_dia` |  | high | constant from the SSPG 3DP design parameters |
-| 27 | `planet_shaft_step_offset` | planet part | sspg_params.json → sspg_3DP_design_parameters → `planet_shaft_step_offset` |  | high | constant from the SSPG 3DP design parameters |
-| 28 | `planet_bearing_OD` | bearing (chosen part) | sspg_params.json → sspg_3DP_design_parameters → `planet_bearing_OD` |  | high | constant from the SSPG 3DP design parameters |
-| 29 | `planet_bearing_width` | bearing (chosen part) | sspg_params.json → sspg_3DP_design_parameters → `planet_bearing_width` |  | high | constant from the SSPG 3DP design parameters |
-| 30 | `carrier_trapezoidal_support_sun_offset` | feature size | sspg_params.json → sspg_3DP_design_parameters → `carrier_trapezoidal_support_sun_offset` |  | high | constant from the SSPG 3DP design parameters |
-| 31 | `carrier_trapezoidal_support_hole_PCD_offset_bearing_ID` | feature size | sspg_params.json → sspg_3DP_design_parameters → `carrier_trapezoidal_support_hole_PCD_offset_bearing_ID` |  | high | constant from the SSPG 3DP design parameters |
-| 32 | `carrier_trapezoidal_support_hole_dia` | fastener size | sspg_params.json → sspg_3DP_design_parameters → `carrier_trapezoidal_support_hole_dia` |  | high | constant from the SSPG 3DP design parameters |
-| 33 | `carrier_bearing_step_width` | feature size | sspg_params.json → sspg_3DP_design_parameters → `carrier_bearing_step_width` |  | high | constant from the SSPG 3DP design parameters |
-| 34 | `standard_clearance_1_5mm` | clearance | sspg_params.json → sspg_3DP_design_parameters → `standard_clearance_1_5mm` |  | high | constant from the SSPG 3DP design parameters |
-| 35 | `standard_fillet_1_5mm` | feature size | sspg_params.json → sspg_3DP_design_parameters → `standard_fillet_1_5mm` |  | high | constant from the SSPG 3DP design parameters |
-| 36 | `sun_shaft_bearing_OD` | bearing (chosen part) | sspg_params.json → sspg_3DP_design_parameters → `sun_shaft_bearing_OD` |  | high | constant from the SSPG 3DP design parameters |
-| 37 | `sun_shaft_bearing_width` | bearing (chosen part) | sspg_params.json → sspg_3DP_design_parameters → `sun_shaft_bearing_width` |  | high | constant from the SSPG 3DP design parameters |
-| 38 | `sun_shaft_bearing_ID` | bearing (chosen part) | sspg_params.json → sspg_3DP_design_parameters → `sun_shaft_bearing_ID` |  | high | constant from the SSPG 3DP design parameters |
-| 39 | `standard_bearing_insertion_chamfer` | feature size | sspg_params.json → sspg_3DP_design_parameters → `standard_bearing_insertion_chamfer` |  | high | constant from the SSPG 3DP design parameters |
-| 40 | `sun_central_bolt_dia` | fastener size | sspg_params.json → sspg_3DP_design_parameters → `sun_central_bolt_dia` |  | high | constant from the SSPG 3DP design parameters |
-| 41 | `bearing_retainer_thickness` | wall thickness | sspg_params.json → sspg_3DP_design_parameters → `bearing_retainer_thickness` |  | high | constant from the SSPG 3DP design parameters |
-| 42 | `tight_clearance_3DP` | clearance | sspg_params.json → sspg_3DP_design_parameters → `tight_clearance_3DP` |  | high | 3D-printing fit clearance from the SSPG 3DP design parameters |
-| 43 | `loose_clearance_3DP` | clearance | sspg_params.json → sspg_3DP_design_parameters → `loose_clearance_3DP` |  | high | 3D-printing fit clearance from the SSPG 3DP design parameters |
+| 18 | `ring_to_chamfer_clearance` | clearance | sspg_params.json → sspg_3DP_design_parameters → `ring_to_chamfer_clearance` |  | high | constant from the SSPG 3DP design parameters |
+| 19 | `Motor_case_OD_base_to_chamfer` | feature size | sspg_params.json → sspg_3DP_design_parameters → `Motor_case_OD_base_to_chamfer` |  | high | constant from the SSPG 3DP design parameters |
+| 20 | `pattern_offset_from_motor_case_OD_base` | feature size | sspg_params.json → sspg_3DP_design_parameters → `pattern_offset_from_motor_case_OD_base` |  | high | constant for the decorative/grip pattern on the case |
+| 21 | `pattern_bulge_dia` | feature size | sspg_params.json → sspg_3DP_design_parameters → `pattern_bulge_dia` |  | high | constant for the decorative/grip pattern on the case |
+| 22 | `pattern_num_bulge` | feature size | sspg_params.json → sspg_3DP_design_parameters → `pattern_num_bulge` |  | high | constant for the decorative/grip pattern on the case |
+| 23 | `pattern_depth` | feature size | sspg_params.json → sspg_3DP_design_parameters → `pattern_depth` |  | high | constant for the decorative/grip pattern on the case |
+| 24 | `planet_pin_bolt_dia` | fastener size | sspg_params.json → sspg_3DP_design_parameters → `planet_pin_bolt_dia` |  | high | constant from the SSPG 3DP design parameters |
+| 25 | `planet_shaft_dia` | planet part | sspg_params.json → sspg_3DP_design_parameters → `planet_shaft_dia` |  | high | constant from the SSPG 3DP design parameters |
+| 26 | `planet_shaft_step_offset` | planet part | sspg_params.json → sspg_3DP_design_parameters → `planet_shaft_step_offset` |  | high | constant from the SSPG 3DP design parameters |
+| 27 | `planet_bearing_OD` | bearing (chosen part) | sspg_params.json → sspg_3DP_design_parameters → `planet_bearing_OD` |  | high | constant from the SSPG 3DP design parameters |
+| 28 | `planet_bearing_width` | bearing (chosen part) | sspg_params.json → sspg_3DP_design_parameters → `planet_bearing_width` |  | high | constant from the SSPG 3DP design parameters |
+| 29 | `carrier_trapezoidal_support_sun_offset` | feature size | sspg_params.json → sspg_3DP_design_parameters → `carrier_trapezoidal_support_sun_offset` |  | high | constant from the SSPG 3DP design parameters |
+| 30 | `carrier_trapezoidal_support_hole_PCD_offset_bearing_ID` | feature size | sspg_params.json → sspg_3DP_design_parameters → `carrier_trapezoidal_support_hole_PCD_offset_bearing_ID` |  | high | constant from the SSPG 3DP design parameters |
+| 31 | `carrier_trapezoidal_support_hole_dia` | fastener size | sspg_params.json → sspg_3DP_design_parameters → `carrier_trapezoidal_support_hole_dia` |  | high | constant from the SSPG 3DP design parameters |
+| 32 | `carrier_bearing_step_width` | feature size | sspg_params.json → sspg_3DP_design_parameters → `carrier_bearing_step_width` |  | high | constant from the SSPG 3DP design parameters |
+| 33 | `standard_clearance_1_5mm` | clearance | sspg_params.json → sspg_3DP_design_parameters → `standard_clearance_1_5mm` |  | high | constant from the SSPG 3DP design parameters |
+| 34 | `standard_fillet_1_5mm` | feature size | sspg_params.json → sspg_3DP_design_parameters → `standard_fillet_1_5mm` |  | high | constant from the SSPG 3DP design parameters |
+| 35 | `sun_shaft_bearing_OD` | bearing (chosen part) | sspg_params.json → sspg_3DP_design_parameters → `sun_shaft_bearing_OD` |  | high | constant from the SSPG 3DP design parameters |
+| 36 | `sun_shaft_bearing_width` | bearing (chosen part) | sspg_params.json → sspg_3DP_design_parameters → `sun_shaft_bearing_width` |  | high | constant from the SSPG 3DP design parameters |
+| 37 | `sun_shaft_bearing_ID` | bearing (chosen part) | sspg_params.json → sspg_3DP_design_parameters → `sun_shaft_bearing_ID` |  | high | constant from the SSPG 3DP design parameters |
+| 38 | `standard_bearing_insertion_chamfer` | feature size | sspg_params.json → sspg_3DP_design_parameters → `standard_bearing_insertion_chamfer` |  | high | constant from the SSPG 3DP design parameters |
+| 39 | `sun_central_bolt_dia` | fastener size | sspg_params.json → sspg_3DP_design_parameters → `sun_central_bolt_dia` |  | high | constant from the SSPG 3DP design parameters |
+| 40 | `bearing_retainer_thickness` | wall thickness | sspg_params.json → sspg_3DP_design_parameters → `bearing_retainer_thickness` |  | high | constant from the SSPG 3DP design parameters |
+| 41 | `tight_clearance_3DP` | clearance | sspg_params.json → sspg_3DP_design_parameters → `tight_clearance_3DP` |  | high | 3D-printing fit clearance from the SSPG 3DP design parameters |
+| 42 | `loose_clearance_3DP` | clearance | sspg_params.json → sspg_3DP_design_parameters → `loose_clearance_3DP` |  | high | 3D-printing fit clearance from the SSPG 3DP design parameters |
 
-## Dependent (48)
+## Dependent (49)
 
 | # | Variable | Sub-type | Source / formula | Depends on | Confidence | Why |
 |---|---|---|---|---|---|---|
@@ -143,12 +142,12 @@ From `config_files/variables/rules.json`; the test holds every gearbox's file to
 | 20 | `beta_s` | formula | `(360 / (4 * Ns) - alpha_s) * 2` | Ns, alpha_s | high | tooth angle used to draw the tooth |
 | 21 | `dp_p` | formula | `module * Np` | module, Np | high | pitch diameter |
 | 22 | `db_p` | formula | `dp_p * cos(pressure_angle_rad)` | dp_p, pressure_angle_rad | high | base-circle diameter |
-| 23 | `fw_p` | stress rule | b = FOS x Ft x qe x qk / (gear_allowable_stress x module), with Ft = serviceFactor x motor_peak_torque / (num_planet x sun pitch radius), qe = 1 / sun-planet contact ratio, qk = curve fit in Ns (mitStressAnalysisMinFacewidth); fw = max(b, 2 x planet_bearing_width + planet_bearing_gap) | module, Ns, Np, Nr, num_planet, pressure_angle, motor_peak_torque, gear_allowable_stress, FOS, serviceFactor, planet_bearing_width, planet_bearing_gap | high | planet face width from the tooth-stress rule, at least room for the two planet bearings: fixed by the optimisation variables, the motor torque, the gear material and the safety factors |
+| 23 | `fw_p` | stress rule | b = FOS x Ft x qe x qk / (gear_allowable_stress x module), with Ft = serviceFactor x motor_peak_torque / (num_planet x sun pitch radius), qe = 1 / sun-planet contact ratio, qk = curve fit in Ns (mitStressAnalysisMinFacewidth); fw = max(b, planet_bearings_per_planet x planet_bearing_width + (planet_bearings_per_planet - 1) x planet_bearing_gap) | module, Ns, Np, Nr, num_planet, pressure_angle, motor_peak_torque, gear_allowable_stress, FOS, serviceFactor, planet_bearings_per_planet, planet_bearing_width, planet_bearing_gap | high | planet face width from the tooth-stress rule, at least room for the two planet bearings: fixed by the optimisation variables, the motor torque, the gear material and the safety factors |
 | 24 | `alpha_p` | formula | `(sqrt(dp_p**2 - db_p**2) / db_p) * 180 / pi - pressure_angle_rad * 180 / pi` | dp_p, db_p, pressure_angle_rad | high | involute angle used to draw the tooth |
 | 25 | `beta_p` | formula | `(360 / (4 * Np) - alpha_p) * 2` | Np, alpha_p | high | tooth angle used to draw the tooth |
 | 26 | `dp_r` | formula | `module * Nr` | module, Nr | high | pitch diameter |
 | 27 | `db_r` | formula | `dp_r * cos(pressure_angle_rad)` | dp_r, pressure_angle_rad | high | base-circle diameter |
-| 28 | `fw_r` | stress rule | b = FOS x Ft x qe x qk / (gear_allowable_stress x module), with Ft = serviceFactor x motor_peak_torque / (num_planet x sun pitch radius), qe = 1 / sun-planet contact ratio, qk = curve fit in Ns (mitStressAnalysisMinFacewidth); fw = max(b, 2 x planet_bearing_width + planet_bearing_gap) | module, Ns, Np, Nr, num_planet, pressure_angle, motor_peak_torque, gear_allowable_stress, FOS, serviceFactor, planet_bearing_width, planet_bearing_gap | high | ring (= planet) face width from the tooth-stress rule, at least room for the two planet bearings: fixed by the optimisation variables, the motor torque, the gear material and the safety factors |
+| 28 | `fw_r` | stress rule | b = FOS x Ft x qe x qk / (gear_allowable_stress x module), with Ft = serviceFactor x motor_peak_torque / (num_planet x sun pitch radius), qe = 1 / sun-planet contact ratio, qk = curve fit in Ns (mitStressAnalysisMinFacewidth); fw = max(b, planet_bearings_per_planet x planet_bearing_width + (planet_bearings_per_planet - 1) x planet_bearing_gap) | module, Ns, Np, Nr, num_planet, pressure_angle, motor_peak_torque, gear_allowable_stress, FOS, serviceFactor, planet_bearings_per_planet, planet_bearing_width, planet_bearing_gap | high | ring (= planet) face width from the tooth-stress rule, at least room for the two planet bearings: fixed by the optimisation variables, the motor torque, the gear material and the safety factors |
 | 29 | `alpha_r` | formula | `(sqrt(dp_r**2 - db_r**2) / db_r) * 180 / pi - pressure_angle_rad * 180 / pi` | dp_r, db_r, pressure_angle_rad | high | involute angle used to draw the tooth |
 | 30 | `beta_r` | formula | `(360 / (4 * Nr) + alpha_r) * 2` | Nr, alpha_r | high | tooth angle used to draw the tooth |
 | 31 | `case_dist` | formula | `sec_carrier_thickness + clearance_planet + sun_coupler_hub_thickness - case_mounting_surface_height` | sec_carrier_thickness, clearance_planet, sun_coupler_hub_thickness, case_mounting_surface_height | high | axial gap between the motor case and the gearbox case |
@@ -161,48 +160,53 @@ From `config_files/variables/rules.json`; the test holds every gearbox's file to
 | 38 | `output_mounting_nut_wrench_size` | lookup | `nuts_and_bolts_dimensions(bolt_dia=output_mounting_hole_dia, bolt_type=socket_head)` → nut_width_across_flats | output_mounting_hole_dia | high | standard socket-head fastener size for the chosen bolt diameter |
 | 39 | `case_mounting_wrench_size` | lookup | `nuts_and_bolts_dimensions(bolt_dia=case_mounting_hole_dia, bolt_type=socket_head)` → nut_width_across_flats | case_mounting_hole_dia | high | standard socket-head fastener size for the chosen bolt diameter |
 | 40 | `case_mounting_nut_thickness` | lookup | `nuts_and_bolts_dimensions(bolt_dia=case_mounting_hole_dia, bolt_type=socket_head)` → nut_thickness | case_mounting_hole_dia | high | standard socket-head fastener size for the chosen bolt diameter |
-| 41 | `ring_OD` | formula | `dp_r + 2 * ring_radial_thickness` | dp_r, ring_radial_thickness | high | ring gear outer diameter |
-| 42 | `planet_pin_socket_head_dia` | lookup | `nuts_and_bolts_dimensions(bolt_dia=planet_pin_bolt_dia, bolt_type=socket_head)` → bolt_head_dia | planet_pin_bolt_dia | high | standard socket-head fastener size for the chosen bolt diameter |
-| 43 | `planet_pin_bolt_wrench_size` | lookup | `nuts_and_bolts_dimensions(bolt_dia=planet_pin_bolt_dia, bolt_type=socket_head)` → nut_width_across_flats | planet_pin_bolt_dia | high | standard socket-head fastener size for the chosen bolt diameter |
-| 44 | `carrier_trapezoidal_support_hole_socket_head_dia` | lookup | `nuts_and_bolts_dimensions(bolt_dia=carrier_trapezoidal_support_hole_dia, bolt_type=socket_head)` → bolt_head_dia | carrier_trapezoidal_support_hole_dia | high | standard socket-head fastener size for the chosen bolt diameter |
-| 45 | `carrier_trapezoidal_support_hole_wrench_size` | lookup | `nuts_and_bolts_dimensions(bolt_dia=carrier_trapezoidal_support_hole_dia, bolt_type=socket_head)` → nut_width_across_flats | carrier_trapezoidal_support_hole_dia | high | standard socket-head fastener size for the chosen bolt diameter |
-| 46 | `sun_hub_dia` | formula | `motor_output_hole_PCD + motor_output_hole_dia + standard_clearance_1_5mm * sun_hub_clearance_multiple` | motor_output_hole_PCD, motor_output_hole_dia, standard_clearance_1_5mm, sun_hub_clearance_multiple | high | sun coupler hub, sized to the motor's output holes |
-| 47 | `sun_central_bolt_socket_head_dia` | lookup | `nuts_and_bolts_dimensions(bolt_dia=sun_central_bolt_dia, bolt_type=socket_head)` → bolt_head_dia | sun_central_bolt_dia | high | standard socket-head fastener size for the chosen bolt diameter |
-| 48 | `fw_s_used` | formula | `fw_p + clearance_planet + sec_carrier_thickness + standard_clearance_1_5mm` | fw_p, clearance_planet, sec_carrier_thickness, standard_clearance_1_5mm | high | printed sun length: planet width plus the carrier and clearances |
+| 41 | `ring_radial_thickness` | formula | getRingWallMM: ringRadialWidthMM if ring_min_rim_tooth_heights is null (3dp), else max(ringRadialWidthMM, 1.25 x module + ring_min_rim_tooth_heights x 2.25 x module) (metal: the dedendum plus a rim of 1.2 tooth heights, at least 3 mm) | ringRadialWidthMM, ring_min_rim_tooth_heights, module | high | ring gear wall from the pitch circle; also the gearbox class's outer ring radius and the steel ring mass |
+| 42 | `ring_OD` | formula | `dp_r + 2 * ring_radial_thickness` | dp_r, ring_radial_thickness | high | ring gear outer diameter |
+| 43 | `planet_pin_socket_head_dia` | lookup | `nuts_and_bolts_dimensions(bolt_dia=planet_pin_bolt_dia, bolt_type=socket_head)` → bolt_head_dia | planet_pin_bolt_dia | high | standard socket-head fastener size for the chosen bolt diameter |
+| 44 | `planet_pin_bolt_wrench_size` | lookup | `nuts_and_bolts_dimensions(bolt_dia=planet_pin_bolt_dia, bolt_type=socket_head)` → nut_width_across_flats | planet_pin_bolt_dia | high | standard socket-head fastener size for the chosen bolt diameter |
+| 45 | `carrier_trapezoidal_support_hole_socket_head_dia` | lookup | `nuts_and_bolts_dimensions(bolt_dia=carrier_trapezoidal_support_hole_dia, bolt_type=socket_head)` → bolt_head_dia | carrier_trapezoidal_support_hole_dia | high | standard socket-head fastener size for the chosen bolt diameter |
+| 46 | `carrier_trapezoidal_support_hole_wrench_size` | lookup | `nuts_and_bolts_dimensions(bolt_dia=carrier_trapezoidal_support_hole_dia, bolt_type=socket_head)` → nut_width_across_flats | carrier_trapezoidal_support_hole_dia | high | standard socket-head fastener size for the chosen bolt diameter |
+| 47 | `sun_hub_dia` | formula | `motor_output_hole_PCD + motor_output_hole_dia + standard_clearance_1_5mm * sun_hub_clearance_multiple` | motor_output_hole_PCD, motor_output_hole_dia, standard_clearance_1_5mm, sun_hub_clearance_multiple | high | sun coupler hub, sized to the motor's output holes |
+| 48 | `sun_central_bolt_socket_head_dia` | lookup | `nuts_and_bolts_dimensions(bolt_dia=sun_central_bolt_dia, bolt_type=socket_head)` → bolt_head_dia | sun_central_bolt_dia | high | standard socket-head fastener size for the chosen bolt diameter |
+| 49 | `fw_s_used` | formula | `fw_p + clearance_planet + sec_carrier_thickness + standard_clearance_1_5mm` | fw_p, clearance_planet, sec_carrier_thickness, standard_clearance_1_5mm | high | printed sun length: planet width plus the carrier and clearances |
 
-## Used by the code, not written to the CAD file (29)
+## Used by the code, not written to the CAD file (33)
 
 | # | Variable | Sub-type | Source / formula | Depends on | Confidence | Why |
 |---|---|---|---|---|---|---|
-| 1 | `ringRadialWidthMM` | constraint constant | sspg_params.json → sspg_3DP_design_parameters → `ringRadialWidthMM` |  | high | ring wall used by the max-diameter rule; written to the CAD as ring_radial_thickness |
+| 1 | `ringRadialWidthMM` | constraint constant | sspg_params.json → sspg_3DP_design_parameters → `ringRadialWidthMM` |  | high | smallest ring wall from the pitch circle (3dp 5 mm, the ring wall; metal 3 mm, the minimum: machined steel ring); used by the max-diameter rule |
 | 2 | `planetMinDistanceMM` | constraint constant | sspg_params.json → sspg_3DP_design_parameters → `planetMinDistanceMM` |  | high | minimum gap between neighbouring planets (old interference check) |
 | 3 | `sCarrierExtrusionDiaMM` | constraint constant | sspg_params.json → sspg_3DP_design_parameters → `sCarrierExtrusionDiaMM` |  | high | carrier extrusion diameter in the planet-interference constraint |
 | 4 | `sCarrierExtrusionClearanceMM` | constraint constant | sspg_params.json → sspg_3DP_design_parameters → `sCarrierExtrusionClearanceMM` |  | high | clearance in the planet-interference constraint |
 | 5 | `bearingIDClearanceMM` | constraint constant | sspg_params.json → sspg_3DP_design_parameters → `bearingIDClearanceMM` |  | high | extra bore when choosing the output bearing |
-| 6 | `clearance_motor_and_case_min` | constraint constant | sspg_params.json → sspg_3DP_design_parameters → `clearance_motor_and_case_min` |  | high | smallest radial gap between the motor and the case; sets clearance_motor_and_case (CAD) and the case mass |
+| 6 | `clearance_motor_and_case_min` | constraint constant | sspg_params.json → sspg_3DP_design_parameters → `clearance_motor_and_case_min` |  | high | smallest radial gap between the motor and the case (3dp 5 mm; metal 2 mm: machined bore concentric with the motor mount); sets clearance_motor_and_case (CAD) and the case mass |
 | 7 | `case_mounting_hole_wall_overlap` | constraint constant | sspg_params.json → sspg_3DP_design_parameters → `case_mounting_hole_wall_overlap` |  | high | how far the case mounting holes cut into the case wall (0 = the hole just touches the wall); sets case_mounting_hole_shift |
 | 8 | `bearing_mount_wall_bolt_dia_multiple` | constraint constant | sspg_params.json → sspg_3DP_design_parameters → `bearing_mount_wall_bolt_dia_multiple` |  | high | bearing-mount wall per side, in output-bolt diameters; sets bearing_mount_thickness (CAD) and the bearing-holding structure mass |
 | 9 | `planet_bearing_gap` | constraint constant | sspg_params.json → sspg_3DP_design_parameters → `planet_bearing_gap` |  | high | axial gap between the two bearings inside a planet; with them it sets the smallest planet (and ring) face width |
-| 10 | `sun_hub_clearance_multiple` | clearance | sspg_params.json → sspg_3DP_design_parameters → `sun_hub_clearance_multiple` |  | high | margin around the sun hub's bolt circle, in multiples of standard_clearance_1_5mm (4); used for the sun hub (CAD and mass code); one shared key name across the gearbox types |
-| 11 | `pressure_angle_rad` | formula | `pressure_angle * pi / 180` | pressure_angle | high | pressure angle in radians (code attribute pressure_angle) |
-| 12 | `maxGearboxDiameter` | formula | `(MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR if motor_OD < SMALL_MOTOR_DIA_MM else MAX_GB_DIA_MULT_FACTOR) * motor_OD - 2 * ringRadialWidthMM` | MAX_GB_DIA_MULT_FACTOR, MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR, SMALL_MOTOR_DIA_MM, motor_OD, ringRadialWidthMM | high | largest gear diameter the optimiser may use (gearbox_runner max_diameter) |
-| 13 | `actuator_width` | formula | `motor_height + case_mounting_surface_height + standard_clearance_1_5mm + base_plate_thickness + case_dist + bearing_height + standard_clearance_1_5mm + fw_r + clearance_planet + bearing_retainer_thickness` | motor_height, case_mounting_surface_height, standard_clearance_1_5mm, base_plate_thickness, case_dist, bearing_height, fw_r, clearance_planet, bearing_retainer_thickness | high | axial width without the driver mount, written to the results CSV |
-| 14 | `motor_peak_torque` | motor | motors.json → motors.<motor>.electrical → `peak_torque_Nm` |  | high | motor torque the gears are sized for (peak torque under the default rating setting); sets the face widths |
-| 15 | `gear_allowable_stress` | material | config.json → Material_properties.<gear material> → `maxAllowableStressMPa` |  | high | allowable tooth stress of the gear material, chosen with the material mode (3dp: PLA, metal: steel); sets the face widths |
-| 16 | `FOS` | safety factor | config.json → MIT_params → `FOS` |  | high | factor of safety in the tooth-stress rule |
-| 17 | `serviceFactor` | safety factor | config.json → MIT_params → `serviceFactor` |  | high | service factor on the motor torque in the tooth-stress rule |
-| 18 | `GEAR_RATIO_MIN` | search bound | sspg_params.json → sspg_optimization_parameters → `GEAR_RATIO_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 19 | `GEAR_RATIO_MAX` | search bound | sspg_params.json → sspg_optimization_parameters → `GEAR_RATIO_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 20 | `GEAR_RATIO_STEP` | search bound | sspg_params.json → sspg_optimization_parameters → `GEAR_RATIO_STEP` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 21 | `MODULE_MIN` | search bound | sspg_params.json → sspg_optimization_parameters → `MODULE_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 22 | `MODULE_MAX` | search bound | sspg_params.json → sspg_optimization_parameters → `MODULE_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 23 | `NUM_PLANET_MIN` | search bound | sspg_params.json → sspg_optimization_parameters → `NUM_PLANET_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 24 | `NUM_PLANET_MAX` | search bound | sspg_params.json → sspg_optimization_parameters → `NUM_PLANET_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 25 | `NUM_TEETH_SUN_MIN` | search bound | sspg_params.json → sspg_optimization_parameters → `NUM_TEETH_SUN_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 26 | `NUM_TEETH_PLANET_MIN` | search bound | sspg_params.json → sspg_optimization_parameters → `NUM_TEETH_PLANET_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 27 | `MAX_GB_DIA_MULT_FACTOR` | search bound | sspg_params.json → sspg_optimization_parameters → `MAX_GB_DIA_MULT_FACTOR` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 28 | `MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR` | search bound | sspg_params.json → sspg_optimization_parameters → `MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR` |  | high | optimiser setting: limits of the search, not a part dimension |
-| 29 | `SMALL_MOTOR_DIA_MM` | search bound | sspg_params.json → sspg_optimization_parameters → `SMALL_MOTOR_DIA_MM` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 10 | `planet_bearings_per_planet` | constraint constant | sspg_params.json → sspg_3DP_design_parameters → `planet_bearings_per_planet` |  | high | bearings inside each planet (3dp 2, metal 1); sets the smallest planet (and ring) face width and the bearing count in the mass |
+| 11 | `planet_bearing_mass_kg` | bearing (chosen part) | sspg_params.json → sspg_3DP_design_parameters → `planet_bearing_mass_kg` |  | high | mass of one planet bearing (3dp 1 g as before; metal: NSK 688ADD, 4.02 g) |
+| 12 | `planet_min_rim_tooth_heights` | constraint constant | sspg_params.json → sspg_3DP_design_parameters → `planet_min_rim_tooth_heights` |  | high | smallest planet rim round its bearing, in tooth heights (planetHoldsBearingConstraint); null: not checked (3dp), metal 1.2 (AGMA backup ratio) |
+| 13 | `ring_min_rim_tooth_heights` | constraint constant | sspg_params.json → sspg_3DP_design_parameters → `ring_min_rim_tooth_heights` |  | high | smallest ring rim behind the teeth, in tooth heights (getRingWallMM, ringFitsConstraint); null: fixed ring wall (3dp), metal 1.2 (AGMA backup ratio) |
+| 14 | `sun_hub_clearance_multiple` | clearance | sspg_params.json → sspg_3DP_design_parameters → `sun_hub_clearance_multiple` |  | high | margin around the sun hub's bolt circle, in multiples of standard_clearance_1_5mm (4); used for the sun hub (CAD and mass code); one shared key name across the gearbox types |
+| 15 | `pressure_angle_rad` | formula | `pressure_angle * pi / 180` | pressure_angle | high | pressure angle in radians (code attribute pressure_angle) |
+| 16 | `maxGearboxDiameter` | formula | `(MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR if motor_OD < SMALL_MOTOR_DIA_MM else MAX_GB_DIA_MULT_FACTOR) * motor_OD - 2 * ringRadialWidthMM` | MAX_GB_DIA_MULT_FACTOR, MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR, SMALL_MOTOR_DIA_MM, motor_OD, ringRadialWidthMM | high | largest gear diameter the optimiser may use (gearbox_runner max_diameter) |
+| 17 | `actuator_width` | formula | `motor_height + case_mounting_surface_height + standard_clearance_1_5mm + base_plate_thickness + case_dist + bearing_height + standard_clearance_1_5mm + fw_r + clearance_planet + bearing_retainer_thickness` | motor_height, case_mounting_surface_height, standard_clearance_1_5mm, base_plate_thickness, case_dist, bearing_height, fw_r, clearance_planet, bearing_retainer_thickness | high | axial width without the driver mount, written to the results CSV |
+| 18 | `motor_peak_torque` | motor | motors.json → motors.<motor>.electrical → `peak_torque_Nm` |  | high | motor torque the gears are sized for (peak torque under the default rating setting); sets the face widths |
+| 19 | `gear_allowable_stress` | material | config.json → Material_properties.<gear material> → `maxAllowableStressMPa` |  | high | allowable tooth stress of the gear material, chosen with the material mode (3dp: PLA, metal: steel); sets the face widths |
+| 20 | `FOS` | safety factor | config.json → MIT_params → `FOS` |  | high | factor of safety in the tooth-stress rule |
+| 21 | `serviceFactor` | safety factor | config.json → MIT_params → `serviceFactor` |  | high | service factor on the motor torque in the tooth-stress rule |
+| 22 | `GEAR_RATIO_MIN` | search bound | sspg_params.json → sspg_optimization_parameters → `GEAR_RATIO_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 23 | `GEAR_RATIO_MAX` | search bound | sspg_params.json → sspg_optimization_parameters → `GEAR_RATIO_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 24 | `GEAR_RATIO_STEP` | search bound | sspg_params.json → sspg_optimization_parameters → `GEAR_RATIO_STEP` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 25 | `MODULE_MIN` | search bound | sspg_params.json → sspg_optimization_parameters → `MODULE_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 26 | `MODULE_MAX` | search bound | sspg_params.json → sspg_optimization_parameters → `MODULE_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 27 | `NUM_PLANET_MIN` | search bound | sspg_params.json → sspg_optimization_parameters → `NUM_PLANET_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 28 | `NUM_PLANET_MAX` | search bound | sspg_params.json → sspg_optimization_parameters → `NUM_PLANET_MAX` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 29 | `NUM_TEETH_SUN_MIN` | search bound | sspg_params.json → sspg_optimization_parameters → `NUM_TEETH_SUN_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 30 | `NUM_TEETH_PLANET_MIN` | search bound | sspg_params.json → sspg_optimization_parameters → `NUM_TEETH_PLANET_MIN` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 31 | `MAX_GB_DIA_MULT_FACTOR` | search bound | sspg_params.json → sspg_optimization_parameters → `MAX_GB_DIA_MULT_FACTOR` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 32 | `MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR` | search bound | sspg_params.json → sspg_optimization_parameters → `MAX_GB_DIA_MULT_FACTOR_SMALL_MOTOR` |  | high | optimiser setting: limits of the search, not a part dimension |
+| 33 | `SMALL_MOTOR_DIA_MM` | search bound | sspg_params.json → sspg_optimization_parameters → `SMALL_MOTOR_DIA_MM` |  | high | optimiser setting: limits of the search, not a part dimension |
 
 ## Config blocks SSPG doesn't read
 

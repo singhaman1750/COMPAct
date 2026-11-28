@@ -126,7 +126,9 @@ def test_every_config_key_is_accounted_for(gb):
     used = {(s["block"], s["key"]) for e in cad + code
             for s in (e.get("source", {}), e.get("otherwise", {})) if s.get("file") == pfile}
     unused = {b["block"] for b in SPECS[gb]["unused_config_blocks"]}
-    assert set(params) == unused | {b for b, _ in used}
+    metal = {gearbox_runner.METAL_DESIGN_KEY.format(gb_type=gb), gearbox_runner.METAL_OPTIMIZATION_KEY.format(gb_type=gb)}
+    assert set(params) - metal == unused | {b for b, _ in used}   # metal sections: override keys only (build() checks them)
+    params = {b: keys for b, keys in params.items() if b not in metal}
     for block, keys in params.items():
         if block not in unused:
             assert {(block, k) for k in keys} <= used, sorted(set(keys) - {k for b, k in used if b == block})
@@ -166,6 +168,13 @@ def test_attr_matches_the_file(design):
         assert getattr(actuator, e["attr"]) == pytest.approx(float(v), rel=1e-9), name
 
 
+def metal_section(gb, params, block):
+    """The metal section that overrides `block` of a params file ({} if there is none)."""
+    spec = gearbox_runner.GEARBOXES[gb]
+    key = gearbox_runner.METAL_OPTIMIZATION_KEY if block == spec.optimization_key else gearbox_runner.METAL_DESIGN_KEY
+    return params.get(key.format(gb_type=gb), {})
+
+
 def test_sources_give_the_values(design):
     gb, _, actuator, _, _, onshape = design
     cad, code = entries(gb)
@@ -186,6 +195,8 @@ def test_sources_give_the_values(design):
             s = e["otherwise"]
         if s.get("file") == GEARBOXES[gb].params_file:
             expected = params[s["block"]][s["key"]]
+            if material == "metal":                                       # metal sections override
+                expected = metal_section(gb, params, s["block"]).get(s["key"], expected)
             if s.get("per_motor"):
                 expected = expected[actuator.motor.motorName]
         elif "constant" in s:                                           # a number fixed in the code
@@ -197,7 +208,7 @@ def test_sources_give_the_values(design):
             expected = lookup(json.loads((CONFIG / s["file"]).read_text(encoding="utf-8")), s["block"])[s["key"]]
         else:
             continue
-        if isinstance(expected, str):                                   # a setting such as "lookup" / "config"
+        if expected is None or isinstance(expected, str):              # null (a check that is off) or a setting such as "lookup"
             assert vals[e["name"]] == expected, e["name"]
         else:
             assert vals[e["name"]] == pytest.approx(expected, rel=1e-9), e["name"]
